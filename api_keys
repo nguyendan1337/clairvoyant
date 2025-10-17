@@ -1,0 +1,2 @@
+api_key = "BtLLDiUNmqkU4c6LLExVAVoZPtZ87gzm"
+tickers_url = f"https://financialmodelingprep.com/api/v3/stock/list?apikey={api_key}"

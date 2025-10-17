@@ -1,0 +1,19 @@
+.idea/
+*.iml
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore node dependencies
+node_modules/
+
+# Ignore Python cache
+__pycache__/
+
+# Ignore environment variables
+.env
+
+# Ignore build output
+dist/
+build/
+

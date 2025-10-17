@@ -1,0 +1,34 @@
+# Hugging Face ETF Analyzer Starter
+
+This repository is a starter project to use **Hugging Face models** for generating insights on ETFs. It includes a simple Python script that loads a Hugging Face API token from a `.env` file, authenticates with the Hugging Face API, and generates text outputs from a model.
+
+---
+
+## 🚀 Features
+
+- Uses Hugging Face Transformers (`mistralai/Mistral-7B-Instruct-v0.2` by default)
+- Secure token handling with `.env` file
+- Easy setup for multiple users without exposing secrets
+- Ready to integrate with ETF lists for automated analysis
+
+---
+
+## 📦 Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+2. **Create a .env file**
+cp .env.template .env
+Open .env and add your Hugging Face API token:
+HF_TOKEN=your_huggingface_token_here
+3. **Install dependencies**
+pip install -r requirements.txt
+
+---
+
+## 🛠️ Usage
+
+**Run the program**
+python hugging_face_test.py

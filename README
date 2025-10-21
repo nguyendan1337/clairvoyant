@@ -1,15 +1,4 @@
-# Hugging Face ETF Analyzer Starter
-
-This repository is a starter project to use **Hugging Face models** for generating insights on ETFs. It includes a simple Python script that loads a Hugging Face API token from a `.env` file, authenticates with the Hugging Face API, and generates text outputs from a model.
-
----
-
-## 🚀 Features
-
-- Uses Hugging Face Transformers (`mistralai/Mistral-7B-Instruct-v0.2` by default)
-- Secure token handling with `.env` file
-- Easy setup for multiple users without exposing secrets
-- Ready to integrate with ETF lists for automated analysis
+# Clairvoyant - AI Stock and ETF Recommender
 
 ---
 
@@ -20,8 +9,9 @@ git clone git@github.com:nguyendan1337/clairvoyant.git
 cd clairvoyant
 2. **Create a .env file**
 cp .env.template .env
-Open .env and add your Hugging Face API token:
-HF_TOKEN=your_huggingface_token_here
+Open .env and add your API keys:
+export GROQ_KEY="your_groq_api_key_here"
+export GEMINI_KEY="your_gemini_api_key_here"
 3. **Install dependencies**
 pip install -U -r requirements.txt
 
@@ -30,4 +20,4 @@ pip install -U -r requirements.txt
 ## 🛠️ Usage
 
 **Run the program**
-python hugging_face_test.py
+python stock_recommender.py

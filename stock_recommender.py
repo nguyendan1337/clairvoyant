@@ -133,18 +133,8 @@ print(top_etfs)
 end_time = time.perf_counter()
 print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
 
-# Load .env file
-load_dotenv()  # looks for .env in current directory
-# Set API key from .env
-api_key = os.getenv("GEMINI_KEY")
-# api_key = os.getenv("GROQ_KEY")
 
-# Define endpoint & payload (using OpenAI‑compatible route)
-url = "https://api.groq.com/openai/v1/chat/completions"
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
+# Send results to Google Gemini for analysis and recommendations
 prompt = f"""
 Group the following ETFs by theme (use the 'Name' or known sector). 
 For each theme, select up to 5 top ETFs by 52-week change %. 
@@ -154,18 +144,15 @@ Provide a summary of insights, analysis, and recommendations based on the data.
 ETF table:
 {top_etfs}
 """
-
+# Load .env file
+load_dotenv()  # looks for .env in current directory
+# Set API key from .env
+api_key = os.getenv("GEMINI_KEY")
 # Initialize the GenAI client
 client = genai.Client(api_key=api_key)
-
 # Enable Google Search tool
-grounding_tool = types.Tool(
-    google_search=types.GoogleSearch()
-)
-config = types.GenerateContentConfig(
-    tools=[grounding_tool]
-)
-
+grounding_tool = types.Tool(google_search=types.GoogleSearch())
+config = types.GenerateContentConfig(tools=[grounding_tool])
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=prompt,

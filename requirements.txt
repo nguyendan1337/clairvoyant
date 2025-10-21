@@ -1,1 +1,4 @@
-pip install python-dotenv
+python-dotenv
+huggingface_hub
+Pillow
+google-genai

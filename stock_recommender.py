@@ -1,8 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
+import os
 import re
-import pandas as pd
 import time
+import requests
+import pandas as pd
+from google import genai
+from bs4 import BeautifulSoup
+from google.genai import types
+from dotenv import load_dotenv
+
 
 def extract_first_number(s):
     """Extract the first float number from a string."""
@@ -44,6 +49,7 @@ def parse_etf_table(html):
         if len(tds) == len(headers):
             rows.append(tds)
     return pd.DataFrame(rows, columns=headers)
+
 
 # Record the start time
 start_time = time.perf_counter()
@@ -109,8 +115,9 @@ df = df[mask]
 # --- Apply growth filters ---
 filtered_df = df[
     (df['52 WkChange %'] > 25) &
-    (df['Price'] > df['200 DayAverage']) &
-    (df['3 MonthReturn'] > 5)
+    (df['Price'] >= df['50 DayAverage'] * 0.98) &
+    (df['Price'] >= df['200 DayAverage'] * 1.05) &
+    (df['3 MonthReturn'] > 7)
     ]
 
 # --- Sort by 52-week performance ---
@@ -118,12 +125,54 @@ sorted_df = filtered_df.sort_values(by='52 WkChange %', ascending=False).copy()
 sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
 
 # --- Display results ---
-print("\nCompiled Top ETFs from Yahoo Finance (all pages):")
-print(
-    sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
-    .to_string(index=False)
-)
+print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
+top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']].to_string(index=False)
+print(top_etfs)
 
 # Record the end time
 end_time = time.perf_counter()
-print(f"Elapsed time: {end_time - start_time:.6f} seconds")
+print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
+
+# Load .env file
+load_dotenv()  # looks for .env in current directory
+# Set API key from .env
+api_key = os.getenv("GEMINI_KEY")
+# api_key = os.getenv("GROQ_KEY")
+
+# Define endpoint & payload (using OpenAI‑compatible route)
+url = "https://api.groq.com/openai/v1/chat/completions"
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+prompt = f"""
+Group the following ETFs by theme (use the 'Name' or known sector). 
+For each theme, select up to 5 top ETFs by 52-week change %. 
+Present a table for each theme with columns: Name, Symbol, 52 WkChange %, 3 MonthReturn, Price, 50 DayAverage, 200 DayAverage. 
+Make sure the columns line up for readability.
+Provide a summary of insights, analysis, and recommendations based on the data.
+ETF table:
+{top_etfs}
+"""
+
+# Initialize the GenAI client
+client = genai.Client(api_key=api_key)
+
+# Enable Google Search tool
+grounding_tool = types.Tool(
+    google_search=types.GoogleSearch()
+)
+config = types.GenerateContentConfig(
+    tools=[grounding_tool]
+)
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config=config
+)
+
+print("GEMINI RESPONSE:")
+print(response.text)
+end_time = time.perf_counter()
+print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")

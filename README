@@ -16,15 +16,14 @@ This repository is a starter project to use **Hugging Face models** for generati
 ## 📦 Installation
 
 1. **Clone the repository**
-```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone git@github.com:nguyendan1337/clairvoyant.git
+cd clairvoyant
 2. **Create a .env file**
 cp .env.template .env
 Open .env and add your Hugging Face API token:
 HF_TOKEN=your_huggingface_token_here
 3. **Install dependencies**
-pip install -r requirements.txt
+pip install -U -r requirements.txt
 
 ---
 

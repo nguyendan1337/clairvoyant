@@ -45,7 +45,7 @@ prompt: |
   3. Adjust ranking or replace weaker picks if necessary
 
   ---
-  
+
   ### Step 4 – HTML Output for Recommendations (Mobile-Friendly)
   
   Return the selected ETFs as a complete HTML table that can be embedded directly into a webpage.
@@ -61,15 +61,31 @@ prompt: |
     - Preferably truncate text after ~150 characters and append "…" if necessary.
     - Allow text wrapping on both desktop and mobile screens using `<td style="max-width:300px; word-wrap:break-word;">` or similar inline styles.
   5. Do **not** include `<html>`, `<head>`, or `<body>` tags — only the `<table>` element and its contents.
-  6. After the table, provide a short **summary (≤200 words)** highlighting:
-    - Strongest sectors
-    - Most resilient or opportunistic ETFs based on data and searches
+  6. After the table, provide a short **summary (≤200 words)** formatted in HTML inside a `<div class="summary">`:
+
+     - Write in a **friendly, conversational tone**, like two friends discussing ETFs and sectors they find interesting.  
+     - Weave **world and macroeconomic context naturally** within the discussion (e.g., interest rates, inflation, energy prices, geopolitical developments).  
+     - Highlight notable **fund inflows or outflows** and what they indicate about investor sentiment.  
+     - Emphasize which sectors are strongest and which ETFs appear most resilient or opportunistic.  
+     - Keep paragraphs short (2–4 sentences) and easy to read on both desktop and mobile.
+
+     **Example HTML structure:**
+     ```html
+     <div class="summary">
+       <h2>Market Chat: ETFs Riding Global Trends</h2>
+       <p>Markets are buzzing lately — between steady rates and shifts in energy prices, certain sectors are catching investor attention.</p>
+       <p><strong>Metals & Mining (SLVP, GOEX):</strong> Gold and silver are holding steady amid global uncertainty, drawing inflows from investors seeking safety.</p>
+       <p><strong>Tech & Innovation (ARKK, ARKQ):</strong> Optimism around AI and robotics remains high, with ARKQ seeing fresh inflows that show growth sentiment is alive.</p>
+       <p><strong>Clean Energy (PBW, CNRG):</strong> Policy support and supply chain constraints are boosting green energy funds, making them an appealing opportunistic play.</p>
+       <p><strong>Outlook:</strong> Investors are balancing optimism with caution — chasing innovation while keeping one foot in defensive or commodity sectors.</p>
+     </div>
+     ```
 
   ---
 
   ### Additional Instructions
   - Keep total output ≤500 words  
   - Do **not** include `<html>`, `<head>`, or `<body>`  
-  - Limit commentary to concise, data-driven insights  
+  - Focus on concise, actionable, and diversified ETF insights  
 
   Here is the dataset:

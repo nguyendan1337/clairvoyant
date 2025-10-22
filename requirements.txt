@@ -1,2 +1,6 @@
 python-dotenv
 google-genai
+PyYAML
+requests
+pandas
+beautifulsoup4

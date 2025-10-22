@@ -1,3 +1,22 @@
+---
+
+urls: [
+  "https://finance.yahoo.com/markets/etfs/gainers/",
+  "https://finance.yahoo.com/markets/etfs/top-performing/",
+  "https://finance.yahoo.com/markets/etfs/best-historical-performance/",
+  "https://finance.yahoo.com/markets/etfs/top/"
+]
+leveraged_keywords: [
+  '2x', '3x', 'Ultra', 'Leveraged', 'Bull', 'Bear', 'Double', 'Triple',
+  'Enhanced', 'PLUS', 'Short', 'Inverse', 'UltraShort', 'Defined Volatility',
+  'Daily', 'Option', 'ETN', 'VIX', 'Junior', 'WeeklyPay', 'Target Income',
+  'Covered Call', 'Strategy', 'Derivative', 'Income', 'Bond', 'Futures',
+  'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon'
+]
+min_52_week_change: 25
+min_3_month_return: 6
+day_50_average_buffer: 0.98
+day_200_average_buffer: 1.05
 prompt: |
   You are a quantitative investment analyst using Google Gemini 2.5 Flash with Grounding through Google Search enabled.
 

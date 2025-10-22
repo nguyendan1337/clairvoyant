@@ -21,6 +21,12 @@
 
         .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
 
+        .recommendations-table td {
+            max-width: 300px;      /* or adjust as needed */
+            word-wrap: break-word;  /* forces line breaks within long text */
+            white-space: normal;    /* allow wrapping instead of nowrap */
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -47,7 +53,7 @@
 </head>
 <body>
 <h1>ETF Dashboard</h1>
-<p>Last updated: 2025-10-21 23:45:45</p>
+<p>Last updated: 2025-10-22 00:01:11</p>
 
 <h2>Gemini ETF Recommendations</h2>
 <div class="table-container">
@@ -63,95 +69,116 @@
   </thead>
   <tbody>
     <tr>
-      <td>Innovation & Technology</td>
-      <td>ARK Innovation ETF (ARKK)</td>
-      <td>93.73</td>
-      <td>15.95</td>
-      <td>Strong recent performance in disruptive innovation, with positive net AUM change over 3 months and 1 year, despite recent monthly outflows. Analyst and investor sentiment are generally positive, though it involves high-conviction, concentrated bets.</td>
-    </tr>
-    <tr>
-      <td>Innovation & Technology</td>
-      <td>ARK Next Generation Internet ETF (ARKW)</td>
-      <td>102.87</td>
-      <td>8.75</td>
-      <td>Strong yearly performance driven by focus on internet innovation, including digital currencies. However, it is experiencing negative fund flows over the past year, while analyst and crowd sentiment remain positive.</td>
-    </tr>
-    <tr>
-      <td>Innovation & Technology</td>
-      <td>Amplify Blockchain Technology ETF (BLOK)</td>
-      <td>74.96</td>
-      <td>16.91</td>
-      <td>Strong recent performance driven by Bitcoin's boom and the blockchain sector. Positive fund flows indicate investor interest, though it carries high concentration and crypto-related volatility risks.</td>
-    </tr>
-    <tr>
       <td>Precious Metals & Mining</td>
-      <td>Global X Gold Explorers ETF (GOEX)</td>
+      <td>Global X Gold Explorers ETF / GOEX</td>
       <td>85.24</td>
       <td>66.12</td>
-      <td>Exceptional yearly and 3-month performance, coupled with positive fund flows, reflecting robust investor interest in gold exploration, possibly due to its role as a safe haven during geopolitical uncertainty.</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong recent performance (112% 1yr, 64% 3mo NAV return) and positive technical sentiment. Modest positive fund flows (1Y: $18.59M).</td>
     </tr>
     <tr>
       <td>Precious Metals & Mining</td>
-      <td>iShares MSCI Global Gold Miners ETF (RING)</td>
-      <td>72.60</td>
-      <td>59.54</td>
-      <td>Strong recent performance and significant fund inflows, but some analyst sentiment suggests it might be overvalued and potentially near a cycle top, advising caution against chasing returns in a cyclical sector.</td>
+      <td>iShares MSCI Global Silver and Metals Miners ETF / SLVP</td>
+      <td>71.45</td>
+      <td>66.25</td>
+      <td style="max-width:300px; word-wrap:break-word;">Excellent recent performance (99% 1yr, 66% 3mo NAV return), positive technicals. Significant 1-year fund inflows ($109.05M).</td>
     </tr>
     <tr>
-      <td>Precious Metals & Mining</td>
-      <td>Sprott Gold Miners ETF (SGDM)</td>
-      <td>75.62</td>
-      <td>49.24</td>
-      <td>Strong recent performance, fueled by gold's rally and risk-off sentiment. Analyst sentiment is mixed, with some noting strong momentum but Morningstar rating it neutral due to process/people.</td>
+      <td>Innovation/Disruptive Tech</td>
+      <td>ARK Next Generation Internet ETF / ARKW</td>
+      <td>102.87</td>
+      <td>8.75</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (94% NAV return), positive crowd sentiment. However, 1-year fund outflows (-$241.83M). Moderate Buy consensus.</td>
     </tr>
     <tr>
-      <td>Uranium & Nuclear Energy</td>
-      <td>Global X Uranium ETF (URA)</td>
-      <td>58.06</td>
-      <td>30.52</td>
-      <td>Excellent recent performance in the uranium/nuclear sector. Despite positive crowd and analyst sentiment, there have been negative fund flows and decreased hedge fund interest over the past year.</td>
+      <td>Innovation/Disruptive Tech</td>
+      <td>ARK Autonomous Technology & Robotics ETF / ARKQ</td>
+      <td>93.67</td>
+      <td>19.06</td>
+      <td style="max-width:300px; word-wrap:break-word;">Robust 1-year performance (90% NAV return) with significant 1-year fund inflows ($179.71M). Positive technicals and Moderate Buy consensus.</td>
     </tr>
     <tr>
-      <td>Uranium & Nuclear Energy</td>
-      <td>VanEck Uranium and Nuclear ETF (NLR)</td>
-      <td>55.29</td>
-      <td>29.10</td>
-      <td>Strong performance and significant positive fund flows highlight robust investor interest in nuclear energy, driven by its role in sustainable energy transition. Positive analyst and crowd sentiment.</td>
+      <td>Innovation/Disruptive Tech</td>
+      <td>ARK Innovation ETF / ARKK</td>
+      <td>93.73</td>
+      <td>15.95</td>
+      <td style="max-width:300px; word-wrap:break-word;">Focus on disruptive innovation. Strong 3-month fund inflows ($1.25B), but 1-month saw outflows. Moderate Buy consensus.</td>
+    </tr>
+    <tr>
+      <td>Clean Energy & Uranium</td>
+      <td>Invesco WilderHill Clean Energy ETF / PBW</td>
+      <td>66.20</td>
+      <td>41.14</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong YTD/1yr performance. Outperforming peers. Positive crowd/technical sentiment, Moderate Buy analyst consensus. Undervalued.</td>
+    </tr>
+    <tr>
+      <td>Clean Energy & Uranium</td>
+      <td>SPDR Kensho Clean Power ETF / CNRG</td>
+      <td>59.47</td>
+      <td>47.73</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong recent performance (59% 1yr, 48% 3mo NAV return) and positive technicals. Moderate 1-year fund outflows (-$37.96M).</td>
+    </tr>
+    <tr>
+      <td>Clean Energy & Uranium</td>
+      <td>Amplify Lithium & Battery Technology ETF / BATT</td>
+      <td>43.42</td>
+      <td>30.33</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (45% NAV return) in growing lithium/battery sector. Modest 1-year fund outflows (-$9.43M).</td>
+    </tr>
+    <tr>
+      <td>Industrial Metals & Materials</td>
+      <td>SPDR S&P Metals and Mining ETF / XME</td>
+      <td>55.06</td>
+      <td>42.88</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance. Captures performance of US metals and mining companies. Moderate Buy consensus, Very Positive crowd wisdom.</td>
+    </tr>
+    <tr>
+      <td>Industrial Metals & Materials</td>
+      <td>VanEck Rare Earth and Strategic Metals ETF / REMX</td>
+      <td>50.12</td>
+      <td>42.69</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (63% total return) with substantial 1-year fund inflows ($788.78M). Positive technical signals.</td>
+    </tr>
+    <tr>
+      <td>Semiconductors</td>
+      <td>SPDR S&P Semiconductor ETF / XSD</td>
+      <td>43.57</td>
+      <td>29.60</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (44% total return) in critical semiconductor sector. However, 1-year fund outflows (-$88.83M). Positive technicals.</td>
     </tr>
     <tr>
       <td>Aerospace & Defense</td>
-      <td>SPDR S&P Aerospace & Defense ETF (XAR)</td>
+      <td>SPDR S&P Aerospace & Defense ETF / XAR</td>
       <td>52.17</td>
       <td>8.79</td>
-      <td>Robust performance driven by geopolitical tensions and increased defense spending. Strong positive fund flows and overall positive analyst/crowd sentiment, despite some concerns about valuation.</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (49% NAV return) and very significant 1-year fund inflows ($792.73M). Moderate Buy consensus.</td>
     </tr>
     <tr>
-      <td>Emerging & Frontier Markets</td>
-      <td>iShares MSCI South Korea ETF (EWY)</td>
-      <td>44.79</td>
-      <td>24.92</td>
-      <td>A strong comeback story in 2025, significantly outperforming US and international peers, largely driven by Korean tech firms' crucial role in AI (e.g., SK Hynix). Positive fund flows and shifting investor sentiment.</td>
+      <td>International / Broad Market / Other</td>
+      <td>VanEck ChiNext ETF / CNXT</td>
+      <td>41.65</td>
+      <td>33.32</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (46% NAV return) in innovative Chinese companies. Positive technicals. Mixed fund flows (1Y: -$14.95M).</td>
     </tr>
     <tr>
-      <td>Clean Energy & Batteries</td>
-      <td>Amplify Lithium & Battery Technology ETF (BATT)</td>
-      <td>43.42</td>
-      <td>30.33</td>
-      <td>Solid performance driven by the growing lithium-ion battery market and demand from electric vehicles and energy storage solutions. Despite positive market trends, it has experienced negative fund flows over the past year.</td>
+      <td>International / Broad Market / Other</td>
+      <td>iShares MSCI Peru ETF / EPU</td>
+      <td>37.37</td>
+      <td>32.45</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong 1-year performance (51% total return) with positive 1-year fund inflows ($104.19M). Positive technicals, "Hold" analyst rating.</td>
     </tr>
   </tbody>
 </table>
 </div>
 <div>
-    <p>
-  This selection of 11 ETFs highlights sectors demonstrating strong momentum and potential for sustained growth over the next 6-12 months. The <b>Precious Metals & Mining</b> sector, particularly gold explorers and miners like GOEX, RING, and SGDM, shows exceptional short-term returns, reflecting safe-haven demand amidst global uncertainties. However, some caution on valuation for gold miners (RING) is noted.
-</p>
-<p>
-  <b>Innovation & Technology</b> ETFs (ARKK, ARKW, BLOK) continue to exhibit robust long-term performance, fueled by disruptive trends in internet, AI, and blockchain, despite varied fund flow dynamics. <b>Uranium & Nuclear Energy</b> (URA, NLR) is a standout, driven by strong investor interest in sustainable energy solutions, with NLR seeing significant positive fund inflows.
-</p>
-<p>
-  The <b>Aerospace & Defense</b> sector (XAR) remains resilient with strong performance and positive sentiment, underpinned by consistent defense spending. Lastly, <b>Emerging Markets</b> represented by South Korea (EWY) show a significant comeback, buoyed by the country's tech leadership in AI. <b>Clean Energy & Batteries</b> (BATT) offers exposure to a high-growth market, although it experienced negative fund flows.
-</p>
+    ### Summary of ETF Recommendations
+
+The selection of 14 ETFs for potential sustained performance over the next 6-12 months highlights several strong sectors and resilient funds. Precious Metals & Mining, particularly GOEX and SLVP, show exceptional quantitative performance and positive sentiment, with significant fund inflows for SLVP. This suggests continued investor interest in safe-haven or commodity-driven assets.
+
+Innovation/Disruptive Technology, represented by the ARK suite (ARKW, ARKQ, ARKK), continues to demonstrate robust 52-week changes, with ARKQ showing strong 1-year fund inflows and positive technicals. While ARKW and ARKK have seen some recent outflows, their long-term growth themes remain compelling and analyst sentiment is generally positive for the underlying holdings.
+
+Clean Energy & Uranium and Industrial Metals & Materials sectors are also well-represented with strong performers like PBW, CNRG, BATT, XME, and REMX. PBW and CNRG show solid recent returns, with PBW often outperforming peers and being considered undervalued. REMX stands out with substantial 1-year fund inflows, indicating strong conviction in strategic metals.
+
+Semiconductors (XSD) and Aerospace & Defense (XAR) are key growth areas, with XSD benefiting from critical global demand and XAR showing significant inflows supported by defense spending trends. Finally, Emerging Markets (CNXT, EPU) offer opportunistic growth, with EPU notably strong in fund inflows, indicating interest in Peruvian resources and broader emerging market diversification.
 </div>
 
 <h2>Full ETF Data</h2>
@@ -192,6 +219,16 @@
     </tr>
     <tr>
       <td>3</td>
+      <td>ARK Autonomous Technology &amp; Robotics ETF</td>
+      <td>ARKQ</td>
+      <td>93.67</td>
+      <td>19.06</td>
+      <td>118.65</td>
+      <td>106.85</td>
+      <td>86.30</td>
+    </tr>
+    <tr>
+      <td>4</td>
       <td>Global X Gold Explorers ETF</td>
       <td>GOEX</td>
       <td>85.24</td>
@@ -201,7 +238,7 @@
       <td>45.40</td>
     </tr>
     <tr>
-      <td>4</td>
+      <td>5</td>
       <td>Sprott Gold Miners ETF</td>
       <td>SGDM</td>
       <td>75.62</td>
@@ -211,7 +248,7 @@
       <td>43.83</td>
     </tr>
     <tr>
-      <td>5</td>
+      <td>6</td>
       <td>Defiance Quantum ETF</td>
       <td>QTUM</td>
       <td>75.24</td>
@@ -221,7 +258,7 @@
       <td>87.85</td>
     </tr>
     <tr>
-      <td>6</td>
+      <td>7</td>
       <td>Amplify Blockchain Technology ETF</td>
       <td>BLOK</td>
       <td>74.96</td>
@@ -231,7 +268,7 @@
       <td>51.75</td>
     </tr>
     <tr>
-      <td>7</td>
+      <td>8</td>
       <td>iShares MSCI Global Gold Miners ETF</td>
       <td>RING</td>
       <td>72.60</td>
@@ -241,7 +278,17 @@
       <td>44.21</td>
     </tr>
     <tr>
-      <td>8</td>
+      <td>9</td>
+      <td>iShares MSCI Global Silver and Metals Miners ETF</td>
+      <td>SLVP</td>
+      <td>71.45</td>
+      <td>66.25</td>
+      <td>26.18</td>
+      <td>24.71</td>
+      <td>17.78</td>
+    </tr>
+    <tr>
+      <td>10</td>
       <td>VanEck Gold Miners ETF</td>
       <td>GDX</td>
       <td>68.26</td>
@@ -251,7 +298,7 @@
       <td>52.48</td>
     </tr>
     <tr>
-      <td>9</td>
+      <td>11</td>
       <td>Global X Silver Miners ETF</td>
       <td>SIL</td>
       <td>66.36</td>
@@ -261,7 +308,17 @@
       <td>47.28</td>
     </tr>
     <tr>
-      <td>10</td>
+      <td>12</td>
+      <td>Invesco WilderHill Clean Energy ETF</td>
+      <td>PBW</td>
+      <td>66.20</td>
+      <td>41.14</td>
+      <td>32.94</td>
+      <td>28.13</td>
+      <td>21.21</td>
+    </tr>
+    <tr>
+      <td>13</td>
       <td>U.S. Global GO GOLD and Precious Metal Miners ETF</td>
       <td>GOAU</td>
       <td>61.03</td>
@@ -271,7 +328,17 @@
       <td>28.57</td>
     </tr>
     <tr>
-      <td>11</td>
+      <td>14</td>
+      <td>SPDR Kensho Clean Power ETF</td>
+      <td>CNRG</td>
+      <td>59.47</td>
+      <td>47.73</td>
+      <td>95.27</td>
+      <td>81.08</td>
+      <td>63.75</td>
+    </tr>
+    <tr>
+      <td>15</td>
       <td>Global X Uranium ETF</td>
       <td>URA</td>
       <td>58.06</td>
@@ -281,7 +348,17 @@
       <td>33.98</td>
     </tr>
     <tr>
-      <td>12</td>
+      <td>16</td>
+      <td>Innovator Deepwater Frontier Tech ETF</td>
+      <td>LOUP</td>
+      <td>55.58</td>
+      <td>22.49</td>
+      <td>76.72</td>
+      <td>71.05</td>
+      <td>59.05</td>
+    </tr>
+    <tr>
+      <td>17</td>
       <td>VanEck Uranium and Nuclear ETF</td>
       <td>NLR</td>
       <td>55.29</td>
@@ -291,7 +368,7 @@
       <td>101.61</td>
     </tr>
     <tr>
-      <td>13</td>
+      <td>18</td>
       <td>SPDR Kensho Final Frontiers ETF</td>
       <td>ROKT</td>
       <td>55.18</td>
@@ -301,7 +378,7 @@
       <td>62.46</td>
     </tr>
     <tr>
-      <td>14</td>
+      <td>19</td>
       <td>SPDR S&amp;P Metals and Mining ETF</td>
       <td>XME</td>
       <td>55.06</td>
@@ -311,7 +388,7 @@
       <td>68.94</td>
     </tr>
     <tr>
-      <td>15</td>
+      <td>20</td>
       <td>SPDR S&amp;P Aerospace &amp; Defense ETF</td>
       <td>XAR</td>
       <td>52.17</td>
@@ -321,7 +398,7 @@
       <td>193.80</td>
     </tr>
     <tr>
-      <td>16</td>
+      <td>21</td>
       <td>SPDR Gold MiniShares</td>
       <td>GLDM</td>
       <td>51.10</td>
@@ -331,7 +408,7 @@
       <td>64.92</td>
     </tr>
     <tr>
-      <td>17</td>
+      <td>22</td>
       <td>GraniteShares Gold Trust</td>
       <td>BAR</td>
       <td>51.08</td>
@@ -341,7 +418,7 @@
       <td>32.33</td>
     </tr>
     <tr>
-      <td>18</td>
+      <td>23</td>
       <td>abrdn Physical Gold Shares ETF</td>
       <td>SGOL</td>
       <td>51.06</td>
@@ -351,7 +428,7 @@
       <td>31.27</td>
     </tr>
     <tr>
-      <td>19</td>
+      <td>24</td>
       <td>Goldman Sachs Physical Gold ETF</td>
       <td>AAAU</td>
       <td>50.95</td>
@@ -361,7 +438,7 @@
       <td>32.38</td>
     </tr>
     <tr>
-      <td>20</td>
+      <td>25</td>
       <td>iShares Gold Trust</td>
       <td>IAU</td>
       <td>50.87</td>
@@ -371,7 +448,7 @@
       <td>61.81</td>
     </tr>
     <tr>
-      <td>21</td>
+      <td>26</td>
       <td>VanEck Merk Gold Trust</td>
       <td>OUNZ</td>
       <td>50.78</td>
@@ -381,7 +458,7 @@
       <td>31.59</td>
     </tr>
     <tr>
-      <td>22</td>
+      <td>27</td>
       <td>SPDR Gold Shares</td>
       <td>GLD</td>
       <td>50.37</td>
@@ -391,7 +468,7 @@
       <td>302.04</td>
     </tr>
     <tr>
-      <td>23</td>
+      <td>28</td>
       <td>GraniteShares Platinum Trust</td>
       <td>PLTM</td>
       <td>50.13</td>
@@ -401,7 +478,17 @@
       <td>11.43</td>
     </tr>
     <tr>
-      <td>24</td>
+      <td>29</td>
+      <td>VanEck Rare Earth and Strategic Metals ETF</td>
+      <td>REMX</td>
+      <td>50.12</td>
+      <td>42.69</td>
+      <td>69.61</td>
+      <td>64.51</td>
+      <td>47.31</td>
+    </tr>
+    <tr>
+      <td>30</td>
       <td>abrdn Physical Platinum Shares ETF</td>
       <td>PPLT</td>
       <td>50.07</td>
@@ -411,7 +498,7 @@
       <td>108.01</td>
     </tr>
     <tr>
-      <td>25</td>
+      <td>31</td>
       <td>abrdn Physical Precious Metals Basket Shares ETF</td>
       <td>GLTR</td>
       <td>47.23</td>
@@ -421,7 +508,7 @@
       <td>136.88</td>
     </tr>
     <tr>
-      <td>26</td>
+      <td>32</td>
       <td>Franklin FTSE South Korea ETF</td>
       <td>FLKR</td>
       <td>46.30</td>
@@ -431,7 +518,7 @@
       <td>22.15</td>
     </tr>
     <tr>
-      <td>27</td>
+      <td>33</td>
       <td>Defiance Connective Technologies ETF</td>
       <td>SIXG</td>
       <td>46.02</td>
@@ -441,7 +528,7 @@
       <td>51.00</td>
     </tr>
     <tr>
-      <td>28</td>
+      <td>34</td>
       <td>SPDR S&amp;P Telecom ETF</td>
       <td>XTL</td>
       <td>45.54</td>
@@ -451,7 +538,7 @@
       <td>115.21</td>
     </tr>
     <tr>
-      <td>29</td>
+      <td>35</td>
       <td>VanEck Africa Index ETF</td>
       <td>AFK</td>
       <td>44.82</td>
@@ -461,7 +548,7 @@
       <td>19.52</td>
     </tr>
     <tr>
-      <td>30</td>
+      <td>36</td>
       <td>iShares MSCI South Korea ETF</td>
       <td>EWY</td>
       <td>44.79</td>
@@ -471,7 +558,7 @@
       <td>65.17</td>
     </tr>
     <tr>
-      <td>31</td>
+      <td>37</td>
       <td>First Trust US Equity Opportunities ETF</td>
       <td>FPX</td>
       <td>44.70</td>
@@ -481,7 +568,7 @@
       <td>137.17</td>
     </tr>
     <tr>
-      <td>32</td>
+      <td>38</td>
       <td>KraneShares FTSE Emerging Markets Consumer Technology Index ETF</td>
       <td>KEMQ</td>
       <td>44.29</td>
@@ -491,7 +578,7 @@
       <td>21.14</td>
     </tr>
     <tr>
-      <td>33</td>
+      <td>39</td>
       <td>SPDR S&amp;P Semiconductor ETF</td>
       <td>XSD</td>
       <td>43.57</td>
@@ -501,7 +588,7 @@
       <td>252.47</td>
     </tr>
     <tr>
-      <td>34</td>
+      <td>40</td>
       <td>Amplify Lithium &amp; Battery Technology ETF</td>
       <td>BATT</td>
       <td>43.42</td>
@@ -511,7 +598,7 @@
       <td>9.68</td>
     </tr>
     <tr>
-      <td>35</td>
+      <td>41</td>
       <td>abrdn Physical Silver Shares ETF</td>
       <td>SIVR</td>
       <td>43.14</td>
@@ -521,7 +608,7 @@
       <td>34.57</td>
     </tr>
     <tr>
-      <td>36</td>
+      <td>42</td>
       <td>SPDR S&amp;P Kensho Future Security ETF</td>
       <td>FITE</td>
       <td>42.80</td>
@@ -531,7 +618,7 @@
       <td>72.68</td>
     </tr>
     <tr>
-      <td>37</td>
+      <td>43</td>
       <td>iShares Silver Trust</td>
       <td>SLV</td>
       <td>42.59</td>
@@ -541,7 +628,7 @@
       <td>32.96</td>
     </tr>
     <tr>
-      <td>38</td>
+      <td>44</td>
       <td>Innovator IBD 50 ETF</td>
       <td>FFTY</td>
       <td>42.37</td>
@@ -551,7 +638,7 @@
       <td>31.51</td>
     </tr>
     <tr>
-      <td>39</td>
+      <td>45</td>
       <td>SPDR NYSE Technology ETF</td>
       <td>XNTK</td>
       <td>42.28</td>
@@ -561,7 +648,7 @@
       <td>225.43</td>
     </tr>
     <tr>
-      <td>40</td>
+      <td>46</td>
       <td>Global X MSCI Colombia ETF</td>
       <td>COLO</td>
       <td>42.14</td>
@@ -571,7 +658,7 @@
       <td>28.88</td>
     </tr>
     <tr>
-      <td>41</td>
+      <td>47</td>
       <td>VanEck ChiNext ETF</td>
       <td>CNXT</td>
       <td>41.65</td>
@@ -581,7 +668,17 @@
       <td>30.82</td>
     </tr>
     <tr>
-      <td>42</td>
+      <td>48</td>
+      <td>Global X Social Media ETF</td>
+      <td>SOCL</td>
+      <td>41.40</td>
+      <td>7.77</td>
+      <td>58.27</td>
+      <td>59.15</td>
+      <td>50.51</td>
+    </tr>
+    <tr>
+      <td>49</td>
       <td>iShares U.S. Aerospace &amp; Defense ETF</td>
       <td>ITA</td>
       <td>41.32</td>
@@ -591,7 +688,7 @@
       <td>175.34</td>
     </tr>
     <tr>
-      <td>43</td>
+      <td>50</td>
       <td>Invesco DB Precious Metals Fund</td>
       <td>DBP</td>
       <td>41.27</td>
@@ -601,7 +698,47 @@
       <td>74.80</td>
     </tr>
     <tr>
-      <td>44</td>
+      <td>51</td>
+      <td>KraneShares Electric Vehicles and Future Mobility Index ETF</td>
+      <td>KARS</td>
+      <td>41.10</td>
+      <td>26.01</td>
+      <td>30.52</td>
+      <td>28.58</td>
+      <td>23.51</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td>iShares Future AI &amp; Tech ETF</td>
+      <td>ARTY</td>
+      <td>40.08</td>
+      <td>15.74</td>
+      <td>48.77</td>
+      <td>44.97</td>
+      <td>39.14</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>First Trust NASDAQ Clean Edge Green Energy Index Fund</td>
+      <td>QCLN</td>
+      <td>39.77</td>
+      <td>27.30</td>
+      <td>45.51</td>
+      <td>40.58</td>
+      <td>33.95</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>ARK Genomic Revolution ETF</td>
+      <td>ARKG</td>
+      <td>38.68</td>
+      <td>34.83</td>
+      <td>32.66</td>
+      <td>27.29</td>
+      <td>24.62</td>
+    </tr>
+    <tr>
+      <td>55</td>
       <td>First Trust China AlphaDEX Fund</td>
       <td>FCA</td>
       <td>38.67</td>
@@ -611,7 +748,7 @@
       <td>23.58</td>
     </tr>
     <tr>
-      <td>45</td>
+      <td>56</td>
       <td>VanEck Semiconductor ETF</td>
       <td>SMH</td>
       <td>38.67</td>
@@ -621,7 +758,17 @@
       <td>262.80</td>
     </tr>
     <tr>
-      <td>46</td>
+      <td>57</td>
+      <td>Global X Artificial Intelligence &amp; Technology ETF</td>
+      <td>AIQ</td>
+      <td>37.85</td>
+      <td>15.62</td>
+      <td>51.02</td>
+      <td>47.77</td>
+      <td>42.01</td>
+    </tr>
+    <tr>
+      <td>58</td>
       <td>iShares MSCI Peru ETF</td>
       <td>EPU</td>
       <td>37.37</td>
@@ -631,7 +778,27 @@
       <td>47.98</td>
     </tr>
     <tr>
-      <td>47</td>
+      <td>59</td>
+      <td>Renaissance International IPO ETF</td>
+      <td>IPOS</td>
+      <td>36.16</td>
+      <td>13.59</td>
+      <td>17.04</td>
+      <td>16.89</td>
+      <td>14.53</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>ProShares Online Retail ETF</td>
+      <td>ONLN</td>
+      <td>35.75</td>
+      <td>11.52</td>
+      <td>59.73</td>
+      <td>59.20</td>
+      <td>50.48</td>
+    </tr>
+    <tr>
+      <td>61</td>
       <td>Cambria Global Value ETF</td>
       <td>GVAL</td>
       <td>34.77</td>
@@ -641,7 +808,27 @@
       <td>26.09</td>
     </tr>
     <tr>
-      <td>48</td>
+      <td>62</td>
+      <td>Invesco China Technology ETF</td>
+      <td>CQQQ</td>
+      <td>34.72</td>
+      <td>18.86</td>
+      <td>55.02</td>
+      <td>54.54</td>
+      <td>46.38</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td>Global X Lithium &amp; Battery Tech ETF</td>
+      <td>LIT</td>
+      <td>34.67</td>
+      <td>36.77</td>
+      <td>57.25</td>
+      <td>52.07</td>
+      <td>42.60</td>
+    </tr>
+    <tr>
+      <td>64</td>
       <td>First Trust Developed Markets ex-US Small Cap AlphaDEX Fund</td>
       <td>FDTS</td>
       <td>34.29</td>
@@ -651,7 +838,7 @@
       <td>47.61</td>
     </tr>
     <tr>
-      <td>49</td>
+      <td>65</td>
       <td>First Trust Developed Markets Ex-US AlphaDEX Fund</td>
       <td>FDT</td>
       <td>34.19</td>
@@ -661,7 +848,7 @@
       <td>65.17</td>
     </tr>
     <tr>
-      <td>50</td>
+      <td>66</td>
       <td>iShares Global Comm Services ETF</td>
       <td>IXP</td>
       <td>33.78</td>
@@ -671,7 +858,7 @@
       <td>108.10</td>
     </tr>
     <tr>
-      <td>51</td>
+      <td>67</td>
       <td>iShares MSCI Italy ETF</td>
       <td>EWI</td>
       <td>33.46</td>
@@ -681,7 +868,17 @@
       <td>45.75</td>
     </tr>
     <tr>
-      <td>52</td>
+      <td>68</td>
+      <td>First Trust Dow Jones International Internet ETF</td>
+      <td>FDNI</td>
+      <td>33.43</td>
+      <td>9.90</td>
+      <td>37.56</td>
+      <td>37.10</td>
+      <td>32.94</td>
+    </tr>
+    <tr>
+      <td>69</td>
       <td>iShares Expanded Tech Sector ETF</td>
       <td>IGM</td>
       <td>33.43</td>
@@ -691,7 +888,7 @@
       <td>107.56</td>
     </tr>
     <tr>
-      <td>53</td>
+      <td>70</td>
       <td>Invesco Semiconductors ETF</td>
       <td>PSI</td>
       <td>33.11</td>
@@ -701,7 +898,7 @@
       <td>58.08</td>
     </tr>
     <tr>
-      <td>54</td>
+      <td>71</td>
       <td>First Trust S-Network Future Vehicles &amp; Technology ETF</td>
       <td>CARZ</td>
       <td>33.07</td>
@@ -711,7 +908,17 @@
       <td>61.34</td>
     </tr>
     <tr>
-      <td>55</td>
+      <td>72</td>
+      <td>SPDR S&amp;P Kensho Smart Mobility ETF</td>
+      <td>HAIL</td>
+      <td>32.69</td>
+      <td>12.21</td>
+      <td>36.41</td>
+      <td>34.72</td>
+      <td>29.92</td>
+    </tr>
+    <tr>
+      <td>73</td>
       <td>iShares Asia 50 ETF</td>
       <td>AIA</td>
       <td>32.03</td>
@@ -721,7 +928,7 @@
       <td>79.05</td>
     </tr>
     <tr>
-      <td>56</td>
+      <td>74</td>
       <td>Global X Copper Miners ETF</td>
       <td>COPX</td>
       <td>31.87</td>
@@ -731,7 +938,7 @@
       <td>44.29</td>
     </tr>
     <tr>
-      <td>57</td>
+      <td>75</td>
       <td>First Trust Nasdaq Semiconductor ETF</td>
       <td>FTXL</td>
       <td>31.73</td>
@@ -741,7 +948,7 @@
       <td>91.50</td>
     </tr>
     <tr>
-      <td>58</td>
+      <td>76</td>
       <td>abrdn Physical Palladium Shares ETF</td>
       <td>PALL</td>
       <td>31.69</td>
@@ -751,7 +958,7 @@
       <td>97.93</td>
     </tr>
     <tr>
-      <td>59</td>
+      <td>77</td>
       <td>SPDR S&amp;P Kensho Intelligent Structures ETF</td>
       <td>SIMS</td>
       <td>31.09</td>
@@ -761,7 +968,7 @@
       <td>35.56</td>
     </tr>
     <tr>
-      <td>60</td>
+      <td>78</td>
       <td>First Trust Japan AlphaDEX Fund</td>
       <td>FJP</td>
       <td>31.07</td>
@@ -769,6 +976,26 @@
       <td>65.35</td>
       <td>65.36</td>
       <td>58.31</td>
+    </tr>
+    <tr>
+      <td>79</td>
+      <td>First Trust Cloud Computing ETF</td>
+      <td>SKYY</td>
+      <td>30.17</td>
+      <td>8.89</td>
+      <td>135.64</td>
+      <td>130.74</td>
+      <td>119.39</td>
+    </tr>
+    <tr>
+      <td>80</td>
+      <td>SPDR S&amp;P Kensho New Economies Composite ETF</td>
+      <td>KOMP</td>
+      <td>30.14</td>
+      <td>13.95</td>
+      <td>64.21</td>
+      <td>60.71</td>
+      <td>53.51</td>
     </tr>
   </tbody>
 </table>

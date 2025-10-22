@@ -45,15 +45,25 @@ prompt: |
   3. Adjust ranking or replace weaker picks if necessary
 
   ---
+  
+  ### Step 4 – HTML Output for Recommendations (Mobile-Friendly)
+  
+  Return the selected ETFs as a complete HTML table that can be embedded directly into a webpage.
 
-  ### Step 4 – HTML Output for Recommendations
-  1. Return a **complete HTML table** (only the `<table>` element) with class `recommendations-table`  
-  2. Columns:  
-     `Sector Group | ETF Name / Ticker | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`  
-  3. Make HTML valid, properly formatted, ready to embed in a webpage  
-  4. After the table, provide a short **summary (≤200 words)** highlighting:
-     - Strongest sectors  
-     - Most resilient or opportunistic ETFs
+  Requirements:
+
+  1. Use a `<table>` element with class `recommendations-table`.
+  2. Include `<thead>` with columns:
+  `Sector Group | ETF Name / Ticker | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
+  3. Include `<tbody>` with one row per ETF.
+  4. For the **Key Search Insight** column:
+    - Wrap long text inside the `<td>` so it does **not exceed the table width**.
+    - Preferably truncate text after ~150 characters and append "…" if necessary.
+    - Allow text wrapping on both desktop and mobile screens using `<td style="max-width:300px; word-wrap:break-word;">` or similar inline styles.
+  5. Do **not** include `<html>`, `<head>`, or `<body>` tags — only the `<table>` element and its contents.
+  6. After the table, provide a short **summary (≤200 words)** highlighting:
+    - Strongest sectors
+    - Most resilient or opportunistic ETFs based on data and searches
 
   ---
 

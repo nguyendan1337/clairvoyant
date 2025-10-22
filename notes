@@ -2,15 +2,7 @@ df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', , 'YTD Return', '52 WkChange %', '52 Wk Range']
 
 Features to add:
-- text file of etfs for cutting get time and testing ai models
-- config file
-    - urls
-    - filters
-    - ai model
-    - prompt
 - polish
 - multi threading
 - stock recommender
-- cron job
 - email
-- shareable website

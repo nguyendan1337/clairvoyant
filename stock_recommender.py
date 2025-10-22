@@ -128,14 +128,16 @@ sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
 
 # --- Display results ---
 print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
-top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']].to_string(index=False)
+top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
+table_html = top_etfs.to_html(index=False, classes="data-table", border=0)
+top_etfs = top_etfs.to_string(index=False)
 print(top_etfs)
 
 # Write Top ETFs to HTML
 with open("template.html", "r", encoding="utf-8") as f: template = f.read()
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 html = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
-html = html.replace("<!--DATA_TABLE_HERE-->", top_etfs)
+html = html.replace("<!--DATA_TABLE_HERE-->", table_html)
 with open("index.html", "w", encoding="utf-8") as f: f.write(html)
 print("✅ Generated index.html with Top ETFS.")
 

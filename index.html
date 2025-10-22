@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Data Page</title>
+    <title>Clairvoyant AI Stock Recommender</title>
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
     <style>
@@ -67,90 +67,825 @@
 </head>
 <body>
 <h1>Stock Data</h1>
-<p>Last updated: 2025-10-21 23:13:15</p>
+<p>Last updated: 2025-10-21 23:24:24</p>
 
 <div class="table-container">
-     Rank                                                            Name Symbol  52 WkChange %  3 MonthReturn  Price  50 DayAverage  200 DayAverage
-    1                                ARK Next Generation Internet ETF   ARKW         102.87           8.75 173.25         166.18          131.86
-    2                                              ARK Innovation ETF   ARKK          93.73          15.95  88.65          81.54           65.11
-    3                        ARK Autonomous Technology & Robotics ETF   ARKQ          93.67          19.06 118.65         106.85           86.30
-    4                                     Global X Gold Explorers ETF   GOEX          85.24          66.12  66.78          61.91           45.40
-    5                                          Sprott Gold Miners ETF   SGDM          75.62          49.24  59.15          57.48           43.83
-    6                                            Defiance Quantum ETF   QTUM          75.24          17.13 110.21         101.79           87.85
-    7                               Amplify Blockchain Technology ETF   BLOK          74.96          16.91  70.30          64.68           51.75
-    8                             iShares MSCI Global Gold Miners ETF   RING          72.60          59.54  61.86          59.31           44.21
-    9                iShares MSCI Global Silver and Metals Miners ETF   SLVP          71.45          66.25  26.18          24.71           17.78
-   10                                          VanEck Gold Miners ETF    GDX          68.26          57.17  72.79          69.58           52.48
-   11                                      Global X Silver Miners ETF    SIL          66.36          56.46  67.21          64.79           47.28
-   12                             Invesco WilderHill Clean Energy ETF    PBW          66.20          41.14  32.94          28.13           21.21
-   13               U.S. Global GO GOLD and Precious Metal Miners ETF   GOAU          61.03          44.03  37.52          36.85           28.57
-   14                                     SPDR Kensho Clean Power ETF   CNRG          59.47          47.73  95.27          81.08           63.75
-   15                                            Global X Uranium ETF    URA          58.06          30.52  49.90          45.66           33.98
-   16                           Innovator Deepwater Frontier Tech ETF   LOUP          55.58          22.49  76.72          71.05           59.05
-   17                                  VanEck Uranium and Nuclear ETF    NLR          55.29          29.10 143.69         131.00          101.61
-   18                                 SPDR Kensho Final Frontiers ETF   ROKT          55.18          16.85  79.56          74.13           62.46
-   19                                  SPDR S&P Metals and Mining ETF    XME          55.06          42.88 100.31          89.90           68.94
-   20                                SPDR S&P Aerospace & Defense ETF    XAR          52.17           8.79 243.71         227.13          193.80
-   21                                            SPDR Gold MiniShares   GLDM          51.10          30.73  81.32          73.43           64.92
-   22                                        GraniteShares Gold Trust    BAR          51.08          30.78  40.49          36.56           32.33
-   23                                  abrdn Physical Gold Shares ETF   SGOL          51.06          30.76  39.17          35.36           31.27
-   24                                 Goldman Sachs Physical Gold ETF   AAAU          50.95          30.72  40.56          36.62           32.38
-   25                                              iShares Gold Trust    IAU          50.87          30.68  77.38          69.89           61.81
-   26                                          VanEck Merk Gold Trust   OUNZ          50.78          30.72  39.55          35.72           31.59
-   27                                                SPDR Gold Shares    GLD          50.37          30.73 377.24         341.33          302.04
-   28                                    GraniteShares Platinum Trust   PLTM          50.13          15.20  14.84          14.14           11.43
-   29                      VanEck Rare Earth and Strategic Metals ETF   REMX          50.12          42.69  69.61          64.51           47.31
-   30                              abrdn Physical Platinum Shares ETF   PPLT          50.07          15.36 140.36         133.56          108.01
-   31                abrdn Physical Precious Metals Basket Shares ETF   GLTR          47.23          31.39 174.60         158.02          136.88
-   32                                   Franklin FTSE South Korea ETF   FLKR          46.30          22.72  29.64          26.52           22.15
-   33                            Defiance Connective Technologies ETF   SIXG          46.02          20.06  64.60          60.65           51.00
-   34                                            SPDR S&P Telecom ETF    XTL          45.54          24.52 148.29         138.87          115.21
-   35                                         VanEck Africa Index ETF    AFK          44.82          17.30  24.04          23.32           19.52
-   36                                    iShares MSCI South Korea ETF    EWY          44.79          24.92  88.64          78.58           65.17
-   37                         First Trust US Equity Opportunities ETF    FPX          44.70          10.37 162.53         158.57          137.17
-   38 KraneShares FTSE Emerging Markets Consumer Technology Index ETF   KEMQ          44.29          16.19  26.14          25.18           21.14
-   39                                      SPDR S&P Semiconductor ETF    XSD          43.57          29.60 344.64         308.77          252.47
-   40                        Amplify Lithium & Battery Technology ETF   BATT          43.42          30.33  13.08          11.97            9.68
-   41                                abrdn Physical Silver Shares ETF   SIVR          43.14          37.49  46.02          41.67           34.57
-   42                             SPDR S&P Kensho Future Security ETF   FITE          42.80          13.53  88.89          83.27           72.68
-   43                                            iShares Silver Trust    SLV          42.59          37.88  43.79          39.71           32.96
-   44                                            Innovator IBD 50 ETF   FFTY          42.37          17.50  38.51          36.73           31.51
-   45                                        SPDR NYSE Technology ETF   XNTK          42.28          17.37 280.81         260.63          225.43
-   46                                      Global X MSCI Colombia ETF   COLO          42.14          11.40  32.99          32.52           28.88
-   47                                              VanEck ChiNext ETF   CNXT          41.65          33.32  41.15          39.96           30.82
-   48                                       Global X Social Media ETF   SOCL          41.40           7.77  58.27          59.15           50.51
-   49                            iShares U.S. Aerospace & Defense ETF    ITA          41.32           7.28 213.36         202.70          175.34
-   50                                 Invesco DB Precious Metals Fund    DBP          41.27          30.72  93.72          85.13           74.80
-   51     KraneShares Electric Vehicles and Future Mobility Index ETF   KARS          41.10          26.01  30.52          28.58           23.51
-   52                                    iShares Future AI & Tech ETF   ARTY          40.08          15.74  48.77          44.97           39.14
-   53           First Trust NASDAQ Clean Edge Green Energy Index Fund   QCLN          39.77          27.30  45.51          40.58           33.95
-   54                                      ARK Genomic Revolution ETF   ARKG          38.68          34.83  32.66          27.29           24.62
-   55                                 First Trust China AlphaDEX Fund    FCA          38.67          16.11  28.58          28.33           23.58
-   56                                        VanEck Semiconductor ETF    SMH          38.67          19.60 345.30         314.04          262.80
-   57               Global X Artificial Intelligence & Technology ETF    AIQ          37.85          15.62  51.02          47.77           42.01
-   58                                           iShares MSCI Peru ETF    EPU          37.37          32.45  61.35          57.82           47.98
-   59                               Renaissance International IPO ETF   IPOS          36.16          13.59  17.04          16.89           14.53
-   60                                     ProShares Online Retail ETF   ONLN          35.75          11.52  59.73          59.20           50.48
-   61                                        Cambria Global Value ETF   GVAL          34.77           7.25  29.09          29.04           26.09
-   62                                    Invesco China Technology ETF   CQQQ          34.72          18.86  55.02          54.54           46.38
-   63                             Global X Lithium & Battery Tech ETF    LIT          34.67          36.77  57.25          52.07           42.60
-   64     First Trust Developed Markets ex-US Small Cap AlphaDEX Fund   FDTS          34.29           9.68  55.18          55.22           47.61
-   65               First Trust Developed Markets Ex-US AlphaDEX Fund    FDT          34.19          11.72  74.81          74.57           65.17
-   66                                iShares Global Comm Services ETF    IXP          33.78          13.01 124.03         121.79          108.10
-   67                                          iShares MSCI Italy ETF    EWI          33.46           7.22  51.10          51.36           45.75
-   68                First Trust Dow Jones International Internet ETF   FDNI          33.43           9.90  37.56          37.10           32.94
-   69                                iShares Expanded Tech Sector ETF    IGM          33.43          13.21 129.15         122.90          107.56
-   70                                      Invesco Semiconductors ETF    PSI          33.11          21.16  74.62          67.63           58.08
-   71          First Trust S-Network Future Vehicles & Technology ETF   CARZ          33.07          18.86  76.41          70.69           61.34
-   72                              SPDR S&P Kensho Smart Mobility ETF   HAIL          32.69          12.21  36.41          34.72           29.92
-   73                                             iShares Asia 50 ETF    AIA          32.03          17.16  96.62          90.92           79.05
-   74                                      Global X Copper Miners ETF   COPX          31.87          42.03  59.30          54.46           44.29
-   75                            First Trust Nasdaq Semiconductor ETF   FTXL          31.73          22.19 120.52         107.58           91.50
-   76                             abrdn Physical Palladium Shares ETF   PALL          31.69          20.76 128.44         112.76           97.93
-   77                      SPDR S&P Kensho Intelligent Structures ETF   SIMS          31.09          25.91  45.94          41.58           35.56
-   78                                 First Trust Japan AlphaDEX Fund    FJP          31.07          14.48  65.35          65.36           58.31
-   79                                 First Trust Cloud Computing ETF   SKYY          30.17           8.89 135.64         130.74          119.39
-   80                     SPDR S&P Kensho New Economies Composite ETF   KOMP          30.14          13.95  64.21          60.71           53.51
+    <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Symbol</th>
+      <th>52 WkChange %</th>
+      <th>3 MonthReturn</th>
+      <th>Price</th>
+      <th>50 DayAverage</th>
+      <th>200 DayAverage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>ARK Next Generation Internet ETF</td>
+      <td>ARKW</td>
+      <td>102.87</td>
+      <td>8.75</td>
+      <td>173.25</td>
+      <td>166.18</td>
+      <td>131.86</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>ARK Innovation ETF</td>
+      <td>ARKK</td>
+      <td>93.73</td>
+      <td>15.95</td>
+      <td>88.65</td>
+      <td>81.54</td>
+      <td>65.11</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>ARK Autonomous Technology &amp; Robotics ETF</td>
+      <td>ARKQ</td>
+      <td>93.67</td>
+      <td>19.06</td>
+      <td>118.65</td>
+      <td>106.85</td>
+      <td>86.30</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Global X Gold Explorers ETF</td>
+      <td>GOEX</td>
+      <td>85.24</td>
+      <td>66.12</td>
+      <td>66.78</td>
+      <td>61.91</td>
+      <td>45.40</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Sprott Gold Miners ETF</td>
+      <td>SGDM</td>
+      <td>75.62</td>
+      <td>49.24</td>
+      <td>59.15</td>
+      <td>57.48</td>
+      <td>43.83</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Defiance Quantum ETF</td>
+      <td>QTUM</td>
+      <td>75.24</td>
+      <td>17.13</td>
+      <td>110.21</td>
+      <td>101.79</td>
+      <td>87.85</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Amplify Blockchain Technology ETF</td>
+      <td>BLOK</td>
+      <td>74.96</td>
+      <td>16.91</td>
+      <td>70.30</td>
+      <td>64.68</td>
+      <td>51.75</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>iShares MSCI Global Gold Miners ETF</td>
+      <td>RING</td>
+      <td>72.60</td>
+      <td>59.54</td>
+      <td>61.86</td>
+      <td>59.31</td>
+      <td>44.21</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>iShares MSCI Global Silver and Metals Miners ETF</td>
+      <td>SLVP</td>
+      <td>71.45</td>
+      <td>66.25</td>
+      <td>26.18</td>
+      <td>24.71</td>
+      <td>17.78</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>VanEck Gold Miners ETF</td>
+      <td>GDX</td>
+      <td>68.26</td>
+      <td>57.17</td>
+      <td>72.79</td>
+      <td>69.58</td>
+      <td>52.48</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Global X Silver Miners ETF</td>
+      <td>SIL</td>
+      <td>66.36</td>
+      <td>56.46</td>
+      <td>67.21</td>
+      <td>64.79</td>
+      <td>47.28</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>Invesco WilderHill Clean Energy ETF</td>
+      <td>PBW</td>
+      <td>66.20</td>
+      <td>41.14</td>
+      <td>32.94</td>
+      <td>28.13</td>
+      <td>21.21</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>U.S. Global GO GOLD and Precious Metal Miners ETF</td>
+      <td>GOAU</td>
+      <td>61.03</td>
+      <td>44.03</td>
+      <td>37.52</td>
+      <td>36.85</td>
+      <td>28.57</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>SPDR Kensho Clean Power ETF</td>
+      <td>CNRG</td>
+      <td>59.47</td>
+      <td>47.73</td>
+      <td>95.27</td>
+      <td>81.08</td>
+      <td>63.75</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>Global X Uranium ETF</td>
+      <td>URA</td>
+      <td>58.06</td>
+      <td>30.52</td>
+      <td>49.90</td>
+      <td>45.66</td>
+      <td>33.98</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>Innovator Deepwater Frontier Tech ETF</td>
+      <td>LOUP</td>
+      <td>55.58</td>
+      <td>22.49</td>
+      <td>76.72</td>
+      <td>71.05</td>
+      <td>59.05</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>VanEck Uranium and Nuclear ETF</td>
+      <td>NLR</td>
+      <td>55.29</td>
+      <td>29.10</td>
+      <td>143.69</td>
+      <td>131.00</td>
+      <td>101.61</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>SPDR Kensho Final Frontiers ETF</td>
+      <td>ROKT</td>
+      <td>55.18</td>
+      <td>16.85</td>
+      <td>79.56</td>
+      <td>74.13</td>
+      <td>62.46</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>SPDR S&amp;P Metals and Mining ETF</td>
+      <td>XME</td>
+      <td>55.06</td>
+      <td>42.88</td>
+      <td>100.31</td>
+      <td>89.90</td>
+      <td>68.94</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>SPDR S&amp;P Aerospace &amp; Defense ETF</td>
+      <td>XAR</td>
+      <td>52.17</td>
+      <td>8.79</td>
+      <td>243.71</td>
+      <td>227.13</td>
+      <td>193.80</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>SPDR Gold MiniShares</td>
+      <td>GLDM</td>
+      <td>51.10</td>
+      <td>30.73</td>
+      <td>81.32</td>
+      <td>73.43</td>
+      <td>64.92</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>GraniteShares Gold Trust</td>
+      <td>BAR</td>
+      <td>51.08</td>
+      <td>30.78</td>
+      <td>40.49</td>
+      <td>36.56</td>
+      <td>32.33</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>abrdn Physical Gold Shares ETF</td>
+      <td>SGOL</td>
+      <td>51.06</td>
+      <td>30.76</td>
+      <td>39.17</td>
+      <td>35.36</td>
+      <td>31.27</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>Goldman Sachs Physical Gold ETF</td>
+      <td>AAAU</td>
+      <td>50.95</td>
+      <td>30.72</td>
+      <td>40.56</td>
+      <td>36.62</td>
+      <td>32.38</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>iShares Gold Trust</td>
+      <td>IAU</td>
+      <td>50.87</td>
+      <td>30.68</td>
+      <td>77.38</td>
+      <td>69.89</td>
+      <td>61.81</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>VanEck Merk Gold Trust</td>
+      <td>OUNZ</td>
+      <td>50.78</td>
+      <td>30.72</td>
+      <td>39.55</td>
+      <td>35.72</td>
+      <td>31.59</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>SPDR Gold Shares</td>
+      <td>GLD</td>
+      <td>50.37</td>
+      <td>30.73</td>
+      <td>377.24</td>
+      <td>341.33</td>
+      <td>302.04</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>GraniteShares Platinum Trust</td>
+      <td>PLTM</td>
+      <td>50.13</td>
+      <td>15.20</td>
+      <td>14.84</td>
+      <td>14.14</td>
+      <td>11.43</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>VanEck Rare Earth and Strategic Metals ETF</td>
+      <td>REMX</td>
+      <td>50.12</td>
+      <td>42.69</td>
+      <td>69.61</td>
+      <td>64.51</td>
+      <td>47.31</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>abrdn Physical Platinum Shares ETF</td>
+      <td>PPLT</td>
+      <td>50.07</td>
+      <td>15.36</td>
+      <td>140.36</td>
+      <td>133.56</td>
+      <td>108.01</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>abrdn Physical Precious Metals Basket Shares ETF</td>
+      <td>GLTR</td>
+      <td>47.23</td>
+      <td>31.39</td>
+      <td>174.60</td>
+      <td>158.02</td>
+      <td>136.88</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>Franklin FTSE South Korea ETF</td>
+      <td>FLKR</td>
+      <td>46.30</td>
+      <td>22.72</td>
+      <td>29.64</td>
+      <td>26.52</td>
+      <td>22.15</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>Defiance Connective Technologies ETF</td>
+      <td>SIXG</td>
+      <td>46.02</td>
+      <td>20.06</td>
+      <td>64.60</td>
+      <td>60.65</td>
+      <td>51.00</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>SPDR S&amp;P Telecom ETF</td>
+      <td>XTL</td>
+      <td>45.54</td>
+      <td>24.52</td>
+      <td>148.29</td>
+      <td>138.87</td>
+      <td>115.21</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>VanEck Africa Index ETF</td>
+      <td>AFK</td>
+      <td>44.82</td>
+      <td>17.30</td>
+      <td>24.04</td>
+      <td>23.32</td>
+      <td>19.52</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>iShares MSCI South Korea ETF</td>
+      <td>EWY</td>
+      <td>44.79</td>
+      <td>24.92</td>
+      <td>88.64</td>
+      <td>78.58</td>
+      <td>65.17</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>First Trust US Equity Opportunities ETF</td>
+      <td>FPX</td>
+      <td>44.70</td>
+      <td>10.37</td>
+      <td>162.53</td>
+      <td>158.57</td>
+      <td>137.17</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>KraneShares FTSE Emerging Markets Consumer Technology Index ETF</td>
+      <td>KEMQ</td>
+      <td>44.29</td>
+      <td>16.19</td>
+      <td>26.14</td>
+      <td>25.18</td>
+      <td>21.14</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>SPDR S&amp;P Semiconductor ETF</td>
+      <td>XSD</td>
+      <td>43.57</td>
+      <td>29.60</td>
+      <td>344.64</td>
+      <td>308.77</td>
+      <td>252.47</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>Amplify Lithium &amp; Battery Technology ETF</td>
+      <td>BATT</td>
+      <td>43.42</td>
+      <td>30.33</td>
+      <td>13.08</td>
+      <td>11.97</td>
+      <td>9.68</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>abrdn Physical Silver Shares ETF</td>
+      <td>SIVR</td>
+      <td>43.14</td>
+      <td>37.49</td>
+      <td>46.02</td>
+      <td>41.67</td>
+      <td>34.57</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>SPDR S&amp;P Kensho Future Security ETF</td>
+      <td>FITE</td>
+      <td>42.80</td>
+      <td>13.53</td>
+      <td>88.89</td>
+      <td>83.27</td>
+      <td>72.68</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>iShares Silver Trust</td>
+      <td>SLV</td>
+      <td>42.59</td>
+      <td>37.88</td>
+      <td>43.79</td>
+      <td>39.71</td>
+      <td>32.96</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>Innovator IBD 50 ETF</td>
+      <td>FFTY</td>
+      <td>42.37</td>
+      <td>17.50</td>
+      <td>38.51</td>
+      <td>36.73</td>
+      <td>31.51</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>SPDR NYSE Technology ETF</td>
+      <td>XNTK</td>
+      <td>42.28</td>
+      <td>17.37</td>
+      <td>280.81</td>
+      <td>260.63</td>
+      <td>225.43</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>Global X MSCI Colombia ETF</td>
+      <td>COLO</td>
+      <td>42.14</td>
+      <td>11.40</td>
+      <td>32.99</td>
+      <td>32.52</td>
+      <td>28.88</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td>VanEck ChiNext ETF</td>
+      <td>CNXT</td>
+      <td>41.65</td>
+      <td>33.32</td>
+      <td>41.15</td>
+      <td>39.96</td>
+      <td>30.82</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>Global X Social Media ETF</td>
+      <td>SOCL</td>
+      <td>41.40</td>
+      <td>7.77</td>
+      <td>58.27</td>
+      <td>59.15</td>
+      <td>50.51</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>iShares U.S. Aerospace &amp; Defense ETF</td>
+      <td>ITA</td>
+      <td>41.32</td>
+      <td>7.28</td>
+      <td>213.36</td>
+      <td>202.70</td>
+      <td>175.34</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>Invesco DB Precious Metals Fund</td>
+      <td>DBP</td>
+      <td>41.27</td>
+      <td>30.72</td>
+      <td>93.72</td>
+      <td>85.13</td>
+      <td>74.80</td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td>KraneShares Electric Vehicles and Future Mobility Index ETF</td>
+      <td>KARS</td>
+      <td>41.10</td>
+      <td>26.01</td>
+      <td>30.52</td>
+      <td>28.58</td>
+      <td>23.51</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td>iShares Future AI &amp; Tech ETF</td>
+      <td>ARTY</td>
+      <td>40.08</td>
+      <td>15.74</td>
+      <td>48.77</td>
+      <td>44.97</td>
+      <td>39.14</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>First Trust NASDAQ Clean Edge Green Energy Index Fund</td>
+      <td>QCLN</td>
+      <td>39.77</td>
+      <td>27.30</td>
+      <td>45.51</td>
+      <td>40.58</td>
+      <td>33.95</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>ARK Genomic Revolution ETF</td>
+      <td>ARKG</td>
+      <td>38.68</td>
+      <td>34.83</td>
+      <td>32.66</td>
+      <td>27.29</td>
+      <td>24.62</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td>First Trust China AlphaDEX Fund</td>
+      <td>FCA</td>
+      <td>38.67</td>
+      <td>16.11</td>
+      <td>28.58</td>
+      <td>28.33</td>
+      <td>23.58</td>
+    </tr>
+    <tr>
+      <td>56</td>
+      <td>VanEck Semiconductor ETF</td>
+      <td>SMH</td>
+      <td>38.67</td>
+      <td>19.60</td>
+      <td>345.30</td>
+      <td>314.04</td>
+      <td>262.80</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td>Global X Artificial Intelligence &amp; Technology ETF</td>
+      <td>AIQ</td>
+      <td>37.85</td>
+      <td>15.62</td>
+      <td>51.02</td>
+      <td>47.77</td>
+      <td>42.01</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td>iShares MSCI Peru ETF</td>
+      <td>EPU</td>
+      <td>37.37</td>
+      <td>32.45</td>
+      <td>61.35</td>
+      <td>57.82</td>
+      <td>47.98</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td>Renaissance International IPO ETF</td>
+      <td>IPOS</td>
+      <td>36.16</td>
+      <td>13.59</td>
+      <td>17.04</td>
+      <td>16.89</td>
+      <td>14.53</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>ProShares Online Retail ETF</td>
+      <td>ONLN</td>
+      <td>35.75</td>
+      <td>11.52</td>
+      <td>59.73</td>
+      <td>59.20</td>
+      <td>50.48</td>
+    </tr>
+    <tr>
+      <td>61</td>
+      <td>Cambria Global Value ETF</td>
+      <td>GVAL</td>
+      <td>34.77</td>
+      <td>7.25</td>
+      <td>29.09</td>
+      <td>29.04</td>
+      <td>26.09</td>
+    </tr>
+    <tr>
+      <td>62</td>
+      <td>Invesco China Technology ETF</td>
+      <td>CQQQ</td>
+      <td>34.72</td>
+      <td>18.86</td>
+      <td>55.02</td>
+      <td>54.54</td>
+      <td>46.38</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td>Global X Lithium &amp; Battery Tech ETF</td>
+      <td>LIT</td>
+      <td>34.67</td>
+      <td>36.77</td>
+      <td>57.25</td>
+      <td>52.07</td>
+      <td>42.60</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>First Trust Developed Markets ex-US Small Cap AlphaDEX Fund</td>
+      <td>FDTS</td>
+      <td>34.29</td>
+      <td>9.68</td>
+      <td>55.18</td>
+      <td>55.22</td>
+      <td>47.61</td>
+    </tr>
+    <tr>
+      <td>65</td>
+      <td>First Trust Developed Markets Ex-US AlphaDEX Fund</td>
+      <td>FDT</td>
+      <td>34.19</td>
+      <td>11.72</td>
+      <td>74.81</td>
+      <td>74.57</td>
+      <td>65.17</td>
+    </tr>
+    <tr>
+      <td>66</td>
+      <td>iShares Global Comm Services ETF</td>
+      <td>IXP</td>
+      <td>33.78</td>
+      <td>13.01</td>
+      <td>124.03</td>
+      <td>121.79</td>
+      <td>108.10</td>
+    </tr>
+    <tr>
+      <td>67</td>
+      <td>iShares MSCI Italy ETF</td>
+      <td>EWI</td>
+      <td>33.46</td>
+      <td>7.22</td>
+      <td>51.10</td>
+      <td>51.36</td>
+      <td>45.75</td>
+    </tr>
+    <tr>
+      <td>68</td>
+      <td>First Trust Dow Jones International Internet ETF</td>
+      <td>FDNI</td>
+      <td>33.43</td>
+      <td>9.90</td>
+      <td>37.56</td>
+      <td>37.10</td>
+      <td>32.94</td>
+    </tr>
+    <tr>
+      <td>69</td>
+      <td>iShares Expanded Tech Sector ETF</td>
+      <td>IGM</td>
+      <td>33.43</td>
+      <td>13.21</td>
+      <td>129.15</td>
+      <td>122.90</td>
+      <td>107.56</td>
+    </tr>
+    <tr>
+      <td>70</td>
+      <td>Invesco Semiconductors ETF</td>
+      <td>PSI</td>
+      <td>33.11</td>
+      <td>21.16</td>
+      <td>74.62</td>
+      <td>67.63</td>
+      <td>58.08</td>
+    </tr>
+    <tr>
+      <td>71</td>
+      <td>First Trust S-Network Future Vehicles &amp; Technology ETF</td>
+      <td>CARZ</td>
+      <td>33.07</td>
+      <td>18.86</td>
+      <td>76.41</td>
+      <td>70.69</td>
+      <td>61.34</td>
+    </tr>
+    <tr>
+      <td>72</td>
+      <td>SPDR S&amp;P Kensho Smart Mobility ETF</td>
+      <td>HAIL</td>
+      <td>32.69</td>
+      <td>12.21</td>
+      <td>36.41</td>
+      <td>34.72</td>
+      <td>29.92</td>
+    </tr>
+    <tr>
+      <td>73</td>
+      <td>iShares Asia 50 ETF</td>
+      <td>AIA</td>
+      <td>32.03</td>
+      <td>17.16</td>
+      <td>96.62</td>
+      <td>90.92</td>
+      <td>79.05</td>
+    </tr>
+    <tr>
+      <td>74</td>
+      <td>Global X Copper Miners ETF</td>
+      <td>COPX</td>
+      <td>31.87</td>
+      <td>42.03</td>
+      <td>59.30</td>
+      <td>54.46</td>
+      <td>44.29</td>
+    </tr>
+    <tr>
+      <td>75</td>
+      <td>First Trust Nasdaq Semiconductor ETF</td>
+      <td>FTXL</td>
+      <td>31.73</td>
+      <td>22.19</td>
+      <td>120.52</td>
+      <td>107.58</td>
+      <td>91.50</td>
+    </tr>
+    <tr>
+      <td>76</td>
+      <td>abrdn Physical Palladium Shares ETF</td>
+      <td>PALL</td>
+      <td>31.69</td>
+      <td>20.76</td>
+      <td>128.44</td>
+      <td>112.76</td>
+      <td>97.93</td>
+    </tr>
+    <tr>
+      <td>77</td>
+      <td>SPDR S&amp;P Kensho Intelligent Structures ETF</td>
+      <td>SIMS</td>
+      <td>31.09</td>
+      <td>25.91</td>
+      <td>45.94</td>
+      <td>41.58</td>
+      <td>35.56</td>
+    </tr>
+    <tr>
+      <td>78</td>
+      <td>First Trust Japan AlphaDEX Fund</td>
+      <td>FJP</td>
+      <td>31.07</td>
+      <td>14.48</td>
+      <td>65.35</td>
+      <td>65.36</td>
+      <td>58.31</td>
+    </tr>
+    <tr>
+      <td>79</td>
+      <td>First Trust Cloud Computing ETF</td>
+      <td>SKYY</td>
+      <td>30.17</td>
+      <td>8.89</td>
+      <td>135.64</td>
+      <td>130.74</td>
+      <td>119.39</td>
+    </tr>
+    <tr>
+      <td>80</td>
+      <td>SPDR S&amp;P Kensho New Economies Composite ETF</td>
+      <td>KOMP</td>
+      <td>30.14</td>
+      <td>13.95</td>
+      <td>64.21</td>
+      <td>60.71</td>
+      <td>53.51</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 <!-- jQuery -->

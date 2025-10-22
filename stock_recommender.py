@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import yaml
 import requests
 import pandas as pd
 from google import genai
@@ -135,15 +136,7 @@ print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
 
 
 # Send results to Google Gemini for analysis and recommendations
-prompt = f"""
-Group the following ETFs by theme (use the 'Name' or known sector). 
-For each theme, select up to 5 top ETFs by 52-week change %. 
-Present a table for each theme with columns: Name, Symbol, 52 WkChange %, 3 MonthReturn, Price, 50 DayAverage, 200 DayAverage. 
-Make sure the columns line up for readability.
-Provide a summary of insights, analysis, and recommendations based on the data.
-ETF table:
-{top_etfs}
-"""
+
 # Load .env file
 load_dotenv()  # looks for .env in current directory
 # Set API key from .env
@@ -152,11 +145,13 @@ api_key = os.getenv("GEMINI_KEY")
 client = genai.Client(api_key=api_key)
 # Enable Google Search tool
 grounding_tool = types.Tool(google_search=types.GoogleSearch())
-config = types.GenerateContentConfig(tools=[grounding_tool])
+with open("config.yaml") as f: prompt = yaml.safe_load(f)["prompt"] + top_etfs
+gemini_config = types.GenerateContentConfig(tools=[grounding_tool])
+# Get response from Gemini
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=prompt,
-    config=config
+    config=gemini_config
 )
 
 print("GEMINI RESPONSE:")

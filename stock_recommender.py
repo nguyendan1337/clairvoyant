@@ -133,13 +133,13 @@ table_html = top_etfs.to_html(index=False, classes="data-table", border=0)
 top_etfs = top_etfs.to_string(index=False)
 print(top_etfs)
 
-# Write Top ETFs to HTML
-with open("template.html", "r", encoding="utf-8") as f: template = f.read()
-timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-html = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
-html = html.replace("<!--DATA_TABLE_HERE-->", table_html)
-with open("index.html", "w", encoding="utf-8") as f: f.write(html)
-print("✅ Generated index.html with Top ETFS.")
+# # Write Top ETFs to HTML
+# with open("template.html", "r", encoding="utf-8") as f: template = f.read()
+# timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# html = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
+# html = html.replace("<!--DATA_TABLE_HERE-->", table_html)
+# with open("index.html", "w", encoding="utf-8") as f: f.write(html)
+# print("✅ Generated index.html with Top ETFS.")
 
 # Record the end time
 end_time = time.perf_counter()
@@ -152,7 +152,7 @@ api_key = os.getenv("GEMINI_KEY")
 client = genai.Client(api_key=api_key)
 # Enable Google Search tool
 grounding_tool = types.Tool(google_search=types.GoogleSearch())
-with open("config.yaml") as f: prompt = yaml.safe_load(f)["prompt"] + top_etfs
+with open("config2.yaml") as f: prompt = yaml.safe_load(f)["prompt"] + top_etfs
 gemini_config = types.GenerateContentConfig(tools=[grounding_tool])
 # Get response from Gemini
 response = client.models.generate_content(
@@ -165,3 +165,29 @@ print("GEMINI RESPONSE:\n")
 print(response.text)
 end_time = time.perf_counter()
 print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
+
+# --- Extract HTML table and summary from Gemini response ---
+# Simple approach: split by first </table>
+table_match = re.search(r'(<table.*?/table>)', response.text, flags=re.DOTALL)
+if table_match:
+    gemini_table_html = table_match.group(1)
+    # Anything after the table is the summary
+    gemini_summary = response.text.split(gemini_table_html)[-1].strip()
+else:
+    gemini_table_html = ""
+    gemini_summary = response.text  # fallback if no table found
+
+# --- Read HTML template ---
+with open("template.html", "r", encoding="utf-8") as f:
+    template = f.read()
+
+# --- Insert content ---
+timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+html_output = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
+html_output = html_output.replace("<!--RECOMMENDATIONS_TABLE_HERE-->", gemini_table_html)
+html_output = html_output.replace("<!--RECOMMENDATIONS_SUMMARY_HERE-->", gemini_summary)
+html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", table_html)
+
+# --- Write final index.html ---
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_output)

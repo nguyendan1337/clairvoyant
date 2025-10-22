@@ -130,18 +130,20 @@ print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
 top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']].to_string(index=False)
 print(top_etfs)
 
+# Write Top ETFs to HTML
+with open("template.html", "r", encoding="utf-8") as f: template = f.read()
+html = template.replace("<!--DATA_TABLE_HERE-->", top_etfs)
+with open("index.html", "w", encoding="utf-8") as f: f.write(html)
+print("✅ Generated index.html with Top ETFS.")
+
 # Record the end time
 end_time = time.perf_counter()
 print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
-
+print("Getting Google Gemini response...\n")
 
 # Send results to Google Gemini for analysis and recommendations
-
-# Load .env file
-load_dotenv()  # looks for .env in current directory
-# Set API key from .env
+load_dotenv()
 api_key = os.getenv("GEMINI_KEY")
-# Initialize the GenAI client
 client = genai.Client(api_key=api_key)
 # Enable Google Search tool
 grounding_tool = types.Tool(google_search=types.GoogleSearch())
@@ -154,7 +156,7 @@ response = client.models.generate_content(
     config=gemini_config
 )
 
-print("GEMINI RESPONSE:")
+print("GEMINI RESPONSE:\n")
 print(response.text)
 end_time = time.perf_counter()
 print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")

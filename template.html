@@ -3,27 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>My Data Page</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
     <style>
         body {
           font-family: Arial, sans-serif;
           margin: 40px;
         }
-        table {
-          border-collapse: collapse;
-          width: 100%;
-        }
-        th, td {
-          border: 1px solid #ccc;
-          padding: 8px;
-          text-align: left;
-        }
-        th {
-          background-color: #f4f4f4;
-        }
     </style>
 </head>
 <body>
-    <h1>Stock Data</h1>
-    <pre><!--DATA_TABLE_HERE--></pre>
+<h1>Stock Data</h1>
+    <p>Last updated: <!--LAST_UPDATED_HERE--></p>
+
+    <!--DATA_TABLE_HERE-->
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.data-table').DataTable({
+                paging: true,
+                searching: true,
+                info: false
+            });
+        });
+    </script>
 </body>
 </html>

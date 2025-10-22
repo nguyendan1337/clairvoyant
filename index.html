@@ -3,71 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <title>My Data Page</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
     <style>
         body {
           font-family: Arial, sans-serif;
           margin: 40px;
         }
-        table {
-          border-collapse: collapse;
-          width: 100%;
-        }
-        th, td {
-          border: 1px solid #ccc;
-          padding: 8px;
-          text-align: left;
-        }
-        th {
-          background-color: #f4f4f4;
-        }
     </style>
 </head>
 <body>
-    <h1>Stock Data</h1>
-    <pre> Rank                                                            Name Symbol  52 WkChange %  3 MonthReturn  Price  50 DayAverage  200 DayAverage
+<h1>Stock Data</h1>
+    <p>Last updated: <!--LAST_UPDATED_HERE--></p>
+
+     Rank                                                            Name Symbol  52 WkChange %  3 MonthReturn  Price  50 DayAverage  200 DayAverage
     1                                ARK Next Generation Internet ETF   ARKW         102.87           8.75 173.25         166.18          131.86
     2                                              ARK Innovation ETF   ARKK          93.73          15.95  88.65          81.54           65.11
     3                        ARK Autonomous Technology & Robotics ETF   ARKQ          93.67          19.06 118.65         106.85           86.30
     4                                     Global X Gold Explorers ETF   GOEX          85.24          66.12  66.78          61.91           45.40
-    5                                          Sprott Gold Miners ETF   SGDM          75.62          49.24  59.15          57.48           43.83
-    6                                            Defiance Quantum ETF   QTUM          75.24          17.13 110.21         101.79           87.85
-    7                               Amplify Blockchain Technology ETF   BLOK          74.96          16.91  70.30          64.68           51.75
-    8                             iShares MSCI Global Gold Miners ETF   RING          72.60          59.54  61.86          59.31           44.21
-    9                iShares MSCI Global Silver and Metals Miners ETF   SLVP          71.45          66.25  26.18          24.71           17.78
-   10                                          VanEck Gold Miners ETF    GDX          68.26          57.17  72.79          69.58           52.48
-   11                                      Global X Silver Miners ETF    SIL          66.36          56.46  67.21          64.79           47.28
-   12                             Invesco WilderHill Clean Energy ETF    PBW          66.20          41.14  32.94          28.13           21.21
-   13               U.S. Global GO GOLD and Precious Metal Miners ETF   GOAU          61.03          44.03  37.52          36.85           28.57
-   14                                     SPDR Kensho Clean Power ETF   CNRG          59.47          47.73  95.27          81.08           63.75
-   15                                            Global X Uranium ETF    URA          58.06          30.52  49.90          45.66           33.98
-   16                           Innovator Deepwater Frontier Tech ETF   LOUP          55.58          22.49  76.72          71.05           59.05
-   17                                  VanEck Uranium and Nuclear ETF    NLR          55.29          29.10 143.69         131.00          101.61
-   18                                 SPDR Kensho Final Frontiers ETF   ROKT          55.18          16.85  79.56          74.13           62.46
-   19                                  SPDR S&P Metals and Mining ETF    XME          55.06          42.88 100.31          89.90           68.94
-   20                                SPDR S&P Aerospace & Defense ETF    XAR          52.17           8.79 243.71         227.13          193.80
-   21                                            SPDR Gold MiniShares   GLDM          51.10          30.73  81.32          73.43           64.92
-   22                                        GraniteShares Gold Trust    BAR          51.08          30.78  40.49          36.56           32.33
-   23                                  abrdn Physical Gold Shares ETF   SGOL          51.06          30.76  39.17          35.36           31.27
-   24                                 Goldman Sachs Physical Gold ETF   AAAU          50.95          30.72  40.56          36.62           32.38
-   25                                              iShares Gold Trust    IAU          50.87          30.68  77.38          69.89           61.81
-   26                                          VanEck Merk Gold Trust   OUNZ          50.78          30.72  39.55          35.72           31.59
-   27                                                SPDR Gold Shares    GLD          50.37          30.73 377.24         341.33          302.04
-   28                                    GraniteShares Platinum Trust   PLTM          50.13          15.20  14.84          14.14           11.43
-   29                      VanEck Rare Earth and Strategic Metals ETF   REMX          50.12          42.69  69.61          64.51           47.31
-   30                              abrdn Physical Platinum Shares ETF   PPLT          50.07          15.36 140.36         133.56          108.01
-   31                abrdn Physical Precious Metals Basket Shares ETF   GLTR          47.23          31.39 174.60         158.02          136.88
-   32                                   Franklin FTSE South Korea ETF   FLKR          46.30          22.72  29.64          26.52           22.15
-   33                            Defiance Connective Technologies ETF   SIXG          46.02          20.06  64.60          60.65           51.00
-   34                                            SPDR S&P Telecom ETF    XTL          45.54          24.52 148.29         138.87          115.21
-   35                                         VanEck Africa Index ETF    AFK          44.82          17.30  24.04          23.32           19.52
-   36                                    iShares MSCI South Korea ETF    EWY          44.79          24.92  88.64          78.58           65.17
-   37                         First Trust US Equity Opportunities ETF    FPX          44.70          10.37 162.53         158.57          137.17
-   38 KraneShares FTSE Emerging Markets Consumer Technology Index ETF   KEMQ          44.29          16.19  26.14          25.18           21.14
-   39                                      SPDR S&P Semiconductor ETF    XSD          43.57          29.60 344.64         308.77          252.47
-   40                        Amplify Lithium & Battery Technology ETF   BATT          43.42          30.33  13.08          11.97            9.68
-   41                                abrdn Physical Silver Shares ETF   SIVR          43.14          37.49  46.02          41.67           34.57
-   42                             SPDR S&P Kensho Future Security ETF   FITE          42.80          13.53  88.89          83.27           72.68
-   43                                            iShares Silver Trust    SLV          42.59          37.88  43.79          39.71           32.96
+    5                                            Defiance Quantum ETF   QTUM          75.24          17.13 110.21         101.79           87.85
+    6                               Amplify Blockchain Technology ETF   BLOK          74.96          16.91  70.30          64.68           51.75
+    7                             iShares MSCI Global Gold Miners ETF   RING          72.60          59.54  61.86          59.31           44.21
+    8                iShares MSCI Global Silver and Metals Miners ETF   SLVP          71.45          66.25  26.18          24.71           17.78
+    9                                          VanEck Gold Miners ETF    GDX          68.26          57.17  72.79          69.58           52.48
+   10                                      Global X Silver Miners ETF    SIL          66.36          56.46  67.21          64.79           47.28
+   11                             Invesco WilderHill Clean Energy ETF    PBW          66.20          41.14  32.94          28.13           21.21
+   12               U.S. Global GO GOLD and Precious Metal Miners ETF   GOAU          61.03          44.03  37.52          36.85           28.57
+   13                                     SPDR Kensho Clean Power ETF   CNRG          59.47          47.73  95.27          81.08           63.75
+   14                                            Global X Uranium ETF    URA          58.06          30.52  49.90          45.66           33.98
+   15                           Innovator Deepwater Frontier Tech ETF   LOUP          55.58          22.49  76.72          71.05           59.05
+   16                                  VanEck Uranium and Nuclear ETF    NLR          55.29          29.10 143.69         131.00          101.61
+   17                                 SPDR Kensho Final Frontiers ETF   ROKT          55.18          16.85  79.56          74.13           62.46
+   18                                  SPDR S&P Metals and Mining ETF    XME          55.06          42.88 100.31          89.90           68.94
+   19                                SPDR S&P Aerospace & Defense ETF    XAR          52.17           8.79 243.71         227.13          193.80
+   20                                            SPDR Gold MiniShares   GLDM          51.10          30.73  81.32          73.43           64.92
+   21                                        GraniteShares Gold Trust    BAR          51.08          30.78  40.49          36.56           32.33
+   22                                  abrdn Physical Gold Shares ETF   SGOL          51.06          30.76  39.17          35.36           31.27
+   23                                 Goldman Sachs Physical Gold ETF   AAAU          50.95          30.72  40.56          36.62           32.38
+   24                                              iShares Gold Trust    IAU          50.87          30.68  77.38          69.89           61.81
+   25                                          VanEck Merk Gold Trust   OUNZ          50.78          30.72  39.55          35.72           31.59
+   26                                                SPDR Gold Shares    GLD          50.37          30.73 377.24         341.33          302.04
+   27                                    GraniteShares Platinum Trust   PLTM          50.13          15.20  14.84          14.14           11.43
+   28                      VanEck Rare Earth and Strategic Metals ETF   REMX          50.12          42.69  69.61          64.51           47.31
+   29                              abrdn Physical Platinum Shares ETF   PPLT          50.07          15.36 140.36         133.56          108.01
+   30                abrdn Physical Precious Metals Basket Shares ETF   GLTR          47.23          31.39 174.60         158.02          136.88
+   31                                   Franklin FTSE South Korea ETF   FLKR          46.30          22.72  29.64          26.52           22.15
+   32                            Defiance Connective Technologies ETF   SIXG          46.02          20.06  64.60          60.65           51.00
+   33                                            SPDR S&P Telecom ETF    XTL          45.54          24.52 148.29         138.87          115.21
+   34                                         VanEck Africa Index ETF    AFK          44.82          17.30  24.04          23.32           19.52
+   35                                    iShares MSCI South Korea ETF    EWY          44.79          24.92  88.64          78.58           65.17
+   36                         First Trust US Equity Opportunities ETF    FPX          44.70          10.37 162.53         158.57          137.17
+   37 KraneShares FTSE Emerging Markets Consumer Technology Index ETF   KEMQ          44.29          16.19  26.14          25.18           21.14
+   38                                      SPDR S&P Semiconductor ETF    XSD          43.57          29.60 344.64         308.77          252.47
+   39                        Amplify Lithium & Battery Technology ETF   BATT          43.42          30.33  13.08          11.97            9.68
+   40                                abrdn Physical Silver Shares ETF   SIVR          43.14          37.49  46.02          41.67           34.57
+   41                             SPDR S&P Kensho Future Security ETF   FITE          42.80          13.53  88.89          83.27           72.68
+   42                                            iShares Silver Trust    SLV          42.59          37.88  43.79          39.71           32.96
+   43                                            Innovator IBD 50 ETF   FFTY          42.37          17.50  38.51          36.73           31.51
    44                                        SPDR NYSE Technology ETF   XNTK          42.28          17.37 280.81         260.63          225.43
    45                                      Global X MSCI Colombia ETF   COLO          42.14          11.40  32.99          32.52           28.88
    46                                              VanEck ChiNext ETF   CNXT          41.65          33.32  41.15          39.96           30.82
@@ -91,8 +83,8 @@
    64               First Trust Developed Markets Ex-US AlphaDEX Fund    FDT          34.19          11.72  74.81          74.57           65.17
    65                                iShares Global Comm Services ETF    IXP          33.78          13.01 124.03         121.79          108.10
    66                                          iShares MSCI Italy ETF    EWI          33.46           7.22  51.10          51.36           45.75
-   67                                iShares Expanded Tech Sector ETF    IGM          33.43          13.21 129.15         122.90          107.56
-   68                First Trust Dow Jones International Internet ETF   FDNI          33.43           9.90  37.56          37.10           32.94
+   67                First Trust Dow Jones International Internet ETF   FDNI          33.43           9.90  37.56          37.10           32.94
+   68                                iShares Expanded Tech Sector ETF    IGM          33.43          13.21 129.15         122.90          107.56
    69                                      Invesco Semiconductors ETF    PSI          33.11          21.16  74.62          67.63           58.08
    70          First Trust S-Network Future Vehicles & Technology ETF   CARZ          33.07          18.86  76.41          70.69           61.34
    71                              SPDR S&P Kensho Smart Mobility ETF   HAIL          32.69          12.21  36.41          34.72           29.92
@@ -115,26 +107,26 @@
    88         Alpha Architect International Quantitative Momentum ETF   IMOM          28.82           8.85  35.61          35.56           31.54
    89                  Fidelity MSCI Communication Services Index ETF   FCOM          28.81          10.26  70.83          69.79           62.72
    90           First Trust RBA American Industrial RenaissanceTM ETF   AIRR          28.78          14.81  98.13          93.94           80.95
-   91                     Global X Autonomous & Electric Vehicles ETF   DRIV          28.63          18.31  29.16          27.29           23.83
-   92                                 ERShares Private-Public Crossov   XOVR          28.27           7.01  20.96          20.56           18.57
-   93                                 Invesco Next Gen Connectivity E   KNCT          28.18          13.89 131.99         124.28          112.06
-   94                            Invesco AI and Next Gen Software ETF   IGPT          28.04          16.20  57.86          53.43           47.41
-   95                          iShares Currency Hedged MSCI Japan ETF   HEWJ          27.97          18.82  52.21          49.54           44.53
-   96                                   iShares MSCI South Africa ETF    EZA          27.95          20.80  63.27          61.21           52.10
-   97                                           ALPS Clean Energy ETF   ACES          27.89          26.37  35.03          31.33           26.60
-   98                                         iShares Global Tech ETF    IXN          27.86          11.57 105.74         100.24           88.34
-   99                                   Invesco S&P 500 High Beta ETF   SPHB          27.82          10.09 113.11         107.97           93.84
-  100                  Fidelity MSCI Information Technology Index ETF   FTEC          27.73          11.33 226.79         216.01          189.91
-  101                      First Trust Small Cap Growth AlphaDEX Fund    FYC          27.57          17.94  95.03          89.06           78.47
-  102           Vanguard Information Technology Index Fund ETF Shares    VGT          27.52          11.31 761.41         725.85          638.39
-  103                                     Virtus Reaves Utilities ETF   UTES          27.42           9.71  83.45          82.19           73.21
-  104                            Invesco Dynamic Large Cap Growth ETF    PWB          27.29           8.15 127.47         122.98          110.79
-  105                                    iShares MSCI Japan Value ETF   EWJV          27.21          17.44  39.37          38.84           34.94
-  106                                         Franklin FTSE China ETF   FLCH          27.01          11.25  25.02          24.88           21.91
-  107                                          iShares MSCI China ETF   MCHI          26.65          11.61  63.44          63.01           55.71
-  108                          Xtrackers MSCI Japan Hedged Equity ETF   DBJP          26.47          18.95  89.98          85.37           77.83
-  109                                               Invesco Solar ETF    TAN          26.38          24.35  46.81          43.19           35.88
-  110                                 Xtrackers MSCI Emerging Markets   EMCS          26.32          12.60  35.33          33.45           30.02
+   91                 First Trust Asia Pacific Ex-Japan AlphaDEX Fund    FPA          28.67           7.99  37.92          37.18           32.81
+   92                     Global X Autonomous & Electric Vehicles ETF   DRIV          28.63          18.31  29.16          27.29           23.83
+   93                                 ERShares Private-Public Crossov   XOVR          28.27           7.01  20.96          20.56           18.57
+   94                                 Invesco Next Gen Connectivity E   KNCT          28.18          13.89 131.99         124.28          112.06
+   95                            Invesco AI and Next Gen Software ETF   IGPT          28.04          16.20  57.86          53.43           47.41
+   96                          iShares Currency Hedged MSCI Japan ETF   HEWJ          27.97          18.82  52.21          49.54           44.53
+   97                                   iShares MSCI South Africa ETF    EZA          27.95          20.80  63.27          61.21           52.10
+   98                                           ALPS Clean Energy ETF   ACES          27.89          26.37  35.03          31.33           26.60
+   99                                         iShares Global Tech ETF    IXN          27.86          11.57 105.74         100.24           88.34
+  100                                   Invesco S&P 500 High Beta ETF   SPHB          27.82          10.09 113.11         107.97           93.84
+  101                  Fidelity MSCI Information Technology Index ETF   FTEC          27.73          11.33 226.79         216.01          189.91
+  102                      First Trust Small Cap Growth AlphaDEX Fund    FYC          27.57          17.94  95.03          89.06           78.47
+  103           Vanguard Information Technology Index Fund ETF Shares    VGT          27.52          11.31 761.41         725.85          638.39
+  104                                     Virtus Reaves Utilities ETF   UTES          27.42           9.71  83.45          82.19           73.21
+  105                            Invesco Dynamic Large Cap Growth ETF    PWB          27.29           8.15 127.47         122.98          110.79
+  106                                    iShares MSCI Japan Value ETF   EWJV          27.21          17.44  39.37          38.84           34.94
+  107                                         Franklin FTSE China ETF   FLCH          27.01          11.25  25.02          24.88           21.91
+  108                                          iShares MSCI China ETF   MCHI          26.65          11.61  63.44          63.01           55.71
+  109                          Xtrackers MSCI Japan Hedged Equity ETF   DBJP          26.47          18.95  89.98          85.37           77.83
+  110                                               Invesco Solar ETF    TAN          26.38          24.35  46.81          43.19           35.88
   111                       iShares International Select Dividend ETF    IDV          26.24           7.16  36.76          36.56           33.04
   112                          The Technology Select Sector SPDR Fund    XLK          26.23          10.60 288.34         274.08          241.85
   113                                 Invesco Global Clean Energy ETF    PBD          26.05          22.26  16.21          14.89           12.58
@@ -145,15 +137,28 @@
   118                             WisdomTree Japan Hedged Equity Fund    DXJ          25.61          16.44 132.88         128.39          115.40
   119                               SPDR Portfolio S&P 500 Growth ETF   SPYG          25.59           8.24 104.94         102.46           92.04
   120                   Vanguard S&P 500 Growth Index Fund ETF Shares   VOOG          25.56           8.28 436.96         426.84          383.39
-  121                                           iShares Micro-Cap ETF    IWC          25.52          18.27 156.68         146.93          128.53
+  121             First Trust NASDAQ-100-Technology Sector Index Fund   QTEC          25.50           9.22 237.38         222.72          201.52
   122                                iShares MSCI Japan Small-Cap ETF    SCJ          25.50          10.12  90.84          91.49           82.36
-  123             First Trust NASDAQ-100-Technology Sector Index Fund   QTEC          25.50           9.22 237.38         222.72          201.52
-  124                             Fidelity Nasdaq Composite Index ETF   ONEQ          25.43           9.99  90.31          87.25           78.07
-  125                             Vanguard Mega Cap Growth Index Fund    MGK          25.41           8.87 407.03         395.00          354.73
-  126                                       Motley Fool 100 Index ETF   TMFC          25.25           8.86  71.08          69.07           62.48
-  127                            Goldman Sachs Hedge Industry VIP ETF   GVIP          25.24           8.76 152.41         148.69          133.55
-  128                                     First Trust IndXX NextG ETF   NXTG          25.23          12.07 108.35         103.03           93.20
-  129                                               Invesco QQQ Trust    QQQ          25.19           9.08 611.38         588.89          532.61
-  130                                  Franklin FTSE Japan Hedged ETF   FLJH          25.07          18.64  37.96          36.18           32.56</pre>
+  123                             Fidelity Nasdaq Composite Index ETF   ONEQ          25.43           9.99  90.31          87.25           78.07
+  124                             Vanguard Mega Cap Growth Index Fund    MGK          25.41           8.87 407.03         395.00          354.73
+  125                                       Motley Fool 100 Index ETF   TMFC          25.25           8.86  71.08          69.07           62.48
+  126                            Goldman Sachs Hedge Industry VIP ETF   GVIP          25.24           8.76 152.41         148.69          133.55
+  127                                     First Trust IndXX NextG ETF   NXTG          25.23          12.07 108.35         103.03           93.20
+  128                                               Invesco QQQ Trust    QQQ          25.19           9.08 611.38         588.89          532.61
+  129                                  Franklin FTSE Japan Hedged ETF   FLJH          25.07          18.64  37.96          36.18           32.56
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.data-table').DataTable({
+                paging: true,
+                searching: true,
+                info: false
+            });
+        });
+    </script>
 </body>
 </html>

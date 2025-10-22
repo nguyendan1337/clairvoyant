@@ -5,6 +5,7 @@ import yaml
 import requests
 import pandas as pd
 from google import genai
+from datetime import datetime
 from bs4 import BeautifulSoup
 from google.genai import types
 from dotenv import load_dotenv
@@ -132,6 +133,8 @@ print(top_etfs)
 
 # Write Top ETFs to HTML
 with open("template.html", "r", encoding="utf-8") as f: template = f.read()
+timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+html = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
 html = template.replace("<!--DATA_TABLE_HERE-->", top_etfs)
 with open("index.html", "w", encoding="utf-8") as f: f.write(html)
 print("✅ Generated index.html with Top ETFS.")

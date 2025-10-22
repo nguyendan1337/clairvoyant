@@ -116,7 +116,7 @@ df = df[mask]
 
 # --- Apply growth filters ---
 filtered_df = df[
-    (df['52 WkChange %'] > 25) &
+    (df['52 WkChange %'] > 30) &
     (df['Price'] >= df['50 DayAverage'] * 0.98) &
     (df['Price'] >= df['200 DayAverage'] * 1.05) &
     (df['3 MonthReturn'] > 7)
@@ -135,7 +135,7 @@ print(top_etfs)
 with open("template.html", "r", encoding="utf-8") as f: template = f.read()
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 html = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
-html = template.replace("<!--DATA_TABLE_HERE-->", top_etfs)
+html = html.replace("<!--DATA_TABLE_HERE-->", top_etfs)
 with open("index.html", "w", encoding="utf-8") as f: f.write(html)
 print("✅ Generated index.html with Top ETFS.")
 

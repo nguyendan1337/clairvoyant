@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETF Dashboard</title>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.5rem; }
+        p { font-size: 1rem; margin-bottom: 1rem; }
+
+        .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+
+        .recommendations-table td {
+            max-width: 300px;      /* or adjust as needed */
+            word-wrap: break-word;  /* forces line breaks within long text */
+            white-space: normal;    /* allow wrapping instead of nowrap */
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 300px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th { background-color: #f4f4f4; }
+
+        @media (max-width: 600px) {
+            body { margin: 10px; }
+            h1 { font-size: 1.4rem; }
+            h2 { font-size: 1.2rem; }
+            p { font-size: 0.9rem; }
+            th, td { padding: 6px; }
+        }
+    </style>
+</head>
+<body>
+<h1>ETF Dashboard</h1>
+<p>Last updated: <!--LAST_UPDATED_HERE--></p>
+
+<h2>Gemini ETF Recommendations</h2>
+<div class="table-container">
+    <!--RECOMMENDATIONS_TABLE_HERE-->
+</div>
+<div>
+    <!--RECOMMENDATIONS_SUMMARY_HERE-->
+</div>
+
+<h2>Full ETF Data</h2>
+<div class="table-container">
+    <!--FULL_DF_TABLE_HERE-->
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- DataTables JS -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.data-table, .recommendations-table').DataTable({
+            paging: true,
+            searching: true,
+            info: false
+        });
+    });
+</script>
+</body>
+</html>

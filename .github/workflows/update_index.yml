@@ -1,0 +1,47 @@
+name: Update index.html
+
+# Trigger workflow on weekdays at 7 AM (local time) + manual trigger
+on:
+  schedule:
+    # 7 AM PST = 14:00 UTC
+    - cron: '0 14 * * 1-5'
+    # Run once at 2:30 PM UTC (adjust below if you want local time)
+    - cron: "32 21 22 10 *"  # This means: 2025-10-22 21:30 UTC (14:30 PDT)
+  workflow_dispatch:
+
+jobs:
+  update-html:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install dependencies if needed
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # Step 4: Run your Python script to update index.html
+      - name: Run Python script
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: |
+          echo "Running Python script..."
+          python stock_recommender.py
+
+      # Step 5: Commit and push changes back to main branch
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Update index.html via GitHub Actions" || echo "No changes to commit"
+          git push

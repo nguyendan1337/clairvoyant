@@ -1,8 +1,14 @@
-import requests
-from bs4 import BeautifulSoup
+import os
 import re
-import pandas as pd
 import time
+import yaml
+import requests
+import pandas as pd
+from google import genai
+from datetime import datetime
+from bs4 import BeautifulSoup
+from google.genai import types
+
 
 def extract_first_number(s):
     """Extract the first float number from a string."""
@@ -45,20 +51,24 @@ def parse_etf_table(html):
             rows.append(tds)
     return pd.DataFrame(rows, columns=headers)
 
+
 # Record the start time
 start_time = time.perf_counter()
 
-# --- List of Yahoo ETF pages ---
-yahoo_urls = [
-    "https://finance.yahoo.com/markets/etfs/gainers/",
-    "https://finance.yahoo.com/markets/etfs/top-performing/",
-    "https://finance.yahoo.com/markets/etfs/best-historical-performance/",
-    "https://finance.yahoo.com/markets/etfs/top/"
-]
+# Read configuration
+with open("config.yml") as f:
+    config = yaml.safe_load(f)
+urls = config["urls"]
+leveraged_keywords = config["leveraged_keywords"]
+min_52_week_change = config["min_52_week_change"]
+min_3_month_return = config["min_3_month_return"]
+day_50_average_buffer = config["day_50_average_buffer"]
+day_200_average_buffer = config["day_200_average_buffer"]
 
+# --- Fetch and parse ETF data from all URLs ---
 all_dfs = []
 
-for url in yahoo_urls:
+for url in urls:
     print(f"Fetching ETFs from: {url}")
     start = 0
     count = 100
@@ -96,21 +106,15 @@ for col in numeric_cols:
         df[col] = df[col].astype(str).str.replace('%', '', regex=True).apply(extract_first_number)
 
 # --- Remove leveraged/risky ETFs ---
-leveraged_keywords = [
-    '2x', '3x', 'Ultra', 'Leveraged', 'Bull', 'Bear', 'Double', 'Triple',
-    'Enhanced', 'PLUS', 'Short', 'Inverse', 'UltraShort', 'Defined Volatility',
-    'Daily', 'Option', 'ETN', 'VIX', 'Junior', 'WeeklyPay', 'Target Income',
-    'Covered Call', 'Strategy', 'Derivative', 'Income', 'Bond', 'Futures',
-    'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon'
-]
 mask = ~df['Name'].str.contains('|'.join(leveraged_keywords), case=False, na=False)
 df = df[mask]
 
 # --- Apply growth filters ---
 filtered_df = df[
-    (df['52 WkChange %'] > 25) &
-    (df['Price'] > df['200 DayAverage']) &
-    (df['3 MonthReturn'] > 5)
+    (df['52 WkChange %'] > min_52_week_change) &
+    (df['Price'] >= df['50 DayAverage'] * day_50_average_buffer) &
+    (df['Price'] >= df['200 DayAverage'] * day_200_average_buffer) &
+    (df['3 MonthReturn'] > min_3_month_return)
     ]
 
 # --- Sort by 52-week performance ---
@@ -118,12 +122,63 @@ sorted_df = filtered_df.sort_values(by='52 WkChange %', ascending=False).copy()
 sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
 
 # --- Display results ---
-print("\nCompiled Top ETFs from Yahoo Finance (all pages):")
-print(
-    sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
-    .to_string(index=False)
-)
+print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
+top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
+table_html = top_etfs.to_html(index=False, classes="data-table", border=0)
+top_etfs = top_etfs.to_string(index=False)
+print(top_etfs)
 
 # Record the end time
 end_time = time.perf_counter()
-print(f"Elapsed time: {end_time - start_time:.6f} seconds")
+print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
+print("Getting Google Gemini response...\n")
+
+# Send results to Google Gemini for analysis and recommendations
+api_key = os.getenv("GEMINI_KEY")
+if not api_key:
+    # fallback to local .env for development
+    from dotenv import load_dotenv
+    load_dotenv()
+    api_key = os.getenv("GEMINI_KEY")
+client = genai.Client(api_key=api_key)
+# Enable Google Search tool
+grounding_tool = types.Tool(google_search=types.GoogleSearch())
+prompt = config["prompt"] + top_etfs
+gemini_config = types.GenerateContentConfig(tools=[grounding_tool])
+# Get response from Gemini
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config=gemini_config
+)
+
+print("GEMINI RESPONSE:\n")
+print(response.text)
+end_time = time.perf_counter()
+print(f"Elapsed time: {end_time - start_time:.6f} seconds\n\n")
+
+# --- Extract HTML table and summary from Gemini response ---
+# Simple approach: split by first </table>
+table_match = re.search(r'(<table.*?/table>)', response.text, flags=re.DOTALL)
+if table_match:
+    gemini_table_html = table_match.group(1)
+    # Anything after the table is the summary
+    gemini_summary = response.text.split(gemini_table_html)[-1].strip()
+else:
+    gemini_table_html = ""
+    gemini_summary = response.text  # fallback if no table found
+
+# --- Read HTML template ---
+with open("template.html", "r", encoding="utf-8") as f:
+    template = f.read()
+
+# --- Insert content ---
+timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+html_output = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
+html_output = html_output.replace("<!--RECOMMENDATIONS_TABLE_HERE-->", gemini_table_html)
+html_output = html_output.replace("<!--RECOMMENDATIONS_SUMMARY_HERE-->", gemini_summary)
+html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", table_html)
+
+# --- Write final index.html ---
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_output)

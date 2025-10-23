@@ -64,6 +64,7 @@ min_52_week_change = config["min_52_week_change"]
 min_3_month_return = config["min_3_month_return"]
 day_50_average_buffer = config["day_50_average_buffer"]
 day_200_average_buffer = config["day_200_average_buffer"]
+max_retries = config["max_retries"]
 
 # --- Fetch and parse ETF data from all URLs ---
 all_dfs = []
@@ -146,11 +147,18 @@ grounding_tool = types.Tool(google_search=types.GoogleSearch())
 prompt = config["prompt"] + top_etfs
 gemini_config = types.GenerateContentConfig(tools=[grounding_tool])
 # Get response from Gemini
-response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=prompt,
-    config=gemini_config
-)
+for attempt in range(max_retries):
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=gemini_config
+    )
+    if response.text:
+        break
+    else:
+        print(f"Attempt {attempt} failed: response.text is None")
+else:
+    raise ValueError("Gemini response.text is None after 3 attempts")
 
 print("GEMINI RESPONSE:\n")
 print(response.text)

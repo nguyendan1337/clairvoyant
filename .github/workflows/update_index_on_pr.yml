@@ -1,0 +1,44 @@
+name: Auto-update index.html on Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}   # ensures we work on the PR's branch
+
+      - name: Set up Python (if your script is Python-based)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt || true
+
+      - name: Generate updated index.html
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: |
+          python stock_recommender.py
+          echo "✅ index.html regenerated"
+
+      - name: Commit and push changes back to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+          git commit -m "Auto-update index.html" || echo "No changes to commit"
+          git push origin HEAD:${{ github.head_ref }}

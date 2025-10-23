@@ -103,21 +103,20 @@ prompt: |
     - Allow text wrapping on both desktop and mobile screens using `<td style="max-width:300px; word-wrap:break-word;">` or similar inline styles.
   5. Do **not** include `<html>`, `<head>`, or `<body>` tags — only the `<table>` element and its contents.
   6. After the table, provide a short **summary (≤200 words)** formatted in HTML inside a `<div class="summary">`:
-
-   - Write in a **friendly, conversational tone**, like two friends chatting about what’s happening in the markets and why certain ETFs are standing out.
-   - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
+    - Write in a **friendly, conversational tone**, like two friends chatting about what’s happening in the markets and why the chosen ETFs are standing out.
+    - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
      - central bank policy updates or inflation data
      - major geopolitical tensions or elections
      - breakthroughs or major announcements in **AI, robotics, semiconductors, or clean energy**
      - government funding, trade developments, or regulation changes that affect key sectors
-   - Highlight clear **fund inflows/outflows** and what they reveal about investor sentiment.
-   - Explain how **specific emerging technologies or policy actions** (e.g., AI chip launches, renewable energy incentives, defense budgets, or semiconductor supply chain expansions) are influencing the ETFs mentioned.
-   - Emphasize which sectors show **momentum, resilience, or opportunity**, and which play a **defensive or cyclical** role under current conditions.
-   - Keep each paragraph **2–4 sentences** for readability across desktop and mobile.
-   - Maintain a tone that’s **smart yet conversational** — engaging, informed, but not filled with jargon.
-   - Use **specific, recent examples** of AI or technology breakthroughs, such as mentions of companies (e.g., Nvidia, OpenAI, Tesla, TSMC) or policy events (e.g., clean energy funding, EU carbon initiatives) to ground the summary in real-world context.
+    - Highlight clear **fund inflows/outflows** and what they reveal about investor sentiment.
+    - Explain how **specific emerging technologies or policy actions** (e.g., AI chip launches, renewable energy incentives, defense budgets, or semiconductor supply chain expansions) are influencing the ETFs mentioned.
+    - Emphasize which sectors show **momentum, resilience, or opportunity**, and which play a **defensive or cyclical** role under current conditions.
+    - Keep each paragraph **2–4 sentences** for readability across desktop and mobile.
+    - Maintain a tone that’s **smart yet conversational** — engaging, informed, but not filled with jargon.
+    - Use **specific, recent examples** of AI or technology breakthroughs, such as mentions of companies (e.g., Nvidia, OpenAI, Tesla, TSMC) or policy events (e.g., clean energy funding, EU carbon initiatives) to ground the summary in real-world context.
 
-   **Example HTML structure:**
+   **Required HTML structure example:**
    ```html
    <div class="summary">
      <h2>Market Chat:</h2>

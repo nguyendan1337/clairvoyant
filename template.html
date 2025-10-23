@@ -9,116 +9,49 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
     <style>
-        /* ---- General ---- */
         body {
-            font-family: 'Inter', Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
         }
 
-        h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #111;
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.5rem; }
+        p { font-size: 1rem; margin-bottom: 1rem; }
+
+        .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+
+        .recommendations-table td {
+            max-width: 300px;      /* or adjust as needed */
+            word-wrap: break-word;  /* forces line breaks within long text */
+            white-space: normal;    /* allow wrapping instead of nowrap */
         }
 
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-top: 2rem;
-            margin-bottom: 0.75rem;
-            color: #222;
-        }
-
-        p {
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        /* ---- Table Container ---- */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            background-color: #fff;
-            padding: 10px;
-        }
-
-        /* ---- Tables ---- */
         table {
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             width: 100%;
-            min-width: 400px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: inset 0 0 0 1px #e0e0e0;
+            min-width: 300px;
         }
 
         th, td {
-            padding: 12px 15px;
+            border: 1px solid #ccc;
+            padding: 8px;
             text-align: left;
             white-space: nowrap;
         }
 
-        th {
-            background-color: #f0f0f0;
-            font-weight: 600;
-            color: #111;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            border-bottom: 2px solid #e0e0e0;
-        }
+        th { background-color: #f4f4f4; }
 
-        td {
-            background-color: #fff;
-            transition: background-color 0.25s ease;
-        }
-
-        /* ---- Striped rows and hover ---- */
-        tbody tr:nth-child(even) td {
-            background-color: #fafafa;
-        }
-
-        tbody tr:hover td {
-            background-color: #e8f0fe;
-        }
-
-        /* ---- Word wrap for long cells ---- */
-        td {
-            max-width: 300px;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-
-        /* ---- DataTables enhancements ---- */
-        .dataTables_wrapper {
-            font-size: 0.95rem;
-        }
-
-        /* ---- Responsive adjustments ---- */
-        @media (max-width: 768px) {
-            h1 { font-size: 1.6rem; }
-            h2 { font-size: 1.3rem; }
-            th, td { padding: 8px 10px; }
-            .table-container { padding: 5px; }
-        }
-
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
+            body { margin: 10px; }
             h1 { font-size: 1.4rem; }
-            h2 { font-size: 1.1rem; }
-            th, td { padding: 6px 8px; }
+            h2 { font-size: 1.2rem; }
+            p { font-size: 0.9rem; }
+            th, td { padding: 6px; }
         }
     </style>
 </head>
 <body>
-
 <h1>Clairvoyant: AI Stock Recommender</h1>
 <p>Last updated: <!--LAST_UPDATED_HERE--></p>
 
@@ -149,11 +82,9 @@
         $('.data-table, .recommendations-table').DataTable({
             paging: true,
             searching: true,
-            info: false,
-            scrollX: true
+            info: false
         });
     });
 </script>
-
 </body>
 </html>

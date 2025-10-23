@@ -30,12 +30,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # Step 4: Run your Python script to update index.html
-      - name: Run Python script
+      # Step 4: Run the stock recommender and update index.html
+      - name: Run Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: |
-          echo "Running Python script..."
+          echo "Running Recommender..."
           python stock_recommender.py
 
       # Step 5: Commit and push changes back to main branch

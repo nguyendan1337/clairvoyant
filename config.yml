@@ -67,13 +67,13 @@ prompt: |
 
   ### Step 4 – HTML Output for Recommendations (Mobile-Friendly)
   
-  Return the selected ETFs as a complete HTML table that can be embedded directly into a webpage.
+  Return the selected ETFs as a complete HTML table that is already sorted by 52 Wk Change (%) descending that can be embedded directly into a webpage.
 
   Requirements:
 
   1. Use a `<table>` element with class `recommendations-table`.
   2. Include `<thead>` with columns:
-  `Sector Group | ETF Name / Ticker | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
+  `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
   3. Include `<tbody>` with one row per ETF.
   4. For the **Key Search Insight** column:
     - Wrap long text inside the `<td>` so it does **not exceed the table width**.

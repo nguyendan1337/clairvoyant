@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ETF Dashboard</title>
+    <title>Clairvoyant: AI Stock Recommender</title>
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
@@ -52,10 +52,10 @@
     </style>
 </head>
 <body>
-<h1>ETF Dashboard</h1>
+<h1>Clairvoyant: AI Stock Recommender</h1>
 <p>Last updated: <!--LAST_UPDATED_HERE--></p>
 
-<h2>Gemini ETF Recommendations</h2>
+<h2>ETF Top Picks</h2>
 <div class="table-container">
     <!--RECOMMENDATIONS_TABLE_HERE-->
 </div>
@@ -63,10 +63,15 @@
     <!--RECOMMENDATIONS_SUMMARY_HERE-->
 </div>
 
-<h2>Full ETF Data</h2>
+<h2>Full List of ETF Picks</h2>
 <div class="table-container">
     <!--FULL_DF_TABLE_HERE-->
 </div>
+
+<h2>How ETFs Were Selected</h2>
+<p>
+    The list of ETFs was compiled from multiple Yahoo Finance lists. ETFs with leveraged or otherwise risky keywords were filtered out. The remaining ETFs were sorted by 52-week change, and only those with a 52-week change above 25%, a 3-month return above 6%, and prices above both their 50-day and 200-day averages were kept. Finally, the filtered list was analyzed using Google Gemini to provide real-world context, and from that analysis, the final 10–15 ETFs were chosen.
+</p>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>

@@ -15,8 +15,6 @@ __pycache__/
 
 api_keys
 
-index.html
-
 # Ignore build output
 dist/
 build/

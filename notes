@@ -2,7 +2,8 @@ df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', , 'YTD Return', '52 WkChange %', '52 Wk Range']
 
 Features to add:
+- break monolith prompt into 3 gemini requests flow
 - multi threading
-- stock recommender
+- stock recommender config
 - polish
 - email

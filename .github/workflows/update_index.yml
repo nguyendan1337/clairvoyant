@@ -1,4 +1,4 @@
-name: Update index.html
+name: Run recommender and update page
 
 # Trigger workflow on weekdays at 7 AM (local time) + manual trigger
 on:

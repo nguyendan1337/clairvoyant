@@ -13,8 +13,8 @@ leveraged_keywords: [
   'Covered Call', 'Strategy', 'Derivative', 'Income', 'Bond', 'Futures',
   'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon'
 ]
-min_52_week_change: 30
-min_3_month_return: 8
+min_52_week_change: 25
+min_3_month_return: 6
 day_50_average_buffer: 0.98
 day_200_average_buffer: 1.05
 max_retries: 3

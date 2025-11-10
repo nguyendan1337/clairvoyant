@@ -43,6 +43,7 @@ prompt: |
   1. Infer each ETF's sector or theme (Technology, Energy, Commodities, Clean Energy, Innovation, etc.)  
   2. Cluster ETFs into 4–7 logical sector groups  
   3. Ensure each sector group captures related ETFs
+  4. Remove the sector group "Emerging Markets & Global Equities" or similar sector groups dealing with foreign markets outside of the US from the dataset.
 
   ---
 

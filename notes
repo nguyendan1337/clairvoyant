@@ -1,9 +1,15 @@
 df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', , 'YTD Return', '52 WkChange %', '52 Wk Range']
 
+2️⃣ Ignore index.html changes on other branches
+After creating a branch:
+# Example: create a new feature branch
+git checkout -b feature-branch
+
+# Tell Git to ignore local changes to index.html on this branch
+git update-index --assume-unchanged index.html
+
 Features to add:
-- break monolith prompt into 3 gemini requests flow
-- multi threading
 - stock recommender config
 - polish
-- email
+- email maybe

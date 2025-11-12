@@ -6,18 +6,197 @@ urls: [
   "https://finance.yahoo.com/markets/etfs/best-historical-performance/",
   "https://finance.yahoo.com/markets/etfs/top/"
 ]
-leveraged_keywords: [
+excluded_keywords: [
+  # Leveraged / inverse / complex / derivative / niche ETFs
   '2x', '3x', 'Ultra', 'Leveraged', 'Bull', 'Bear', 'Double', 'Triple',
   'Enhanced', 'PLUS', 'Short', 'Inverse', 'UltraShort', 'Defined Volatility',
   'Daily', 'Option', 'ETN', 'VIX', 'Junior', 'WeeklyPay', 'Target Income',
   'Covered Call', 'Strategy', 'Derivative', 'Income', 'Bond', 'Futures',
-  'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon'
+  'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon',
+  # Added keywords for foreign/non-US ETFs
+  'International', 'Foreign', 'Ex-US', 'Europe', 'Asia', 'Emerging Market',
+  'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
+  'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland'
 ]
 min_52_week_change: 25
 min_3_month_return: 6
 day_50_average_buffer: 0.98
 day_200_average_buffer: 1.05
 max_retries: 3
+prompt_context: |
+  You are a U.S. financial markets analyst. 
+  Briefly summarize the current U.S. macroeconomic and market environment using recent news and data.
+
+  Focus only on essential points:
+    - Federal Reserve policy direction and inflation trend (1 sentence)
+    - Labor market and consumer sentiment (1 sentence)
+    - Key sector performance themes (technology, energy, financials, industrials, healthcare, etc.) (1 sentence)
+    - Any major geopolitical or fiscal factors currently affecting U.S. equities (1 sentence)
+  
+  Then, in a compact structured format, list:
+    1. Sectors likely to outperform over the next 6–12 months
+    2. Sectors likely to underperform
+  
+  Output your summary **strictly in JSON format only** — do **not** include dashes, backticks, triple quotes, or any extra text before or after the JSON.
+
+  Use the following JSON structure:
+    
+    {
+      "macro_summary": "Brief 4–5 sentence summary of overall U.S. market environment.",
+      "sectors_that_will_outperform": ["sector1", "sector2", "sector3"],
+      "sectors_that_will_underperform": ["sectorA", "sectorB", "sectorC"]
+    }
+  
+  Ensure:
+    - No leading or trailing formatting characters (like ``` or --- or json)
+    - Only valid JSON is returned
+  
+  Keep the entire response under 200 words.
+
+
+prompt_selection: |
+  You are an investment analyst specializing in recommending U.S. ETFs.
+
+  Your task:
+    1. You will be given a **DataFrame containing only the ETFs to consider**. You must use **only these ETFs** — do **not** include, search for, or reference any ETFs that are not in the DataFrame under any circumstances.
+    
+    2. For each ETF in the DataFrame:
+      - Infer its **primary sector or theme** based **only on the ETF name**. 
+      - Group ETFs into **logical Sector Groups** of related themes based solely on the ETFs in the DataFrame. Combine sectors or themes that share similar characteristics into the same group.
+      - Remove any ETFs from sectors outside the U.S. market (e.g., Emerging Markets, International) from consideration.
+    
+    3. Within each Sector Group:
+      - Rank ETFs based on performance **using only the metrics provided in the DataFrame**, such as '52 WkChange %', '3 MonthReturn', and the 'Price' relative to '50 DayAverage' and '200 DayAverage'.
+      - Select up to **4 ETFs per Sector Group** with the best performance.
+    
+    4. Return your final output list **strictly in JSON format only**, including the following fields for each ETF:
+      - **Sector Group**
+      - **ETF Name**
+      - **Symbol**
+      - **52 Wk Change (%)**
+      - **3 Mo Return (%)** (estimate based only on the ETF’s data in the DataFrame)
+  
+  Output example:
+    [
+      {
+        "Sector Group": "Technology",
+        "ETF Name": "Invesco QQQ Trust",
+        "Symbol": "QQQ",
+        "52 Wk Change (%)": "35.2",
+        "3 Mo Return (%)": "6.8"
+      },
+      ...
+    ]
+  
+  Ensure:
+    - Do **not** include ETFs not in the DataFrame.
+    - Do **not** include ETFs from sectors outside the U.S. market (e.g., Emerging Markets, International).
+    - Do **not** perform any searches or lookups.
+    - Only use the data provided in the DataFrame for metrics, sector inference.
+    - No leading or trailing formatting characters (like ``` or ---)
+    - Only valid JSON is returned.
+  
+  DataSet:
+  
+
+
+prompt_recommendation: |
+  You are an investment analyst recommending U.S. based ETFs.  
+  Given the following list of ETFs with these columns:
+    **Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%)**
+  
+  Your job is to:
+    1. Run 3–4 general searches to understand the current global and macroeconomic backdrop shaping investor sentiment and sector trends.
+      Search examples:
+        - "Recent global economic and market trends this week"
+        - "Latest breakthroughs in technology, AI, robotics, and semiconductors"
+        - "Recent clean energy and renewable investment updates"
+        - "Current geopolitical tensions, defense spending, and inflation data"
+      From these, extract key insights such as:
+        - Central bank policies, inflation expectations, or rate guidance
+        - Breakthroughs or major announcements in AI, robotics, or semiconductors
+        - Clean energy, uranium, or resource investment trends
+        - Geopolitical events, defense spending, or trade developments
+      Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
+    2. Research and analyze the ETFs provided (and perform searches for each ETF to get the latest insights, performance context, and sentiment).
+    3. Select up to **2 ETFs** per Sector Group that you recommend as likely to continue performing well over the next 12 months as buys. 
+       Prioritize ETFs and Sector Groups with higher 52 Wk Change (%) and strong recent performance (3 Mo Return %) over those with lower performance.
+    4. Return **embeddable HTML** containing:
+      - A `<table>` sorted **by 52 Wk Change (%) descending**, and
+      - A friendly, conversational `<div class="summary">` section with sector-wise explanations that incorporate **recent real-world news**.
+  ---
+  
+  ### 🔍 Research and Recommendation Formatting Rules
+  - Perform searches for each ETF’s latest performance drivers, sector momentum, macroeconomic backdrop, fund flows, or news that may affect its outlook.
+  - From the best performing Sector Groups, choose and return up to **10 best performing ETFs** that will continue to perform well in the next year.
+  - Include **1–2 sentences of "Key Search Insight"** summarizing what current research or news suggests about that ETF’s outlook.
+  - Use **accurate numeric formatting** (e.g., `23.45%`), even if rounded.
+  - Include the most recent **"Data as of YYYY-MM-DD"** date based on the last market close you find.
+  
+  ---
+  
+  ### 📊 HTML Output Format (Strict)
+  
+  #### 1. ETF Table 
+    Return the selected ETFs as a complete HTML table that is already sorted by 52 Wk Change (%) descending that can be embedded directly into a webpage.
+  
+    Requirements:
+  
+    1. Use a `<table>` element with class `recommendations-table`.
+    2. Include `<thead>` with columns:
+    `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
+    3. Include `<tbody>` with one row per ETF.
+    4. For the **Key Search Insight** column:
+      - Wrap long text inside the `<td>` so it does **not exceed the table width**.
+      - Preferably truncate text after ~100 characters and append "…" if necessary.
+      - Allow text wrapping on both desktop and mobile screens using `<td style="max-width:300px; word-wrap:break-word;">` or similar inline styles.
+      - Make the insight engaging and easy to read, not wordy or full of jargon/babble.
+    5. Do **not** include `<html>`, `<head>`, or `<body>` tags — only the `<table>` element and its contents.
+  
+  #### 2. Summary Block  
+  After the ETF recommendation table, provide an html summary block that includes:
+  - an exciting greeting! and a brief 1-2 sentence <MARKET SUMMARY> that explains recent news, market sentiment, tech trends, etc.
+  - a section for each Sector Group that includes a brief summary of why that sector looks promising and a sentence for each recommended ETF.
+  
+  Each Sector Group section should:
+    - Begin with the sector name in `<strong>` (e.g., `<p><strong>Technology:</strong> …</p>`).
+    - Have exactly **1 sentence** per ETF — a balanced, engaging sentence that is easy to read. Not wordy or full of jargon/babble.
+    - Make sure the ETF symbols are bold in the html summary.
+    - Be written in a **friendly, conversational tone** — like one friend explaining to another current trends and why that sector looks promising right now.
+    - Include **specific real-world news**: recent market trends, Fed policy, consumer demand shifts, geopolitical or supply chain factors, etc.
+    - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
+     - central bank policy updates or inflation data
+     - major geopolitical tensions or elections
+     - breakthroughs or major announcements in **AI, robotics, semiconductors, or clean energy**
+     - government funding, trade developments, or regulation changes that affect key sectors
+  
+  **Summary Block HTML structure example:**
+    ```html
+         <div class="summary">
+         <h2>Market Chat:</h2>
+         <p><MARKET SUMMARY HERE></p>
+    
+         <p><strong><SECTOR GROUP HERE> (<ETF SYMBOLS HERE>):</strong> <SECTOR SUMMARY, NEWS, BUY REASONING HERE></p>
+         ...
+         </div>
+    ```
+  ---
+  
+  #### 3. Sources and Disclaimer  
+  At the very end of the HTML, include:
+    <div class="sources" style="margin-top:10px;font-size:13px;">
+  Sources: Yahoo Finance, ETF.com, Bloomberg, Morningstar, CNBC, fund issuer pages.
+    </div>
+    
+    <div style="font-size:12px;color:#666;margin-top:10px;">
+    This content is for informational purposes only and not financial advice. Data as of YYYY-MM-DD.
+    </div>
+  
+  ---
+  
+  Dataset:
+  
+
 prompt: |
   You are a quantitative investment analyst using Google Gemini 2.5 Flash with Grounding through Google Search enabled.
 
@@ -43,6 +222,7 @@ prompt: |
   1. Infer each ETF's sector or theme (Technology, Energy, Commodities, Clean Energy, Innovation, etc.)  
   2. Cluster ETFs into 4–7 logical sector groups  
   3. Ensure each sector group captures related ETFs
+  4. Remove the sector group "Emerging Markets & Global Equities" or similar sector groups dealing with foreign markets outside of the US from the dataset
 
   ---
 
@@ -61,10 +241,10 @@ prompt: |
   #### 3A. Global & Sector Context
   Before evaluating individual ETFs, run 3–4 general searches to understand the current global and macroeconomic backdrop shaping investor sentiment and sector trends.
   Search examples:
-    - “Recent global economic and market trends this week”
-    - “Latest breakthroughs in technology, AI, robotics, and semiconductors”
-    - “Recent clean energy and renewable investment updates”
-    - “Current geopolitical tensions, defense spending, and inflation data”
+    - "Recent global economic and market trends this week"
+    - "Latest breakthroughs in technology, AI, robotics, and semiconductors"
+    - "Recent clean energy and renewable investment updates"
+    - "Current geopolitical tensions, defense spending, and inflation data"
   
   From these, extract key insights such as:
     - Central bank policies, inflation expectations, or rate guidance

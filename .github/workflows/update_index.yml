@@ -3,8 +3,7 @@ name: Run recommender and update page
 # Trigger workflow on weekdays at 7 AM (local time) + manual trigger
 on:
   schedule:
-    # 7 AM PST = 14:00 UTC
-    - cron: '0 14 * * *' #
+    - cron: '0 12 * * *' # 4 AM PST, 5 AM PDT Daily
   workflow_dispatch:
 
 permissions:

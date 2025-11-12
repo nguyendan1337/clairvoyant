@@ -22,7 +22,9 @@ min_52_week_change: 25
 min_3_month_return: 6
 day_50_average_buffer: 0.98
 day_200_average_buffer: 1.05
-max_retries: 3
+max_retries: 4
+initial_delay: 15
+model: gemini-2.5-flash
 
 prompt_selection: |
   You are an investment analyst specializing in recommending U.S. ETFs.

@@ -13,34 +13,66 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 0;
+            background-color: #000;  /* black background */
+            color: #fff;             /* white text */
         }
 
-        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
-        h2 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.5rem; }
-        p { font-size: 1rem; margin-bottom: 1rem; }
+        h1, h2, p, em {
+            color: #fff;
+        }
+
+        a {
+            color: #32CD32;          /* Money green for normal links */
+            text-decoration: none;    /* optional, removes underline */
+        }
+
+        a:hover {
+            color: #FFD700;          /* Gold on hover */
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: #FFA500;          /* Orange for visited links */
+        }
 
         .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
 
         .recommendations-table td {
-            max-width: 300px;      /* or adjust as needed */
-            word-wrap: break-word;  /* forces line breaks within long text */
-            white-space: normal;    /* allow wrapping instead of nowrap */
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: normal;
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
             min-width: 300px;
+            background-color: #111;   /* dark table background */
+            color: #fff;              /* white text */
         }
 
         th, td {
-            border: 1px solid #ccc;
+            border: 1px solid #555;   /* lighter border for visibility */
             padding: 8px;
             text-align: left;
             white-space: nowrap;
         }
 
-        th { background-color: #f4f4f4; }
+        th {
+            background-color: #222;   /* dark gray header */
+            color: #fff;
+        }
+
+        /* DataTables overrides to match dark mode */
+        .dataTables_wrapper .dataTables_filter label,
+        .dataTables_wrapper .dataTables_length label,
+        .dataTables_wrapper .dataTables_info {
+            color: #fff;
+        }
+
+        .dataTables_wrapper .dataTables_paginate a {
+            color: #1E90FF !important; /* make pagination links match table link color */
+        }
 
         @media (max-width: 600px) {
             body { margin: 10px; }
@@ -49,11 +81,18 @@
             p { font-size: 0.9rem; }
             th, td { padding: 6px; }
         }
+
+        /* Small gray disclaimer text */
+        .disclaimer {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 <h1>Clairvoyant: AI Stock Recommender</h1>
-<p>Last updated: 2025-11-15 12:17:25</p>
+<p>Last updated: 2025-11-15 14:13:12</p>
 
 <h2>ETF Top Picks</h2>
 <div class="table-container">
@@ -65,109 +104,114 @@
       <th>Symbol</th>
       <th>52 Wk Change (%)</th>
       <th>3 Mo Return (%)</th>
-      <th style="max-width:300px; word-wrap:break-word;">Key Search Insight</th>
+      <th>Key Search Insight</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Precious Metals &amp; Mining</td>
-      <td>Global X Gold Explorers ETF</td>
-      <td>GOEX</td>
-      <td>116.3%</td>
-      <td>39.5%</td>
-      <td style="max-width:300px; word-wrap:break-word;">This ETF is riding the current "gold rush," with the precious metal seeing surging prices and increased safe-haven demand amidst global uncertainties, leading to strong inflows into gold-focused funds.</td>
+      <td>Precious Metals</td>
+      <td><a href="https://finance.yahoo.com/quote/GOEX/" target="_blank">Global X Gold Explorers ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GOEX/" target="_blank">GOEX</a></td>
+      <td>116.31%</td>
+      <td>39.54%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Precious metals, particularly gold, are seeing increased investor interest as safe-haven assets amidst persistent global geopolitical tensions and lingering concerns about future inflation despite recent rate cuts.</td>
     </tr>
     <tr>
-      <td>Precious Metals &amp; Mining</td>
-      <td>Sprott Gold Miners ETF</td>
-      <td>SGDM</td>
-      <td>116.3%</td>
-      <td>27.1%</td>
-      <td style="max-width:300px; word-wrap:break-word;">Benefiting from gold's impressive rally to new record highs above $4,000 per ounce, this ETF offers exposure to gold mining companies experiencing strong market momentum and investor interest.</td>
+      <td>Precious Metals</td>
+      <td><a href="https://finance.yahoo.com/quote/SGDM/" target="_blank">Sprott Gold Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SGDM/" target="_blank">SGDM</a></td>
+      <td>116.26%</td>
+      <td>27.13%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Gold miners benefit from sustained high gold prices, which are supported by global uncertainties and expectations of accelerating inflation in 2026, making them attractive in the current climate.</td>
     </tr>
     <tr>
-      <td>Technology &amp; Innovation</td>
-      <td>Defiance Quantum ETF</td>
-      <td>QTUM</td>
-      <td>66.0%</td>
-      <td>13.2%</td>
-      <td style="max-width:300px; word-wrap:break-word;">Capitalizing on the explosive demand for computational power, this ETF has shown stellar performance by investing in companies at the forefront of quantum computing and machine learning, key drivers of the ongoing AI revolution.</td>
+      <td>Clean Energy</td>
+      <td><a href="https://finance.yahoo.com/quote/PBW/" target="_blank">Invesco WilderHill Clean Energy ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PBW/" target="_blank">PBW</a></td>
+      <td>58.88%</td>
+      <td>26.14%</td>
+      <td style="max-width:300px; word-wrap:break-word;">The clean energy sector is experiencing unprecedented growth, with global utilities committing over $1 trillion in investments by 2030 and renewables outpacing fossil fuels.</td>
     </tr>
     <tr>
-      <td>Clean Energy &amp; EV Tech</td>
-      <td>Invesco WilderHill Clean Energy ETF</td>
-      <td>PBW</td>
-      <td>58.9%</td>
-      <td>26.1%</td>
-      <td style="max-width:300px; word-wrap:break-word;">Positioned within a surging renewable energy sector, this ETF benefits from massive investment in clean power and explosive electricity demand, notably from AI-driven data centers, making green stocks outperform.</td>
+      <td>Clean Energy</td>
+      <td><a href="https://finance.yahoo.com/quote/CNRG/" target="_blank">SPDR Kensho Clean Power ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/CNRG/" target="_blank">CNRG</a></td>
+      <td>56.25%</td>
+      <td>39.77%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Strong government policies and decreasing solar panel costs are accelerating the transition to clean power, further bolstered by increasing electricity demand from AI data centers.</td>
     </tr>
     <tr>
-      <td>Clean Energy &amp; EV Tech</td>
-      <td>SPDR Kensho Clean Power ETF</td>
-      <td>CNRG</td>
-      <td>56.2%</td>
-      <td>39.8%</td>
-      <td style="max-width:300px; word-wrap:break-word;">Despite some short-term technical caution, this ETF is poised for long-term growth as global demand for clean electricity and renewable energy solutions continues to accelerate, driven by decarbonization efforts.</td>
+      <td>Electric Vehicles & Battery Technology</td>
+      <td><a href="https://finance.yahoo.com/quote/REMX/" target="_blank">VanEck Rare Earth and Strategic Metals ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/REMX/" target="_blank">REMX</a></td>
+      <td>53.06%</td>
+      <td>23.63%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Demand for rare earth and strategic metals is soaring due to the rapid global adoption of electric vehicles and broad electrification efforts, driving strong performance in this segment.</td>
     </tr>
     <tr>
-      <td>Materials (Industrial Metals)</td>
-      <td>VanEck Rare Earth and Strategic Metals ETF</td>
-      <td>REMX</td>
-      <td>53.1%</td>
-      <td>23.6%</td>
-      <td style="max-width:300px; word-wrap:break-word;">With geopolitical tensions highlighting the critical importance of secure supply chains, this ETF gains from increasing demand and strategic investments in rare earth and strategic metals essential for advanced technologies like EVs and renewable energy.</td>
+      <td>Electric Vehicles & Battery Technology</td>
+      <td><a href="https://finance.yahoo.com/quote/BATT/" target="_blank">Amplify Lithium & Battery Technology ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/BATT/" target="_blank">BATT</a></td>
+      <td>46.79%</td>
+      <td>25.61%</td>
+      <td style="max-width:300px; word-wrap:break-word;">The critical role of lithium in advanced battery technology for EVs and energy storage systems ensures continued strong demand and investment.</td>
     </tr>
     <tr>
-      <td>Materials (Industrial Metals)</td>
-      <td>Global X Copper Miners ETF</td>
-      <td>COPX</td>
-      <td>45.0%</td>
-      <td>31.5%</td>
-      <td style="max-width:300px; word-wrap:break-word;">Essential for the green energy transition and global infrastructure development, copper demand is projected to soar, positioning this ETF to benefit from strong tailwinds in the industrial metals sector.</td>
+      <td>Frontier Technologies</td>
+      <td><a href="https://finance.yahoo.com/quote/LOUP/" target="_blank">Innovator Deepwater Frontier Tech ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/LOUP/" target="_blank">LOUP</a></td>
+      <td>45.34%</td>
+      <td>18.89%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Breakthroughs in agentic AI, autonomous systems, and advanced robotics are moving from conceptual stages to practical industrial applications, signaling robust growth for frontier tech investments.</td>
     </tr>
     <tr>
-      <td>Technology &amp; Innovation</td>
-      <td>Innovator Deepwater Frontier Tech ETF</td>
-      <td>LOUP</td>
-      <td>45.3%</td>
-      <td>18.9%</td>
-      <td style="max-width:300px; word-wrap:break-word;">This fund taps into disruptive technological innovations like advanced AI, robotics, and autonomous systems, offering exposure to the cutting edge of tech that continues to reshape industries.</td>
+      <td>Industrial Metals & Mining</td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">Global X Copper Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">COPX</a></td>
+      <td>44.97%</td>
+      <td>31.51%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Copper demand remains strong, fueled by ongoing global infrastructure development and the increasing needs of the clean energy and electric vehicle sectors.</td>
     </tr>
     <tr>
-      <td>Energy (Traditional)</td>
-      <td>VanEck Oil Refiners ETF</td>
-      <td>CRAK</td>
-      <td>31.2%</td>
-      <td>22.1%</td>
-      <td style="max-width:300px; word-wrap:break-word;">In a volatile energy landscape, this ETF focuses on global oil refiners, which may see a rebound and advantage from current geopolitical dynamics influencing oil prices and refining margins.</td>
+      <td>Technology - Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/FTXL/" target="_blank">First Trust Nasdaq Semiconductor ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FTXL/" target="_blank">FTXL</a></td>
+      <td>38.24%</td>
+      <td>17.88%</td>
+      <td style="max-width:300px; word-wrap:break-word;">The semiconductor industry is experiencing exponential demand driven by AI, robotics, and advanced computing, with significant investments like the NVIDIA-Samsung "AI factory" pushing innovation.</td>
     </tr>
     <tr>
-      <td>Biotechnology &amp; Healthcare</td>
-      <td>ALPS Medical Breakthroughs ETF</td>
-      <td>SBIO</td>
-      <td>26.6%</td>
-      <td>33.1%</td>
-      <td style="max-width:300px; word-wrap:break-word;">This ETF offers exposure to promising biotechnology companies with drugs in advanced clinical trials, signaling potential growth from significant medical breakthroughs and ongoing innovation in the healthcare space.</td>
+      <td>Technology - Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/PSI/" target="_blank">Invesco Semiconductors ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PSI/" target="_blank">PSI</a></td>
+      <td>37.01%</td>
+      <td>17.89%</td>
+      <td style="max-width:300px; word-wrap:break-word;">Innovations in application-specific semiconductors are critical for powering the next generation of AI and autonomous systems, ensuring continued strong performance for the sector.</td>
     </tr>
   </tbody>
 </table>
 </div>
 <div>
     <div class="summary">
-  <h2>Market Chat:</h2>
-  <p>Hey there, fellow investor! It's an exciting, yet complex, time in the markets right now. The global economy is showing mixed signals, with ongoing geopolitical tensions and trade disputes creating some headwinds, especially with a recent US federal government shutdown adding to uncertainty. However, the relentless innovation in AI and clean energy continues to drive impressive growth, and central banks are cautiously navigating inflation, with some easing of monetary policy potentially on the horizon.</p>
+<h2>Market Chat:</h2>
+<p>The markets are navigating a complex environment characterized by recent interest rate cuts from the US Fed, tempered by warnings of accelerating inflation in 2026, alongside robust advancements in AI and a global surge in clean energy investments. Geopolitical tensions and rising defense spending further add layers of influence on various sectors.</p>
 
-  <p><strong>Precious Metals & Mining (GOEX, SGDM):</strong> With global uncertainties lingering and central banks grappling with inflation, gold has truly shined as a safe-haven asset, driving prices to record highs above $4,000 per ounce. This strong tailwind is creating a "gold rush" for explorers and miners alike. The Global X Gold Explorers ETF (<b>GOEX</b>) is excellently positioned to capitalize on this heightened demand, offering exposure to companies actively seeking new gold deposits. Similarly, the Sprott Gold Miners ETF (<b>SGDM</b>) provides a focused way to invest in the established gold mining companies that are directly benefiting from these soaring bullion prices and robust investor inflows.</p>
+<p><strong>Precious Metals (<a href="https://finance.yahoo.com/quote/GOEX/" target="_blank"><strong>GOEX</strong></a>, <a href="https://finance.yahoo.com/quote/SGDM/" target="_blank"><strong>SGDM</strong></a>):</strong> With global military expenditure soaring and geopolitical uncertainties intensifying, gold and other precious metals continue to serve as crucial safe-haven assets, attracting strong investor interest. <a href="https://finance.yahoo.com/quote/GOEX/" target="_blank"><strong>GOEX</strong></a> is poised to benefit from exploration successes driven by higher metal prices, while <a href="https://finance.yahoo.com/quote/SGDM/" target="_blank"><strong>SGDM</strong></a> taps into the robust performance of established gold mining operations.</p>
 
-  <p><strong>Technology & Innovation (QTUM, LOUP):</strong> The AI revolution is in full swing, creating a massive demand for advanced computing power and specialized semiconductors. This sector continues to be a hotbed of innovation, with breakthroughs in quantum computing promising to redefine technological capabilities. The Defiance Quantum ETF (<b>QTUM</b>) is a standout, focusing on companies leading the charge in quantum computing and machine learning, making it a direct play on this transformative technology. The Innovator Deepwater Frontier Tech ETF (<b>LOUP</b>) also offers a compelling opportunity by investing in a broad range of disruptive technologies, from advanced AI to robotics, which are consistently reshaping various industries.</p>
+<p><strong>Clean Energy (<a href="https://finance.yahoo.com/quote/PBW/" target="_blank"><strong>PBW</strong></a>, <a href="https://finance.yahoo.com/quote/CNRG/" target="_blank"><strong>CNRG</strong></a>):</strong> The shift to a sustainable future is undeniable, with global utilities pledging over $1 trillion in clean energy investments by 2030, and the International Energy Agency reporting renewables growing faster than any other energy source. <a href="https://finance.yahoo.com/quote/PBW/" target="_blank"><strong>PBW</strong></a>, focusing on a broad range of clean energy innovators, and <a href="https://finance.yahoo.com/quote/CNRG/" target="_blank"><strong>CNRG</strong></a>, targeting clean power generation and smart grid technologies, are both positioned to capitalize on this massive global transformation, further boosted by the escalating demand for electricity to power AI data centers.</p>
 
-  <p><strong>Clean Energy & EV Tech (PBW, CNRG):</strong> This sector is experiencing an unprecedented surge, largely driven by the explosive electricity demands of AI data centers and significant global investments in low-carbon solutions. For the first time this year, renewables generated more electricity than coal, marking a historic shift. The Invesco WilderHill Clean Energy ETF (<b>PBW</b>) captures this momentum by investing in companies across the cleaner energy and conservation spectrum, directly benefiting from the accelerating energy transition. The SPDR Kensho Clean Power ETF (<b>CNRG</b>) also aligns with these powerful long-term trends, providing exposure to companies generating renewable electricity, even as some short-term market dynamics warrant careful observation.</p>
+<p><strong>Electric Vehicles & Battery Technology (<a href="https://finance.yahoo.com/quote/REMX/" target="_blank"><strong>REMX</strong></a>, <a href="https://finance.yahoo.com/quote/BATT/" target="_blank"><strong>BATT</strong></a>):</strong> The accelerating global adoption of electric vehicles and the broader push towards electrification are creating immense demand for the essential components of battery technology. <a href="https://finance.yahoo.com/quote/REMX/" target="_blank"><strong>REMX</strong></a> offers exposure to the companies mining and processing the critical rare earth and strategic metals needed for these advancements, while <a href="https://finance.yahoo.com/quote/BATT/" target="_blank"><strong>BATT</strong></a> directly invests in the lithium and battery technology innovators powering the EV revolution.</p>
 
-  <p><strong>Materials (Industrial Metals) (REMX, COPX):</strong> Geopolitical tensions and the global push for green technology are underscoring the strategic importance of critical minerals. China's export controls on rare earths, for instance, are driving a global effort to diversify supply chains and boost domestic production. The VanEck Rare Earth and Strategic Metals ETF (<b>REMX</b>) is a timely investment, offering exposure to companies involved in these vital materials, which are indispensable for everything from electric vehicles to defense systems. Meanwhile, the Global X Copper Miners ETF (<b>COPX</b>) is poised for strong performance as copper, a crucial component in EVs, renewable energy infrastructure, and general industrial growth, sees its demand projected to soar significantly by 2050.</p>
+<p><strong>Frontier Technologies (<a href="https://finance.yahoo.com/quote/LOUP/" target="_blank"><strong>LOUP</strong></a>):</strong> We're at the cusp of a new technological era where advancements in agentic AI, robotics, and autonomous systems are transitioning from theoretical concepts to tangible industrial applications. <a href="https://finance.yahoo.com/quote/LOUP/" target="_blank"><strong>LOUP</strong></a> provides exposure to companies at the forefront of these breakthroughs, which are set to redefine various industries.</p>
 
-  <p><strong>Energy (Traditional) (CRAK):</strong> While the long-term energy transition is undeniable, the traditional energy sector remains vital and subject to unique market dynamics. Geopolitical events continue to influence oil prices, and specific segments like refining can exhibit resilience. The VanEck Oil Refiners ETF (<b>CRAK</b>) provides focused exposure to global oil refiners, a segment that could see advantages from current market conditions and a potential rebound in refining margins.</p>
+<p><strong>Industrial Metals & Mining (<a href="https://finance.yahoo.com/quote/COPX/" target="_blank"><strong>COPX</strong></a>):</strong> With a global emphasis on infrastructure upgrades and the massive build-out required for clean energy and EV technologies, industrial metals like copper are experiencing sustained high demand. <a href="https://finance.yahoo.com/quote/COPX/" target="_blank"><strong>COPX</strong></a> offers a direct play on this trend, investing in companies that extract and process this crucial resource. </p>
 
-  <p><strong>Biotechnology & Healthcare (SBIO):</strong> The healthcare sector continues to be a hotbed of innovation, with a constant stream of medical breakthroughs and advancements. The aging global population and ongoing research efforts ensure consistent demand for new therapies and treatments. The ALPS Medical Breakthroughs ETF (<b>SBIO</b>) is an intriguing option, investing in biotechnology companies with drugs in advanced clinical trials, offering potential growth from the successful development and commercialization of new medical solutions.</p>
+<p><strong>Technology - Semiconductors (<a href="https://finance.yahoo.com/quote/FTXL/" target="_blank"><strong>FTXL</strong></a>, <a href="https://finance.yahoo.com/quote/PSI/" target="_blank"><strong>PSI</strong></a>):</strong> Semiconductors remain the bedrock of modern technology, with innovations in application-specific chips driving the exponential growth in AI, robotics, and advanced computing. <a href="https://finance.yahoo.com/quote/FTXL/" target="_blank"><strong>FTXL</strong></a> tracks leading semiconductor companies, while <a href="https://finance.yahoo.com/quote/PSI/" target="_blank"><strong>PSI</strong></a> offers a focused approach on the broader semiconductor industry, both poised to benefit from the ongoing digital transformation, highlighted by collaborations such as NVIDIA and Samsung's "AI factory."</p>
+</div>
+</div>
+<div class="sources" style="margin-top:10px;font-size:13px;">
+    <div class="sources" style="margin-top:10px;font-size:13px;">
+Sources: Global Weekly Economic Update | Deloitte Insights. (2025-11-11). Holidays and Trading Hours - NYSE. McKinsey technology trends outlook 2025. (2025-07-22). Unprecedented rise in global military expenditure as European and Middle East spending surges | SIPRI. (2025-04-28). IRENA – International Renewable Energy Agency. Military Expenditure: Transparency, Defence Inflation and Purchasing Power Parity - The International Institute for Strategic Studies. 10 Breakthrough Technologies to Watch in 2026 | StartUs Insights. (2025-11-13). US Stock Market Holiday Schedule - Nasdaq. Global markets weekly update | T. Rowe Price. TRADING ECONOMICS | 20 million INDICATORS FROM 196 COUNTRIES. NVIDIA and Samsung Build AI Factory to Transform Global Intelligent Manufacturing. (2025-10-30). Supply boom in cheaper renewables will seal end of fossil fuel era, says IEA - The Guardian. (2025-11-12). Global Economic Outlook Shows Modest Change Amid Policy Shifts and Complex Forces. (2025-10-14). Stock market hours and holidays - Fidelity Investments. TradingHours.com - Market Holidays &amp; Trading Hours Data. This Week's Top 5 Stories in Technology. (2025-11-14). World Economic Outlook - All Issues - International Monetary Fund. The End of Addition: Clean energy's economic and political takeover - E3G. (2025-11-11). Stock Market Holiday Calendar - Investing.com. Weekly Market Recap - J.P. Morgan Asset Management. How AI, Simulation, and Robotics Are Transforming American Manufacturing - YouTube. (2025-11-05). Top Geopolitical Risks of 2025 - S&P Global. Global military spending surges amid war, rising tensions and insecurity - SIPRI. (2024-04-22). Overview and key findings – World Energy Investment 2024 – Analysis - IEA. Unlocking a clean energy future for Latin America and the Caribbean. (2025-11-14).
 </div>
 </div>
 <p><em>Generated by model: gemini-2.5-flash</em></p>
@@ -190,8 +234,8 @@
   <tbody>
     <tr>
       <td>1</td>
-      <td>iShares MSCI Global Gold Miners ETF</td>
-      <td>RING</td>
+      <td><a href="https://finance.yahoo.com/quote/RING/" target="_blank">iShares MSCI Global Gold Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/RING/" target="_blank">RING</a></td>
       <td>116.70</td>
       <td>33.60</td>
       <td>65.53</td>
@@ -200,8 +244,8 @@
     </tr>
     <tr>
       <td>2</td>
-      <td>Global X Gold Explorers ETF</td>
-      <td>GOEX</td>
+      <td><a href="https://finance.yahoo.com/quote/GOEX/" target="_blank">Global X Gold Explorers ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GOEX/" target="_blank">GOEX</a></td>
       <td>116.31</td>
       <td>39.54</td>
       <td>68.83</td>
@@ -210,8 +254,8 @@
     </tr>
     <tr>
       <td>3</td>
-      <td>Sprott Gold Miners ETF</td>
-      <td>SGDM</td>
+      <td><a href="https://finance.yahoo.com/quote/SGDM/" target="_blank">Sprott Gold Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SGDM/" target="_blank">SGDM</a></td>
       <td>116.26</td>
       <td>27.13</td>
       <td>62.60</td>
@@ -220,8 +264,8 @@
     </tr>
     <tr>
       <td>4</td>
-      <td>iShares MSCI Global Silver and Metals Miners ETF</td>
-      <td>SLVP</td>
+      <td><a href="https://finance.yahoo.com/quote/SLVP/" target="_blank">iShares MSCI Global Silver and Metals Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SLVP/" target="_blank">SLVP</a></td>
       <td>108.86</td>
       <td>37.92</td>
       <td>27.57</td>
@@ -230,8 +274,8 @@
     </tr>
     <tr>
       <td>5</td>
-      <td>VanEck Gold Miners ETF</td>
-      <td>GDX</td>
+      <td><a href="https://finance.yahoo.com/quote/GDX/" target="_blank">VanEck Gold Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GDX/" target="_blank">GDX</a></td>
       <td>105.73</td>
       <td>31.99</td>
       <td>76.16</td>
@@ -240,8 +284,8 @@
     </tr>
     <tr>
       <td>6</td>
-      <td>Global X Silver Miners ETF</td>
-      <td>SIL</td>
+      <td><a href="https://finance.yahoo.com/quote/SIL/" target="_blank">Global X Silver Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SIL/" target="_blank">SIL</a></td>
       <td>88.52</td>
       <td>26.95</td>
       <td>68.30</td>
@@ -250,8 +294,8 @@
     </tr>
     <tr>
       <td>7</td>
-      <td>U.S. Global GO GOLD and Precious Metal Miners ETF</td>
-      <td>GOAU</td>
+      <td><a href="https://finance.yahoo.com/quote/GOAU/" target="_blank">U.S. Global GO GOLD and Precious Metal Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GOAU/" target="_blank">GOAU</a></td>
       <td>87.18</td>
       <td>23.46</td>
       <td>38.60</td>
@@ -260,18 +304,8 @@
     </tr>
     <tr>
       <td>8</td>
-      <td>Defiance Quantum ETF</td>
-      <td>QTUM</td>
-      <td>66.04</td>
-      <td>13.23</td>
-      <td>106.91</td>
-      <td>107.97</td>
-      <td>90.48</td>
-    </tr>
-    <tr>
-      <td>9</td>
-      <td>abrdn Physical Silver Shares ETF</td>
-      <td>SIVR</td>
+      <td><a href="https://finance.yahoo.com/quote/SIVR/" target="_blank">abrdn Physical Silver Shares ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SIVR/" target="_blank">SIVR</a></td>
       <td>62.19</td>
       <td>33.20</td>
       <td>48.22</td>
@@ -279,9 +313,9 @@
       <td>36.16</td>
     </tr>
     <tr>
-      <td>10</td>
-      <td>iShares Silver Trust</td>
-      <td>SLV</td>
+      <td>9</td>
+      <td><a href="https://finance.yahoo.com/quote/SLV/" target="_blank">iShares Silver Trust</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SLV/" target="_blank">SLV</a></td>
       <td>61.95</td>
       <td>33.22</td>
       <td>45.96</td>
@@ -289,9 +323,9 @@
       <td>34.47</td>
     </tr>
     <tr>
-      <td>11</td>
-      <td>Invesco WilderHill Clean Energy ETF</td>
-      <td>PBW</td>
+      <td>10</td>
+      <td><a href="https://finance.yahoo.com/quote/PBW/" target="_blank">Invesco WilderHill Clean Energy ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PBW/" target="_blank">PBW</a></td>
       <td>58.88</td>
       <td>26.14</td>
       <td>30.52</td>
@@ -299,9 +333,9 @@
       <td>22.27</td>
     </tr>
     <tr>
-      <td>12</td>
-      <td>GraniteShares Platinum Trust</td>
-      <td>PLTM</td>
+      <td>11</td>
+      <td><a href="https://finance.yahoo.com/quote/PLTM/" target="_blank">GraniteShares Platinum Trust</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PLTM/" target="_blank">PLTM</a></td>
       <td>58.80</td>
       <td>13.59</td>
       <td>14.88</td>
@@ -309,9 +343,9 @@
       <td>11.98</td>
     </tr>
     <tr>
-      <td>13</td>
-      <td>abrdn Physical Platinum Shares ETF</td>
-      <td>PPLT</td>
+      <td>12</td>
+      <td><a href="https://finance.yahoo.com/quote/PPLT/" target="_blank">abrdn Physical Platinum Shares ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PPLT/" target="_blank">PPLT</a></td>
       <td>58.45</td>
       <td>13.47</td>
       <td>140.45</td>
@@ -319,39 +353,9 @@
       <td>113.16</td>
     </tr>
     <tr>
-      <td>14</td>
-      <td>abrdn Physical Precious Metals Basket Shares ETF</td>
-      <td>GLTR</td>
-      <td>56.78</td>
-      <td>25.09</td>
-      <td>176.46</td>
-      <td>168.81</td>
-      <td>142.26</td>
-    </tr>
-    <tr>
-      <td>15</td>
-      <td>SPDR Gold MiniShares</td>
-      <td>GLDM</td>
-      <td>56.42</td>
-      <td>22.43</td>
-      <td>80.90</td>
-      <td>77.96</td>
-      <td>67.30</td>
-    </tr>
-    <tr>
-      <td>16</td>
-      <td>Goldman Sachs Physical Gold ETF</td>
-      <td>AAAU</td>
-      <td>56.30</td>
-      <td>22.39</td>
-      <td>40.33</td>
-      <td>38.88</td>
-      <td>33.57</td>
-    </tr>
-    <tr>
-      <td>17</td>
-      <td>SPDR Kensho Clean Power ETF</td>
-      <td>CNRG</td>
+      <td>13</td>
+      <td><a href="https://finance.yahoo.com/quote/CNRG/" target="_blank">SPDR Kensho Clean Power ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/CNRG/" target="_blank">CNRG</a></td>
       <td>56.25</td>
       <td>39.77</td>
       <td>94.97</td>
@@ -359,29 +363,9 @@
       <td>66.96</td>
     </tr>
     <tr>
-      <td>18</td>
-      <td>abrdn Physical Gold Shares ETF</td>
-      <td>SGOL</td>
-      <td>56.24</td>
-      <td>22.37</td>
-      <td>38.95</td>
-      <td>37.54</td>
-      <td>32.41</td>
-    </tr>
-    <tr>
-      <td>19</td>
-      <td>GraniteShares Gold Trust</td>
-      <td>BAR</td>
-      <td>56.21</td>
-      <td>22.36</td>
-      <td>40.27</td>
-      <td>38.82</td>
-      <td>33.51</td>
-    </tr>
-    <tr>
-      <td>20</td>
-      <td>iShares Gold Trust</td>
-      <td>IAU</td>
+      <td>14</td>
+      <td><a href="https://finance.yahoo.com/quote/IAU/" target="_blank">iShares Gold Trust</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IAU/" target="_blank">IAU</a></td>
       <td>56.18</td>
       <td>22.38</td>
       <td>76.98</td>
@@ -389,19 +373,9 @@
       <td>64.07</td>
     </tr>
     <tr>
-      <td>21</td>
-      <td>VanEck Merk Gold Trust</td>
-      <td>OUNZ</td>
-      <td>56.07</td>
-      <td>22.33</td>
-      <td>39.33</td>
-      <td>37.92</td>
-      <td>32.74</td>
-    </tr>
-    <tr>
-      <td>22</td>
-      <td>SPDR Gold Shares</td>
-      <td>GLD</td>
+      <td>15</td>
+      <td><a href="https://finance.yahoo.com/quote/GLD/" target="_blank">SPDR Gold Shares</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GLD/" target="_blank">GLD</a></td>
       <td>55.94</td>
       <td>22.36</td>
       <td>375.96</td>
@@ -409,9 +383,9 @@
       <td>313.03</td>
     </tr>
     <tr>
-      <td>23</td>
-      <td>VanEck Rare Earth and Strategic Metals ETF</td>
-      <td>REMX</td>
+      <td>16</td>
+      <td><a href="https://finance.yahoo.com/quote/REMX/" target="_blank">VanEck Rare Earth and Strategic Metals ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/REMX/" target="_blank">REMX</a></td>
       <td>53.06</td>
       <td>23.63</td>
       <td>70.21</td>
@@ -419,19 +393,9 @@
       <td>49.73</td>
     </tr>
     <tr>
-      <td>24</td>
-      <td>Invesco DB Precious Metals Fund</td>
-      <td>DBP</td>
-      <td>48.50</td>
-      <td>23.32</td>
-      <td>94.18</td>
-      <td>90.48</td>
-      <td>77.51</td>
-    </tr>
-    <tr>
-      <td>25</td>
-      <td>Amplify Lithium &amp; Battery Technology ETF</td>
-      <td>BATT</td>
+      <td>17</td>
+      <td><a href="https://finance.yahoo.com/quote/BATT/" target="_blank">Amplify Lithium & Battery Technology ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/BATT/" target="_blank">BATT</a></td>
       <td>46.79</td>
       <td>25.61</td>
       <td>13.49</td>
@@ -439,9 +403,9 @@
       <td>10.09</td>
     </tr>
     <tr>
-      <td>26</td>
-      <td>Cambria Global Value ETF</td>
-      <td>GVAL</td>
+      <td>18</td>
+      <td><a href="https://finance.yahoo.com/quote/GVAL/" target="_blank">Cambria Global Value ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GVAL/" target="_blank">GVAL</a></td>
       <td>46.54</td>
       <td>8.65</td>
       <td>30.89</td>
@@ -449,9 +413,9 @@
       <td>26.89</td>
     </tr>
     <tr>
-      <td>27</td>
-      <td>Innovator Deepwater Frontier Tech ETF</td>
-      <td>LOUP</td>
+      <td>19</td>
+      <td><a href="https://finance.yahoo.com/quote/LOUP/" target="_blank">Innovator Deepwater Frontier Tech ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/LOUP/" target="_blank">LOUP</a></td>
       <td>45.34</td>
       <td>18.89</td>
       <td>76.29</td>
@@ -459,19 +423,9 @@
       <td>61.04</td>
     </tr>
     <tr>
-      <td>28</td>
-      <td>Defiance Connective Technologies ETF</td>
-      <td>SIXG</td>
-      <td>45.00</td>
-      <td>13.27</td>
-      <td>64.26</td>
-      <td>63.78</td>
-      <td>52.53</td>
-    </tr>
-    <tr>
-      <td>29</td>
-      <td>Global X Copper Miners ETF</td>
-      <td>COPX</td>
+      <td>20</td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">Global X Copper Miners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">COPX</a></td>
       <td>44.97</td>
       <td>31.51</td>
       <td>61.15</td>
@@ -479,9 +433,9 @@
       <td>46.25</td>
     </tr>
     <tr>
-      <td>30</td>
-      <td>Global X Lithium &amp; Battery Tech ETF</td>
-      <td>LIT</td>
+      <td>21</td>
+      <td><a href="https://finance.yahoo.com/quote/LIT/" target="_blank">Global X Lithium & Battery Tech ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/LIT/" target="_blank">LIT</a></td>
       <td>43.92</td>
       <td>40.65</td>
       <td>63.77</td>
@@ -489,9 +443,9 @@
       <td>44.39</td>
     </tr>
     <tr>
-      <td>31</td>
-      <td>Invesco Solar ETF</td>
-      <td>TAN</td>
+      <td>22</td>
+      <td><a href="https://finance.yahoo.com/quote/TAN/" target="_blank">Invesco Solar ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/TAN/" target="_blank">TAN</a></td>
       <td>43.42</td>
       <td>35.20</td>
       <td>49.51</td>
@@ -499,19 +453,9 @@
       <td>37.23</td>
     </tr>
     <tr>
-      <td>32</td>
-      <td>VanEck Semiconductor ETF</td>
-      <td>SMH</td>
-      <td>42.83</td>
-      <td>14.26</td>
-      <td>344.98</td>
-      <td>335.95</td>
-      <td>272.05</td>
-    </tr>
-    <tr>
-      <td>33</td>
-      <td>KraneShares Electric Vehicles and Future Mobility Index ETF</td>
-      <td>KARS</td>
+      <td>23</td>
+      <td><a href="https://finance.yahoo.com/quote/KARS/" target="_blank">KraneShares Electric Vehicles and Future Mobility Index ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/KARS/" target="_blank">KARS</a></td>
       <td>41.33</td>
       <td>22.04</td>
       <td>31.23</td>
@@ -519,9 +463,9 @@
       <td>24.39</td>
     </tr>
     <tr>
-      <td>34</td>
-      <td>iShares Global Clean Energy ETF</td>
-      <td>ICLN</td>
+      <td>24</td>
+      <td><a href="https://finance.yahoo.com/quote/ICLN/" target="_blank">iShares Global Clean Energy ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/ICLN/" target="_blank">ICLN</a></td>
       <td>40.20</td>
       <td>24.60</td>
       <td>17.02</td>
@@ -529,9 +473,9 @@
       <td>13.44</td>
     </tr>
     <tr>
-      <td>35</td>
-      <td>Invesco Global Clean Energy ETF</td>
-      <td>PBD</td>
+      <td>25</td>
+      <td><a href="https://finance.yahoo.com/quote/PBD/" target="_blank">Invesco Global Clean Energy ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PBD/" target="_blank">PBD</a></td>
       <td>39.23</td>
       <td>19.90</td>
       <td>16.36</td>
@@ -539,9 +483,9 @@
       <td>13.03</td>
     </tr>
     <tr>
-      <td>36</td>
-      <td>SPDR Kensho Final Frontiers ETF</td>
-      <td>ROKT</td>
+      <td>26</td>
+      <td><a href="https://finance.yahoo.com/quote/ROKT/" target="_blank">SPDR Kensho Final Frontiers ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/ROKT/" target="_blank">ROKT</a></td>
       <td>38.61</td>
       <td>10.27</td>
       <td>76.25</td>
@@ -549,9 +493,9 @@
       <td>64.30</td>
     </tr>
     <tr>
-      <td>37</td>
-      <td>First Trust Nasdaq Semiconductor ETF</td>
-      <td>FTXL</td>
+      <td>27</td>
+      <td><a href="https://finance.yahoo.com/quote/FTXL/" target="_blank">First Trust Nasdaq Semiconductor ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FTXL/" target="_blank">FTXL</a></td>
       <td>38.24</td>
       <td>17.88</td>
       <td>120.60</td>
@@ -559,19 +503,9 @@
       <td>94.51</td>
     </tr>
     <tr>
-      <td>38</td>
-      <td>abrdn Physical Palladium Shares ETF</td>
-      <td>PALL</td>
-      <td>38.21</td>
-      <td>22.17</td>
-      <td>127.90</td>
-      <td>122.71</td>
-      <td>101.74</td>
-    </tr>
-    <tr>
-      <td>39</td>
-      <td>Invesco Semiconductors ETF</td>
-      <td>PSI</td>
+      <td>28</td>
+      <td><a href="https://finance.yahoo.com/quote/PSI/" target="_blank">Invesco Semiconductors ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PSI/" target="_blank">PSI</a></td>
       <td>37.01</td>
       <td>17.89</td>
       <td>74.07</td>
@@ -579,9 +513,9 @@
       <td>59.47</td>
     </tr>
     <tr>
-      <td>40</td>
-      <td>SPDR NYSE Technology ETF</td>
-      <td>XNTK</td>
+      <td>29</td>
+      <td><a href="https://finance.yahoo.com/quote/XNTK/" target="_blank">SPDR NYSE Technology ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/XNTK/" target="_blank">XNTK</a></td>
       <td>35.80</td>
       <td>11.75</td>
       <td>274.61</td>
@@ -589,9 +523,9 @@
       <td>232.28</td>
     </tr>
     <tr>
-      <td>41</td>
-      <td>iShares Semiconductor ETF</td>
-      <td>SOXX</td>
+      <td>30</td>
+      <td><a href="https://finance.yahoo.com/quote/SOXX/" target="_blank">iShares Semiconductor ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SOXX/" target="_blank">SOXX</a></td>
       <td>34.86</td>
       <td>13.77</td>
       <td>288.52</td>
@@ -599,9 +533,9 @@
       <td>233.04</td>
     </tr>
     <tr>
-      <td>42</td>
-      <td>iShares Future AI &amp; Tech ETF</td>
-      <td>ARTY</td>
+      <td>31</td>
+      <td><a href="https://finance.yahoo.com/quote/ARTY/" target="_blank">iShares Future AI & Tech ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/ARTY/" target="_blank">ARTY</a></td>
       <td>33.55</td>
       <td>9.91</td>
       <td>47.13</td>
@@ -609,9 +543,9 @@
       <td>40.09</td>
     </tr>
     <tr>
-      <td>43</td>
-      <td>Global X Artificial Intelligence &amp; Technology ETF</td>
-      <td>AIQ</td>
+      <td>32</td>
+      <td><a href="https://finance.yahoo.com/quote/AIQ/" target="_blank">Global X Artificial Intelligence & Technology ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/AIQ/" target="_blank">AIQ</a></td>
       <td>32.39</td>
       <td>10.88</td>
       <td>50.15</td>
@@ -619,19 +553,9 @@
       <td>43.12</td>
     </tr>
     <tr>
-      <td>44</td>
-      <td>First Trust S-Network Future Vehicles &amp; Technology ETF</td>
-      <td>CARZ</td>
-      <td>32.17</td>
-      <td>12.88</td>
-      <td>75.59</td>
-      <td>74.36</td>
-      <td>62.94</td>
-    </tr>
-    <tr>
-      <td>45</td>
-      <td>VanEck Oil Refiners ETF</td>
-      <td>CRAK</td>
+      <td>33</td>
+      <td><a href="https://finance.yahoo.com/quote/CRAK/" target="_blank">VanEck Oil Refiners ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/CRAK/" target="_blank">CRAK</a></td>
       <td>31.19</td>
       <td>22.14</td>
       <td>41.26</td>
@@ -639,9 +563,9 @@
       <td>32.46</td>
     </tr>
     <tr>
-      <td>46</td>
-      <td>First Trust NASDAQ Clean Edge Green Energy Index Fund</td>
-      <td>QCLN</td>
+      <td>34</td>
+      <td><a href="https://finance.yahoo.com/quote/QCLN/" target="_blank">First Trust NASDAQ Clean Edge Green Energy Index Fund</a></td>
+      <td><a href="https://finance.yahoo.com/quote/QCLN/" target="_blank">QCLN</a></td>
       <td>30.16</td>
       <td>19.34</td>
       <td>43.37</td>
@@ -649,9 +573,9 @@
       <td>34.95</td>
     </tr>
     <tr>
-      <td>47</td>
-      <td>iShares Expanded Tech Sector ETF</td>
-      <td>IGM</td>
+      <td>35</td>
+      <td><a href="https://finance.yahoo.com/quote/IGM/" target="_blank">iShares Expanded Tech Sector ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IGM/" target="_blank">IGM</a></td>
       <td>28.93</td>
       <td>7.81</td>
       <td>127.81</td>
@@ -659,9 +583,9 @@
       <td>110.02</td>
     </tr>
     <tr>
-      <td>48</td>
-      <td>Invesco Next Gen Connectivity E</td>
-      <td>KNCT</td>
+      <td>36</td>
+      <td><a href="https://finance.yahoo.com/quote/KNCT/" target="_blank">Invesco Next Gen Connectivity E</a></td>
+      <td><a href="https://finance.yahoo.com/quote/KNCT/" target="_blank">KNCT</a></td>
       <td>28.77</td>
       <td>11.24</td>
       <td>132.43</td>
@@ -669,9 +593,9 @@
       <td>114.57</td>
     </tr>
     <tr>
-      <td>49</td>
-      <td>iShares Global Tech ETF</td>
-      <td>IXN</td>
+      <td>37</td>
+      <td><a href="https://finance.yahoo.com/quote/IXN/" target="_blank">iShares Global Tech ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IXN/" target="_blank">IXN</a></td>
       <td>28.47</td>
       <td>8.06</td>
       <td>105.73</td>
@@ -679,9 +603,9 @@
       <td>90.40</td>
     </tr>
     <tr>
-      <td>50</td>
-      <td>iShares U.S. Technology ETF</td>
-      <td>IYW</td>
+      <td>38</td>
+      <td><a href="https://finance.yahoo.com/quote/IYW/" target="_blank">iShares U.S. Technology ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IYW/" target="_blank">IYW</a></td>
       <td>27.51</td>
       <td>7.75</td>
       <td>199.16</td>
@@ -689,19 +613,9 @@
       <td>170.15</td>
     </tr>
     <tr>
-      <td>51</td>
-      <td>First Trust IndXX NextG ETF</td>
-      <td>NXTG</td>
-      <td>26.85</td>
-      <td>6.71</td>
-      <td>106.35</td>
-      <td>106.05</td>
-      <td>95.19</td>
-    </tr>
-    <tr>
-      <td>52</td>
-      <td>First Trust Global Wind Energy ETF</td>
-      <td>FAN</td>
+      <td>39</td>
+      <td><a href="https://finance.yahoo.com/quote/FAN/" target="_blank">First Trust Global Wind Energy ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FAN/" target="_blank">FAN</a></td>
       <td>26.84</td>
       <td>9.57</td>
       <td>20.04</td>
@@ -709,9 +623,9 @@
       <td>17.57</td>
     </tr>
     <tr>
-      <td>53</td>
-      <td>ALPS Medical Breakthroughs ETF</td>
-      <td>SBIO</td>
+      <td>40</td>
+      <td><a href="https://finance.yahoo.com/quote/SBIO/" target="_blank">ALPS Medical Breakthroughs ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SBIO/" target="_blank">SBIO</a></td>
       <td>26.60</td>
       <td>33.10</td>
       <td>46.11</td>
@@ -719,9 +633,9 @@
       <td>33.36</td>
     </tr>
     <tr>
-      <td>54</td>
-      <td>Virtus LifeSci Biotech Products ETF</td>
-      <td>BBP</td>
+      <td>41</td>
+      <td><a href="https://finance.yahoo.com/quote/BBP/" target="_blank">Virtus LifeSci Biotech Products ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/BBP/" target="_blank">BBP</a></td>
       <td>26.38</td>
       <td>14.75</td>
       <td>76.50</td>
@@ -729,29 +643,9 @@
       <td>63.14</td>
     </tr>
     <tr>
-      <td>55</td>
-      <td>iShares Global 100 ETF</td>
-      <td>IOO</td>
-      <td>26.18</td>
-      <td>8.67</td>
-      <td>124.91</td>
-      <td>121.39</td>
-      <td>108.13</td>
-    </tr>
-    <tr>
-      <td>56</td>
-      <td>VanEck Brazil Small-Cap ETF</td>
-      <td>BRF</td>
-      <td>26.01</td>
-      <td>15.07</td>
-      <td>17.15</td>
-      <td>16.14</td>
-      <td>14.39</td>
-    </tr>
-    <tr>
-      <td>57</td>
-      <td>Invesco AI and Next Gen Software ETF</td>
-      <td>IGPT</td>
+      <td>42</td>
+      <td><a href="https://finance.yahoo.com/quote/IGPT/" target="_blank">Invesco AI and Next Gen Software ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IGPT/" target="_blank">IGPT</a></td>
       <td>25.59</td>
       <td>13.21</td>
       <td>58.01</td>
@@ -759,9 +653,9 @@
       <td>48.54</td>
     </tr>
     <tr>
-      <td>58</td>
-      <td>The Technology Select Sector SPDR Fund</td>
-      <td>XLK</td>
+      <td>43</td>
+      <td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">The Technology Select Sector SPDR Fund</a></td>
+      <td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">XLK</a></td>
       <td>25.58</td>
       <td>7.76</td>
       <td>288.15</td>
@@ -769,9 +663,9 @@
       <td>247.31</td>
     </tr>
     <tr>
-      <td>59</td>
-      <td>Global X Autonomous &amp; Electric Vehicles ETF</td>
-      <td>DRIV</td>
+      <td>44</td>
+      <td><a href="https://finance.yahoo.com/quote/DRIV/" target="_blank">Global X Autonomous & Electric Vehicles ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/DRIV/" target="_blank">DRIV</a></td>
       <td>25.43</td>
       <td>14.77</td>
       <td>29.30</td>
@@ -779,9 +673,9 @@
       <td>24.41</td>
     </tr>
     <tr>
-      <td>60</td>
-      <td>Fidelity MSCI Information Technology Index ETF</td>
-      <td>FTEC</td>
+      <td>45</td>
+      <td><a href="https://finance.yahoo.com/quote/FTEC/" target="_blank">Fidelity MSCI Information Technology Index ETF</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FTEC/" target="_blank">FTEC</a></td>
       <td>25.32</td>
       <td>7.67</td>
       <td>225.43</td>
@@ -789,9 +683,9 @@
       <td>193.97</td>
     </tr>
     <tr>
-      <td>61</td>
-      <td>Vanguard Information Technology Index Fund ETF Shares</td>
-      <td>VGT</td>
+      <td>46</td>
+      <td><a href="https://finance.yahoo.com/quote/VGT/" target="_blank">Vanguard Information Technology Index Fund ETF Shares</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VGT/" target="_blank">VGT</a></td>
       <td>25.06</td>
       <td>7.48</td>
       <td>756.26</td>
@@ -807,7 +701,7 @@
     The initial universe of ETFs was compiled from multiple Yahoo Finance top performance lists. ETFs containing leveraged, inverse, foreign, or otherwise high-risk characteristics were filtered out using a set of exclusion keywords. From the remaining ETFs, only those showing strong performance—defined as a 52-week change above 25%, a 3-month return above 6%, and trading above both their 50-day and 200-day moving averages—were retained. These criteria capture short-, mid-, and long-term momentum and growth trends. The resulting list was then sorted by 52-week change to highlight the strongest performers. Finally, this refined list was analyzed using Google Gemini, which conducted focused searches for each ETF, incorporating recent news, macroeconomic context, and real-world developments to produce the final selection of up to 10 recommended ETFs.
 </p>
 
-<div style="font-size:12px;color:#666;margin-top:10px;">
+<div class="disclaimer">
     This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
 </div>
 
@@ -817,7 +711,6 @@
 <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Recommendations table: sort by 52 Wk Change (%) descending
         $('.recommendations-table').DataTable({
             paging: true,
             searching: true,
@@ -825,7 +718,6 @@
             order: [[3, 'desc']]
         });
 
-        // Full ETF table
         $('.data-table').DataTable({
             paging: true,
             searching: true,

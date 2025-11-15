@@ -73,7 +73,6 @@ def fetch_all_stock_pages_from_url(url):
 
         df_page = parse_stock_table(html)
         if df_page.empty:
-            print(f"No more ETFs found for {url}. Finished this page.")
             break
 
         all_pages.append(df_page)
@@ -143,12 +142,22 @@ def cleanup_filter_sort_data(df):
 
     # --- Display results ---
     print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
-    top_etfs = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
-    all_etfs_table = top_etfs.to_html(index=False, classes="data-table", border=0)
-    top_etfs = top_etfs.to_string(index=False)
+    top_etfs_df = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
+    top_etfs = top_etfs_df.to_string(index=False)
     print(top_etfs)
 
-    return top_etfs, all_etfs_table
+    #add links to html table
+    top_etfs_html_df = top_etfs_df.copy()
+    top_etfs_html_df["Symbol"] = top_etfs_html_df["Symbol"].apply(
+        lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
+    )
+    top_etfs_html_df["Name"] = top_etfs_html_df.apply(
+        lambda row: f'<a href="https://finance.yahoo.com/quote/{sorted_df.loc[row.name, "Symbol"]}/" target="_blank">{row["Name"]}</a>',
+        axis=1
+    )
+    top_etfs_html_table = top_etfs_html_df.to_html(escape=False, index=False, classes="data-table", border=0)
+
+    return top_etfs, top_etfs_html_table
 
 
 
@@ -200,13 +209,15 @@ def call_gemini(client, model, gemini_config, prompt):
 
 
 
-def update_html_page(final_recommendations, all_etfs_table, model_used):
+def update_html_page(final_recommendations, top_etfs_html_table, model_used):
     # --- Extract table and summary blocks in any order ---
     table_match = re.search(r'(<table.*?</table>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
     summary_match = re.search(r'(<div[^>]*class=["\']summary["\'][^>]*>.*?</div>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
+    sources_match = re.search(r'(<div[^>]*class=["\']sources["\'][^>]*>.*?</div>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
 
     gemini_table_html = table_match.group(1).strip() if table_match else ""
     gemini_summary = summary_match.group(1).strip() if summary_match else ""
+    gemini_sources = sources_match.group(1).strip() if sources_match else ""
 
     # --- Fallbacks ---
     if not gemini_table_html and "<table" in final_recommendations:
@@ -229,7 +240,8 @@ def update_html_page(final_recommendations, all_etfs_table, model_used):
     html_output = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
     html_output = html_output.replace("<!--RECOMMENDATIONS_TABLE_HERE-->", gemini_table_html)
     html_output = html_output.replace("<!--RECOMMENDATIONS_SUMMARY_HERE-->", gemini_summary)
-    html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", all_etfs_table)
+    html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", top_etfs_html_table)
+    html_output = html_output.replace("<!--SOURCES_HERE-->", gemini_sources)
     html_output = html_output.replace("<!--MODEL_USED_HERE-->", model_used)
 
     # --- Write final index.html ---
@@ -258,7 +270,7 @@ model = config["model"]
 df = concurrently_fetch_stock_data_from_all_urls()
 
 # --- Get the top performing etfs by cleaning, filtering by keywords and performance, and sorting the data ---
-top_etfs, all_etfs_table = cleanup_filter_sort_data(df)
+top_etfs, top_etfs_html_table = cleanup_filter_sort_data(df)
 
 # Record the end time
 end_time = time.perf_counter()
@@ -283,4 +295,4 @@ end_time = time.perf_counter()
 print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
 
 # --- Update HTML page with recommendations ---
-update_html_page(final_recommendations, all_etfs_table, model_used)
+update_html_page(final_recommendations, top_etfs_html_table, model_used)

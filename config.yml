@@ -16,7 +16,7 @@ excluded_keywords: [
   # Added keywords for foreign/non-US ETFs
   'International', 'Foreign', 'Ex-US', 'Europe', 'Asia', 'Emerging Market',
   'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
-  'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland'
+  'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil'
 ]
 min_52_week_change: 25
 min_3_month_return: 6
@@ -89,76 +89,55 @@ prompt_recommendation: |
         - Breakthroughs or major announcements in AI, robotics, or semiconductors
         - Clean energy, uranium, or resource investment trends
         - Geopolitical events, defense spending, or trade developments
-      Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
-    2. Research and analyze the ETFs provided (and perform searches for each ETF to get the latest insights, performance context, and sentiment).
-    3. Select up to **2 ETFs** per Sector Group that you recommend as likely to continue performing well over the next 12 months as buys. 
-       Prioritize ETFs and Sector Groups with higher 52 Wk Change (%) and strong recent performance (3 Mo Return %) over those with lower performance.
-    4. Return **embeddable HTML** containing:
-      - A `<table>` sorted **by 52 Wk Change (%) descending**, and
-      - A friendly, conversational `<div class="summary">` section with sector-wise explanations that incorporate **recent real-world news**.
-  ---
-  
-  ### 🔍 Research and Recommendation Formatting Rules
-  - Perform searches for each ETF’s latest performance drivers, sector momentum, macroeconomic backdrop, fund flows, or news that may affect its outlook.
-  - From the best performing Sector Groups, choose and return up to **10 best performing ETFs** that will continue to perform well in the next year.
-  - Include **1–2 sentences of "Key Search Insight"** summarizing what current research or news suggests about that ETF’s outlook.
-  - Use **accurate numeric formatting** (e.g., `23.45%`), even if rounded.
-  - Include the most recent **"Data as of YYYY-MM-DD"** date based on the last market close you find.
-  
-  ---
-  
-  ### 📊 HTML Output Format (Strict)
-  
-  #### 1. ETF Table 
-    Return the selected ETFs as a complete HTML table that is already sorted by 52 Wk Change (%) descending that can be embedded directly into a webpage.
-  
-    Requirements:
-  
-    1. Use a `<table>` element with class `recommendations-table`.
-    2. Include `<thead>` with columns:
-    `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
-    3. Include `<tbody>` with one row per ETF.
-    4. For the **Key Search Insight** column:
-      - Wrap long text inside the `<td>` so it does **not exceed the table width**.
-      - Preferably truncate text after ~100 characters and append "…" if necessary.
-      - Allow text wrapping on both desktop and mobile screens using `<td style="max-width:300px; word-wrap:break-word;">` or similar inline styles.
-      - Make the insight engaging and easy to read, not wordy or full of jargon/babble.
-    5. Do **not** include `<html>`, `<head>`, or `<body>` tags — only the `<table>` element and its contents.
-  
-  #### 2. Summary Block  
-  After the ETF recommendation table, provide an html summary block that includes:
-  - an exciting greeting! and a brief 1-2 sentence <MARKET SUMMARY> that explains recent news, market sentiment, tech trends, etc.
-  - a section for each Sector Group that includes a brief summary of why that sector looks promising and a sentence for each recommended ETF.
-  
-  Each Sector Group section should:
-    - Begin with the sector name in `<strong>` (e.g., `<p><strong>Technology:</strong> …</p>`).
-    - Have exactly **1 sentence** per ETF — a balanced, engaging sentence that is easy to read. Not wordy or full of jargon/babble.
-    - Make sure the ETF symbols are bold in the html summary.
-    - Be written in a **friendly, conversational tone** — like one friend explaining to another current trends and why that sector looks promising right now.
-    - Include **specific real-world news**: recent market trends, Fed policy, consumer demand shifts, geopolitical or supply chain factors, etc.
-    - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
-     - central bank policy updates or inflation data
-     - major geopolitical tensions or elections
-     - breakthroughs or major announcements in **AI, robotics, semiconductors, or clean energy**
-     - government funding, trade developments, or regulation changes that affect key sectors
-  
-  **Summary Block HTML structure example:**
-    ```html
-         <div class="summary">
-         <h2>Market Chat:</h2>
-         <p><MARKET SUMMARY HERE></p>
+        Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
     
-         <p><strong><SECTOR GROUP HERE> (<ETF SYMBOLS HERE>):</strong> <SECTOR SUMMARY, NEWS, BUY REASONING HERE></p>
-         ...
-         </div>
-    ```
-  ---
+    2. Generate the **ETF Recommendations Table**:
+      - Research and analyze the ETFs provided to get the latest insights, performance context, and sentiment.
+      - Select up to **2 ETFs per Sector Group** that you recommend as likely to continue performing well over the next 12 months.
+        Prioritize ETFs and Sector Groups with higher 52 Wk Change (%) and strong recent performance (3 Mo Return %) over lower performers.
+      - From the best performing Sector Groups, choose and return up to **10 best performing ETFs** that will continue to perform well in the next year.
+      - Include **1–2 sentences of "Key Search Insight"** summarizing what current research or news suggests about that ETF’s outlook.
+      - Use **accurate numeric formatting** (e.g., `23.45%`), even if rounded.
+      - Include the most recent **"Data as of YYYY-MM-DD"** date based on the last market close you find.
+      - Return a **complete HTML table** with:
+          - `<table>` element with class `recommendations-table`.
+          - `<thead>` with columns: `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`.
+          - `<tbody>` with one row per ETF.
+          - **Clickable links** for Name and Symbol columns:
+                          `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><TEXT HERE></a>`.
+          - Truncate or wrap long text in the Key Search Insight column using `<td style="max-width:300px; word-wrap:break-word;">`.
+    
+    3. Generate the **Summary Block**:
+      - Include an exciting greeting and a brief 1–2 sentence <MARKET SUMMARY> explaining recent news, market sentiment, tech trends, etc.
+      - For each Sector Group, include a brief summary of why that sector looks promising and a sentence for each recommended ETF.
+      - Each Sector Group section should:
+          - Begin with the sector name in `<strong>` (e.g., `<p><strong>Technology:</strong> …</p>`).
+          - Have exactly **1 sentence** per ETF — balanced, engaging, readable, not wordy.
+          - Make sure ETF symbols are **bold and clickable**, using the format:
+            `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><strong><SYMBOL HERE></strong></a>`.
+          - Be written in a **friendly, conversational tone** — like explaining to a friend why the sector looks promising.
+          - Include **specific real-world news**: recent market trends, Fed policy, consumer demand shifts, geopolitical or supply chain factors, etc.
+          - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
+              - central bank policy updates or inflation data
+              - major geopolitical tensions or elections
+              - breakthroughs or major announcements in **AI, robotics, semiconductors, or clean energy**
+              - government funding, trade developments, or regulation changes that affect key sectors
+      
+      **Summary Block HTML structure example:**
+      ```html
+      <div class="summary">
+      <h2>Market Chat:</h2>
+      <p><MARKET SUMMARY HERE></p>
+      
+      <p><strong><SECTOR GROUP HERE> (<a href="https://finance.yahoo.com/quote/<SYMBOL1>/" target="_blank"><strong>SYMBOL1</strong></a>, <a href="https://finance.yahoo.com/quote/<SYMBOL2>/" target="_blank"><strong>SYMBOL2</strong></a>):</strong> <SECTOR SUMMARY, NEWS, BUY REASONING HERE></p>
+      ...
+      </div>  
+      ```
   
-  #### 3. Sources and Disclaimer  
-  At the very end of the HTML, include:
-    <div class="sources" style="margin-top:10px;font-size:13px;">
-  Sources: Yahoo Finance, ETF.com, Bloomberg, Morningstar, CNBC, fund issuer pages.
-    </div>
+    4. At the very end of the HTML, include a list of sources used for your searches:
+      <div class="sources" style="margin-top:10px;font-size:13px;">
+        Sources: <LIST OF SEARCH SOURCES HERE>
+      </div>
   
   ---
   

@@ -18,10 +18,10 @@ excluded_keywords: [
   'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
   'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil'
 ]
-min_52_week_change: 25
-min_3_month_return: 6
-day_50_average_buffer: 0.95
-day_200_average_buffer: 0.99
+min_52_week_change: 23
+min_3_month_return: 5
+day_50_average_buffer: 0.94
+day_200_average_buffer: 0.98
 max_retries: 4
 initial_delay: 15
 model: gemini-2.5-flash
@@ -30,25 +30,37 @@ prompt_selection: |
   You are an investment analyst specializing in recommending U.S. ETFs.
 
   Your task:
+    You are an investment analyst specializing in recommending U.S. ETFs.
+
+  Your task:
     1. You will be given a **DataFrame containing only the ETFs to consider**. You must use **only these ETFs** — do **not** include, search for, or reference any ETFs that are not in the DataFrame under any circumstances.
     
     2. For each ETF in the DataFrame:
-      - Infer its **primary sector or theme** based **only on the ETF name**. 
-      - Group ETFs into **logical Sector Groups** of related themes based solely on the ETFs in the DataFrame. Combine sectors or themes that share similar characteristics into the same group.
-      - Remove any ETFs from sectors outside the U.S. market (e.g., Emerging Markets, International) from consideration.
-    
-    3. Within each Sector Group:
-      - Rank ETFs based on performance **using only the metrics provided in the DataFrame**, such as '52 WkChange %', '3 MonthReturn', and the 'Price' relative to '50 DayAverage' and '200 DayAverage'.
-      - Select up to **4 ETFs per Sector Group** with the best performance.
-    
-    4. Return your final output list **strictly in JSON format only**, including the following fields for each ETF:
-      - **Sector Group**
-      - **ETF Name**
-      - **Symbol**
-      - **52 Wk Change (%)**
-      - **3 Mo Return (%)** (estimate based only on the ETF’s data in the DataFrame)
+      - Infer its **primary sector or theme** based **only on the ETF name**.
+      - Group ETFs into **logical Sector Groups** of related themes based solely on the ETFs in the DataFrame.
+      - Remove any ETFs from sectors outside the U.S. market (e.g., Emerging Markets, International).
   
-  Output example:
+    3. Within each Sector Group:
+      - Rank ETFs using ONLY the numeric columns provided in the DataFrame (such as '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage').
+      - Select up to **4 ETFs per Sector Group** with the best performance.
+  
+    4. You must return your final output **as a JSON list ONLY**, with no explanation or commentary.
+    The JSON list must contain objects with the following fields:
+      - "Sector Group"
+      - "ETF Name"
+      - "Symbol"
+      - "52 Wk Change (%)"
+      - "3 Mo Return (%)"
+  
+  STRICT OUTPUT RULES:
+    - **Return ONLY a JSON array. No text before or after.**
+    - **Do NOT return markdown, code blocks, backticks, or explanations.**
+    - **Do NOT return Python, pseudocode, or instructions.**
+    - The output MUST start with `[` and end with `]`.
+    - The output MUST be valid JSON. If not valid JSON, the task is failed.
+    - You may not include any content outside the JSON.
+  
+  Output example (formatting only, values will differ):
     [
       {
         "Sector Group": "Technology",
@@ -56,21 +68,11 @@ prompt_selection: |
         "Symbol": "QQQ",
         "52 Wk Change (%)": "35.2",
         "3 Mo Return (%)": "6.8"
-      },
-      ...
+      }
     ]
   
-  Ensure:
-    - Do **not** include ETFs not in the DataFrame.
-    - Do **not** include ETFs from sectors outside the U.S. market (e.g., Emerging Markets, International).
-    - Do **not** perform any searches or lookups.
-    - Only use the data provided in the DataFrame for metrics, sector inference.
-    - No leading or trailing formatting characters (like ``` or ---)
-    - Only valid JSON is returned.
+  Dataset:
   
-  DataSet:
-  
-
 
 prompt_recommendation: |
   You are an investment analyst recommending U.S. based ETFs.  
@@ -89,56 +91,67 @@ prompt_recommendation: |
         - Breakthroughs or major announcements in AI, robotics, or semiconductors
         - Clean energy, uranium, or resource investment trends
         - Geopolitical events, defense spending, or trade developments
-        Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
-    
-    2. Generate the **ETF Recommendations Table**:
+      Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
+
+    ---
+    **IMPORTANT:**  
+    **All content generated for Steps 2 and 3 must appear *inside a single continuous HTML output block*.  
+    Do NOT output any prose, analysis, or text outside of the HTML.**
+
+    ---
+
+    2. Generate the **ETF Recommendations Table (HTML ONLY)**:
       - Research and analyze the ETFs provided to get the latest insights, performance context, and sentiment.
       - Select up to **2 ETFs per Sector Group** that you recommend as likely to continue performing well over the next 12 months.
         Prioritize ETFs and Sector Groups with higher 52 Wk Change (%) and strong recent performance (3 Mo Return %) over lower performers.
-      - From the best performing Sector Groups, choose and return up to **10 best performing ETFs** that will continue to perform well in the next year.
-      - Include **1–2 sentences of "Key Search Insight"** summarizing what current research or news suggests about that ETF’s outlook.
+      - From the top sector performers, choose and return up to **10 best performing ETFs**.
+      - Include **a brief sentence of "Key Search Insight"** summarizing what current research or news suggests about that ETF’s outlook.
       - Use **accurate numeric formatting** (e.g., `23.45%`), even if rounded.
-      - Include the most recent **"Data as of YYYY-MM-DD"** date based on the last market close you find.
-      - Return a **complete HTML table** with:
-          - `<table>` element with class `recommendations-table`.
-          - `<thead>` with columns: `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`.
-          - `<tbody>` with one row per ETF.
-          - **Clickable links** for Name and Symbol columns:
-                          `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><TEXT HERE></a>`.
-          - Truncate or wrap long text in the Key Search Insight column using `<td style="max-width:300px; word-wrap:break-word;">`.
-    
-    3. Generate the **Summary Block**:
-      - Include an exciting greeting and a brief 1–2 sentence <MARKET SUMMARY> explaining recent news, market sentiment, tech trends, etc.
-      - For each Sector Group, include a brief summary of why that sector looks promising and a sentence for each recommended ETF.
-      - Each Sector Group section should:
-          - Begin with the sector name in `<strong>` (e.g., `<p><strong>Technology:</strong> …</p>`).
-          - Have exactly **1 sentence** per ETF — balanced, engaging, readable, not wordy.
-          - Make sure ETF symbols are **bold and clickable**, using the format:
-            `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><strong><SYMBOL HERE></strong></a>`.
-          - Be written in a **friendly, conversational tone** — like explaining to a friend why the sector looks promising.
-          - Include **specific real-world news**: recent market trends, Fed policy, consumer demand shifts, geopolitical or supply chain factors, etc.
-          - Blend in **current world and macroeconomic context** naturally — reference notable **recent events (within the last few weeks)** such as:
-              - central bank policy updates or inflation data
+      - Output a **complete HTML table**, embedded entirely within the final HTML response:
+          - Use `<table>` with class `recommendations-table`.
+          - Include `<thead>` with columns:  
+            `Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%) | Key Search Insight`
+          - Include `<tbody>` with one row per ETF.
+          - Both ETF Name and Symbol must be **clickable links** using:
+            `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><TEXT HERE></a>`
+          - Wrap or truncate long Key Search Insight text using  
+            `<td style="max-width:300px; word-wrap:break-word;">`.
+
+    3. Generate the **Summary Block (HTML ONLY)**:
+      - This summary must appear **directly after the table** inside the same HTML output.
+      - Include an exciting greeting! and a brief 1–2 sentence <MARKET SUMMARY> explaining recent news, market sentiment, tech trends, etc.
+      - For each Sector Group, include:
+          - A short sector summary.
+          - Exactly **1 sentence** per recommended ETF.
+          - ETF symbols must be **bold and clickable**, using:  
+            `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><strong><SYMBOL HERE></strong></a>`
+          - Use a friendly, conversational tone.
+          - Include **specific real-world news**:  
+            market trends, Fed policy, consumer demand shifts, geopolitics, supply chain issues, etc.
+          - Incorporate **recent events (within last few weeks)** such as:
+              - central bank/inflation updates
               - major geopolitical tensions or elections
-              - breakthroughs or major announcements in **AI, robotics, semiconductors, or clean energy**
-              - government funding, trade developments, or regulation changes that affect key sectors
-      
+              - breakthroughs in AI, robotics, semiconductors, clean energy
+              - government funding, regulation changes, or trade shifts
+
       **Summary Block HTML structure example:**
       ```html
       <div class="summary">
-      <h2>Market Chat:</h2>
-      <p><MARKET SUMMARY HERE></p>
-      
-      <p><strong><SECTOR GROUP HERE> (<a href="https://finance.yahoo.com/quote/<SYMBOL1>/" target="_blank"><strong>SYMBOL1</strong></a>, <a href="https://finance.yahoo.com/quote/<SYMBOL2>/" target="_blank"><strong>SYMBOL2</strong></a>):</strong> <SECTOR SUMMARY, NEWS, BUY REASONING HERE></p>
-      ...
-      </div>  
-      ```
-  
-    4. At the very end of the HTML, include a list of sources used for your searches:
-      <div class="sources" style="margin-top:10px;font-size:13px;">
-        Sources: <LIST OF SEARCH SOURCES HERE>
+        <h2>Market Chat:</h2>
+        <p><MARKET SUMMARY HERE></p>
+
+        <p>
+          <strong><SECTOR GROUP HERE> 
+            (<a href="https://finance.yahoo.com/quote/<SYMBOL1>/" target="_blank"><strong>SYMBOL1</strong></a>, 
+             <a href="https://finance.yahoo.com/quote/<SYMBOL2>/" target="_blank"><strong>SYMBOL2</strong></a>):
+          </strong> 
+          <SECTOR SUMMARY, NEWS, BUY REASONING HERE>
+        </p>
+        ...
       </div>
-  
+      ```
+
   ---
   
   Dataset:
+  

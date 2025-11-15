@@ -213,11 +213,9 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
     # --- Extract table and summary blocks in any order ---
     table_match = re.search(r'(<table.*?</table>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
     summary_match = re.search(r'(<div[^>]*class=["\']summary["\'][^>]*>.*?</div>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
-    sources_match = re.search(r'(<div[^>]*class=["\']sources["\'][^>]*>.*?</div>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
 
     gemini_table_html = table_match.group(1).strip() if table_match else ""
     gemini_summary = summary_match.group(1).strip() if summary_match else ""
-    gemini_sources = sources_match.group(1).strip() if sources_match else ""
 
     # --- Fallbacks ---
     if not gemini_table_html and "<table" in final_recommendations:
@@ -241,7 +239,6 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
     html_output = html_output.replace("<!--RECOMMENDATIONS_TABLE_HERE-->", gemini_table_html)
     html_output = html_output.replace("<!--RECOMMENDATIONS_SUMMARY_HERE-->", gemini_summary)
     html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", top_etfs_html_table)
-    html_output = html_output.replace("<!--SOURCES_HERE-->", gemini_sources)
     html_output = html_output.replace("<!--MODEL_USED_HERE-->", model_used)
 
     # --- Write final index.html ---

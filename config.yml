@@ -18,19 +18,17 @@ excluded_keywords: [
   'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
   'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil'
 ]
-min_52_week_change: 23
-min_3_month_return: 5
-day_50_average_buffer: 0.94
+min_52_week_change: 20
+min_3_month_return: 4
+day_50_average_buffer: 0.95
 day_200_average_buffer: 0.98
 max_retries: 4
-initial_delay: 15
-model: gemini-2.5-flash
+initial_delay: 10
+model_primary: gemini-2.5-flash
+model_fallback: gemini-2.5-flash-lite
 
 prompt_selection: |
   You are an investment analyst specializing in recommending U.S. ETFs.
-
-  Your task:
-    You are an investment analyst specializing in recommending U.S. ETFs.
 
   Your task:
     1. You will be given a **DataFrame containing only the ETFs to consider**. You must use **only these ETFs** — do **not** include, search for, or reference any ETFs that are not in the DataFrame under any circumstances.
@@ -80,19 +78,23 @@ prompt_recommendation: |
     **Sector Group | ETF Name | Symbol | 52 Wk Change (%) | 3 Mo Return (%)**
   
   Your job is to:
-    1. Run 3–4 general searches to understand the current global and macroeconomic backdrop shaping investor sentiment and sector trends.
-      Search examples:
-        - "Recent global economic and market trends this week"
-        - "Latest breakthroughs in technology, AI, robotics, and semiconductors"
-        - "Recent clean energy and renewable investment updates"
-        - "Current geopolitical tensions, defense spending, and inflation data"
-      From these, extract key insights such as:
-        - Central bank policies, inflation expectations, or rate guidance
-        - Breakthroughs or major announcements in AI, robotics, or semiconductors
-        - Clean energy, uranium, or resource investment trends
-        - Geopolitical events, defense spending, or trade developments
+    1. Perform a broad, unbiased investigation of the current stock market environment.
+      - First, determine the overall direction and mood of the U.S. and global equity markets over the past 5–7 days:
+          - Are major indices (S&P 500, Nasdaq, Russell 2000, Europe, China, etc.) generally rising, falling, or range-bound?
+          - What is the prevailing narrative or sentiment right now (risk-on, risk-off, rotation, etc.)?
+      - Identify which major sectors and themes are currently leading or lagging the market. Look especially for:
+          - The top performing S&P 500 sectors this week and this month
+          - Any sharp rotations (e.g., from growth to value, from tech to energy/financials, etc.)
+          - Emerging or re-emerging themes that analysts and financial media are talking about right now
+      - Run several broad searches (avoid narrow preconceived themes) such as:
+          - "stock market performance and sector rotation last 7 days"
+          - "what’s driving the stock market today/this week"
+          - "strongest and weakest S&P 500 sectors right now"
+          - "current investor sentiment and market breadth"
+          - "major macroeconomic or policy events affecting markets this week"
+      - Only after establishing the actual current winners, dig deeper into the specific drivers behind the best performing sectors (earnings, policy changes, commodity moves, geopolitical developments, technological breakthroughs, etc.).
       Use these insights to inform the broader **market summary** and connect them to the relevant ETF sectors later.
-
+  
     ---
     **IMPORTANT:**  
     **All content generated for Steps 2 and 3 must appear *inside a single continuous HTML output block*.  
@@ -118,22 +120,18 @@ prompt_recommendation: |
             `<td style="max-width:300px; word-wrap:break-word;">`.
 
     3. Generate the **Summary Block (HTML ONLY)**:
-      - This summary must appear **directly after the table** inside the same HTML output.
-      - Include an exciting greeting! and a brief 1–2 sentence <MARKET SUMMARY> explaining recent news, market sentiment, tech trends, etc.
-      - For each Sector Group, include:
-          - A short sector summary.
-          - Exactly **1 sentence** per recommended ETF.
-          - ETF symbols must be **bold and clickable**, using:  
-            `<a href="https://finance.yahoo.com/quote/<SYMBOL HERE>/" target="_blank"><strong><SYMBOL HERE></strong></a>`
-          - Use a friendly, conversational tone.
-          - Include **specific real-world news**:  
-            market trends, Fed policy, consumer demand shifts, geopolitics, supply chain issues, etc.
-          - Incorporate **recent events (within last few weeks)** such as:
-              - central bank/inflation updates
-              - major geopolitical tensions or elections
-              - breakthroughs in AI, robotics, semiconductors, clean energy
-              - government funding, regulation changes, or trade shifts
-
+      - This block must appear directly after the table in the final HTML output (no extra text before or after the HTML).
+      - Start with an exciting, friendly greeting!
+      - Include a short 1–2 sentence <MARKET SUMMARY> that accurately reflects whether the market is currently rising, falling, or mixed, plus the dominant mood and the single biggest driver or theme of the past 5–10 days.
+      - For each Sector Group in the recommendations:
+          - Write a brief, upbeat sector summary (2–3 sentences max).
+          - Provide **exactly one sentence** per recommended ETF explaining why it is attractive **right now**.
+          - Make every ETF symbol bold and clickable using this exact format:  
+            `<a href="https://finance.yahoo.com/quote/<SYMBOL>/" target="_blank"><strong><SYMBOL></strong></a>`
+          - Use a warm, conversational, and slightly enthusiastic tone (like you’re telling a friend about a great opportunity).
+          - Weave in **specific, real, timely drivers** that are actually moving markets this week/month (earnings surprises, policy announcements, commodity moves, regulatory shifts, macroeconomic data releases, major mergers, supply/demand shocks, etc.).
+  
+  
       **Summary Block HTML structure example:**
       ```html
       <div class="summary">
@@ -155,3 +153,86 @@ prompt_recommendation: |
   
   Dataset:
   
+prompt_combined: |
+  You are an expert U.S. ETF investment analyst with real-time web search capability.
+
+  You will receive a DataFrame containing a pre-filtered list of strong-performing U.S. ETFs with momentum metrics.
+
+  Your task is to produce one perfect HTML recommendation page in a single response.
+
+  ### PHASE 1 – Sector Grouping Only (internal step)
+  From the provided data:
+  1. For each ETF, infer its primary sector or theme **solely from its name** (e.g., Technology, Financials, Healthcare, Energy, Industrials & Defense, Consumer Discretionary/Staples, Utilities & Infrastructure, Materials & Resources, Real Estate, etc.).
+  2. Group the ETFs into logical, clearly named **Sector Groups** that make intuitive sense.
+  3. Exclude any ETF that is obviously international, emerging-market, or single-country focused.
+
+  ### PHASE 2 – Fresh Market Research (must do this before selecting anything)
+  Perform a broad, unbiased investigation of the current U.S. stock market (past 5–10 days only):
+  - Determine overall market direction and sentiment (risk-on / risk-off / rotation).
+  - Identify the top performing S&P 500 sectors this week and this month.
+  - Find the dominant themes, narratives, or events driving performance right now.
+  - Use broad searches only, e.g.:
+    • "strongest and weakest S&P 500 sectors this month"
+    • "stock market sector rotation last 7 days"
+    • "what’s driving the stock market this week"
+    • "current investor sentiment and market leaders"
+  - Only after this research is complete, decide which of your Sector Groups align with the actual current market leaders.
+
+  ### PHASE 3 – Final Selection & HTML Output
+  After completing Phase 2 market research:
+    - Use the market insights as your primary guide to select up to 10 ETFs (max 2 per Sector Group) from the dataset, prioritizing those in currently leading sectors/themes with strong 52 Wk Change (%) and 3 Mo Return (%).
+    - Amonst the 10 selections, also include 1–2 ETFs from the data that are proven long-term leaders, even if their sector or performance isn't the absolute hottest this week, and indicate they are stable picks in the summaries.
+    - For each initial pick, perform quick targeted searches (e.g., "recent news on [ETF Symbol] performance this month" or "[Sector Group] ETF outlook this week") to validate and gather timely drivers.
+    - Revise your selections if the searches reveal stronger alternatives in the dataset or confirm a pick is underperforming due to recent events — aim for the most compelling, data-backed choices.
+    - Generate one concise "Key Search Insight" sentence per ETF based on your validation searches.
+
+  ### FINAL OUTPUT RULES (NON-NEGOTIABLE)
+  Your entire response must be **100% valid, clean HTML only** — nothing else.
+  - No explanations, no JSON, no markdown, no code blocks, no text outside the HTML.
+  - Start directly with the <table> and end with the closing </div>.
+  - If anything appears before <table> or after </div>, the task fails.
+  
+  ### REQUIRED HTML STRUCTURE (MUST FOLLOW EXACTLY)
+
+  1. Recommendations Table (MUST be valid HTML table structure):
+   • Start with: <table class="recommendations-table">
+   • Always include a complete <thead> section containing exactly one <tr> with these six <th> cells in this order:
+        <th>Sector Group</th>
+        <th>ETF Name</th>
+        <th>Symbol</th>
+        <th>52 Wk Change (%)</th>
+        <th>3 Mo Return (%)</th>
+        <th>Key Search Insight</th>
+   • Always include a <tbody> section
+   • Inside <tbody>, create one <tr> per selected ETF containing exactly six <td> cells in the same order
+   • In each row:
+        – ETF Name cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">Full ETF Name</a>
+        – Symbol cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">SYMBOL</a>
+        – Key Search Insight cell: use style="max-width:320px; word-wrap:break-word; white-space:normal;"
+   • Never place text, comments, or extra elements inside or between <thead> and <tbody>
+  
+  2. Summary Block (immediately after the table — no text or line breaks in between):
+    • Wrap entire summary in <div class="summary">
+    • First: <h2>Market Chat:</h2>
+    • Then: one <p> containing a short, real-time MARKET SUMMARY (1–2 sentences) that **must include**:
+          - An exciting, friendly greeting!
+          – S&P 500 % change today or this week (e.g., “up 0.7%”, “down 1.1%”, “flat”)
+          – Current market mood (risk-on, risk-off, rotational, etc.)
+          – The dominant real-world driver right now
+    • Then, for **each Sector Group** that appears in the table, create **one dedicated <p> block** using this **exact format**:
+      
+      <p>
+        <strong>Sector Group Name (
+          <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST</strong></a>,
+          <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND</strong></a>
+        ):</strong>
+        Brief upbeat sector context sentence.
+        Specific timely driver or news this week.
+        Buy reasoning for each ETF.
+      </p>
+    
+    • Use warm, friendly, enthusiastic tone — like texting a friend about a hot opportunity
+    • Make every ETF symbol bold and clickable using this exact format:  
+            `<a href="https://finance.yahoo.com/quote/<SYMBOL>/" target="_blank"><strong><SYMBOL></strong></a>`
+
+  Dataset:

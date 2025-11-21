@@ -16,7 +16,15 @@ jobs:
     steps:
       # Step 1: Checkout repository
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          # Retry up to 5 times, waiting 10s between attempts (exponential backoff)
+          fetch-depth: 0
+          retry: |
+            max-attempts: 3
+            backoff: exponential
+            backoff-multiplier: 2
+            initial-delay: 5s
 
       # Step 2: Set up Python
       - name: Set up Python

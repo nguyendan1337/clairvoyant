@@ -18,8 +18,8 @@ excluded_keywords: [
   'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
   'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil'
 ]
-min_52_week_change: 20
-min_3_month_return: 4
+min_52_week_change: 25
+min_3_month_return: 6
 day_50_average_buffer: 0.95
 day_200_average_buffer: 0.98
 max_retries: 4

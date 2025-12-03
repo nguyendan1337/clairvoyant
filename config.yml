@@ -14,9 +14,9 @@ excluded_keywords: [
   'Covered Call', 'Strategy', 'Derivative', 'Income', 'Bond', 'Futures',
   'Smallcap', 'Microcap', 'Factor', 'Volatility', 'ESG', 'Carbon',
   # Added keywords for foreign/non-US ETFs
-  'International', 'Foreign', 'Ex-US', 'Europe', 'Asia', 'Emerging Market',
+  'International', 'Foreign', 'Ex-US', 'Europe', 'Euro', 'Asia', 'Emerging Market',
   'Japan', 'China', 'India', 'Latin America', 'World', 'Developed Market',
-  'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil'
+  'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil', 'Austria'
 ]
 min_52_week_change: 23
 min_3_month_return: 6

@@ -1,5 +1,8 @@
-df columns
+etf df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', , 'YTD Return', '52 WkChange %', '52 Wk Range']
+
+stock df columns
+['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', 'Avg Vol (3M)', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %', '52 Wk Range']
 
 2️⃣ Ignore index.html changes on other branches
 After creating a branch:

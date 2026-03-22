@@ -1,5 +1,5 @@
 etf df columns
-['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', , 'YTD Return', '52 WkChange %', '52 Wk Range']
+['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', '50 DayAverage', '200 DayAverage', '3 Month Return', 'YTD Return', '52 WkChange %', '52 Wk Range']
 
 stock df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', 'Avg Vol (3M)', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %', '52 Wk Range']

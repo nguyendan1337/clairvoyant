@@ -376,9 +376,9 @@ def score_qvm(df, top_n=100, weights=None):
 
     # --- MOMENTUM SCORE ---
     momentum_weights = {
-        '3M Return': 0.3,
-        '6M Return': 0.3,
-        '9M Return': 0.2,
+        '3M Return': 0.2,
+        '6M Return': 0.35,
+        '9M Return': 0.25,
         '1Y Return': 0.2
     }
     existing_momentum = [c for c in momentum_weights if c in df.columns]
@@ -502,7 +502,7 @@ minimal_cols = ['Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %
 df_minimal = df[minimal_cols].copy()
 
 df_yf = append_qvm_data_yfinance(df_minimal)
-df_scored = score_qvm(df_yf, weights={'Quality': 0.4, 'Value': 0.2, 'Momentum': 0.4})
+df_scored = score_qvm(df_yf, weights={'Quality': 0.38, 'Value': 0.25, 'Momentum': 0.37})
 
 # Take top 50–100 stocks for your watchlist
 top_stocks = df_scored.head(100)

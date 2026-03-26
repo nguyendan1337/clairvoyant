@@ -44,7 +44,6 @@ jobs:
         run: |
           echo "Running ETF Recommender..."
           python etf_recommender.py
-            - name: Run Recommender
       - name: Run Stock Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}

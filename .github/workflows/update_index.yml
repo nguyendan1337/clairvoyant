@@ -1,4 +1,4 @@
-name: Run recommender and update page
+name: Run recommenders and update page
 
 # Trigger workflow on weekdays at 7 AM (local time) + manual trigger
 on:
@@ -37,12 +37,19 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # Step 4: Run the stock recommender and update index.html
-      - name: Run Recommender
+      # Step 4: Run the stock and etf recommenders and update index.html
+      - name: Run ETF Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: |
-          echo "Running Recommender..."
+          echo "Running ETF Recommender..."
+          python etf_recommender.py
+            - name: Run Recommender
+      - name: Run Stock Recommender
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: |
+          echo "Running Stock Recommender..."
           python stock_recommender.py
 
       # Step 5: Commit and push changes back to main branch

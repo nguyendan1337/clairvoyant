@@ -1,0 +1,160 @@
+
+| Rank | Symbol | Sector | Proxy Score | 1-sentence rationale (include key web-discovered quality/value insight) | Key catalyst or risk (from search) | Conviction |
+|:-----|:-------|:-----------------------|------------:|:-------------------------------------------------------------------------------|:---------------------------------------------------------------------------------|:----------|
+| 1    | PARR   | Energy                 | 0.992       | Excellent value (low P/E) and strong momentum are underpinned by a recent profitability turnaround and effective debt management. | Catalysts: Hawaii Renewables project and share repurchases. Risk: Forecasted earnings decline for the next 3 years. | High |
+| 2    | AGX    | Industrials            | 0.985       | Exceptional quality with a debt-free balance sheet, high ROE, and robust free cash flow, fueling significant project backlog growth. | Catalyst: Strong momentum in Data Center & Critical Power market. Risk: Analyst "Hold" ratings with lower price targets suggest overvaluation. | High |
+| 3    | LRCX   | Information Technology | 0.887       | A critical player in semiconductor equipment, demonstrating consistent strong fundamentals with excellent margins and free cash flow. | Catalyst: Continued global demand for advanced semiconductor manufacturing. Risk: Cyclicality of the semiconductor industry. | High |
+| 4    | AMAT   | Information Technology | 0.867       | Essential to the semiconductor supply chain, boasting robust profitability, efficient capital management, and strong demand for its innovative solutions. | Catalyst: Investments in AI and advanced chipmaking driving equipment upgrades. Risk: Geopolitical tensions impacting global chip supply chains. | High |
+| 5    | TSM    | Information Technology | 0.814       | The undisputed global leader in semiconductor foundry services, exhibiting high quality, strong growth, and critical technological leadership. | Catalyst: Persistent demand for advanced chips across all tech sectors. Risk: Geopolitical risks related to Taiwan and intense competition. | High |
+| 6    | APH    | Information Technology | 0.778       | Consistently delivers strong financial performance in connectors and sensors, driven by diversified end markets and disciplined execution. | Catalyst: Growth in 5G, automotive electrification, and industrial IoT. Risk: Supply chain disruptions and raw material cost fluctuations. | High |
+| 7    | ASML   | Information Technology | 0.767       | Holds a near-monopoly on critical lithography equipment for advanced chip manufacturing, ensuring very high quality and sustained demand. | Catalyst: Unabated global race for cutting-edge semiconductor technology. Risk: Export controls and high R&D intensity. | High |
+| 8    | CAT    | Industrials            | 0.732       | A strong global heavy machinery manufacturer with solid fundamentals, benefiting from worldwide infrastructure development and resource demand. | Catalyst: Global infrastructure spending and recovery in commodity markets. Risk: Economic slowdowns impacting construction and mining sectors. | High |
+| 9    | GEV    | Industrials            | 0.730       | A key player in energy transition, benefiting from increasing investment in sustainable power solutions and a focused post-spin-off strategy. | Catalyst: Accelerating global push towards decarbonization and renewable energy. Risk: Execution risks related to large-scale energy projects. | Medium |
+| 10   | NEM    | Materials              | 0.702       | A leading gold producer with good value (P/E 15.74) and strong momentum, providing a defensive asset in an uncertain economic climate. | Catalyst: Continued geopolitical uncertainty and inflation concerns driving demand for safe-haven assets. Risk: Volatility in gold prices and mining operational challenges. | High |
+
+1 | PARR | Energy | 291.47 | Par Pacific Holdings demonstrates strong value with a low P/E, supported by healthy cash flow and operational efficiencies driving recent earnings beats.
+2 | NVTS | Technology | 288.84 | Navitas Semiconductor, a leader in GaN power ICs, exhibits high growth potential in a strategic market, backed by recent customer wins and design ramps, despite current unprofitability due to R&D investment.
+3 | RKLB | Industrials | 266.84 | Rocket Lab, a high-growth space industry leader, boasts a strong order backlog and government contracts, justifying its development-stage unprofitability with significant long-term growth potential.
+4 | ASTS | Communication Services | 252.94 | AST SpaceMobile is a high-growth player in space-based broadband with a strong vision and substantial market capitalization, signaling significant future potential despite being pre-revenue.
+5 | HL | Materials | 221.18 | Hecla Mining benefits from rising precious metals prices, maintaining stable operations, manageable debt, and disciplined capital allocation.
+6 | INDV | Healthcare | 210.9 | Indivior Pharmaceuticals maintains a reasonable P/E and consistent performance, underpinned by established products and strategic market positioning within the healthcare sector.
+7 | CDE | Materials | 210.14 | Coeur Mining, a diversified precious metals producer, shows operational improvements and portfolio optimization efforts that position it to benefit from commodity price tailwinds.
+8 | PACS | Healthcare | 202.35 | PACS Group, a healthcare services provider, demonstrates a solid market position and steady operations with a reasonable valuation for its sector.
+9 | LRCX | Technology | 196.29 | Lam Research is an elite semiconductor equipment leader with exceptional margins, robust free cash flow, and a critical role in supporting long-term technology trends, justifying its higher P/E.
+10 | IAG | Materials | 196.19 | IAMGOLD, a gold miner, is experiencing production ramp-ups at new mines and focusing on efficiency improvements, benefiting from the strong gold price environment.
+
+Rank | Symbol | Sector | 52 WkChange % | 1-sentence rationale
+1 | PARR | Energy | 291.47 | Strong cash flow generation from optimized refining operations and disciplined capital allocation underpin its attractive valuation.
+2 | AGX | Industrials | 289.56 | Consistent project execution in specialized infrastructure leads to robust order backlogs and steady profitability growth.
+3 | NVTS | Information Technology | 288.84 | Rapid revenue growth is driven by increasing adoption of GaN power semiconductors in high-demand consumer and industrial electronics.
+4 | ARWR | Health Care | 283.18 | Promising clinical trial results for its RNAi therapeutic pipeline and strategic partnerships signal future revenue potential.
+5 | RKLB | Industrials | 266.84 | Increasing launch cadence and growing space systems contracts underpin its leadership in the small satellite launch market.
+6 | LRCX | Information Technology | 196.29 | Market leadership in critical semiconductor manufacturing equipment is supported by ongoing innovation and robust R&D investment.
+7 | ATI | Industrials | 187.55 | Robust demand from the aerospace and defense sectors, coupled with improved operational efficiencies, is driving margin expansion and strong free cash flow.
+8 | CGAU | Materials | 186.21 | An exceptionally low P/E ratio, combined with steady gold production and healthy free cash flow, makes it an attractive value play.
+9 | WWD | Industrials | 100.99 | Strong backlog in both aerospace and industrial segments, driven by rising demand for advanced control systems, ensures future revenue growth.
+10 | GOOGL | Communication Services | 87.63 | Continued dominance in digital advertising and strong growth in Google Cloud and AI investments underpin its robust profitability.
+Generated by model: gemini-2.5-flash
+Elapsed time: 387 seconds
+
+
+['EC', 'C', 'WDC', 'TSEM', 'TPH', 'IREN', 'MU', 'STNG', 'SSL', 'ARWR', 'CRDO', 'UGP', 'FORM', 'FIGS', 'PARR', 'VISN', 'FTAI', 'ALAB', 'STX', 'TER', 'RMBS', 'ERIC', 'WPM', 'NBIS', 'CGAU', 'GS', 'LRCX', 'TTMI', 'ASX', 'HL', 'LBRT', 'PLAB', 'ARIS', 'NESR', 'VAL', 'MKSI', 'SEI', 'PACS', 'AMAT', 'DOCN', 'CENX', 'AG', 'CAH', 'KLAC', 'ZIM', 'VRT', 'KRMN', 'MTSI', 'AMKR', 'NXT', 'DINO', 'SCCO', 'ATI', 'CDE', 'TIGO', 'IAG', 'TS', 'LEU', 'FIVE', 'APA', 'TSM', 'OR', 'CF', 'AU', 'GLW', 'SQM', 'NVDA', 'EQNR', 'CSTM', 'DHT', 'VLO', 'NE', 'BVN', 'B', 'BG', 'ACMR', 'MT', 'CGNX', 'KMT', 'WBD', 'KGC', 'VALE', 'CVE', 'OII', 'KEYS', 'BTSG', 'AA', 'SSRM', 'INDV', 'WDS', 'MOD', 'BWA', 'WFRD', 'NEM', 'SU', 'VIST', 'MGA', 'CEF', 'PAAS', 'TD']
+
+<table class="recommendations-table">
+  <thead>
+    <tr>
+      <th>Sector Group</th>
+      <th>stock Name</th>
+      <th>Symbol</th>
+      <th>52 Wk Change (%)</th>
+      <th>3 Mo Return (%)</th>
+      <th>QVMScore</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Energy</td>
+      <td><a href="https://finance.yahoo.com/quote/PARR/" target="_blank">Par Pacific Holdings, Inc.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/PARR/" target="_blank">PARR</a></td>
+      <td>329.90</td>
+      <td>0.621072</td>
+      <td>0.850721</td>
+    </tr>
+    <tr>
+      <td>Energy</td>
+      <td><a href="https://finance.yahoo.com/quote/VAL/" target="_blank">Valaris Limited</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VAL/" target="_blank">VAL</a></td>
+      <td>130.90</td>
+      <td>0.887008</td>
+      <td>0.625713</td>
+    </tr>
+    <tr>
+      <td>Financial Services</td>
+      <td><a href="https://finance.yahoo.com/quote/GS/" target="_blank">The Goldman Sachs Group, Inc.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GS/" target="_blank">GS</a></td>
+      <td>40.24</td>
+      <td>-0.066745</td>
+      <td>0.680677</td>
+    </tr>
+    <tr>
+      <td>Industrials</td>
+      <td><a href="https://finance.yahoo.com/quote/VRT/" target="_blank">Vertiv Holdings Co</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VRT/" target="_blank">VRT</a></td>
+      <td>173.11</td>
+      <td>0.657756</td>
+      <td>0.560545</td>
+    </tr>
+    <tr>
+      <td>Industrials</td>
+      <td><a href="https://finance.yahoo.com/quote/FTAI/" target="_blank">FTAI Aviation Ltd.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FTAI/" target="_blank">FTAI</a></td>
+      <td>100.18</td>
+      <td>0.398341</td>
+      <td>0.794799</td>
+    </tr>
+    <tr>
+      <td>Technology & Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/MU/" target="_blank">Micron Technology, Inc.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/MU/" target="_blank">MU</a></td>
+      <td>336.25</td>
+      <td>0.702156</td>
+      <td>1.017601</td>
+    </tr>
+    <tr>
+      <td>Technology & Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/WDC/" target="_blank">Western Digital Corporation</a></td>
+      <td><a href="https://finance.yahoo.com/quote/WDC/" target="_blank">WDC</a></td>
+      <td>561.48</td>
+      <td>0.675563</td>
+      <td>1.210693</td>
+    </tr>
+    <tr>
+      <td>Technology & Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/TSEM/" target="_blank">Tower Semiconductor Ltd.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/TSEM/" target="_blank">TSEM</a></td>
+      <td>316.89</td>
+      <td>0.402262</td>
+      <td>1.177709</td>
+    </tr>
+    <tr>
+      <td>Technology & Semiconductors</td>
+      <td><a href="https://finance.yahoo.com/quote/FORM/" target="_blank">FormFactor, Inc.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FORM/" target="_blank">FORM</a></td>
+      <td>185.07</td>
+      <td>0.676423</td>
+      <td>0.867313</td>
+    </tr>
+    <tr>
+      <td>Basic Materials</td>
+      <td><a href="https://finance.yahoo.com/quote/CF/" target="_blank">CF Industries Holdings, Inc.</a></td>
+      <td><a href="https://finance.yahoo.com/quote/CF/" target="_blank">CF</a></td>
+      <td>62.57</td>
+      <td>0.603867</td>
+      <td>0.517737</td>
+    </tr>
+  </tbody>
+</table>
+<div class="summary">
+  <h2>Market Chat:</h2>
+  <p>Hey there, smart investor! The market's feeling a bit "risk-off" lately, with the S&P 500 recently dropping about 1.5% this week and entering correction territory. The big news driving everything is the escalating Middle East conflict, which is sending oil prices soaring and pushing Treasury yields higher, stirring up those inflation worries again!</p>
+
+  <p>
+    <strong>Energy (<a href="https://finance.yahoo.com/quote/PARR/" target="_blank"><strong>PARR</strong></a>, <a href="https://finance.yahoo.com/quote/VAL/" target="_blank"><strong>VAL</strong></a>):</strong> This sector is absolutely on fire, being the top-performing S&P 500 sector this week with a nearly 3% gain! With geopolitical tensions escalating and oil prices surging, energy stocks are perfectly positioned to thrive in this environment. Both <a href="https://finance.yahoo.com/quote/PARR/" target="_blank"><strong>PARR</strong></a> and <a href="https://finance.yahoo.com/quote/VAL/" target="_blank"><strong>VAL</strong></a> offer fantastic growth, with <a href="https://finance.yahoo.com/quote/PARR/" target="_blank"><strong>PARR</strong></a> boasting an incredible 329.90% 52-week change and <a href="https://finance.yahoo.com/quote/VAL/" target="_blank"><strong>VAL</strong></a> delivering a stellar 88.70% 3-month return, making them compelling plays in this red-hot sector.
+  </p>
+
+  <p>
+    <strong>Financial Services (<a href="https://finance.yahoo.com/quote/GS/" target="_blank"><strong>GS</strong></a>):</strong> Even in a turbulent market, Financials were one of the few sectors to finish higher this week! <a href="https://finance.yahoo.com/quote/GS/" target="_blank"><strong>GS</strong></a> is a powerhouse, recently a top gainer on the Dow Jones, benefiting from a robust investment banking rebound, strong M&A activity, and strategic moves into private markets and AI. It’s a great pick for stability and growth, even with its recent 3-month return being slightly negative, its current drivers are truly compelling!
+  </p>
+
+  <p>
+    <strong>Industrials (<a href="https://finance.yahoo.com/quote/VRT/" target="_blank"><strong>VRT</strong></a>, <a href="https://finance.yahoo.com/quote/FTAI/" target="_blank"><strong>FTAI</strong></a>):</strong> This sector was noted as "Leading" earlier in March, showing its underlying strength. <a href="https://finance.yahoo.com/quote/VRT/" target="_blank"><strong>VRT</strong></a> is powering ahead with a fantastic 173.11% 52-week change and strong 3-month return, while <a href="https://finance.yahoo.com/quote/FTAI/" target="_blank"><strong>FTAI</strong></a> also shows impressive year-over-year gains, making them solid additions for diversified growth!
+  </p>
+
+  <p>
+    <strong>Technology & Semiconductors (<a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>MU</strong></a>, <a href="https://finance.yahoo.com/quote/WDC/" target="_blank"><strong>WDC</strong></a>, <a href="https://finance.yahoo.com/quote/TSEM/" target="_blank"><strong>TSEM</strong></a>, <a href="https://finance.yahoo.com/quote/FORM/" target="_blank"><strong>FORM</strong></a>):</strong> Despite some recent tech sector pullbacks, the AI revolution continues to drive immense demand! <a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>MU</strong></a> just blew past earnings expectations, with revenue nearly tripling year-over-year due to soaring AI memory demand. <a href="https://finance.yahoo.com/quote/WDC/" target="_blank"><strong>WDC</strong></a> is a Zacks Rank #1 "Strong Buy" due to strong data center and hyperscaler collaborations, essential for the AI era. Both <a href="https://finance.yahoo.com/quote/TSEM/" target="_blank"><strong>TSEM</strong></a> and <a href="https://finance.yahoo.com/quote/FORM/" target="_blank"><strong>FORM</strong></a> are smaller, nimble semiconductor players with phenomenal 52-week changes, making them exciting picks for explosive growth in the AI infrastructure build-out!
+  </p>
+
+  <p>
+    <strong>Basic Materials (<a href="https://finance.yahoo.com/quote/CF/" target="_blank"><strong>CF</strong></a>):</strong> Even with recent sector weakness, Basic Materials can be a smart hedge in an inflationary environment. <a href="https://finance.yahoo.com/quote/CF/" target="_blank"><strong>CF</strong></a>, a leader in agricultural products, has a strong 3-month return and a decent QVM score, positioning it well to benefit from rising commodity prices and global food demand.
+  </p>
+</div>

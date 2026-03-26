@@ -334,31 +334,88 @@ def append_qvm_data_yfinance(df):
 
 
 
-def score_qvm_clean(df, top_n=100):
+def score_qvm(df, top_n=100, weights=None):
     """
-    Score and rank stocks using QVM, keeping only essential columns.
-    Returns top_n stocks or fewer if the DataFrame is smaller.
+    Score and rank stocks using QVM with custom weights.
+    Handles missing columns and percentage returns.
+
+    weights: dict with keys 'Quality', 'Value', 'Momentum' summing to 1.
+             Example: {'Quality': 0.4, 'Value': 0.2, 'Momentum': 0.4}
     """
+    import numpy as np
+    import pandas as pd
 
     df = df.copy()
 
+    # Default equal weights if none provided
+    if weights is None:
+        weights = {'Quality': 0.33, 'Value': 0.33, 'Momentum': 0.33}
+
     # --- QUALITY SCORE ---
     quality_metrics = ['ROE', 'ROA', 'ProfitMargin', 'GrossMargin', 'CurrentRatio', 'InterestCoverage']
-    df['QualityScore'] = df[quality_metrics].mean(axis=1, skipna=True)
+    existing_quality = [c for c in quality_metrics if c in df.columns]
+    if existing_quality:
+        # Normalize each metric to 0–100 for balance
+        df_quality = df[existing_quality]
+        df_quality_norm = df_quality.apply(lambda col: (col - col.min()) / (col.max() - col.min()) * 100 if col.max() != col.min() else 50)
+        df['QualityScore'] = df_quality_norm.mean(axis=1, skipna=True)
+    else:
+        df['QualityScore'] = np.nan
 
     # --- VALUE SCORE ---
     value_metrics = ['PE', 'PEG', 'PriceToBook', 'EV_EBITDA', 'EV_Revenue']
-
-    # Invert each column individually to make lower = better
-    df_value_inv = df[value_metrics].apply(lambda col: 1/col.replace(0, np.nan))
-    df['ValueScore'] = df_value_inv.mean(axis=1, skipna=True)
+    existing_value = [c for c in value_metrics if c in df.columns]
+    if existing_value:
+        # Invert so lower = better
+        df_value_inv = df[existing_value].apply(lambda col: 1/col.replace(0, np.nan))
+        # Normalize to 0–100
+        df_value_norm = df_value_inv.apply(lambda col: (col - col.min()) / (col.max() - col.min()) * 100 if col.max() != col.min() else 50)
+        df['ValueScore'] = df_value_norm.mean(axis=1, skipna=True)
+    else:
+        df['ValueScore'] = np.nan
 
     # --- MOMENTUM SCORE ---
-    momentum_metrics = ['3M Return', '6M Return', '9M Return', '1Y Return']
-    df['MomentumScore'] = df[momentum_metrics].mean(axis=1, skipna=True)
+    momentum_weights = {
+        '3M Return': 0.5,
+        '6M Return': 0.3,
+        '9M Return': 0.1,
+        '1Y Return': 0.1
+    }
+    existing_momentum = [c for c in momentum_weights if c in df.columns]
 
-    # --- COMPOSITE QVM SCORE ---
-    df['QVMScore'] = df[['QualityScore', 'ValueScore', 'MomentumScore']].mean(axis=1, skipna=True)
+    if existing_momentum:
+        df_momentum = df[existing_momentum].copy()
+
+        # 1️⃣ Remove extreme losers (3M Return < -10%)
+        extreme_negative_cap = -10
+        if '3M Return' in df_momentum.columns:
+            df = df[df['3M Return'] >= extreme_negative_cap]
+            df_momentum = df_momentum.loc[df.index]  # sync with filtered df
+
+        # 2️⃣ Cap temporarily down stocks (3M Return >= -10% but negative)
+        momentum_negative_cap = -5
+        if '3M Return' in df_momentum.columns:
+            df_momentum['3M Return'] = df_momentum['3M Return'].clip(lower=momentum_negative_cap)
+
+        # Compute weighted momentum
+        weighted_momentum = sum(df_momentum[col] * weight for col, weight in momentum_weights.items() if col in df_momentum.columns)
+
+        # Normalize to 0–100
+        min_val = weighted_momentum.min()
+        max_val = weighted_momentum.max()
+        if max_val != min_val:
+            df['MomentumScore'] = (weighted_momentum - min_val) / (max_val - min_val) * 100
+        else:
+            df['MomentumScore'] = 50
+    else:
+        df['MomentumScore'] = np.nan
+
+    # --- COMPOSITE QVM SCORE WITH WEIGHTS ---
+    df['QVMScore'] = (
+            df['QualityScore'] * weights.get('Quality', 0) +
+            df['ValueScore'] * weights.get('Value', 0) +
+            df['MomentumScore'] * weights.get('Momentum', 0)
+    )
 
     # --- Sort and select top_n stocks ---
     df = df.sort_values('QVMScore', ascending=False)
@@ -427,6 +484,7 @@ url = config["url"]
 min_52_week_change = config["min_52_week_change"]
 
 df = fetch_all_stock_pages_from_url(url, min_52_week_change)
+df = df.drop_duplicates()
 
 # Filter rules (adjust thresholds as you like)
 df = df[
@@ -444,7 +502,7 @@ minimal_cols = ['Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %
 df_minimal = df[minimal_cols].copy()
 
 df_yf = append_qvm_data_yfinance(df_minimal)
-df_scored = score_qvm_clean(df_yf)
+df_scored = score_qvm(df_yf, weights={'Quality': 0.4, 'Value': 0.2, 'Momentum': 0.4})
 
 # Take top 50–100 stocks for your watchlist
 top_stocks = df_scored.head(100)

@@ -29,7 +29,7 @@ prompt: |
 
     ### PHASE 3 – Final Selection & HTML Output
     After completing Phase 2 market research:
-      - Use the market insights as your primary guide to select up to 10 stocks (max 2 per Sector Group) from the dataset, prioritizing those in currently leading sectors/themes with higher QVMScores and 52 Wk Change (%) and positive 3 Mo Return (%).
+      - Use the market insights as your primary guide to select 10 stocks (max 2 per Sector Group) from the dataset, prioritizing those in currently leading sectors/themes with higher QVMScores and 52 Wk Change (%) and positive 3 Mo Return (%).
       - For each initial pick, perform quick targeted searches (e.g., "recent news on [stock Symbol] performance this month" or "[Sector Group] stock outlook this week") to validate and gather timely drivers.
       - Revise your selections if the searches reveal stronger alternatives in the dataset or confirm a pick is underperforming due to recent events — aim for the most compelling, data-backed choices.
 

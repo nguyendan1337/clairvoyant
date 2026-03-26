@@ -376,10 +376,10 @@ def score_qvm(df, top_n=100, weights=None):
 
     # --- MOMENTUM SCORE ---
     momentum_weights = {
-        '3M Return': 0.5,
+        '3M Return': 0.3,
         '6M Return': 0.3,
-        '9M Return': 0.1,
-        '1Y Return': 0.1
+        '9M Return': 0.2,
+        '1Y Return': 0.2
     }
     existing_momentum = [c for c in momentum_weights if c in df.columns]
 

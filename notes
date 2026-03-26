@@ -4,6 +4,10 @@ etf df columns
 stock df columns
 ['Symbol', 'Name', '', 'Price', 'Change', 'Change %', 'Volume', 'Avg Vol (3M)', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %', '52 Wk Range']
 
+You might also consider dynamic weighting, e.g., adjusting weights based on market conditions:
+Bull markets → more momentum
+Bear markets → more quality
+
 2️⃣ Ignore index.html changes on other branches
 After creating a branch:
 # Example: create a new feature branch

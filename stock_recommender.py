@@ -3,30 +3,77 @@ import re
 import time
 import yaml
 import requests
+import numpy as np
 import pandas as pd
+import yfinance as yf
 from google import genai
-import concurrent.futures
-from datetime import datetime
 from bs4 import BeautifulSoup
+from datetime import datetime
 from google.genai import types
 
 
 
-def extract_first_number(s):
-    """Extract the first float number from a string."""
-    match = re.search(r'-?\d+\.?\d*', str(s))
-    return float(match.group()) if match else None
+def extract_number_with_suffix(s):
+    if s is None:
+        return None
+
+    s = str(s).strip().upper()
+
+    if s in ["N/A", "NONE", ""]:
+        return None
+
+    match = re.search(r'-?\d+\.?\d*', s)
+    if not match:
+        return None
+
+    num = float(match.group())
+
+    if 'T' in s:
+        num *= 1e12
+    elif 'B' in s:
+        num *= 1e9
+    elif 'M' in s:
+        num *= 1e6
+    elif 'K' in s:
+        num *= 1e3
+
+    return num
+
+def clean_52wk_change(s):
+    """Robust cleaner for '52 Wk Change %' values like '+2,734.88%' or '−12.34%' """
+    if pd.isna(s) or not isinstance(s, str):
+        return None
+    s = s.replace(',', '').replace('+', '').replace('%', '').strip()
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def clean_numeric_columns(df, cols):
+    """
+    Convert columns in `cols` to numeric values.
+    Removes '%' signs and extracts first number from string if needed.
+    """
+    for col in cols:
+        if col in df.columns:
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.replace('%', '', regex=True)
+                .apply(extract_number_with_suffix)
+            )
+    return df
 
 
 
 def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2):
-    """Fetch one ETF page with retries and delay, supports pagination for Yahoo Finance."""
     paged_url = f"{url}?start={start}&count={count}"
     headers = {
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
             'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/91.0.4472.124 Safari/537.36'
+            'Chrome/120.0.0.0 Safari/537.36'
         )
     }
     for attempt in range(1, retries + 1):
@@ -35,129 +82,98 @@ def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2):
             response.raise_for_status()
             return response.text
         except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt} failed for {paged_url}: {e}")
             if attempt < retries:
                 time.sleep(sleep)
-            else:
-                print(f"Failed to fetch {paged_url}: {e}")
-                return None
-
+    print(f"Failed to fetch {paged_url} after {retries} attempts.")
+    return None
 
 
 def parse_stock_table(html):
-    """Parse HTML table into a DataFrame."""
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find('table')
     if not table:
+        print("No <table> found in HTML.")
         return pd.DataFrame()
+
     headers = [th.get_text(strip=True) for th in table.find_all('th')]
+    # print("Detected headers:", headers)
+
     rows = []
-    for tr in table.find_all('tr')[1:]:
+    for tr in table.find_all('tr')[1:]:  # skip header row
         tds = [td.get_text(strip=True) for td in tr.find_all('td')]
         if len(tds) == len(headers):
             rows.append(tds)
+
+    if not rows:
+        print("No data rows parsed.")
     return pd.DataFrame(rows, columns=headers)
 
 
-
-def fetch_all_stock_pages_from_url(url):
-    """Fetch and parse all pages for a single ETF list URL."""
+def fetch_all_stock_pages_from_url(url, min_52_week_change=20):
     all_pages = []
     start = 0
     count = 100
+    target_col = '52 WkChange %'
+    numeric_cols = [
+        'Price', 'Change', 'Change %', 'Volume',
+        'Avg Vol (3M)', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %'
+    ]
 
     while True:
         html = fetch_single_stock_page(url, start=start, count=count)
         if not html:
-            print(f"No HTML returned for {url} at start={start}. Stopping this page.")
+            print(f"No HTML returned for start={start}. Stopping.")
             break
 
         df_page = parse_stock_table(html)
         if df_page.empty:
+            print(f"Empty page at start={start}. Stopping.")
             break
+
+        if target_col not in df_page.columns:
+            print(f"Column '{target_col}' not found at start={start}. Stopping.")
+            break
+
+        # Clean numeric columns (you need to define/implement this function)
+        df_page = clean_numeric_columns(df_page, numeric_cols)
+
+        # Drop clearly invalid rows early
+        df_page = df_page[
+            df_page[target_col].notna() &
+            (df_page['Avg Vol (3M)'] > 0) &
+            (df_page['Market Cap'] > 0)
+            ]
+
+        if df_page.empty:
+            print(f"No valid rows after cleaning at start={start}. Stopping.")
+            break
+
+        # ─── Early stopping logic ────────────────────────────────
+        max_change_on_page = df_page[target_col].max()
+        if max_change_on_page < min_52_week_change:
+            print(f"Page at start={start} has max {target_col} = {max_change_on_page:.2f}% "
+                  f"which is below threshold {min_52_week_change}%. Stopping early.")
+            break
+        # ─────────────────────────────────────────────────────────
 
         all_pages.append(df_page)
 
+        # Standard last-page check
         if len(df_page) < count:
-            break  # last page reached
+            print(f"Last page reached at start={start} (fewer than {count} rows).")
+            break
 
         start += count
-        time.sleep(1.5)  # polite delay between paginated calls
+        time.sleep(1.5)  # polite delay
 
-    return pd.concat(all_pages, ignore_index=True) if all_pages else pd.DataFrame()
+    if not all_pages:
+        return pd.DataFrame()
 
-
-
-def concurrently_fetch_stock_data_from_all_urls(urls):
-    """Fetch ETF data from multiple URLs concurrently."""
-    all_dfs = []
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_url = {executor.submit(fetch_all_stock_pages_from_url, url): url for url in urls}
-
-        for future in concurrent.futures.as_completed(future_to_url):
-            url = future_to_url[future]
-            try:
-                df_url = future.result()
-                if not df_url.empty:
-                    print(f"Completed fetching from {url}, {len(df_url)} ETFs found.")
-                    all_dfs.append(df_url)
-                else:
-                    print(f"No data found for {url}.")
-            except Exception as e:
-                print(f"Error fetching data from {url}: {e}")
-
-    if not all_dfs:
-        print("No ETF data retrieved from any page.")
-        exit()
-
-    # Combine all dataframes and clean up
-    df = pd.concat(all_dfs, ignore_index=True)
-    df = df.drop_duplicates(subset='Symbol', keep='first').reset_index(drop=True)
-    return df
-
-
-
-def cleanup_filter_sort_data(df):
-    # --- Clean numeric fields if present ---
-    numeric_cols = ['Price', '50 DayAverage', '200 DayAverage', '52 WkChange %', '3 MonthReturn']
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = df[col].astype(str).str.replace('%', '', regex=True).apply(extract_first_number)
-
-    # --- Remove leveraged/risky/foreign ETFs ---
-    mask = ~df['Name'].str.contains('|'.join(excluded_keywords), case=False, na=False)
-    df = df[mask]
-
-    # --- Apply growth filters ---
-    filtered_df = df[
-        (df['52 WkChange %'] > min_52_week_change) &
-        (df['Price'] >= df['50 DayAverage'] * day_50_average_buffer) &
-        (df['Price'] >= df['200 DayAverage'] * day_200_average_buffer) &
-        (df['3 MonthReturn'] > min_3_month_return)
-        ]
-
-    # --- Sort by 52-week performance ---
-    sorted_df = filtered_df.sort_values(by='52 WkChange %', ascending=False).copy()
-    sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
-
-    # --- Display results ---
-    print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
-    top_etfs_df = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
-    top_etfs = top_etfs_df.to_string(index=False)
-    print(top_etfs)
-
-    #add links to html table
-    top_etfs_html_df = top_etfs_df.copy()
-    top_etfs_html_df["Symbol"] = top_etfs_html_df["Symbol"].apply(
-        lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
-    )
-    top_etfs_html_df["Name"] = top_etfs_html_df.apply(
-        lambda row: f'<a href="https://finance.yahoo.com/quote/{sorted_df.loc[row.name, "Symbol"]}/" target="_blank">{row["Name"]}</a>',
-        axis=1
-    )
-    top_etfs_html_table = top_etfs_html_df.to_html(escape=False, index=False, classes="data-table", border=0)
-
-    return top_etfs, top_etfs_html_table
+    # Final concatenation + sort + threshold filter (just in case)
+    df = pd.concat(all_pages, ignore_index=True)
+    df = df[df[target_col] >= min_52_week_change]
+    return df.sort_values(target_col, ascending=False).reset_index(drop=True)
 
 
 
@@ -209,7 +225,161 @@ def call_gemini(client, model_primary, model_fallback, gemini_config, prompt):
 
 
 
-def update_html_page(final_recommendations, top_etfs_html_table, model_used):
+def append_qvm_data_yfinance(df):
+    """
+    Enrich an existing DataFrame with QVM metrics using yfinance.
+    Expects df to have a "Symbol" column.
+    Appends Sector along with Quality, Value, and Momentum metrics.
+    Optimized with batch Tickers API to reduce network calls.
+    """
+    df = df.copy()
+    tickers = df["Symbol"].tolist()
+
+    # ---- Download price history for momentum ----
+    price_data = yf.download(
+        tickers,
+        period="1y",
+        interval="1d",
+        group_by="ticker",
+        auto_adjust=True,
+        progress=False
+    )
+
+    data_map = {}
+
+    # ---- Fetch info for all tickers in batch ----
+    tickers_batch = yf.Tickers(" ".join(tickers))
+    for ticker in tickers:
+        try:
+            info = tickers_batch.tickers[ticker].info
+
+            # ---- SECTOR ----
+            sector = info.get("sector", "Unknown")
+
+            # ---- QUALITY ----
+            roe = info.get("returnOnEquity")
+            roa = info.get("returnOnAssets")
+            profit_margin = info.get("profitMargins")
+            gross_margin = info.get("grossMargins")
+            debt_to_equity = info.get("debtToEquity")
+            current_ratio = info.get("currentRatio")
+            interest_coverage = info.get("interestCoverage")
+
+            # ---- VALUE ----
+            pe = info.get("trailingPE")
+            price_to_book = info.get("priceToBook")
+            peg_ratio = info.get("pegRatio")
+            ev = info.get("enterpriseValue")
+            ebitda = info.get("ebitda")
+            revenue = info.get("totalRevenue")
+
+            ev_ebitda = (ev / ebitda) if ev and ebitda else None
+            ev_revenue = (ev / revenue) if ev and revenue else None
+
+            # ---- MOMENTUM ----
+            try:
+                if len(tickers) == 1:
+                    df_prices = price_data
+                else:
+                    df_prices = price_data[ticker]
+
+                close = df_prices["Close"].dropna()
+
+                ret_1y = ((close.iloc[-1] / close.iloc[0]) - 1) * 100 if len(close) > 0 else None
+                ret_6m = ((close.iloc[-1] / close.iloc[-126]) - 1) * 100 if len(close) > 126 else None
+                ret_3m = ((close.iloc[-1] / close.iloc[-63]) - 1) * 100 if len(close) > 63 else None
+                ret_9m = ((close.iloc[-1] / close.iloc[-189]) - 1) * 100 if len(close) > 189 else None
+
+            except Exception:
+                ret_1y = ret_6m = ret_3m = ret_9m = None
+
+            data_map[ticker] = {
+                "Sector": sector,
+                # Quality
+                "ROE": roe,
+                "ROA": roa,
+                "ProfitMargin": profit_margin,
+                "GrossMargin": gross_margin,
+                "DebtToEquity": debt_to_equity,
+                "CurrentRatio": current_ratio,
+                "InterestCoverage": interest_coverage,
+                # Value
+                "PE": pe,
+                "PriceToBook": price_to_book,
+                "PEG": peg_ratio,
+                "EV_EBITDA": ev_ebitda,
+                "EV_Revenue": ev_revenue,
+                # Momentum
+                "3M Return": ret_3m,
+                "6M Return": ret_6m,
+                "9M Return": ret_9m,
+                "1Y Return": ret_1y
+            }
+
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+            data_map[ticker] = {"Sector": "Unknown"}
+
+    # ---- Map metrics back to df ----
+    all_columns = [
+        "Sector", "ROE", "ROA", "ProfitMargin", "GrossMargin", "DebtToEquity",
+        "CurrentRatio", "InterestCoverage", "PE", "PriceToBook", "PEG",
+        "EV_EBITDA", "EV_Revenue", "3M Return", "6M Return", "9M Return", "1Y Return"
+    ]
+
+    for col in all_columns:
+        df[col] = df["Symbol"].map(lambda x: data_map.get(x, {}).get(col))
+
+    return df
+
+
+
+def score_qvm_clean(df, top_n=100):
+    """
+    Score and rank stocks using QVM, keeping only essential columns.
+    Returns top_n stocks or fewer if the DataFrame is smaller.
+    """
+
+    df = df.copy()
+
+    # --- QUALITY SCORE ---
+    quality_metrics = ['ROE', 'ROA', 'ProfitMargin', 'GrossMargin', 'CurrentRatio', 'InterestCoverage']
+    df['QualityScore'] = df[quality_metrics].mean(axis=1, skipna=True)
+
+    # --- VALUE SCORE ---
+    value_metrics = ['PE', 'PEG', 'PriceToBook', 'EV_EBITDA', 'EV_Revenue']
+
+    # Invert each column individually to make lower = better
+    df_value_inv = df[value_metrics].apply(lambda col: 1/col.replace(0, np.nan))
+    df['ValueScore'] = df_value_inv.mean(axis=1, skipna=True)
+
+    # --- MOMENTUM SCORE ---
+    momentum_metrics = ['3M Return', '6M Return', '9M Return', '1Y Return']
+    df['MomentumScore'] = df[momentum_metrics].mean(axis=1, skipna=True)
+
+    # --- COMPOSITE QVM SCORE ---
+    df['QVMScore'] = df[['QualityScore', 'ValueScore', 'MomentumScore']].mean(axis=1, skipna=True)
+
+    # --- Sort and select top_n stocks ---
+    df = df.sort_values('QVMScore', ascending=False)
+    df_top = df.head(min(top_n, len(df)))
+
+    # --- Keep only essential columns ---
+    essential_columns = [
+        'Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %',
+        'Avg Vol (3M)', 'Sector', 'ROE', 'ROA', 'ProfitMargin', 'GrossMargin',
+        'DebtToEquity', 'CurrentRatio', 'InterestCoverage', 'PE', 'PriceToBook',
+        'PEG', 'EV_EBITDA', 'EV_Revenue', '3M Return', '6M Return',
+        '9M Return', '1Y Return', 'QualityScore', 'ValueScore', 'MomentumScore', 'QVMScore'
+    ]
+
+    df_top = df_top[[c for c in essential_columns if c in df_top.columns]]
+
+    return df_top.reset_index(drop=True)
+
+
+
+def update_html_page(final_recommendations, df_html_table, template_name, display_page, model_used):
     # --- Extract table and summary blocks in any order ---
     table_match = re.search(r'(<table.*?</table>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
     summary_match = re.search(r'(<div[^>]*class=["\']summary["\'][^>]*>.*?</div>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
@@ -230,7 +400,7 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
         gemini_summary = final_recommendations[start:end]
 
     # --- Read HTML template ---
-    with open("template.html", "r", encoding="utf-8") as f:
+    with open(template_name, "r", encoding="utf-8") as f:
         template = f.read()
 
     # --- Insert content ---
@@ -238,48 +408,74 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
     html_output = template.replace("<!--LAST_UPDATED_HERE-->", timestamp)
     html_output = html_output.replace("<!--RECOMMENDATIONS_TABLE_HERE-->", gemini_table_html)
     html_output = html_output.replace("<!--RECOMMENDATIONS_SUMMARY_HERE-->", gemini_summary)
-    html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", top_etfs_html_table)
+    html_output = html_output.replace("<!--FULL_DF_TABLE_HERE-->", df_html_table)
     html_output = html_output.replace("<!--MODEL_USED_HERE-->", model_used)
 
     # --- Write final index.html ---
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open(display_page, "w", encoding="utf-8") as f:
         f.write(html_output)
 
 
 
+# Main execution
 # Record the start time
 start_time = time.perf_counter()
 
-# Read configuration
-with open("config.yml") as f:
+with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
-urls = config["urls"]
-excluded_keywords = config["excluded_keywords"]
+url = config["url"]
 min_52_week_change = config["min_52_week_change"]
-min_3_month_return = config["min_3_month_return"]
-day_50_average_buffer = config["day_50_average_buffer"]
-day_200_average_buffer = config["day_200_average_buffer"]
-max_retries = config["max_retries"]
-initial_delay = config["initial_delay"]
-model_primary = config["model_primary"]
-model_fallback = config["model_fallback"]
 
-# --- Fetch and parse Stock data from all URLs ---
-df = concurrently_fetch_stock_data_from_all_urls(urls)
+df = fetch_all_stock_pages_from_url(url, min_52_week_change)
 
-# --- Get the top performing etfs by cleaning, filtering by keywords and performance, and sorting the data ---
-top_etfs, top_etfs_html_table = cleanup_filter_sort_data(df)
+# Filter rules (adjust thresholds as you like)
+df = df[
+    (df['Market Cap'] > 300_000_000) &  # remove microcaps < $300M
+    (df['P/E Ratio(TTM)'].notnull()) & (df['P/E Ratio(TTM)'] > 0) & (df['P/E Ratio(TTM)'] < 200) &  # avoid negative or extreme PE
+    (df['Avg Vol (3M)'] > 100_000) &  # avoid illiquid stocks
+    (df['52 WkChange %'].notnull())  # require some price history
+    ].copy()
 
-# Record the end time
-end_time = time.perf_counter()
-print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
-print("Getting Google Gemini responses...\n")
+print("\nTrash Filtered Stocks:")
+print(df[['Symbol', 'Name', '52 WkChange %']].reset_index(drop=True))
 
-# --- Pass the top etfs to Gemini to get world context and final recommendations ---
+# Assuming df is your full filtered DataFrame
+minimal_cols = ['Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %', 'Avg Vol (3M)']
+df_minimal = df[minimal_cols].copy()
+
+df_yf = append_qvm_data_yfinance(df_minimal)
+df_scored = score_qvm_clean(df_yf)
+
+# Take top 50–100 stocks for your watchlist
+top_stocks = df_scored.head(100)
+print("\nTop QVM Stocks:")
+print(top_stocks.head(15)[['Symbol', '52 WkChange %', '3M Return', 'QVMScore']])
+
+essential_columns_for_gemini = [
+    'Symbol',
+    'Name',
+    'Sector',         # Add this if available
+    'Market Cap',
+    'P/E Ratio(TTM)',
+    'ROE',
+    '52 WkChange %',
+    '3M Return',      # short-term momentum
+    'QVMScore'        # overall quantitative score
+]
+
+# Filter your df before sending to Gemini
+df_gemini = top_stocks[essential_columns_for_gemini].copy()
+symbol_list = df_gemini['Symbol'].tolist()
+print(symbol_list)
+
+df_gemini_str = df_gemini.to_string(index=False)
+prompt = config["prompt"] + df_gemini_str
+max_retries = 4
+initial_delay = 10
+# # --- Pass the top etfs to Gemini to get world context and final recommendations ---
 client, gemini_config = initialize_gemini_client()
 
-prompt_combined = config["prompt_combined"] + top_etfs
-final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt_combined)
+final_recommendations, model_used = call_gemini(client, 'gemini-2.5-flash', 'gemini-2.5-flash-lite', gemini_config, prompt)
 print("GEMINI RESPONSE:\n")
 print(final_recommendations)
 print("Generated by model: " + model_used)
@@ -287,5 +483,23 @@ print("Generated by model: " + model_used)
 end_time = time.perf_counter()
 print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
 
-# --- Update HTML page with recommendations ---
-update_html_page(final_recommendations, top_etfs_html_table, model_used)
+# # --- Update HTML page with recommendations ---
+output_columns = [
+    'Symbol',
+    'Name',
+    'Sector',         # Add this if available
+    '52 WkChange %',
+    '3M Return',      # short-term momentum
+    'QVMScore'        # overall quantitative score
+]
+df_html = df_gemini[output_columns].copy()
+df_html = df_html.sort_values(by='QVMScore', ascending=False).reset_index(drop=True)
+df_html["Symbol"] = df_html["Symbol"].apply(
+    lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
+)
+df_html["Name"] = df_html.apply(
+    lambda row: f'<a href="https://finance.yahoo.com/quote/{row["Symbol"].split(">")[1].split("<")[0]}/" target="_blank">{row["Name"]}</a>',
+    axis=1
+)
+df_html_table = df_html.to_html(escape=False, index=False, classes="recommendations-table", border=0)
+update_html_page(final_recommendations, df_html_table, "stock_page_template.html","stock_index.html", model_used)

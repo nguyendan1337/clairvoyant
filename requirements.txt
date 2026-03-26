@@ -4,3 +4,4 @@ PyYAML
 requests
 pandas
 beautifulsoup4
+yfinance

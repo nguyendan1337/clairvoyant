@@ -560,4 +560,4 @@ df_html["Name"] = df_html.apply(
     axis=1
 )
 df_html_table = df_html.to_html(escape=False, index=False, classes="recommendations-table", border=0)
-update_html_page(final_recommendations, df_html_table, "stock_page_template.html","stock_index.html", model_used)
+update_html_page(final_recommendations, df_html_table, "stock_page_template.html","index.html", model_used)

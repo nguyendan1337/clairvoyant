@@ -230,7 +230,7 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
         gemini_summary = final_recommendations[start:end]
 
     # --- Read HTML template ---
-    with open("template.html", "r", encoding="utf-8") as f:
+    with open("etf_page_template.html", "r", encoding="utf-8") as f:
         template = f.read()
 
     # --- Insert content ---
@@ -242,7 +242,7 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
     html_output = html_output.replace("<!--MODEL_USED_HERE-->", model_used)
 
     # --- Write final index.html ---
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open("etf_index.html", "w", encoding="utf-8") as f:
         f.write(html_output)
 
 
@@ -251,7 +251,7 @@ def update_html_page(final_recommendations, top_etfs_html_table, model_used):
 start_time = time.perf_counter()
 
 # Read configuration
-with open("config.yml") as f:
+with open("etf_config.yml") as f:
     config = yaml.safe_load(f)
 urls = config["urls"]
 excluded_keywords = config["excluded_keywords"]

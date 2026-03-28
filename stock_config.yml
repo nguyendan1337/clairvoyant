@@ -65,9 +65,9 @@ prompt: |
     Using the dataset and insights from Phase 2:
       1. **Initial Ranking**
         - Rank all stocks using a combined heuristic prioritizing:
-        - QVMScore (primary)
-        - 3M Return and/or 6M Return (momentum confirmation)
-        - Sector alignment with current market leaders
+          - QVMScore (primary)
+          - 3M Return and/or 6M Return (momentum confirmation)
+          - Sector alignment with current market leaders
       
       2. **Top 10 Selection (Preliminary)**
         - From the ranked pool, select up to 10 stocks:
@@ -122,16 +122,19 @@ prompt: |
     <table class="recommendations-table">
     <thead>
     <tr>
-    <th>Sector Group</th>
-    <th>stock Name</th>
     <th>Symbol</th>
+    <th>Stock Name</th>
+    <th>Sector Group</th>
     <th>52 Wk Change (%)</th>
     <th>3 Mo Return (%)</th>
     <th>QVMScore</th>
     </tr>
     </thead>
     <tbody>
-    (One row per stock)
+      - One row per stock
+      - In each row:
+        – Stock Name cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">STOCK NAME</a>
+        – Symbol cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">SYMBOL</a>
     </tbody>
     </table>
   
@@ -142,7 +145,7 @@ prompt: |
   
     <p>
       Friendly intro including:
-        - S&P 500 move (today or this week)
+        - S&P 500 % change today or this week (e.g., “up 0.7%”, “down 1.1%”, “flat”)
         - Market mood (risk-on / risk-off / rotation)
         - Dominant driver (macro/news)
     </p>
@@ -156,6 +159,8 @@ prompt: |
       - Short upbeat explanation
       - Specific real-time driver
       - Why these stocks are strong
+      - Make every Stock Symbol bold and clickable using this exact format:  
+          `<a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL</strong></a>`
       - Explicit note if risk is low / controlled
       </p>
     

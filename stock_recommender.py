@@ -622,7 +622,7 @@ if __name__ == "__main__":
     # Take top 50–100 stocks for your watchlist
     top_stocks = df.head(100)
     print("\nTop QVM Stocks:")
-    print(top_stocks.head(15)[['Symbol', '52 WkChange %', '3M Return', 'QVMScore']])
+    print(top_stocks.head(10)[['Symbol', '52 WkChange %', '3M Return', 'QVMScore']])
 
     essential_columns_for_gemini = [
         # Identity

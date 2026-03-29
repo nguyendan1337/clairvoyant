@@ -546,7 +546,6 @@ df_gemini = top_stocks[essential_columns_for_gemini].copy()
 df_gemini_str = df_gemini.to_string(index=False)
 prompt = config["prompt"] + df_gemini_str
 
-
 # # --- Pass the top etfs to Gemini to get world context and final recommendations ---
 client, gemini_config = initialize_gemini_client()
 

@@ -5,5 +5,3 @@ requests
 pandas
 beautifulsoup4
 yfinance
-requests-cache
-yfinance_cache

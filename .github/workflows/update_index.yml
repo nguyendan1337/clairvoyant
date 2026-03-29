@@ -32,29 +32,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Step 3: Restore caches (BEFORE install + run)
-      - name: Cache yfinance data
-        uses: actions/cache@v4
-        with:
-          path: cache/yfinance
-          key: yfinance-cache-${{ runner.os }}
-          restore-keys: |
-            yfinance-cache-${{ runner.os }}
-
-      - name: Cache screener API responses
-        uses: actions/cache@v4
-        with:
-          path: cache/stock_screener_cache.sqlite
-          key: screener-cache-${{ runner.os }}
-          restore-keys: |
-            screener-cache-${{ runner.os }}
-
-      # Step 4: Install dependencies if needed
+      # Step 3: Install dependencies if needed
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      # Step 5: Run the stock and etf recommenders and update index.html
+      # Step 4: Run the stock and etf recommenders and update index.html
       - name: Run ETF Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
@@ -68,7 +51,7 @@ jobs:
           echo "Running Stock Recommender..."
           python stock_recommender.py
 
-      # Step 6: Commit and push changes back to main branch
+      # Step 5: Commit and push changes back to main branch
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"

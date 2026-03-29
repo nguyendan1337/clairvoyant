@@ -4,6 +4,8 @@ url: "https://finance.yahoo.com/markets/stocks/52-week-gainers/"
 min_52_week_change: 25
 max_retries: 4
 initial_delay: 10
+model_primary: gemini-2.5-flash
+model_fallback: gemini-2.5-flash-lite
 prompt: |
   You are an expert U.S. stock investment analyst with real-time web search capability and a strong focus on risk management.
   You will receive a DataFrame containing a pre-filtered list of strong-performing U.S. stocks with the following columns:

@@ -342,8 +342,6 @@ def score_qvm(df, top_n=100, weights=None):
     weights: dict with keys 'Quality', 'Value', 'Momentum' summing to 1.
              Example: {'Quality': 0.4, 'Value': 0.2, 'Momentum': 0.4}
     """
-    import numpy as np
-    import pandas as pd
 
     df = df.copy()
 

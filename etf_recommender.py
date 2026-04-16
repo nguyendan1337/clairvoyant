@@ -117,47 +117,134 @@ def concurrently_fetch_stock_data_from_all_urls(urls):
 
 
 
+# def cleanup_filter_sort_data(df):
+#     # --- Clean numeric fields if present ---
+#     numeric_cols = ['Price', '50 DayAverage', '200 DayAverage', '52 WkChange %', '3 MonthReturn']
+#     for col in numeric_cols:
+#         if col in df.columns:
+#             df[col] = df[col].astype(str).str.replace('%', '', regex=True).apply(extract_first_number)
+#
+#     # --- Remove leveraged/risky/foreign ETFs ---
+#     mask = ~df['Name'].str.contains('|'.join(excluded_keywords), case=False, na=False)
+#     df = df[mask]
+#
+#     # --- Apply growth filters ---
+#     filtered_df = df[
+#         (df['52 WkChange %'] > min_52_week_change) &
+#         (df['Price'] >= df['50 DayAverage'] * day_50_average_buffer) &
+#         (df['Price'] >= df['200 DayAverage'] * day_200_average_buffer) &
+#         (df['3 MonthReturn'] > min_3_month_return)
+#         ]
+#
+#     # --- Sort by 52-week performance ---
+#     sorted_df = filtered_df.sort_values(by='52 WkChange %', ascending=False).copy()
+#     sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
+#
+#     # --- Display results ---
+#     print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
+#     top_etfs_df = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
+#     top_etfs = top_etfs_df.to_string(index=False)
+#     print(top_etfs)
+#
+#     #add links to html table
+#     top_etfs_html_df = top_etfs_df.copy()
+#     top_etfs_html_df["Symbol"] = top_etfs_html_df["Symbol"].apply(
+#         lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
+#     )
+#     top_etfs_html_df["Name"] = top_etfs_html_df.apply(
+#         lambda row: f'<a href="https://finance.yahoo.com/quote/{sorted_df.loc[row.name, "Symbol"]}/" target="_blank">{row["Name"]}</a>',
+#         axis=1
+#     )
+#     top_etfs_html_table = top_etfs_html_df.to_html(escape=False, index=False, classes="data-table", border=0)
+#
+#     return top_etfs, top_etfs_html_table
+
+
+
 def cleanup_filter_sort_data(df):
-    # --- Clean numeric fields if present ---
-    numeric_cols = ['Price', '50 DayAverage', '200 DayAverage', '52 WkChange %', '3 MonthReturn']
+    df = df.copy()
+
+    def debug_count(label, df):
+        print(f"{label}: {len(df)} rows")
+
+    debug_count("Start", df)
+
+    # --- Clean numeric fields ---
+    numeric_cols = ['Price', '50 DayAverage', '200 DayAverage', '52 WkChange %', '3 MonthReturn', 'Volume']
+
     for col in numeric_cols:
         if col in df.columns:
-            df[col] = df[col].astype(str).str.replace('%', '', regex=True).apply(extract_first_number)
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.replace('%', '', regex=True)
+                .str.replace(',', '', regex=True)  # IMPORTANT
+                .apply(extract_first_number)
+            )
 
-    # --- Remove leveraged/risky/foreign ETFs ---
-    mask = ~df['Name'].str.contains('|'.join(excluded_keywords), case=False, na=False)
-    df = df[mask]
+    debug_count("After numeric cleaning", df)
 
-    # --- Apply growth filters ---
-    filtered_df = df[
+    # --- Keyword filter ---
+    excluded_keywords = [
+        # Leveraged / inverse / complex / derivative
+        '2x', '3x', 'Ultra', 'Leveraged', 'Bull', 'Bear',
+        'Double', 'Triple', 'Short', 'Inverse', 'UltraShort',
+        'Daily', 'ETN', 'VIX', 'Futures',
+
+        # Foreign / non-US indicators (name-based hints)
+        'International', 'Foreign', 'Ex-US', 'Ex US',
+        'Developed Market', 'Emerging Market',
+        'Europe', 'Euro', 'Asia', 'Latin America',
+        'China', 'India', 'Japan', 'Norway', 'JPX', 'Thailand', 'Malaysia',
+        'Latin America', 'World', 'Developed Market', 'Poland', 'United Kingdom',
+        'Israel', 'Mexico', 'Hong Kong', 'Korea', 'Africa', 'Chile', 'Peru', 'Taiwan', 'Netherlands', 'Spain', 'Colombia', 'Finland', 'Brazil', 'Austria',
+
+        # Niche / strategy-style ETFs (optional but included per your intent)
+        'Covered Call', 'Option', 'Strategy', 'Target Income',
+        'WeeklyPay', 'Defined Volatility',
+
+        # Other non-core wrappers
+        'Enhanced', 'PLUS'
+    ]
+
+    df = df[~df['Name'].str.contains('|'.join(excluded_keywords), case=False, na=False)]
+    debug_count("After keyword filter", df)
+
+    # --- Drop rows missing critical fields BEFORE filtering ---
+    required_cols = ['Price', '200 DayAverage', 'Volume', '52 WkChange %', '3 MonthReturn']
+    df = df.dropna(subset=['Price', 'Volume'])  # only critical fields
+    debug_count("After dropping NaNs", df)
+
+    # --- Liquidity filter ---
+    df = df[df['Volume'] > 20_000]
+    debug_count("After volume filter", df)
+
+    # --- Trend filter (safe now) ---
+    df = df[df['Price'] >= df['200 DayAverage'] * 0.90]
+    debug_count("After trend filter", df)
+
+    # --- Momentum sanity ---
+    df = df[
         (df['52 WkChange %'] > min_52_week_change) &
-        (df['Price'] >= df['50 DayAverage'] * day_50_average_buffer) &
-        (df['Price'] >= df['200 DayAverage'] * day_200_average_buffer) &
-        (df['3 MonthReturn'] > min_3_month_return)
+        (df['3 MonthReturn'] > -5)
         ]
+    debug_count("After momentum filter", df)
 
-    # --- Sort by 52-week performance ---
-    sorted_df = filtered_df.sort_values(by='52 WkChange %', ascending=False).copy()
-    sorted_df.insert(0, 'Rank', range(1, len(sorted_df) + 1))
+    # --- Remove extreme outliers ---
+    df = df[df['52 WkChange %'] < 500]
+    debug_count("After outlier filter", df)
+
+    # --- Sort ---
+    df = df.sort_values(by='52 WkChange %', ascending=False).copy()
+    df.insert(0, 'Rank', range(1, len(df) + 1))
 
     # --- Display results ---
     print("\nCompiled Top ETFs from Yahoo Finance (sorted by 52 Week Change %):")
-    top_etfs_df = sorted_df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
+    top_etfs_df = df[['Rank', 'Name', 'Symbol', '52 WkChange %', '3 MonthReturn', 'Price', '50 DayAverage', '200 DayAverage']]
     top_etfs = top_etfs_df.to_string(index=False)
     print(top_etfs)
 
-    #add links to html table
-    top_etfs_html_df = top_etfs_df.copy()
-    top_etfs_html_df["Symbol"] = top_etfs_html_df["Symbol"].apply(
-        lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
-    )
-    top_etfs_html_df["Name"] = top_etfs_html_df.apply(
-        lambda row: f'<a href="https://finance.yahoo.com/quote/{sorted_df.loc[row.name, "Symbol"]}/" target="_blank">{row["Name"]}</a>',
-        axis=1
-    )
-    top_etfs_html_table = top_etfs_html_df.to_html(escape=False, index=False, classes="data-table", border=0)
-
-    return top_etfs, top_etfs_html_table
+    return df
 
 
 
@@ -266,9 +353,12 @@ model_fallback = config["model_fallback"]
 
 # --- Fetch and parse Stock data from all URLs ---
 df = concurrently_fetch_stock_data_from_all_urls(urls)
+print(len(df))
+# print(df.columns)
 
 # --- Get the top performing etfs by cleaning, filtering by keywords and performance, and sorting the data ---
-top_etfs, top_etfs_html_table = cleanup_filter_sort_data(df)
+# top_etfs, top_etfs_html_table = cleanup_filter_sort_data(df)
+filtered_df = cleanup_filter_sort_data(df)
 
 # Record the end time
 end_time = time.perf_counter()
@@ -276,16 +366,17 @@ print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
 print("Getting Google Gemini responses...\n")
 
 # --- Pass the top etfs to Gemini to get world context and final recommendations ---
-client, gemini_config = initialize_gemini_client()
+# client, gemini_config = initialize_gemini_client()
+#
+# prompt_combined = config["prompt_combined"] + top_etfs
+# final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt_combined)
+# print("\nGEMINI RESPONSE:\n")
+# print(final_recommendations)
+# print("Generated by model: " + model_used)
+#
+# # --- Update HTML page with recommendations ---
+# update_html_page(final_recommendations, top_etfs_html_table, model_used)
 
-prompt_combined = config["prompt_combined"] + top_etfs
-final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt_combined)
-print("GEMINI RESPONSE:\n")
-print(final_recommendations)
-print("Generated by model: " + model_used)
-
+# print elapsed time
 end_time = time.perf_counter()
 print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
-
-# --- Update HTML page with recommendations ---
-update_html_page(final_recommendations, top_etfs_html_table, model_used)

@@ -17,6 +17,8 @@ git checkout -b feature-branch
 git update-index --assume-unchanged index.html
 
 Features to add:
-- stock recommender config
+- less severe initial filtering (to allow sandisk to be recommended)
+- add 1 month performance to momentum score
+- upgrade gemini prompt for more consistent results (max 2 or 3? stocks per sector, prefer higher qvm scorers, downweight recent performers due to recent news (energy being high due to iran war but collapses after ceasefire))
 - polish
-- email maybe
+- same file, classes, abstraction, different object types for stock and etf, different configs

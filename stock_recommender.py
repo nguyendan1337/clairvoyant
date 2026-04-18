@@ -1,15 +1,13 @@
-import os
 import re
-import time
-import yaml
-import requests
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from tqdm import tqdm
 from google import genai
 from bs4 import BeautifulSoup
-from datetime import datetime
 from google.genai import types
+from datetime import datetime, timedelta, UTC
+import requests, time, random, json, yaml, os
 
 
 
@@ -67,8 +65,49 @@ def clean_numeric_columns(df, cols):
 
 
 
-def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2):
+HTML_CACHE_FILE = "stock_pages_cache.json"
+HTML_CACHE_EXPIRY_DAYS = 1
+
+def load_html_cache():
+    if not os.path.exists(HTML_CACHE_FILE):
+        return {}
+
+    with open(HTML_CACHE_FILE, "r") as f:
+        cache = json.load(f)
+
+    fresh_cache = {}
+    now = datetime.now(UTC)
+
+    for key, entry in cache.items():
+        try:
+            ts = datetime.fromisoformat(entry["timestamp"])
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=UTC)
+
+            if now - ts < timedelta(days=HTML_CACHE_EXPIRY_DAYS):
+                fresh_cache[key] = entry
+        except:
+            continue
+
+    return fresh_cache
+
+
+def save_html_cache(cache):
+    with open(HTML_CACHE_FILE, "w") as f:
+        json.dump(cache, f)
+
+
+
+def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2, cache=None, force_refresh=False):
     paged_url = f"{url}?start={start}&count={count}"
+
+    # Unique cache key per page
+    cache_key = f"{url}|{start}|{count}"
+
+    # ---- CACHE HIT ----
+    if not force_refresh and cache is not None and cache_key in cache:
+        return cache[cache_key]["html"]
+
     headers = {
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -76,15 +115,28 @@ def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2):
             'Chrome/120.0.0.0 Safari/537.36'
         )
     }
+
     for attempt in range(1, retries + 1):
         try:
             response = requests.get(paged_url, headers=headers, timeout=10)
             response.raise_for_status()
-            return response.text
+
+            html = response.text
+
+            # ---- SAVE TO CACHE ----
+            if cache is not None:
+                cache[cache_key] = {
+                    "html": html,
+                    "timestamp": datetime.now(UTC).isoformat()
+                }
+
+            return html
+
         except requests.exceptions.RequestException as e:
             print(f"Attempt {attempt} failed for {paged_url}: {e}")
             if attempt < retries:
-                time.sleep(sleep)
+                time.sleep(sleep + random.uniform(0, 1))
+
     print(f"Failed to fetch {paged_url} after {retries} attempts.")
     return None
 
@@ -114,6 +166,10 @@ def fetch_all_stock_pages_from_url(url, min_52_week_change=20):
     all_pages = []
     start = 0
     count = 100
+
+    # ---- LOAD CACHE ----
+    cache = load_html_cache()
+
     target_col = '52 WkChange %'
     numeric_cols = [
         'Price', 'Change', 'Change %', 'Volume',
@@ -121,7 +177,8 @@ def fetch_all_stock_pages_from_url(url, min_52_week_change=20):
     ]
 
     while True:
-        html = fetch_single_stock_page(url, start=start, count=count)
+        html = fetch_single_stock_page(url, start=start, count=count, cache=cache)
+
         if not html:
             print(f"No HTML returned for start={start}. Stopping.")
             break
@@ -135,10 +192,8 @@ def fetch_all_stock_pages_from_url(url, min_52_week_change=20):
             print(f"Column '{target_col}' not found at start={start}. Stopping.")
             break
 
-        # Clean numeric columns (you need to define/implement this function)
         df_page = clean_numeric_columns(df_page, numeric_cols)
 
-        # Drop clearly invalid rows early
         df_page = df_page[
             df_page[target_col].notna() &
             (df_page['Avg Vol (3M)'] > 0) &
@@ -149,28 +204,26 @@ def fetch_all_stock_pages_from_url(url, min_52_week_change=20):
             print(f"No valid rows after cleaning at start={start}. Stopping.")
             break
 
-        # ─── Early stopping logic ────────────────────────────────
         max_change_on_page = df_page[target_col].max()
         if max_change_on_page < min_52_week_change:
-            print(f"Page at start={start} has max {target_col} = {max_change_on_page:.2f}% "
-                  f"which is below threshold {min_52_week_change}%. Stopping early.")
+            print(f"Page at start={start} below threshold. Stopping early.")
             break
-        # ─────────────────────────────────────────────────────────
 
         all_pages.append(df_page)
 
-        # Standard last-page check
         if len(df_page) < count:
-            print(f"Last page reached at start={start} (fewer than {count} rows).")
+            print(f"Last page reached at start={start}.")
             break
 
         start += count
-        time.sleep(1.5)  # polite delay
+        time.sleep(1.0)
+
+    # ---- SAVE CACHE ----
+    save_html_cache(cache)
 
     if not all_pages:
         return pd.DataFrame()
 
-    # Final concatenation + sort + threshold filter (just in case)
     df = pd.concat(all_pages, ignore_index=True)
     df = df[df[target_col] >= min_52_week_change]
     return df.sort_values(target_col, ascending=False).reset_index(drop=True)
@@ -225,111 +278,170 @@ def call_gemini(client, model_primary, model_fallback, gemini_config, prompt):
 
 
 
-def append_qvm_data_yfinance(df):
-    """
-    Enrich an existing DataFrame with QVM metrics using yfinance.
-    Expects df to have a "Symbol" column.
-    Appends Sector along with Quality, Value, and Momentum metrics.
-    Optimized with batch Tickers API to reduce network calls.
-    """
-    df = df.copy()
-    tickers = df["Symbol"].tolist()
+CACHE_FILE = "yf_cache.json"
+CACHE_EXPIRY_DAYS = 1
 
-    # ---- Download price history for momentum ----
+
+# ---------- CACHE HELPERS ----------
+def load_cache():
+    if not os.path.exists(CACHE_FILE):
+        return {}
+
+    with open(CACHE_FILE, "r") as f:
+        cache = json.load(f)
+
+    fresh_cache = {}
+    now = datetime.now(UTC)
+
+    for ticker, entry in cache.items():
+        try:
+            ts = datetime.fromisoformat(entry["timestamp"])
+            if now - ts < timedelta(days=CACHE_EXPIRY_DAYS):
+                fresh_cache[ticker] = entry
+        except:
+            continue
+
+    return fresh_cache
+
+
+def save_cache(cache):
+    with open(CACHE_FILE, "w") as f:
+        json.dump(cache, f)
+
+
+# ---------- MAIN FUNCTION ----------
+def append_qvm_data_yfinance(
+        df: pd.DataFrame,
+        max_info_calls: int = 150,   # 🔥 KEY: limit expensive calls
+        delay: float = 0.5
+):
+    df = df.copy()
+    tickers_list = df["Symbol"].tolist()
+
+    # ---- Load cache ----
+    cache = load_cache()
+
+    # ---- Download price history (fast, bulk) ----
+    print("Downloading price data...")
     price_data = yf.download(
-        tickers,
+        tickers_list,
         period="1y",
         interval="1d",
         group_by="ticker",
         auto_adjust=True,
-        progress=False
+        progress=False,
+        threads=True
     )
 
     data_map = {}
 
-    # ---- Fetch info for all tickers in batch ----
-    tickers_batch = yf.Tickers(" ".join(tickers))
-    for ticker in tickers:
+    # ---- STEP 1: Compute momentum FIRST (cheap) ----
+    momentum_scores = {}
+
+    for symbol in tickers_list:
         try:
-            info = tickers_batch.tickers[ticker].info
+            df_prices = price_data if len(tickers_list) == 1 else price_data[symbol]
+            close = df_prices["Close"].dropna()
 
-            # ---- SECTOR ----
-            sector = info.get("sector", "Unknown")
+            ret_1y = ((close.iloc[-1] / close.iloc[0]) - 1) * 100 if len(close) > 10 else None
+            ret_9m = ((close.iloc[-1] / close.iloc[-189]) - 1) * 100 if len(close) > 189 else None
+            ret_6m = ((close.iloc[-1] / close.iloc[-126]) - 1) * 100 if len(close) > 126 else None
+            ret_3m = ((close.iloc[-1] / close.iloc[-63]) - 1) * 100 if len(close) > 63 else None
+            ret_1m = ((close.iloc[-1] / close.iloc[-21]) - 1) * 100 if len(close) > 21 else None
 
-            # ---- QUALITY ----
-            roe = info.get("returnOnEquity")
-            roa = info.get("returnOnAssets")
-            profit_margin = info.get("profitMargins")
-            gross_margin = info.get("grossMargins")
-            debt_to_equity = info.get("debtToEquity")
-            current_ratio = info.get("currentRatio")
-            interest_coverage = info.get("interestCoverage")
+            # simple pre-score to rank
+            score = np.nanmean([ret_3m, ret_6m, ret_9m])
+            momentum_scores[symbol] = score
 
-            # ---- VALUE ----
-            pe = info.get("trailingPE")
-            price_to_book = info.get("priceToBook")
-            peg_ratio = info.get("pegRatio")
-            ev = info.get("enterpriseValue")
-            ebitda = info.get("ebitda")
-            revenue = info.get("totalRevenue")
-
-            ev_ebitda = (ev / ebitda) if ev and ebitda else None
-            ev_revenue = (ev / revenue) if ev and revenue else None
-
-            # ---- MOMENTUM ----
-            try:
-                if len(tickers) == 1:
-                    df_prices = price_data
-                else:
-                    df_prices = price_data[ticker]
-
-                close = df_prices["Close"].dropna()
-
-                ret_1y = ((close.iloc[-1] / close.iloc[0]) - 1) * 100 if len(close) > 0 else None
-                ret_6m = ((close.iloc[-1] / close.iloc[-126]) - 1) * 100 if len(close) > 126 else None
-                ret_3m = ((close.iloc[-1] / close.iloc[-63]) - 1) * 100 if len(close) > 63 else None
-                ret_9m = ((close.iloc[-1] / close.iloc[-189]) - 1) * 100 if len(close) > 189 else None
-
-            except Exception:
-                ret_1y = ret_6m = ret_3m = ret_9m = None
-
-            data_map[ticker] = {
-                "Sector": sector,
-                # Quality
-                "ROE": roe,
-                "ROA": roa,
-                "ProfitMargin": profit_margin,
-                "GrossMargin": gross_margin,
-                "DebtToEquity": debt_to_equity,
-                "CurrentRatio": current_ratio,
-                "InterestCoverage": interest_coverage,
-                # Value
-                "PE": pe,
-                "PriceToBook": price_to_book,
-                "PEG": peg_ratio,
-                "EV_EBITDA": ev_ebitda,
-                "EV_Revenue": ev_revenue,
-                # Momentum
+            data_map[symbol] = {
+                "1M Return": ret_1m,
                 "3M Return": ret_3m,
                 "6M Return": ret_6m,
                 "9M Return": ret_9m,
                 "1Y Return": ret_1y
             }
 
-        except Exception as e:
-            print(f"Error processing {ticker}: {e}")
-            data_map[ticker] = {"Sector": "Unknown"}
+        except:
+            momentum_scores[symbol] = -np.inf
+            data_map[symbol] = {}
 
-    # ---- Map metrics back to df ----
+    # ---- STEP 2: Select top N for expensive calls ----
+    sorted_symbols = sorted(momentum_scores, key=lambda x: momentum_scores[x], reverse=True)
+    selected_for_info = set(sorted_symbols[:max_info_calls])
+
+    print(f"Fetching fundamentals for top {len(selected_for_info)} tickers...")
+
+    # ---- STEP 3: Fetch info (cached + throttled) ----
+    for symbol in tqdm(selected_for_info):
+        try:
+            if symbol in cache:
+                info = cache[symbol]["info"]
+            else:
+                ticker_obj = yf.Ticker(symbol)
+                info = ticker_obj.info
+
+                # store minimal fields
+                cache[symbol] = {
+                    "info": {
+                        "sector": info.get("sector"),
+                        "returnOnEquity": info.get("returnOnEquity"),
+                        "returnOnAssets": info.get("returnOnAssets"),
+                        "profitMargins": info.get("profitMargins"),
+                        "grossMargins": info.get("grossMargins"),
+                        "debtToEquity": info.get("debtToEquity"),
+                        "currentRatio": info.get("currentRatio"),
+                        "interestCoverage": info.get("interestCoverage"),
+                        "trailingPE": info.get("trailingPE"),
+                        "priceToBook": info.get("priceToBook"),
+                        "pegRatio": info.get("pegRatio"),
+                        "enterpriseValue": info.get("enterpriseValue"),
+                        "ebitda": info.get("ebitda"),
+                        "totalRevenue": info.get("totalRevenue"),
+                    },
+                    "timestamp": datetime.now(UTC).isoformat()
+                }
+
+                time.sleep(delay + random.uniform(0, 0.3))
+
+            # compute derived metrics
+            ev = info.get("enterpriseValue")
+            ebitda = info.get("ebitda")
+            revenue = info.get("totalRevenue")
+
+            data_map[symbol].update({
+                "Sector": info.get("sector"),
+                "ROE": info.get("returnOnEquity"),
+                "ROA": info.get("returnOnAssets"),
+                "ProfitMargin": info.get("profitMargins"),
+                "GrossMargin": info.get("grossMargins"),
+                "DebtToEquity": info.get("debtToEquity"),
+                "CurrentRatio": info.get("currentRatio"),
+                "InterestCoverage": info.get("interestCoverage"),
+                "PE": info.get("trailingPE"),
+                "PriceToBook": info.get("priceToBook"),
+                "PEG": info.get("pegRatio"),
+                "EV_EBITDA": (ev / ebitda) if ev and ebitda else None,
+                "EV_Revenue": (ev / revenue) if ev and revenue else None,
+            })
+
+        except Exception as e:
+            print(f"Error on {symbol}: {e}")
+
+    # ---- Save cache ----
+    save_cache(cache)
+
+    # ---- Map back to df ----
     all_columns = [
-        "Sector", "ROE", "ROA", "ProfitMargin", "GrossMargin", "DebtToEquity",
-        "CurrentRatio", "InterestCoverage", "PE", "PriceToBook", "PEG",
-        "EV_EBITDA", "EV_Revenue", "3M Return", "6M Return", "9M Return", "1Y Return"
+        "Sector", "ROE", "ROA", "ProfitMargin", "GrossMargin",
+        "DebtToEquity", "CurrentRatio", "InterestCoverage",
+        "PE", "PriceToBook", "PEG", "EV_EBITDA", "EV_Revenue",
+        "1M Return", "3M Return", "6M Return", "9M Return", "1Y Return"
     ]
 
     for col in all_columns:
         df[col] = df["Symbol"].map(lambda x: data_map.get(x, {}).get(col))
 
+    print("Done.")
     return df
 
 
@@ -342,8 +454,6 @@ def score_qvm(df, top_n=100, weights=None):
     weights: dict with keys 'Quality', 'Value', 'Momentum' summing to 1.
              Example: {'Quality': 0.4, 'Value': 0.2, 'Momentum': 0.4}
     """
-    import numpy as np
-    import pandas as pd
 
     df = df.copy()
 
@@ -376,11 +486,13 @@ def score_qvm(df, top_n=100, weights=None):
 
     # --- MOMENTUM SCORE ---
     momentum_weights = {
-        '3M Return': 0.2,
-        '6M Return': 0.35,
+        '1M Return': 0.05,
+        '3M Return': 0.20,
+        '6M Return': 0.40,
         '9M Return': 0.25,
-        '1Y Return': 0.2
+        '1Y Return': 0.10
     }
+
     existing_momentum = [c for c in momentum_weights if c in df.columns]
 
     if existing_momentum:
@@ -397,14 +509,60 @@ def score_qvm(df, top_n=100, weights=None):
         if '3M Return' in df_momentum.columns:
             df_momentum['3M Return'] = df_momentum['3M Return'].clip(lower=momentum_negative_cap)
 
-        # Compute weighted momentum
-        weighted_momentum = sum(df_momentum[col] * weight for col, weight in momentum_weights.items() if col in df_momentum.columns)
+        # 3️⃣ Compute weighted momentum (base score)
+        weighted_momentum = sum(
+            df_momentum[col] * weight
+            for col, weight in momentum_weights.items()
+            if col in df_momentum.columns
+        )
 
-        # Normalize to 0–100
-        min_val = weighted_momentum.min()
-        max_val = weighted_momentum.max()
+        # 4️⃣ Smoothness penalty (penalize spikes / inconsistency)
+        smoothness = 0
+
+        if all(col in df_momentum.columns for col in ['1M Return', '3M Return']):
+            smoothness -= abs(df_momentum['1M Return'] - df_momentum['3M Return'])
+
+        if all(col in df_momentum.columns for col in ['3M Return', '6M Return']):
+            smoothness -= abs(df_momentum['3M Return'] - df_momentum['6M Return'])
+
+        if all(col in df_momentum.columns for col in ['6M Return', '9M Return']):
+            smoothness -= abs(df_momentum['6M Return'] - df_momentum['9M Return'])
+
+        if all(col in df_momentum.columns for col in ['9M Return', '1Y Return']):
+            smoothness -= abs(df_momentum['9M Return'] - df_momentum['1Y Return'])
+
+        smoothness_weight = 0.1
+
+        # 5️⃣ Trend direction penalty (penalize declining momentum)
+        trend_penalty = 0
+
+        if all(col in df_momentum.columns for col in ['1M Return', '3M Return']):
+            trend_penalty += (df_momentum['1M Return'] - df_momentum['3M Return'])
+
+        if all(col in df_momentum.columns for col in ['3M Return', '6M Return']):
+            trend_penalty += (df_momentum['3M Return'] - df_momentum['6M Return'])
+
+        if all(col in df_momentum.columns for col in ['6M Return', '9M Return']):
+            trend_penalty += (df_momentum['6M Return'] - df_momentum['9M Return'])
+
+        # Only penalize negative trends (declining momentum)
+        trend_penalty = trend_penalty.clip(upper=0)
+
+        trend_weight = 0.2
+
+        # Combine everything
+        combined_momentum = (
+                weighted_momentum
+                + (smoothness * smoothness_weight)
+                + (trend_penalty * trend_weight)
+        )
+
+        # 6️⃣ Normalize to 0–100
+        min_val = combined_momentum.min()
+        max_val = combined_momentum.max()
+
         if max_val != min_val:
-            df['MomentumScore'] = (weighted_momentum - min_val) / (max_val - min_val) * 100
+            df['MomentumScore'] = (combined_momentum - min_val) / (max_val - min_val) * 100
         else:
             df['MomentumScore'] = 50
     else:
@@ -426,7 +584,7 @@ def score_qvm(df, top_n=100, weights=None):
         'Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %',
         'Avg Vol (3M)', 'Sector', 'ROE', 'ROA', 'ProfitMargin', 'GrossMargin',
         'DebtToEquity', 'CurrentRatio', 'InterestCoverage', 'PE', 'PriceToBook',
-        'PEG', 'EV_EBITDA', 'EV_Revenue', '3M Return', '6M Return',
+        'PEG', 'EV_EBITDA', 'EV_Revenue', '1M Return', '3M Return', '6M Return',
         '9M Return', '1Y Return', 'QualityScore', 'ValueScore', 'MomentumScore', 'QVMScore'
     ]
 
@@ -490,28 +648,33 @@ model_fallback = config["model_fallback"]
 df = fetch_all_stock_pages_from_url(url, min_52_week_change)
 df = df.drop_duplicates()
 
-# Filter rules (adjust thresholds as you like)
+# Filter rules
+# df = df[
+#     (df['Market Cap'] > 300_000_000) &  # remove microcaps < $300M
+#     (df['P/E Ratio(TTM)'].notnull()) & (df['P/E Ratio(TTM)'] > 0) & (df['P/E Ratio(TTM)'] < 200) &  # avoid negative or extreme PE
+#     (df['Avg Vol (3M)'] > 100_000) &  # avoid illiquid stocks
+#     (df['52 WkChange %'].notnull())  # require some price history
+#     ].copy()
 df = df[
-    (df['Market Cap'] > 300_000_000) &  # remove microcaps < $300M
-    (df['P/E Ratio(TTM)'].notnull()) & (df['P/E Ratio(TTM)'] > 0) & (df['P/E Ratio(TTM)'] < 200) &  # avoid negative or extreme PE
-    (df['Avg Vol (3M)'] > 100_000) &  # avoid illiquid stocks
-    (df['52 WkChange %'].notnull())  # require some price history
-    ].copy()
+    (df['Market Cap'] >= 300_000_000) &          # much lower threshold
+    (df['Price'] >= 5.0) &
+    (df['Avg Vol (3M)'] >= 100_000) &
+    ((df['P/E Ratio(TTM)'].isna()) | (df['P/E Ratio(TTM)'] > 0))
+].copy()
 
 print("\nTrash Filtered Stocks:")
 print(df[['Symbol', 'Name', '52 WkChange %']].reset_index(drop=True))
 
-# Assuming df is your full filtered DataFrame
 minimal_cols = ['Symbol', 'Name', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %', 'Avg Vol (3M)']
 df_minimal = df[minimal_cols].copy()
 
 df_yf = append_qvm_data_yfinance(df_minimal)
 df_scored = score_qvm(df_yf, weights={'Quality': 0.38, 'Value': 0.25, 'Momentum': 0.37})
 
-# Take top 50–100 stocks for your watchlist
+# Take top 50–100 stocks for watchlist
 top_stocks = df_scored.head(100)
 print("\nTop QVM Stocks:")
-print(top_stocks.head(10)[['Symbol', '52 WkChange %', '3M Return', 'QVMScore']])
+print(top_stocks.head(20)[['Symbol', '52 WkChange %', '1M Return', '3M Return', 'QVMScore']])
 
 essential_columns_for_gemini = [
     # Identity
@@ -541,39 +704,39 @@ essential_columns_for_gemini = [
     "52 WkChange %"
 ]
 
-# Filter your df before sending to Gemini
+# Filter df before sending to Gemini
 df_gemini = top_stocks[essential_columns_for_gemini].copy()
 df_gemini_str = df_gemini.to_string(index=False)
 prompt = config["prompt"] + df_gemini_str
 
 # # --- Pass the top etfs to Gemini to get world context and final recommendations ---
-client, gemini_config = initialize_gemini_client()
-
-final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt)
-print("\nGEMINI RESPONSE:\n")
-print(final_recommendations)
-print("Generated by model: " + model_used)
-
-# # --- Update HTML page with recommendations ---
-output_columns = [
-    'Symbol',
-    'Name',
-    'Sector',         # Add this if available
-    '52 WkChange %',
-    '3M Return',      # short-term momentum
-    'QVMScore'        # overall quantitative score
-]
-df_html = df_gemini[output_columns].copy()
-df_html = df_html.sort_values(by='QVMScore', ascending=False).reset_index(drop=True)
-df_html["Symbol"] = df_html["Symbol"].apply(
-    lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
-)
-df_html["Name"] = df_html.apply(
-    lambda row: f'<a href="https://finance.yahoo.com/quote/{row["Symbol"].split(">")[1].split("<")[0]}/" target="_blank">{row["Name"]}</a>',
-    axis=1
-)
-df_html_table = df_html.to_html(escape=False, index=False, classes="recommendations-table", border=0)
-update_html_page(final_recommendations, df_html_table, "stock_page_template.html","index.html", model_used)
+# client, gemini_config = initialize_gemini_client()
+#
+# final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt)
+# print("\nGEMINI RESPONSE:\n")
+# print(final_recommendations)
+# print("Generated by model: " + model_used)
+#
+# # # --- Update HTML page with recommendations ---
+# output_columns = [
+#     'Symbol',
+#     'Name',
+#     'Sector',         # Add this if available
+#     '52 WkChange %',
+#     '3M Return',      # short-term momentum
+#     'QVMScore'        # overall quantitative score
+# ]
+# df_html = df_gemini[output_columns].copy()
+# df_html = df_html.sort_values(by='QVMScore', ascending=False).reset_index(drop=True)
+# df_html["Symbol"] = df_html["Symbol"].apply(
+#     lambda x: f'<a href="https://finance.yahoo.com/quote/{x}/" target="_blank">{x}</a>'
+# )
+# df_html["Name"] = df_html.apply(
+#     lambda row: f'<a href="https://finance.yahoo.com/quote/{row["Symbol"].split(">")[1].split("<")[0]}/" target="_blank">{row["Name"]}</a>',
+#     axis=1
+# )
+# df_html_table = df_html.to_html(escape=False, index=False, classes="recommendations-table", border=0)
+# update_html_page(final_recommendations, df_html_table, "stock_page_template.html","index.html", model_used)
 
 # print elapsed time
 end_time = time.perf_counter()

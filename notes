@@ -17,8 +17,12 @@ git checkout -b feature-branch
 git update-index --assume-unchanged index.html
 
 Features to add:
-- less severe initial filtering (to allow sandisk to be recommended)
-- add 1 month performance to momentum score
-- upgrade gemini prompt for more consistent results (max 2 or 3? stocks per sector, prefer higher qvm scorers, downweight recent performers due to recent news (energy being high due to iran war but collapses after ceasefire))
+- wdc has fallen in the rankings cuz others have higher quality and better value,
+- if i want recognizable names with good momentum, add market cap to append qvm data, then use market cap in quality score?
+- upgrade gemini prompt for more consistent results
+    - sometimes explains its steps
+    - max 2 or 3? stocks per sector
+    - downweight recent performers due to recent news (energy being high due to iran war but collapses after ceasefire))
+    - consistently outputs stock specific blurb in summaries instead of vague general speak sometimes
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

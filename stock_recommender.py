@@ -17,15 +17,21 @@ def extract_number_with_suffix(s):
 
     s = str(s).strip().upper()
 
-    if s in ["N/A", "NONE", ""]:
+    if s in ["N/A", "NONE", "-", "", "—"]:
         return None
 
-    match = re.search(r'-?\d+\.?\d*', s)
+    s = s.replace(',', '')
+
+    match = re.search(r'-?[\d.]+', s)
     if not match:
         return None
 
-    num = float(match.group())
+    try:
+        num = float(match.group())
+    except ValueError:
+        return None
 
+    # Handle suffixes (B, M, K, T)
     if 'T' in s:
         num *= 1e12
     elif 'B' in s:
@@ -37,6 +43,8 @@ def extract_number_with_suffix(s):
 
     return num
 
+
+
 def clean_52wk_change(s):
     """Robust cleaner for '52 Wk Change %' values like '+2,734.88%' or '−12.34%' """
     if pd.isna(s) or not isinstance(s, str):
@@ -46,6 +54,7 @@ def clean_52wk_change(s):
         return float(s)
     except ValueError:
         return None
+
 
 
 def clean_numeric_columns(df, cols):
@@ -75,6 +84,8 @@ def clean_numeric_columns(df, cols):
 HTML_CACHE_FILE = "stock_pages_cache.json"
 HTML_CACHE_EXPIRY_DAYS = 1
 
+
+
 def load_html_cache():
     if not os.path.exists(HTML_CACHE_FILE):
         return {}
@@ -97,6 +108,7 @@ def load_html_cache():
             continue
 
     return fresh_cache
+
 
 
 def save_html_cache(cache):
@@ -148,6 +160,7 @@ def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2, cache=N
     return None
 
 
+
 def parse_stock_table(html):
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find('table')
@@ -167,6 +180,7 @@ def parse_stock_table(html):
     if not rows:
         print("No data rows parsed.")
     return pd.DataFrame(rows, columns=headers)
+
 
 
 def fetch_all_stock_pages_from_url(url, min_52_week_change=20, force_refresh=False):
@@ -289,6 +303,7 @@ CACHE_FILE = "yf_cache.json"
 CACHE_EXPIRY_DAYS = 1
 
 
+
 # ---------- CACHE HELPERS ----------
 def load_cache():
     if not os.path.exists(CACHE_FILE):
@@ -311,9 +326,11 @@ def load_cache():
     return fresh_cache
 
 
+
 def save_cache(cache):
     with open(CACHE_FILE, "w") as f:
         json.dump(cache, f)
+
 
 
 # ---------- MAIN FUNCTION ----------
@@ -553,6 +570,8 @@ def score_qvm(df, top_n=100, weights=None, min_quality=0):
 
     return df.sort_values('QVMScore', ascending=False).head(top_n).reset_index(drop=True)
 
+
+
 def update_html_page(final_recommendations, df_html_table, template_name, display_page, model_used):
     # --- Extract table and summary blocks in any order ---
     table_match = re.search(r'(<table.*?</table>)', final_recommendations, flags=re.DOTALL | re.IGNORECASE)
@@ -606,6 +625,14 @@ model_fallback = config["model_fallback"]
 
 df = fetch_all_stock_pages_from_url(url, min_52_week_change)
 df = df.drop_duplicates()
+
+# Right after df = fetch_all_stock_pages_from_url(...)
+print("RAW Price for SNDK:")
+print(df[df['Symbol'] == 'SNDK'][['Symbol', 'Price']].to_string())
+
+print("\nData type of Price column:", df['Price'].dtype)
+print("Sample of first 10 raw Price values:")
+print(df['Price'].head(10).tolist())
 
 # Filter rules
 df = df[

@@ -24,5 +24,6 @@ Features to add:
     - max 2 or 3? stocks per sector
     - downweight recent performers due to recent news (energy being high due to iran war but collapses after ceasefire))
     - consistently outputs stock specific blurb in summaries instead of vague general speak sometimes
+    - sometimes summaries do not include all 10 stocks
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

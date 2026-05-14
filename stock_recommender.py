@@ -626,14 +626,6 @@ model_fallback = config["model_fallback"]
 df = fetch_all_stock_pages_from_url(url, min_52_week_change)
 df = df.drop_duplicates()
 
-# Right after df = fetch_all_stock_pages_from_url(...)
-print("RAW Price for SNDK:")
-print(df[df['Symbol'] == 'SNDK'][['Symbol', 'Price']].to_string())
-
-print("\nData type of Price column:", df['Price'].dtype)
-print("Sample of first 10 raw Price values:")
-print(df['Price'].head(10).tolist())
-
 # Filter rules
 df = df[
     (df['Market Cap'] >= 300_000_000) &

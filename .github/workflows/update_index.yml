@@ -70,6 +70,14 @@ jobs:
           touch yf_cache.json stock_pages_cache.json
 
           git add index.html etf_index.html yf_cache.json stock_pages_cache.json
+          
+          git add index.html etf_index.html yf_cache.json stock_pages_cache.json
+  
+          if ! git diff --cached --quiet; then
+            git commit -m "Update stock data"
+            git pull --rebase
+            git push
+          fi
 
           git commit -m "Update HTML files and caches via GitHub Actions" || echo "No changes to commit"
 

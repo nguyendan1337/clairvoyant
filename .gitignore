@@ -17,9 +17,6 @@ api_keys
 
 index.html
 
-stock_pages_cache.json
-yf_cache.json
-
 # Ignore build output
 dist/
 build/

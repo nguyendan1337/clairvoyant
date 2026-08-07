@@ -18,13 +18,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          # Retry up to 5 times, waiting 10s between attempts (exponential backoff)
           fetch-depth: 0
-          retry: |
-            max-attempts: 3
-            backoff: exponential
-            backoff-multiplier: 2
-            initial-delay: 5s
 
       # Step 2: Set up Python
       - name: Set up Python
@@ -32,30 +26,52 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Step 3: Install dependencies if needed
+      # Step 3: Install dependencies
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      # Step 4: Run the stock and etf recommenders and update index.html
+      - name: Restore caches
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        with:
+          path: |
+            yf_cache.json
+            stock_pages_cache.json
+          key: qvm-cache-${{ github.ref }}-${{ github.sha }}     # primary key (unique per commit)
+          restore-keys: |
+            qvm-cache-${{ github.ref }}-                         # fallback to latest on same branch
+
+      # Step 4: Run scripts
       - name: Run ETF Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: |
-          echo "Running ETF Recommender..."
-          python etf_recommender.py
+        run: python etf_recommender.py
       - name: Run Stock Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: |
-          echo "Running Stock Recommender..."
-          python stock_recommender.py
+        run: python stock_recommender.py
 
-      # Step 5: Commit and push changes back to main branch
+      - name: Save caches for future runs
+        uses: actions/cache/save@v4
+        if: always()                     # save even if previous steps failed
+        with:
+          path: |
+            yf_cache.json
+            stock_pages_cache.json
+          key: qvm-cache-${{ github.ref }}-${{ github.sha }}
+
+      # Step 5: Commit + push outputs and caches
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html etf_index.html
-          git commit -m "Update HTML files via GitHub Actions" || echo "No changes to commit"
+
+          # Ensure cache files exist
+          touch yf_cache.json stock_pages_cache.json
+
+          git add index.html etf_index.html yf_cache.json stock_pages_cache.json
+
+          git commit -m "Update HTML files and caches via GitHub Actions" || echo "No changes to commit"
+
+          git pull --rebase
           git push

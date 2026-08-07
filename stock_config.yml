@@ -28,12 +28,16 @@ prompt: |
     "ROE",
     "ProfitMargin",
     "DebtToEquity",
+    "EV_EBITDA",
+    "PEG",
 
     # Valuation anchor
     "PE",
 
-    # Momentum anchors 
+    # Momentum anchors
     "3M Return",
+    "6M Return",
+    "9M Return",
     "52 WkChange %"
   ]  
   Your task is to produce one perfect HTML recommendation page in a single response.

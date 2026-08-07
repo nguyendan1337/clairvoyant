@@ -518,6 +518,13 @@ def score_qvm(df, top_n=100, weights=None, min_quality=0):
     value_metrics = ['PE', 'PEG', 'PriceToBook', 'EV_EBITDA', 'EV_Revenue']
     v_cols = [c for c in value_metrics if c in df.columns]
 
+    df[v_cols] = (
+        df[v_cols]
+        .replace(['Infinity', '-Infinity'], np.nan)
+        .infer_objects(copy=False)
+        .apply(pd.to_numeric, errors='coerce')
+    )
+
     if v_cols:
         v = df[v_cols].apply(lambda x: x.rank(pct=True))
         df['ValueScore'] = v.mean(axis=1) * 100

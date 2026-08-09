@@ -66,17 +66,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Ensure cache files exist
           touch yf_cache.json stock_pages_cache.json
 
-          # Stage generated files and caches
           git add index.html etf_index.html yf_cache.json stock_pages_cache.json
 
-          # Commit only if there are changes
           if ! git diff --cached --quiet; then
             git commit -m "Update stock data"
-            git pull --rebase
-            git push
+            git push origin main
           else
             echo "No changes to commit"
           fi

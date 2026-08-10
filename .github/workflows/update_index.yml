@@ -51,24 +51,13 @@ jobs:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python stock_recommender.py
 
-      - name: Save caches for future runs
-        uses: actions/cache/save@v4
-        if: always()                     # save even if previous steps failed
-        with:
-          path: |
-            yf_cache.json
-            stock_pages_cache.json
-          key: qvm-cache-${{ github.ref }}-${{ github.sha }}
-
       # Step 5: Commit + push outputs and caches
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          touch yf_cache.json stock_pages_cache.json
-
-          git add index.html etf_index.html yf_cache.json stock_pages_cache.json
+          git add index.html etf_index.html yf_cache.json stock_pages_cache.json top_qvm_stocks.md
 
           if ! git diff --cached --quiet; then
             git commit -m "Update stock data"

@@ -475,107 +475,585 @@ def append_qvm_data_yfinance(
 
 
 
-def score_qvm(df, top_n=100, weights=None, min_quality=0):
+def score_qvm(df, top_n=100, weights=None, min_quality=40):
+    """
+    QVM scorer designed for durable, high-quality compounders.
+
+    Philosophy:
+      - Quality is the foundation.
+      - Momentum rewards persistent performance, not one-off spikes.
+      - Value is a secondary confirmation rather than the primary driver.
+      - Penalize excessive leverage.
+      - Penalize inconsistent / volatile return paths.
+      - Prevent missing data and extreme outliers from distorting scores.
+
+    Strategy:
+      1. Strong underlying businesses.
+      2. Sustained upward performance.
+      3. Reasonable valuation relative to the universe.
+      4. Manageable balance-sheet risk.
+
+    Default weights:
+      Quality  = 45%
+      Value    = 15%
+      Momentum = 40%
+    """
+
     df = df.copy()
 
     if weights is None:
         weights = {
-            'Quality': 0.38,
-            'Value': 0.17,
-            'Momentum': 0.45
+            'Quality': 0.45,
+            'Value': 0.15,
+            'Momentum': 0.40
         }
 
-    # ===========================
-    # 1. QUALITY SCORE (less harsh debt penalty)
-    # ===========================
+    # =========================================================
+    # 0. BASIC DATA CLEANUP
+    # =========================================================
+
+    numeric_columns = [
+        'ROE',
+        'ROA',
+        'ProfitMargin',
+        'GrossMargin',
+        'CurrentRatio',
+        'InterestCoverage',
+        'DebtToEquity',
+        'PE',
+        'PEG',
+        'PriceToBook',
+        'EV_EBITDA',
+        'EV_Revenue',
+        '1M Return',
+        '3M Return',
+        '6M Return',
+        '9M Return',
+        '1Y Return'
+    ]
+
+    for col in numeric_columns:
+        if col in df.columns:
+            df[col] = (
+                df[col]
+                .replace(['Infinity', '-Infinity'], np.nan)
+                .infer_objects(copy=False)
+            )
+            df[col] = pd.to_numeric(
+                df[col],
+                errors='coerce'
+            )
+
+    if df.empty:
+        return pd.DataFrame()
+
+    # =========================================================
+    # 1. QUALITY SCORE
+    # =========================================================
+
     quality_metrics = [
-        'ROE', 'ROA', 'ProfitMargin',
-        'GrossMargin', 'CurrentRatio',
+        'ROE',
+        'ROA',
+        'ProfitMargin',
+        'GrossMargin',
+        'CurrentRatio',
         'InterestCoverage'
     ]
-    q_cols = [c for c in quality_metrics if c in df.columns]
+
+    q_cols = [
+        c for c in quality_metrics
+        if c in df.columns
+    ]
 
     if q_cols:
-        q = df[q_cols].apply(lambda x: x.rank(pct=True))
-        quality = q.mean(axis=1)
 
-        # Softer, capped debt penalty
+        q = df[q_cols].copy()
+
+        # -----------------------------------------------------
+        # Winsorize extreme observations.
+        #
+        # This prevents pathological values such as extremely
+        # high ROE from dominating the percentile ranking.
+        # -----------------------------------------------------
+
+        for col in q_cols:
+            valid = q[col].dropna()
+
+            if len(valid) >= 20:
+                lower = valid.quantile(0.02)
+                upper = valid.quantile(0.98)
+
+                q[col] = q[col].clip(
+                    lower=lower,
+                    upper=upper
+                )
+
+        # Higher quality metric = better.
+        q_rank = q.rank(
+            pct=True,
+            ascending=True
+        )
+
+        valid_quality_count = q.notna().sum(axis=1)
+
+        # Mean only across available metrics.
+        quality = q_rank.mean(
+            axis=1,
+            skipna=True
+        )
+
+        # -----------------------------------------------------
+        # Missing-data confidence adjustment
+        #
+        # 2+ valid metrics = full confidence
+        # 1 valid metric  = reduced confidence
+        # 0 valid metrics = neutral score
+        # -----------------------------------------------------
+
+        quality_confidence = np.where(
+            valid_quality_count >= 2,
+            1.00,
+            np.where(
+                valid_quality_count == 1,
+                0.75,
+                0.50
+            )
+        )
+
+        # Move one-metric observations toward neutral (50).
+        quality = (
+                0.50 +
+                (quality - 0.50) * quality_confidence
+        )
+
+        quality = quality.where(
+            valid_quality_count > 0,
+            0.50
+        )
+
+        # -----------------------------------------------------
+        # Debt penalty
+        # -----------------------------------------------------
+
         if 'DebtToEquity' in df.columns:
-            debt = df['DebtToEquity'].clip(upper=100)  # cap extreme outliers
-            debt_penalty = debt.rank(pct=True)
-            quality = quality - 0.22 * debt_penalty
 
-        df['QualityScore'] = (quality * 100).clip(0, 100)
+            debt = (
+                df['DebtToEquity']
+                .fillna(0)
+                .clip(
+                    lower=0,
+                    upper=300
+                )
+            )
+
+            # Little/no penalty below 50 D/E.
+            excess_debt = (
+                    debt - 50
+            ).clip(lower=0)
+
+            # Nonlinear penalty.
+            debt_penalty = (
+                                   excess_debt / 250
+                           ) ** 1.7
+
+            quality = (
+                    quality -
+                    0.30 * debt_penalty
+            )
+
+        df['QualityScore'] = (
+                quality * 100
+        ).clip(0, 100)
+
     else:
         df['QualityScore'] = 50
 
+    # Minimum quality filter.
     if min_quality > 0:
-        df = df[df['QualityScore'] >= min_quality].copy()
 
-    # ===========================
-    # 2. VALUE SCORE (NaN-safe, unchanged structure)
-    # ===========================
-    value_metrics = ['PE', 'PEG', 'PriceToBook', 'EV_EBITDA', 'EV_Revenue']
-    v_cols = [c for c in value_metrics if c in df.columns]
+        df = df[
+            df['QualityScore'] >= min_quality
+            ].copy()
 
-    df[v_cols] = (
-        df[v_cols]
-        .replace(['Infinity', '-Infinity'], np.nan)
-        .infer_objects(copy=False)
-        .apply(pd.to_numeric, errors='coerce')
-    )
+    if df.empty:
+        return pd.DataFrame()
+
+    # =========================================================
+    # 2. VALUE SCORE
+    # =========================================================
+
+    value_metrics = [
+        'PE',
+        'PEG',
+        'PriceToBook',
+        'EV_EBITDA',
+        'EV_Revenue'
+    ]
+
+    v_cols = [
+        c for c in value_metrics
+        if c in df.columns
+    ]
 
     if v_cols:
-        v = df[v_cols].apply(lambda x: x.rank(pct=True))
-        df['ValueScore'] = v.mean(axis=1) * 100
+
+        value_df = df[v_cols].copy()
+
+        value_df = value_df.replace(
+            ['Infinity', '-Infinity'],
+            np.nan
+        )
+
+        value_df = value_df.apply(
+            pd.to_numeric,
+            errors='coerce'
+        )
+
+        # -----------------------------------------------------
+        # Negative and zero valuation multiples are not
+        # meaningful measures of "cheapness".
+        #
+        # Examples:
+        #   negative P/E
+        #   negative EV/EBITDA
+        #
+        # These become missing rather than receiving a high
+        # value score.
+        # -----------------------------------------------------
+
+        value_df = value_df.mask(
+            value_df <= 0
+        )
+
+        valid_value_count = (
+            value_df.notna().sum(axis=1)
+        )
+
+        # Lower multiple = better.
+        value_rank = value_df.apply(
+            lambda x: x.rank(
+                pct=True,
+                ascending=False
+            )
+        )
+
+        value_score = value_rank.mean(
+            axis=1,
+            skipna=True
+        )
+
+        # -----------------------------------------------------
+        # Missing-data confidence adjustment
+        #
+        # 2+ metrics = full confidence
+        # 1 metric  = reduced confidence
+        # 0 metrics = neutral
+        # -----------------------------------------------------
+
+        value_confidence = np.where(
+            valid_value_count >= 2,
+            1.00,
+            np.where(
+                valid_value_count == 1,
+                0.65,
+                0.50
+            )
+        )
+
+        # Pull low-confidence observations toward neutral.
+        value_score = (
+                0.50 +
+                (value_score - 0.50) *
+                value_confidence
+        )
+
+        value_score = value_score.where(
+            valid_value_count > 0,
+            0.50
+        )
+
+        df['ValueScore'] = (
+                value_score * 100
+        ).clip(0, 100)
+
     else:
         df['ValueScore'] = 50
 
-    # ===========================
-    # 3. MOMENTUM SCORE (reward real winners more)
-    # ===========================
-    mom_cols = ['1M Return','3M Return','6M Return','9M Return','1Y Return']
-    m_cols = [c for c in mom_cols if c in df.columns]
+    # =========================================================
+    # 3. MOMENTUM SCORE
+    # =========================================================
+
+    mom_cols = [
+        '1M Return',
+        '3M Return',
+        '6M Return',
+        '9M Return',
+        '1Y Return'
+    ]
+
+    m_cols = [
+        c for c in mom_cols
+        if c in df.columns
+    ]
 
     if m_cols:
-        m = df[m_cols].copy().clip(lower=-100, upper=500)
 
-        # Strong emphasis on actual returns
-        raw_momentum = m.mean(axis=1).rank(pct=True) * 100
+        m = df[m_cols].copy()
 
-        # Trend persistence (lighter penalty)
-        consistency = 0
-        if '3M Return' in m and '6M Return' in m:
-            consistency += (m['3M Return'] - m['6M Return']).abs()
-        if '6M Return' in m and '1Y Return' in m:
-            consistency += (m['6M Return'] - m['1Y Return']).abs()
+        # -----------------------------------------------------
+        # Prevent pathological return outliers from dominating
+        # the ranking.
+        # -----------------------------------------------------
 
-        consistency = (100 - consistency.rank(pct=True) * 100)
-
-        # Volatility penalty (reduced impact)
-        volatility = m.std(axis=1).replace(0, np.nan)
-        vol_penalty = volatility.rank(pct=True) * 100
-
-        df['MomentumScore'] = (
-                0.65 * raw_momentum +     # dominant factor
-                0.20 * consistency -
-                0.15 * vol_penalty       # reduced penalty
+        m = m.clip(
+            lower=-100,
+            upper=500
         )
 
-        df['MomentumScore'] = df['MomentumScore'].clip(0, 100)
+        # -----------------------------------------------------
+        # A. Overall momentum
+        # -----------------------------------------------------
+
+        mean_return = m.mean(
+            axis=1,
+            skipna=True
+        )
+
+        raw_momentum = (
+                mean_return.rank(
+                    pct=True
+                ) * 100
+        )
+
+        # -----------------------------------------------------
+        # B. Trend persistence
+        #
+        # Count positive periods.
+        # -----------------------------------------------------
+
+        positive_windows = (
+                m > 0
+        ).sum(axis=1)
+
+        valid_momentum_count = (
+            m.notna().sum(axis=1)
+        )
+
+        trend_alignment = (
+                                  positive_windows /
+                                  valid_momentum_count.replace(
+                                      0,
+                                      np.nan
+                                  )
+                          ) * 100
+
+        trend_alignment = (
+            trend_alignment
+            .fillna(50)
+        )
+
+        # -----------------------------------------------------
+        # C. Long-term consistency
+        #
+        # Compare 3M / 6M / 1Y where available.
+        #
+        # This rewards sustained strength while applying a
+        # moderate penalty to highly erratic rank paths.
+        # -----------------------------------------------------
+
+        consistency_cols = [
+            c for c in [
+                '3M Return',
+                '6M Return',
+                '1Y Return'
+            ]
+            if c in df.columns
+        ]
+
+        if len(consistency_cols) >= 2:
+
+            consistency = df[
+                consistency_cols
+            ].copy()
+
+            consistency_rank = (
+                consistency.rank(
+                    pct=True,
+                    axis=0
+                )
+            )
+
+            consistency_score = (
+                    consistency_rank.mean(
+                        axis=1,
+                        skipna=True
+                    ) * 100
+            )
+
+            rank_dispersion = (
+                consistency_rank.std(
+                    axis=1,
+                    skipna=True
+                )
+            )
+
+            # Moderate rather than aggressive penalty.
+            consistency_score = (
+                    consistency_score -
+                    rank_dispersion * 25
+            ).clip(0, 100)
+
+            consistency_score = (
+                consistency_score
+                .fillna(50)
+            )
+
+        else:
+            consistency_score = raw_momentum
+
+        # -----------------------------------------------------
+        # D. Risk-adjusted momentum
+        # -----------------------------------------------------
+
+        volatility = m.std(
+            axis=1,
+            skipna=True
+        )
+
+        risk_adjusted_return = (
+                mean_return /
+                (volatility + 1e-5)
+        )
+
+        risk_adj = (
+                risk_adjusted_return.rank(
+                    pct=True
+                ) * 100
+        )
+
+        risk_adj = (
+            risk_adj.fillna(50)
+        )
+
+        # -----------------------------------------------------
+        # E. Recent trend confirmation
+        # -----------------------------------------------------
+
+        if '3M Return' in df.columns:
+
+            recent_rank = (
+                    df['3M Return']
+                    .rank(pct=True) * 100
+            )
+
+            recent_rank = (
+                recent_rank.fillna(50)
+            )
+
+        else:
+            recent_rank = raw_momentum
+
+        # -----------------------------------------------------
+        # F. Final momentum blend
+        #
+        # 30% overall return
+        # 30% persistence
+        # 20% multi-period consistency
+        # 10% risk adjustment
+        # 10% recent confirmation
+        # -----------------------------------------------------
+
+        momentum = (
+                0.30 * raw_momentum +
+                0.30 * trend_alignment +
+                0.20 * consistency_score +
+                0.10 * risk_adj +
+                0.10 * recent_rank
+        )
+
+        df['MomentumScore'] = (
+            momentum
+            .fillna(50)
+            .clip(0, 100)
+        )
+
     else:
         df['MomentumScore'] = 50
 
-    # ===========================
-    # 4. FINAL SCORE
-    # ===========================
+    # =========================================================
+    # 4. ADDITIONAL MOMENTUM PENALTIES
+    # =========================================================
+
+    if '3M Return' in df.columns:
+
+        recent_return = (
+            df['3M Return']
+            .fillna(0)
+        )
+
+        # Negative recent performance receives a meaningful
+        # penalty, but does not automatically eliminate the
+        # stock.
+        recent_penalty = np.where(
+            recent_return < 0,
+            np.minimum(
+                20,
+                -recent_return * 0.5
+            ),
+            0
+        )
+
+        df['MomentumScore'] = (
+                df['MomentumScore'] -
+                recent_penalty
+        ).clip(0, 100)
+
+    # =========================================================
+    # 5. FINAL QVM SCORE
+    # =========================================================
+
     df['QVMScore'] = (
-            df['QualityScore'] * weights['Quality'] +
-            df['ValueScore'] * weights['Value'] +
-            df['MomentumScore'] * weights['Momentum']
+            df['QualityScore'] *
+            weights['Quality'] +
+
+            df['ValueScore'] *
+            weights['Value'] +
+
+            df['MomentumScore'] *
+            weights['Momentum']
     )
 
-    return df.sort_values('QVMScore', ascending=False).head(top_n).reset_index(drop=True)
+    # =========================================================
+    # 6. FINAL RISK OVERRIDE
+    # =========================================================
+    #
+    # Extremely leveraged companies should have difficulty
+    # reaching the very top regardless of cheap valuation.
+    # =========================================================
+
+    if 'DebtToEquity' in df.columns:
+
+        extreme_debt = (
+                df['DebtToEquity'] > 200
+        )
+
+        df.loc[
+            extreme_debt,
+            'QVMScore'
+        ] *= 0.90
+
+    # =========================================================
+    # 7. OUTPUT
+    # =========================================================
+
+    return (
+        df.sort_values(
+            'QVMScore',
+            ascending=False
+        )
+        .head(top_n)
+        .reset_index(drop=True)
+    )
 
 
 
@@ -649,10 +1127,7 @@ df_minimal = df[minimal_cols].copy()
 
 df_yf = append_qvm_data_yfinance(df_minimal)
 # After append_qvm_data_yfinance step
-df_scored = score_qvm(
-    df_yf,
-    weights={'Quality': 0.38, 'Value': 0.17, 'Momentum': 0.45}
-)
+df_scored = score_qvm(df_yf)
 
 # Take top 50–100 stocks for watchlist
 top_stocks = df_scored.head(50)

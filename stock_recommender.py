@@ -1193,6 +1193,7 @@ df_gemini_str = df_gemini.to_string(index=False)
 prompt = config["prompt"] + df_gemini_str
 
 # --- Pass the top etfs to Gemini to get world context and final recommendations ---
+print("\n...calling Gemini...\n")
 client, gemini_config = initialize_gemini_client()
 
 final_recommendations, model_used = call_gemini(client, model_primary, model_fallback, gemini_config, prompt)

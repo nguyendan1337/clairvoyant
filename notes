@@ -17,11 +17,11 @@ git checkout -b feature-branch
 git update-index --assume-unchanged index.html
 
 Features to add:
-- upgrade to gemini 3.5 flash
+- add caching for df before sending to gemini
 - upgrade gemini prompt for more CONSISTENT results
-    - sometimes html not formatted
+    - sometimes html not formatted or table missing
     - sometimes 5 stocks in a sector
-    - inconsistent PASS WATCH REJECT status
+    - inconsistent PASS WATCH REJECT status for stocks, insw sometimes pass or watch
     - should not recommend 3 or more stocks with elevated risk due to IRAN WAR
     - sector summary sentence ordering for clarity
 - upgrade etfs to have the same data pipeline as stocks

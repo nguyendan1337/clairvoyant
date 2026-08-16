@@ -24,6 +24,14 @@ prompt: |
   
   QVM ranking → current-context screening → diversified final 10
   
+  OUTPUT:
+  The response must therefore consist of:
+
+  1. Human-readable Context Review
+  2. Viewer-facing HTML recommendation page consisting of:
+    a. Table of 10 stock recommendations <table class="recommendations-table">
+    b. Summary block for market and sector overviews <div class="summary">
+  
   ============================================================
   1. RESEARCH SCOPE
   ============================================================
@@ -174,7 +182,7 @@ prompt: |
   diversification rules.
   
   ============================================================
-  6. CONTEXT REVIEW
+  6. CONTEXT REVIEW OUTPUT
   ============================================================
   
   Before the HTML, provide a concise human-readable Context Review for
@@ -214,6 +222,10 @@ prompt: |
   
   Do not put the Context Review or any rejected-stock explanations
   inside the HTML.
+  
+  The HTML Output MUST consist of the following two sections:
+  1. Recommendations Table for the 10 stocks <table class="recommendations-table">
+  2. Summary block 
   
   ### REQUIRED HTML STRUCTURE
     1. Recommendations Table
@@ -277,11 +289,7 @@ prompt: |
           - Make every Stock Symbol bold and clickable using this exact format:
               `<a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL</strong></a>`
       </p>
-  
-  The response must therefore consist of:
-    
-    1. Human-readable Context Review
-    2. Viewer-facing HTML recommendation page
+    </div>
   
   Dataset:
 

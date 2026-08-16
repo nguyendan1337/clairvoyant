@@ -18,14 +18,12 @@ git update-index --assume-unchanged index.html
 
 Features to add:
 - upgrade to gemini 3.5 flash
-- wdc has fallen in the rankings cuz others have higher quality and better value, verify those above are genuinely better
-- if i want recognizable names with good momentum, add market cap to append qvm data, then use market cap in quality score?
-- upgrade gemini prompt for more consistent results
-    - sometimes explains its steps
-    - max 2 or 3? stocks per sector
-    - downweight strong recent performers due to recent news (energy being high due to iran war but collapses after ceasefire))
-    - consistently outputs stock specific blurb in summaries instead of vague general speak sometimes
-    - sometimes summaries do not include all 10 stocks
+- upgrade gemini prompt for more CONSISTENT results
+    - sometimes html not formatted
+    - sometimes 5 stocks in a sector
+    - inconsistent PASS WATCH REJECT status
+    - should not recommend 3 or more stocks with elevated risk due to IRAN WAR
+    - sector summary sentence ordering for clarity
 - upgrade etfs to have the same data pipeline as stocks
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

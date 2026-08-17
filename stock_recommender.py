@@ -333,6 +333,73 @@ def save_cache(cache):
 
 
 
+# ---------- TOP QVM DATAFRAME CACHE ----------
+# This cache stores the fully computed top-50 QVM DataFrame so that
+# Gemini prompt testing can skip the expensive stock-data/QVM pipeline.
+# The cache file can be persisted by GitHub Actions in the same way as
+# the existing JSON caches.
+TOP_QVM_CACHE_FILE = "top_qvm_stocks_cache.pkl"
+TOP_QVM_CACHE_EXPIRY_HOURS = 6
+TOP_QVM_CACHE_VERSION = 1
+
+
+def load_top_qvm_cache():
+    """Load the cached top-QVM DataFrame if it exists and is still fresh."""
+    if not os.path.exists(TOP_QVM_CACHE_FILE):
+        return None
+
+    try:
+        modified_time = datetime.fromtimestamp(
+            os.path.getmtime(TOP_QVM_CACHE_FILE),
+            tz=UTC
+        )
+
+        age = datetime.now(UTC) - modified_time
+        if age >= timedelta(hours=TOP_QVM_CACHE_EXPIRY_HOURS):
+            print(
+                f"Top QVM cache is stale ({age.total_seconds() / 3600:.1f}h old)."
+            )
+            return None
+
+        cached = pd.read_pickle(TOP_QVM_CACHE_FILE)
+
+        if not isinstance(cached, dict):
+            print("Invalid top QVM cache format. Rebuilding cache.")
+            return None
+
+        if cached.get("version") != TOP_QVM_CACHE_VERSION:
+            print("Top QVM cache version mismatch. Rebuilding cache.")
+            return None
+
+        df = cached.get("data")
+        if not isinstance(df, pd.DataFrame) or df.empty:
+            print("Top QVM cache is empty or invalid. Rebuilding cache.")
+            return None
+
+        print(
+            f"Using cached top {len(df)} QVM stocks "
+            f"({age.total_seconds() / 3600:.1f}h old)."
+        )
+        return df
+
+    except Exception as e:
+        print(f"Could not load top QVM cache: {e}")
+        return None
+
+
+def save_top_qvm_cache(df):
+    """Save the fully computed top-QVM DataFrame for later Gemini testing."""
+    try:
+        cache = {
+            "version": TOP_QVM_CACHE_VERSION,
+            "data": df.copy()
+        }
+        pd.to_pickle(cache, TOP_QVM_CACHE_FILE)
+        print(f"Saved top QVM cache to {TOP_QVM_CACHE_FILE}.")
+    except Exception as e:
+        print(f"Could not save top QVM cache: {e}")
+
+
 # ---------- MAIN FUNCTION ----------
 def append_qvm_data_yfinance(
         df: pd.DataFrame,
@@ -1099,7 +1166,7 @@ def update_html_page(final_recommendations, df_html_table, template_name, displa
 # Record the start time
 start_time = time.perf_counter()
 
-with open("stock_config.yml") as f:
+with open("stock_config_original.yml") as f:
     config = yaml.safe_load(f)
 url = config["url"]
 min_52_week_change = config["min_52_week_change"]
@@ -1108,29 +1175,51 @@ initial_delay = config["initial_delay"]
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
 
-df = fetch_all_stock_pages_from_url(url, min_52_week_change)
-df = df.drop_duplicates()
+# ---------------------------------------------------------
+# Load cached top-50 QVM DataFrame when fresh.
+#
+# This check happens BEFORE any stock-page, yfinance, or
+# QVM-scoring work, so Gemini prompt testing can reuse the
+# exact same quantitative input without rerunning the
+# expensive pipeline.
+# ---------------------------------------------------------
+top_stocks = load_top_qvm_cache()
 
-# Filter rules
-df = df[
-    (df['Market Cap'] >= 300_000_000) &
-    (df['Price'] >= 5.0) &
-    (df['Avg Vol (3M)'] >= 100_000) &
-    ((df['P/E Ratio(TTM)'].isna()) | (df['P/E Ratio(TTM)'] > 0))
-].copy()
+if top_stocks is None:
 
-print("\nTrash Filtered Stocks:")
-print(df[['Symbol', 'Name', '52 WkChange %']].reset_index(drop=True))
+    df = fetch_all_stock_pages_from_url(url, min_52_week_change)
+    df = df.drop_duplicates()
 
-minimal_cols = ['Symbol', 'Name', 'Market Cap', 'Price', 'P/E Ratio(TTM)', '52 WkChange %', 'Avg Vol (3M)']
-df_minimal = df[minimal_cols].copy()
+    # Filter rules
+    df = df[
+        (df['Market Cap'] >= 300_000_000) &
+        (df['Price'] >= 5.0) &
+        (df['Avg Vol (3M)'] >= 100_000) &
+        ((df['P/E Ratio(TTM)'].isna()) | (df['P/E Ratio(TTM)'] > 0))
+    ].copy()
 
-df_yf = append_qvm_data_yfinance(df_minimal)
-# After append_qvm_data_yfinance step
-df_scored = score_qvm(df_yf)
+    print("\nTrash Filtered Stocks:")
+    print(df[['Symbol', 'Name', '52 WkChange %']].reset_index(drop=True))
 
-# Take top 50–100 stocks for watchlist
-top_stocks = df_scored.head(50)
+    minimal_cols = [
+        'Symbol',
+        'Name',
+        'Market Cap',
+        'Price',
+        'P/E Ratio(TTM)',
+        '52 WkChange %',
+        'Avg Vol (3M)'
+    ]
+    df_minimal = df[minimal_cols].copy()
+
+    df_yf = append_qvm_data_yfinance(df_minimal)
+    df_scored = score_qvm(df_yf)
+
+    # Take top 50 stocks for watchlist/Gemini evaluation.
+    top_stocks = df_scored.head(50).copy()
+
+    save_top_qvm_cache(top_stocks)
+
 print("\nTop QVM Stocks:")
 print(top_stocks.head(50)[['Symbol', 'QVMScore', '3M Return','1Y Return']])
 

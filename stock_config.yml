@@ -56,6 +56,9 @@ prompt: |
   Do not independently rescreen the entire top 50 or search lower-ranked
   stocks merely because they appear interesting.
   
+  Search sources are internal evidence only. Never expose citations or
+  grounding references in the final output.
+  
   ============================================================
   2. ELIGIBILITY AND CURRENT STATUS
   ============================================================
@@ -356,6 +359,21 @@ prompt: |
   1. Recommendations Table for the 10 stocks <table class="recommendations-table">
   2. Summary block <div class="summary">
   
+  Do NOT expose search citations, grounding references, source markers,
+  citation IDs, or source lists in the output.
+  The Summary and Sector Overview must read as clean, standalone
+  editorial content, not as a research transcript.
+  NEVER output strings such as:
+    - [cite: ...]
+    - [citation: ...]
+    - [source: ...]
+    - [1], [2], [3] when used as source references
+    - grounding citation markers
+    - internal search-result references
+  Before returning the final answer, scan the entire output and remove
+  any citation markers, grounding references, source IDs, or source-list
+  artifacts.
+  
   ### REQUIRED HTML STRUCTURE
     1. Recommendations Table
     <table class="recommendations-table">
@@ -377,7 +395,7 @@ prompt: |
     </tbody>
     </table>
 
-    2. Summary Block
+    2. Summary Block 
     <div class="summary">
 
     <h2>Market Chat:</h2>

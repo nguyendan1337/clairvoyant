@@ -1166,7 +1166,7 @@ def update_html_page(final_recommendations, df_html_table, template_name, displa
 # Record the start time
 start_time = time.perf_counter()
 
-with open("stock_config_original.yml") as f:
+with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
 url = config["url"]
 min_52_week_change = config["min_52_week_change"]

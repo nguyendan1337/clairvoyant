@@ -433,8 +433,8 @@ prompt: |
             - briefly explain what makes EACH specific stock attractive right now. Focus on recent news and company-specific strengths such as strong business performance, competitive position, growth, profitability, valuation, momentum, or exposure to the sector's current driver. Do not simply describe the stocks as a group.
             - Current context and market risks: explain the relevant current market, economic, geopolitical, regulatory, and industry conditions affecting the sector or stocks, and assess whether major risks appear LOW, CONTROLLED, MODERATE, or ELEVATED, briefly explaining the most important risks.
            Keep the explanation understandable to a non-expert. Avoid unexplained stock-market jargon and do not mention internal scoring systems.
-          - Make every Stock Symbol bold and clickable using this exact format:
-              `<a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL</strong></a>`
+          - Make every Stock Symbol and Stock Name bold and clickable using this exact format:
+              `<a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL or NAME</strong></a>`
       </p>
     </div>
   

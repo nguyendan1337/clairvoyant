@@ -19,11 +19,9 @@ git update-index --assume-unchanged index.html
 Features to add:
 - add caching for df before sending to gemini
 - upgrade gemini prompt for more CONSISTENT results
-    - sometimes html not formatted or table missing
-    - sometimes 5 stocks in a sector
-    - inconsistent PASS WATCH REJECT status for stocks, insw sometimes pass or watch
-    - should not recommend 3 or more stocks with elevated risk due to IRAN WAR
-    - sector summary sentence ordering for clarity
+    - max 2 stocks per sector, 2 stocks per risk event
+    - this should be taken into account DURING research
+    - only add an additional stock per sector if there are less than 5 sector groups in the initial top 50 qvm dataframe
 - upgrade etfs to have the same data pipeline as stocks
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

@@ -352,17 +352,22 @@ TOP_QVM_CACHE_VERSION = 1
 
 
 def load_top_qvm_cache():
-    """Load cached top-QVM DataFrame if it exists and is still fresh.
+    """Load cached top-QVM DataFrame if it exists and is still fresh."""
 
-    The cache age is stored inside the pickle rather than inferred from the
-    filesystem modification time. This is important because GitHub Actions
-    checkout resets the file's filesystem mtime to the checkout time.
-    """
+    print(f"Checking top QVM cache: {TOP_QVM_CACHE_FILE}", flush=True)
+
     if not os.path.exists(TOP_QVM_CACHE_FILE):
+        print("Top QVM cache does not exist.", flush=True)
         return None
 
+    print("Top QVM cache exists.", flush=True)
+
     try:
+        print("About to read top QVM pickle...", flush=True)
+
         cached = pd.read_pickle(TOP_QVM_CACHE_FILE)
+
+        print("Top QVM pickle loaded successfully.", flush=True)
 
         if not isinstance(cached, dict):
             print("Invalid top QVM cache format. Rebuilding cache.")

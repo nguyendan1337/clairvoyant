@@ -4,7 +4,6 @@ import pandas as pd
 import yfinance as yf
 from tqdm import tqdm
 from google import genai
-from pathlib import Path
 from bs4 import BeautifulSoup
 from google.genai import types
 from datetime import datetime, timedelta, UTC
@@ -254,21 +253,14 @@ def fetch_all_stock_pages_from_url(url, min_52_week_change=20, force_refresh=Fal
 
 def initialize_gemini_client():
     api_key = os.getenv("GEMINI_KEY")
-
     if not api_key:
         # fallback to local .env for development
         from dotenv import load_dotenv
-        env_path = Path(__file__).resolve().parent / ".env"
-        load_dotenv(dotenv_path=env_path)
+        load_dotenv()
         api_key = os.getenv("GEMINI_KEY")
-
-    if not api_key:
-        raise ValueError("GEMINI_KEY not found in environment or .env")
-
     # Enable Google Search tool
     grounding_tool = types.Tool(google_search=types.GoogleSearch())
     gemini_config = types.GenerateContentConfig(tools=[grounding_tool])
-
     return genai.Client(api_key=api_key), gemini_config
 
 
@@ -352,16 +344,23 @@ TOP_QVM_CACHE_VERSION = 1
 
 
 def load_top_qvm_cache():
-    """Load cached top-QVM DataFrame if it exists and is still fresh.
-
-    The cache age is stored inside the pickle rather than inferred from the
-    filesystem modification time. This is important because GitHub Actions
-    checkout resets the file's filesystem mtime to the checkout time.
-    """
+    """Load the cached top-QVM DataFrame if it exists and is still fresh."""
     if not os.path.exists(TOP_QVM_CACHE_FILE):
         return None
 
     try:
+        modified_time = datetime.fromtimestamp(
+            os.path.getmtime(TOP_QVM_CACHE_FILE),
+            tz=UTC
+        )
+
+        age = datetime.now(UTC) - modified_time
+        if age >= timedelta(hours=TOP_QVM_CACHE_EXPIRY_HOURS):
+            print(
+                f"Top QVM cache is stale ({age.total_seconds() / 3600:.1f}h old)."
+            )
+            return None
+
         cached = pd.read_pickle(TOP_QVM_CACHE_FILE)
 
         if not isinstance(cached, dict):
@@ -372,27 +371,7 @@ def load_top_qvm_cache():
             print("Top QVM cache version mismatch. Rebuilding cache.")
             return None
 
-        created_at = cached.get("created_at")
-        if not created_at:
-            print("Top QVM cache has no creation timestamp. Rebuilding cache.")
-            return None
-
-        created_time = datetime.fromisoformat(created_at)
-
-        if created_time.tzinfo is None:
-            created_time = created_time.replace(tzinfo=UTC)
-
-        age = datetime.now(UTC) - created_time
-
-        if age >= timedelta(hours=TOP_QVM_CACHE_EXPIRY_HOURS):
-            print(
-                f"Top QVM cache is stale "
-                f"({age.total_seconds() / 3600:.1f}h old)."
-            )
-            return None
-
         df = cached.get("data")
-
         if not isinstance(df, pd.DataFrame) or df.empty:
             print("Top QVM cache is empty or invalid. Rebuilding cache.")
             return None
@@ -401,29 +380,27 @@ def load_top_qvm_cache():
             f"Using cached top {len(df)} QVM stocks "
             f"({age.total_seconds() / 3600:.1f}h old)."
         )
-
         return df
 
     except Exception as e:
         print(f"Could not load top QVM cache: {e}")
         return None
 
+
 def save_top_qvm_cache(df):
     """Save the fully computed top-QVM DataFrame for later Gemini testing."""
     try:
         cache = {
             "version": TOP_QVM_CACHE_VERSION,
-            "created_at": datetime.now(UTC).isoformat(),
             "data": df.copy()
         }
-
         pd.to_pickle(cache, TOP_QVM_CACHE_FILE)
-
         print(f"Saved top QVM cache to {TOP_QVM_CACHE_FILE}.")
-
     except Exception as e:
         print(f"Could not save top QVM cache: {e}")
 
+
+# ---------- MAIN FUNCTION ----------
 def append_qvm_data_yfinance(
         df: pd.DataFrame,
         max_info_calls: int = 500,

@@ -31,15 +31,15 @@ jobs:
         run: pip install -r requirements.txt
 
       # Step 4: Run recommenders
-      - name: Run ETF Recommender
-        env:
-          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: python etf_recommender.py
-
       - name: Run Stock Recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python stock_recommender.py
+
+      - name: Run ETF Recommender
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: python etf_recommender.py
 
       # Step 5: Commit updated pages, caches, and generated data
       - name: Commit and push changes

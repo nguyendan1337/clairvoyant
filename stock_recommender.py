@@ -598,9 +598,9 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     if weights is None:
         weights = {
-            'Quality': 0.45,
-            'Value': 0.15,
-            'Momentum': 0.40
+            'Quality': 0.34,
+            'Value': 0.33,
+            'Momentum': 0.33
         }
 
     # =========================================================
@@ -1241,7 +1241,11 @@ if top_stocks is None:
     df_minimal = df[minimal_cols].copy()
 
     df_yf = append_qvm_data_yfinance(df_minimal)
-    df_scored = score_qvm(df_yf)
+    df_scored = score_qvm(df_yf, weights = {
+        'Quality': 0.45,
+        'Value': 0.10,
+        'Momentum': 0.45
+    })
 
     # Take top 50 stocks for watchlist/Gemini evaluation.
     top_stocks = df_scored.head(50).copy()

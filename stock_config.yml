@@ -88,26 +88,33 @@ prompt: |
   2. SECTOR DIVERSIFICATION
   ============================================================
 
+  "Sector Group" means the exact value in the supplied DataFrame's "Sector"
+  column. Do not merge, split, rename, or reinterpret Sector Groups.
+
   First determine the number of distinct Sector Groups represented in the
   supplied DataFrame.
 
   If 5 OR MORE distinct Sector Groups exist:
 
-    HARD MAXIMUM = 2 selected stocks per Sector Group.
+    HARD MAXIMUM = 2 FINAL SELECTED stocks per Sector Group.
 
-  Before researching each candidate:
+  This is an absolute portfolio constraint. It applies regardless of QVMScore,
+  classification, company quality, or how attractive a third candidate
+  appears.
 
-    If its Sector Group already has 2 SELECTED stocks:
-      SKIP WITHOUT RESEARCH.
+  Before researching each candidate, check the candidate's Sector Group
+  against the current FINAL SELECTED count.
 
-  A sector-capacity skip is not a rejection. Do not research, classify,
-  or include the skipped stock in the Context Review.
+  If its Sector Group already has 2 FINAL SELECTED stocks:
+    SKIP WITHOUT RESEARCH.
 
-  Once a Sector Group reaches 2 selected stocks, every later candidate from
-  that Sector Group is skipped.
+  A sector-capacity skip is not a classification or rejection. Do not research,
+  classify, or include the skipped stock in the Context Review.
 
-  Do not override this rule because a third candidate has a higher QVMScore
-  or appears more attractive.
+  Once a Sector Group reaches 2 FINAL SELECTED stocks, every later candidate
+  from that Sector Group is skipped for the remainder of the selection process.
+
+  Never select a third stock from a Sector Group when 5+ Sector Groups exist.
 
   If FEWER THAN 5 distinct Sector Groups exist in the supplied DataFrame,
   additional stocks from the strongest available sectors are permitted only
@@ -200,150 +207,128 @@ prompt: |
   ============================================================
   6. DETERMINISTIC CONTINUATION / REVERSAL TEST
   ============================================================
-  
+
   Assign EXACTLY ONE classification to every researched stock.
-  
-  Do not classify a stock based on overall company quality alone.
 
-  For every researched stock, first determine three things:
+  Classification depends only on current evidence about that stock. Never use
+  QVM rank, portfolio composition, sector capacity, or comparison with other
+  stocks to change it.
 
-  1. DURABLE DRIVERS
-  Identify the 1–3 current drivers of strength that are likely to persist.
-  
-  2. TEMPORARY DRIVERS
-  Identify any current event, disruption, abnormal pricing, commodity
-  condition, geopolitical event, unusually strong industry condition, or
-  other temporary factor contributing materially to recent strength.
-  
-  3. REVERSAL MECHANISM
-  Identify the most credible current event that could cause recent strength
-  to weaken.
+  For each researched stock determine:
 
-  Then perform the following mandatory counterfactual:
+    1. DURABLE DRIVERS — the 1–3 current drivers likely to persist.
 
-  "If the most important temporary driver disappeared or normalized, would
-  the stock still have a strong continuation thesis based on its durable
-  business and industry fundamentals?"
+    2. TEMPORARY DRIVERS — any event, disruption, abnormal pricing, commodity
+       condition, geopolitical event, or unusually favorable industry condition
+       materially contributing to recent strength.
 
-  Use the answer to determine the classification.
-  
+    3. REVERSAL MECHANISM — the most credible current reason recent strength
+       could weaken.
+
+  Apply this counterfactual:
+
+    "If the most important temporary driver disappeared or normalized today,
+     would the stock still have a strong continuation thesis based on durable
+     business and industry fundamentals?"
+
+  CATALYST DEPENDENCE:
+
+    LOW:
+      Recent strength is primarily supported by durable fundamentals;
+      temporary events are incidental or incremental.
+
+    MODERATE:
+      Temporary/current conditions materially improve performance, but the
+      underlying continuation thesis remains attractive without them.
+
+    HIGH:
+      Recent strength depends substantially on a temporary event, abnormal
+      pricing, disruption, or unusually favorable industry condition.
+
   ------------------------------------------------------------
-  CATALYST DEPENDENCE
+  CLASSIFICATION RULES — APPLY IN THIS ORDER
   ------------------------------------------------------------
 
-  Classify dependence on temporary drivers as:
+  REJECT:
 
-  LOW:
-    Recent strength is primarily supported by durable fundamentals.
-    Temporary events are incidental or provide only incremental benefit.
+    Use when the underlying continuation thesis is broken or materially
+    deteriorating, OR current evidence indicates recent strength is unlikely
+    to persist even without a temporary catalyst, OR reversal risk is so
+    severe that the other categories do not adequately describe it.
 
-  MODERATE:
-    Temporary/current conditions materially improve performance, but the
-    underlying continuation thesis remains attractive without them.
+  ELEVATED REVERSAL RISK:
 
-  HIGH:
-    Recent strength depends substantially on a temporary event, abnormal
-    pricing, disruption, or unusually favorable industry condition.
-  
-  ------------------------------------------------------------
-  CLASSIFICATION RULES
-  ------------------------------------------------------------
-  
-  STRONG CONTINUATION
+    Use when REJECT does not apply AND either:
 
-  Use only when:
-  
-    - durable drivers clearly support continued strength
-    - temporary-driver dependence is LOW
-    - no significant current reversal mechanism exists
-    - normalization of temporary conditions would not materially weaken the
-      continuation thesis
+      - catalyst dependence is HIGH and normalization would materially weaken
+        recent earnings, valuation, or stock performance; OR
+      - the most credible current reversal mechanism makes reversal at least
+        as likely as continuation.
 
-  Do NOT use STRONG CONTINUATION when an active temporary event is a major
-  driver of recent performance.
-  
-  CONTINUATION
-
-  Use when:
-  
-    - durable drivers remain strong
-    - temporary-driver dependence is LOW or MODERATE
-    - current reversal risk is limited
-    - normalization of current favorable conditions would weaken the thesis
-      only modestly
-
-  CAUTIOUS CONTINUATION
-
-  Use when:
-  
-    - the underlying continuation thesis remains stronger than the reversal case
-    - BUT a credible current reversal mechanism could materially reduce recent
-      strength
-    - temporary-driver dependence is MODERATE
-    - or valuation, cyclicality, expectations, industry normalization, or another
-      current factor creates meaningful but non-disqualifying reversal risk
-
-  CAUTIOUS CONTINUATION is the required middle category when a reversal
-  mechanism is credible but the underlying thesis remains attractive.
-  
-  Do NOT escalate to ELEVATED REVERSAL RISK merely because a temporary risk
-  exists.
-  
-  ELEVATED REVERSAL RISK
-
-  Use when:
-  
-    - temporary-driver dependence is HIGH
-    - AND normalization of the temporary driver would likely materially weaken
-      recent earnings, valuation, or stock performance
-  
-  OR:
-  
-    - the most credible current reversal mechanism is sufficiently significant
-      that continuation is no longer the more likely outcome.
-  
     These stocks are ineligible.
-  
-  REJECT
 
-  Use when:
-  
-    - the underlying continuation thesis is broken or materially deteriorating
-    - OR current evidence indicates that recent strength is unlikely to persist
-      even without relying on a temporary catalyst
-    - OR the reversal risk is so severe that CAUTIOUS or ELEVATED REVERSAL RISK
-      does not adequately describe the situation
+  CAUTIOUS CONTINUATION:
 
-  These stocks are ineligible.
-  
+    Use when REJECT and ELEVATED REVERSAL RISK do not apply AND:
+
+      - catalyst dependence is MODERATE; OR
+      - a credible current reversal mechanism could materially reduce recent
+        strength; OR
+      - valuation, cyclicality, expectations, industry normalization, or
+        another current factor creates meaningful but non-disqualifying risk.
+
+    Continuation must still be more likely than reversal.
+
+  CONTINUATION:
+
+    Use when none of the higher-risk categories apply AND:
+
+      - durable drivers support continued strength;
+      - catalyst dependence is LOW; and
+      - current reversal risk is limited.
+
+  STRONG CONTINUATION:
+
+    Use when CONTINUATION applies AND durable drivers provide especially strong
+    evidence for continued strength, no significant current reversal mechanism
+    is present, and normalization of temporary conditions would not materially
+    weaken the thesis.
+
+  Do NOT use STRONG CONTINUATION when an active temporary event materially
+  drives recent performance.
+
+  Do NOT use CONTINUATION for MODERATE catalyst dependence.
+
+  When evidence is mixed and no higher-risk threshold is clearly met, choose
+  the less extreme eligible classification rather than STRONG CONTINUATION or
+  ELEVATED REVERSAL RISK.
+
   ------------------------------------------------------------
-  MANDATORY NORMALIZATION TEST
+  NORMALIZATION RULE
   ------------------------------------------------------------
 
-  For any stock materially affected by a temporary event, answer internally:
+  For a stock materially affected by a temporary event:
 
-  "If this event normalized today, would the stock still have a strong
-  continuation thesis?"
+    - normalization leaves the thesis strongly intact →
+      STRONG CONTINUATION or CONTINUATION, if all other rules are satisfied
 
-  YES, strongly:
-    STRONG CONTINUATION or CONTINUATION may be used.
+    - normalization leaves the thesis materially weaker →
+      CAUTIOUS CONTINUATION
 
-  YES, but materially weaker:
-    CAUTIOUS CONTINUATION.
+    - normalization materially impairs recent performance →
+      ELEVATED REVERSAL RISK
 
-  NO, recent strength would be materially impaired:
-    ELEVATED REVERSAL RISK.
+    - normalization materially impairs performance AND the underlying thesis
+      is deteriorating →
+      REJECT
 
-  NO, and the underlying thesis is also deteriorating:
-    REJECT.
-  
   Do not classify an event-driven stock as STRONG CONTINUATION or CONTINUATION
-  when normalization of the event would materially impair the current thesis.
-  
+  when normalization would materially impair the current thesis.
+
   ============================================================
   CROSS-STOCK CONSISTENCY
   ============================================================
-  
+
   When multiple researched stocks have materially similar exposure to the same
   industry condition, geopolitical event, commodity cycle, disruption, or
   temporary catalyst:
@@ -352,12 +337,12 @@ prompt: |
     - use the same standard for catalyst dependence
     - do not assign materially different classifications merely because the
       companies have different QVM scores or rankings
-  
+
   Different classifications are allowed only when there is a specific
   company-level difference that materially changes the continuation thesis,
   such as different contract exposure, geographic exposure, balance-sheet
   strength, earnings sensitivity, business mix, or dependence on the catalyst.
-  
+
   If two stocks are materially dependent on the same temporary event, both
   must be evaluated as event-driven stocks even if one appears fundamentally
   stronger.
@@ -603,20 +588,35 @@ prompt: |
   14. CONSISTENCY
   ============================================================
 
-  Use the same classification when the underlying facts are materially
-  unchanged.
+  Treat the classification rules in Section 6 as the single authoritative
+  classification standard.
 
-  Do not change classifications because:
+  When the underlying facts are materially unchanged, the same stock must
+  receive the same classification.
+
+  Do not change a classification because:
     - wording differs between runs
     - another stock appears more attractive
     - portfolio composition changes
     - QVM rank changes slightly
+    - a different sector has more or fewer selected stocks
     - additional research merely confirms the same facts
 
-  Change a classification only when credible new evidence materially changes
-  the situation or demonstrates that the previous conclusion was factually wrong.
+  Change a classification only when credible current evidence materially
+  changes the facts, catalyst dependence, reversal mechanism, or continuation
+  thesis, or demonstrates that the previous conclusion was factually wrong.
 
-  Portfolio constraints must NEVER be used to change a stock's classification.
+  When current sources conflict, resolve the conflict using source credibility,
+  recency, and directness of evidence. Do not let one weak or sensational
+  source overturn a classification supported by stronger evidence.
+
+  Portfolio constraints NEVER change a classification. They only determine
+  whether a candidate can be selected.
+
+  When materially similar stocks have materially similar exposure to the same
+  event or industry condition, apply the same normalization and catalyst-
+  dependence standards. A different classification requires a specific
+  company-level fact that materially changes the continuation thesis.
 
   ============================================================
   15. FINAL VALIDATION
@@ -647,56 +647,72 @@ prompt: |
 
   CONTEXT REVIEW
 
-  | QVM Rank | Symbol | Classification | Explanation |
-  | -------- | ------ | -------------- | ----------- |
+  | QVM Rank | Symbol | Classification / Status | Explanation |
+  | -------- | ------ | ----------------------- | ----------- |
 
-  Include EVERY stock actually researched or considered.
+  The Context Review is a DEBUGGING LEDGER of the candidates that were
+  actually considered during the sequential selection process.
 
-  Do not include:
-    - the entire top 50
-  
-  Explain why candidates were skipped, ie because their sector or risk event reached capacity.
+  Do NOT output the entire DataFrame or all 50 stocks.
 
-  Include researched:
-    - selected stocks
-    - ELEVATED REVERSAL RISK stocks
-    - REJECT stocks
-    - candidates researched but not selected because of the risk-event limit
-    - lower-ranked candidates researched as replacements
+  Process candidates strictly in descending QVMScore order and record a
+  candidate in the Context Review ONLY when the selection algorithm actually
+  reaches that candidate.
 
-  Each row contains:
-    - QVM Rank
-    - Symbol
-    - Classification
-    - Explanation
+  Once exactly 10 stocks have been selected, STOP the selection process
+  immediately and do NOT consider, research, classify, or output any remaining
+  stocks from the DataFrame.
 
-  Classification must be exactly one of:
+  Include each candidate that was actually considered, using one row per
+  candidate.
 
-    STRONG CONTINUATION
-    CONTINUATION
-    CAUTIOUS CONTINUATION
-    ELEVATED REVERSAL RISK
-    REJECT
+  For each considered candidate, use one of these statuses:
 
-  Use exactly ONE concise sentence per researched stock, preferably under
-  30 words.
+    SELECTED - CLASSIFICATION GOES HERE (STRONG, CONTINUATION, CAUTIOUS)
+    SKIPPED — SECTOR CAPACITY
+    EXCLUDED — ELIGIBILITY
+    NOT SELECTED — ELEVATED REVERSAL RISK
+    NOT SELECTED — REJECT
+    NOT SELECTED — RISK-EVENT CAPACITY
 
-  STRONG CONTINUATION:
-    state the strongest evidence supporting durable continuation.
+  For SELECTED stocks:
+    - provide the stock's classification in the Explanation
+    - briefly state the primary reason it was selected
 
-  CONTINUATION:
-    state the strongest current evidence supporting continued strength.
+  For SKIPPED — SECTOR CAPACITY:
+    - do not research or classify the stock
+    - explain that it was skipped because its Sector Group already had
+      2 selected stocks
 
-  CAUTIOUS CONTINUATION:
-    state the current factor creating moderate reversal risk and why
-    continuation still appears more likely.
+  For EXCLUDED — ELIGIBILITY:
+    - do not research the stock
+    - briefly state the eligibility reason
 
-  ELEVATED REVERSAL RISK:
-    state the specific current catalyst, event, or condition making reversal
-    sufficiently likely to exclude the stock.
+  For NOT SELECTED — ELEVATED REVERSAL RISK:
+    - state the specific current catalyst, event, or condition creating
+      elevated reversal risk
 
-  REJECT:
-    state the specific current evidence making the stock unsuitable.
+  For NOT SELECTED — REJECT:
+    - state the specific current evidence making the stock unsuitable
+
+  For NOT SELECTED — RISK-EVENT CAPACITY:
+    - state that it was otherwise eligible but not selected because its
+      primary risk event already had 2 selected CAUTIOUS CONTINUATION stocks
+
+  A candidate skipped for Sector Capacity must NOT be researched, assigned a
+  continuation classification, or described as rejected.
+
+  Keep each explanation to ONE concise sentence, preferably under 30 words.
+
+  IMPORTANT:
+    The Context Review ends when exactly 10 stocks have been SELECTED.
+    Do not continue scanning the DataFrame after the 10th selected stock.
+    Do not output candidates that were never actually considered.
+
+  The Context Review therefore may contain more than 10 rows because it records
+  candidates considered and skipped, but it must NEVER contain all 50 stocks
+  unless the selection algorithm genuinely had to consider all 50 before
+  reaching 10 selected stocks.
 
   ============================================================
   17. HTML RECOMMENDATIONS TABLE
@@ -769,17 +785,16 @@ prompt: |
     final 10.
     <p>
       <strong>Sector Group Name (
-        <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST</strong></a>,
-        <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND</strong></a>):
+        <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST SYMBOL</strong></a>,
+        <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND SYMBOL</strong></a>):
       </strong>
 
       For each sector paragraph:
         - explain why the sector is currently attractive or relevant
         - explain the most important current industry driver
-        - explain why EACH selected stock in the sector is attractive now
-        - focus on recent news and company-specific strengths
-        - use the classification to state how likely EACH selected stock is to continue to perform well and why
-  
+        - explain why EACH selected stock in the sector is attractive now, focus on recent news and company-specific strengths
+        - explain how likely each selected stock is to continue performing well and why
+
       Make every Stock Symbol and Stock Name that appears in the text bold and clickable using:
 
       <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL or NAME</strong></a>
@@ -801,15 +816,94 @@ prompt: |
   The HTML summary is viewer-facing editorial content.
 
   ============================================================
-  19. OUTPUT CLEANLINESS
+  19. FINAL RESPONSE — OUTPUT ONLY
   ============================================================
 
-  Do not expose citations, grounding references, source IDs, search-result
-  markers, or internal research artifacts.
+  IMPORTANT: Research and reasoning are REQUIRED internally, but MUST NOT be
+  printed. The final response is a formatting task only.
 
-  Never output citation markers or search-result references.
+  After completing all research and portfolio selection, DISCARD ALL INTERNAL
+  RESEARCH, REASONING, SEARCH RESULTS, SOURCE INFORMATION, AND INTERMEDIATE
+  WORK. Do not summarize or describe them.
 
-  Do not use Markdown code fences around the HTML.
+  The final response MUST contain EXACTLY these three components and NOTHING
+  ELSE, in this exact order:
+
+    1. CONTEXT REVIEW
+    2. HTML recommendations table
+    3. HTML summary block
+
+  ============================================================
+  ABSOLUTE PROHIBITION
+  ============================================================
+
+  NEVER print or expose:
+
+    - research
+    - reasoning
+    - analysis
+    - chain-of-thought
+    - search results
+    - sources or citations
+    - source IDs or grounding references
+    - intermediate calculations
+    - intermediate rankings
+    - candidate-processing steps
+    - internal decision-making
+    - research notes
+    - scratch work
+    - arrays, tuples, lists, or serialized candidate data
+    - debugging output
+    - internal variables
+    - duplicate/intermediate symbol lists
+    - any text resembling:
+      "(PARR), 11 (PARR), 17 (PARR), 18 (PARR), 24 (PARR), 26 (PARR)"
+    - any other content not explicitly required by Sections 16–18
+
+  DO NOT explain how classifications were determined.
+  DO NOT explain how stocks were selected.
+  DO NOT describe what was researched.
+  DO NOT provide evidence or sources outside the required viewer-facing HTML.
+  DO NOT add an introductory sentence.
+  DO NOT add a concluding sentence.
+
+  ============================================================
+  EXACT OUTPUT BOUNDARY
+  ============================================================
+
+  The first visible text MUST be:
+
+    CONTEXT REVIEW
+
+  After the Context Review, output the HTML recommendations table exactly as
+  specified in Section 17.
+
+  Immediately after the table, output the HTML summary exactly as specified
+  in Section 18.
+
+  The final response MUST end with the closing:
+
+    </div>
+
+  Nothing may appear before "CONTEXT REVIEW".
+  Nothing may appear after "</div>".
+
+  The Context Review may contain ONLY the columns and one-sentence
+  explanations explicitly required by Section 16.
+
+  The HTML recommendations table may contain ONLY the fields explicitly
+  required by Section 17.
+
+  The HTML summary may contain ONLY the viewer-facing content explicitly
+  required by Section 18.
+
+  Do not use Markdown code fences.
+
+  FINAL CHECK:
+  Before responding, delete every piece of text that is not one of the three
+  required components above. If research, reasoning, analysis, source
+  information, or intermediate work appears in the draft response, remove it
+  before returning the response.
 
   ============================================================
   20. FINAL FORMAT CHECK
@@ -840,375 +934,721 @@ prompt: |
   Dataframe:
 
 #prompt: |
-#  You are an expert U.S. stock investment analyst with real-time web search capability and a focus on evidence-based risk management.
+#  You are an expert U.S. stock investment analyst with real-time web search
+#  capability and a focus on evidence-based risk management.
 #
-#  You will receive a DataFrame containing the top 50 stocks from a quantitative QVM model.
+#  You will receive a DataFrame containing the top 50 stocks from a quantitative
+#  QVM model.
 #
 #  Columns:
-#    "Symbol", "Name", "Sector", "Market Cap",
-#    "QVMScore", "QualityScore", "ValueScore", "MomentumScore",
-#    "ROE", "ProfitMargin", "DebtToEquity", "EV\_EBITDA", "PEG", "PE",
-#    "3M Return", "6M Return", "9M Return", "52 WkChange %"
+#      "Symbol", "Name", "Sector", "Market Cap",
+#        "QVMScore", "QualityScore", "ValueScore", "MomentumScore",
+#        "ROE", "ProfitMargin", "DebtToEquity", "EV_EBITDA", "PEG", "PE",
+#        "3M Return", "6M Return", "9M Return", "52 WkChange %"
 #
-#  QVMScore is the authoritative quantitative ranking. Higher is better.
-#  Do not recalculate it or create a replacement numerical score.
-#
-#  OBJECTIVE:
-#
-#  QVM ranking → current-context screening → diversified final 10
-#
-#  OUTPUT:
-#  The response must therefore consist of:
-#
-#  1. Human-readable Context Review
-#  2. Viewer-facing HTML recommendation page consisting of:
-#    a. Table of 10 stock recommendations <table class="recommendations-table">
-#    b. Summary block for market and sector overviews <div class="summary">
+#  QVMScore is authoritative. Higher is better.
+#  Do not recalculate QVMScore or create another quantitative score.
 #
 #  ============================================================
-#  1. RESEARCH SCOPE
+#  OBJECTIVE
 #  ============================================================
 #
-#  The QVM model has already performed the broad quantitative screening.
-#  Your job is to determine whether the highest-ranked stocks have serious
-#  CURRENT contextual problems that make them unsuitable.
+#  Build a diversified final portfolio of exactly 10 stocks.
 #
-#  Start by researching ONLY the top 10 QVM-ranked stocks.
+#  Process candidates strictly in descending QVMScore order using this
+#  integrated sequence:
 #
-#  Do NOT research all 50.
+#    QVM rank → sector-capacity check → eligibility → research →
+#    continuation/reversal classification → risk-event check → selection
 #
-#  Research ranks 11+ only when necessary to:
-#    - replace a top-10 stock that is REJECTED
-#    - complete a final portfolio of 10 after applying diversification rules
+#  The central question for every researched stock is:
 #
-#  When additional research is needed, proceed in QVM order: 11, 12, 13, etc.
+#  "Based on CURRENT evidence, how likely is this stock's recent strength
+#  to continue, and is the current reversal risk low enough to include it?"
 #
-#  Stop researching once enough suitable stocks exist to construct the
-#  final 10-stock portfolio.
-#
-#  Do not independently rescreen the entire top 50 or search lower-ranked
-#  stocks merely because they appear interesting.
-#
-#  Search sources are internal evidence only. Never expose citations or
-#  grounding references in the final output.
+#  Portfolio construction and research are ONE integrated process.
+#  Do not research a large group first and construct the portfolio afterward.
 #
 #  ============================================================
-#  2. ELIGIBILITY AND CURRENT STATUS
+#  OUTPUT
 #  ============================================================
 #
-#  Before contextual research, exclude stocks clearly outside the
-#  portfolio mandate, such as companies primarily focused on emerging
-#  markets, foreign markets, or a single non-U.S. country.
+#  Output exactly:
 #
-#  These are eligibility exclusions, not REJECT decisions.
+#    1. CONTEXT REVIEW
+#    2. HTML recommendations table
+#    3. HTML summary block
+#
+#  The Context Review is the authoritative ledger of stocks actually researched.
+#
+#  Every final recommendation MUST appear in the Context Review.
+#  No unresearched stock may appear in the final HTML.
+#
+#  The final recommendations must contain exactly 10 stocks.
+#
+#  ============================================================
+#  1. CANDIDATE PROCESSING
+#  ============================================================
+#
+#  Treat the supplied DataFrame as a QVM-ranked candidate stream.
+#
+#  Process candidates strictly in descending QVMScore order:
+#  rank 1 → rank 2 → rank 3 → ... → rank 50
+#
+#  Do NOT automatically research the entire top 10.
+#
+#  There is no separate "top 10 plus replacements" phase.
+#
+#  For each candidate, apply the selection algorithm below. Continue down
+#  the ranking until exactly 10 stocks have been selected.
+#
+#  Research lower-ranked candidates only when earlier candidates are skipped,
+#  ineligible, rejected, or cannot be selected under a hard portfolio rule.
+#
+#  Never skip ahead merely because a lower-ranked stock looks attractive.
+#
+#  A stock is "researched" only after its current company news, industry
+#  conditions, and relevant market/world context have actually been
+#  investigated.
+#
+#  ============================================================
+#  2. SECTOR DIVERSIFICATION
+#  ============================================================
+#
+#  First determine the number of distinct Sector Groups represented in the
+#  supplied DataFrame.
+#
+#  If 5 OR MORE distinct Sector Groups exist:
+#
+#    HARD MAXIMUM = 2 selected stocks per Sector Group.
+#
+#  Before researching each candidate:
+#
+#    If its Sector Group already has 2 SELECTED stocks:
+#      SKIP WITHOUT RESEARCH.
+#
+#  A sector-capacity skip is not a rejection. Do not research, classify,
+#  or include the skipped stock in the Context Review.
+#
+#  Once a Sector Group reaches 2 selected stocks, every later candidate from
+#  that Sector Group is skipped.
+#
+#  Do not override this rule because a third candidate has a higher QVMScore
+#  or appears more attractive.
+#
+#  If FEWER THAN 5 distinct Sector Groups exist in the supplied DataFrame,
+#  additional stocks from the strongest available sectors are permitted only
+#  when necessary to reach exactly 10.
+#
+#  There is no minimum allocation or equal-sector requirement.
+#
+#  ============================================================
+#  3. ELIGIBILITY
+#  ============================================================
+#
+#  Exclude stocks clearly outside the portfolio mandate, such as companies
+#  primarily focused on emerging markets, foreign markets, or a single
+#  non-U.S. country.
 #
 #  For an otherwise U.S.-focused company with substantial international
 #  operations, do not automatically exclude it.
 #
-#  When evaluating eligibility, verify the company’s current status using current sources rather than relying on historical corporate information. A company that is currently independently publicly traded is eligible regardless of prior acquisitions, mergers, spin-offs, ticker changes, or ownership. In particular, do not reject SNDK (SanDisk) based on Western Digital’s 2016 acquisition: SanDisk was spun off from Western Digital and became an independent publicly traded Nasdaq company under SNDK in February 2025. Only exclude a stock for public-trading status when current evidence clearly shows that it is not currently publicly tradable.
+#  Verify current public-trading status using current sources.
 #
-#  Do not research stocks removed by this initial eligibility screen.
+#  A currently independently publicly traded company is eligible regardless
+#  of prior acquisitions, mergers, spin-offs, ticker changes, or ownership.
+#
+#  In particular, do not reject SNDK (SanDisk) based on Western Digital's
+#  2016 acquisition. SanDisk was spun off and became an independent publicly
+#  traded Nasdaq company under SNDK in February 2025.
+#
+#  Only exclude a stock for public-trading status when current evidence
+#  clearly shows that it is not currently publicly tradable.
+#
+#  Do not research stocks that fail this eligibility screen.
 #
 #  ============================================================
-#  3. MARKET CONTEXT
+#  4. CURRENT MARKET AND WORLD CONTEXT
 #  ============================================================
 #
-#  Briefly research the U.S. market using primarily the past 5–10 days.
+#  Research the current U.S. market and major world developments using
+#  primarily the past 5–10 days, extending to approximately 30 days when
+#  a continuing event is materially relevant.
 #
 #  Assess:
 #    - S&P 500 direction and overall market health
 #    - major macroeconomic developments
+#    - interest rates and inflation
 #    - geopolitical developments
+#    - wars and military conflicts
+#    - energy and commodity developments
 #    - regulatory developments
 #    - earnings trends
 #    - major industry and sector themes
 #
-#  Use this as context, not as an independent stock-ranking system.
+#  Pay particular attention to ACTIVE events that could materially affect
+#  a stock's earnings, demand, costs, valuation, or recent price performance.
 #
+#  Do not treat geopolitical developments as generic background. Determine
+#  whether each relevant event is immaterial, a minor risk, a meaningful
+#  risk, or a major driver of the stock's current performance.
 #
 #  ============================================================
-#  4. CURRENT-CONTEXT SCREENING
+#  5. CURRENT STOCK RESEARCH
 #  ============================================================
 #
-#  Evaluate eligible stocks in descending QVMScore order.
+#  For every researched candidate, investigate:
 #
-#  For every stock actually investigated, assign:
+#    1. Recent company-specific news
+#    2. Latest earnings and guidance
+#    3. Recent management developments
+#    4. Analyst estimate or outlook changes when relevant
+#    5. Current industry conditions
+#    6. Current geopolitical and macroeconomic exposure
+#    7. The reason for the stock's recent strength
+#    8. The most credible mechanism by which that strength could reverse
 #
-#  PASS
-#  No material current contextual issue makes the QVM signal unusually
-#  unreliable.
+#  Use current evidence rather than relying primarily on historical information.
 #
-#  WATCH
-#  A material current risk or catalyst creates meaningful uncertainty
-#  about the sustainability of the stock's recent performance, earnings,
-#  or valuation, but the evidence does not justify exclusion.
+#  Search specifically for the company and its current issues.
+#
+#  Use multiple credible current sources when an issue is material or conflicting.
+#
+#  Give greater weight to:
+#    - recent credible reporting
+#    - company filings and statements
+#    - earnings and guidance
+#    - credible financial reporting
+#    - direct evidence of industry conditions
+#
+#  Do not allow one sensational headline to determine a classification without
+#  supporting evidence.
+#
+#  ============================================================
+#  6. DETERMINISTIC CONTINUATION / REVERSAL TEST
+#  ============================================================
+#
+#  Assign EXACTLY ONE classification to every researched stock.
+#
+#  Do not classify a stock based on overall company quality alone.
+#
+#  For every researched stock, first determine three things:
+#
+#  1. DURABLE DRIVERS
+#  Identify the 1–3 current drivers of strength that are likely to persist.
+#
+#  2. TEMPORARY DRIVERS
+#  Identify any current event, disruption, abnormal pricing, commodity
+#  condition, geopolitical event, unusually strong industry condition, or
+#  other temporary factor contributing materially to recent strength.
+#
+#  3. REVERSAL MECHANISM
+#  Identify the most credible current event that could cause recent strength
+#  to weaken.
+#
+#  Then perform the following mandatory counterfactual:
+#
+#  "If the most important temporary driver disappeared or normalized, would
+#  the stock still have a strong continuation thesis based on its durable
+#  business and industry fundamentals?"
+#
+#  Use the answer to determine the classification.
+#
+#  ------------------------------------------------------------
+#  CATALYST DEPENDENCE
+#  ------------------------------------------------------------
+#
+#  Classify dependence on temporary drivers as:
+#
+#  LOW:
+#    Recent strength is primarily supported by durable fundamentals.
+#    Temporary events are incidental or provide only incremental benefit.
+#
+#  MODERATE:
+#    Temporary/current conditions materially improve performance, but the
+#    underlying continuation thesis remains attractive without them.
+#
+#  HIGH:
+#    Recent strength depends substantially on a temporary event, abnormal
+#    pricing, disruption, or unusually favorable industry condition.
+#
+#  ------------------------------------------------------------
+#  CLASSIFICATION RULES
+#  ------------------------------------------------------------
+#
+#  STRONG CONTINUATION
+#
+#  Use only when:
+#
+#    - durable drivers clearly support continued strength
+#    - temporary-driver dependence is LOW
+#    - no significant current reversal mechanism exists
+#    - normalization of temporary conditions would not materially weaken the
+#      continuation thesis
+#
+#  Do NOT use STRONG CONTINUATION when an active temporary event is a major
+#  driver of recent performance.
+#
+#  CONTINUATION
+#
+#  Use when:
+#
+#    - durable drivers remain strong
+#    - temporary-driver dependence is LOW or MODERATE
+#    - current reversal risk is limited
+#    - normalization of current favorable conditions would weaken the thesis
+#      only modestly
+#
+#  CAUTIOUS CONTINUATION
+#
+#  Use when:
+#
+#    - the underlying continuation thesis remains stronger than the reversal case
+#    - BUT a credible current reversal mechanism could materially reduce recent
+#      strength
+#    - temporary-driver dependence is MODERATE
+#    - or valuation, cyclicality, expectations, industry normalization, or another
+#      current factor creates meaningful but non-disqualifying reversal risk
+#
+#  CAUTIOUS CONTINUATION is the required middle category when a reversal
+#  mechanism is credible but the underlying thesis remains attractive.
+#
+#  Do NOT escalate to ELEVATED REVERSAL RISK merely because a temporary risk
+#  exists.
+#
+#  ELEVATED REVERSAL RISK
+#
+#  Use when:
+#
+#    - temporary-driver dependence is HIGH
+#    - AND normalization of the temporary driver would likely materially weaken
+#      recent earnings, valuation, or stock performance
+#
+#  OR:
+#
+#    - the most credible current reversal mechanism is sufficiently significant
+#      that continuation is no longer the more likely outcome.
+#
+#    These stocks are ineligible.
 #
 #  REJECT
-#  Strong, credible evidence indicates a material problem that makes the
-#  QVM signal unusually unreliable or creates significant downside risk.
 #
-#  Use these classifications consistently and independently of portfolio
-#  construction.
+#  Use when:
 #
-#  WATCH should be used consistently when a stock's unusually strong
-#  recent performance or earnings is materially dependent on a temporary,
-#  unusual, or event-driven factor that could normalize.
+#    - the underlying continuation thesis is broken or materially deteriorating
+#    - OR current evidence indicates that recent strength is unlikely to persist
+#      even without relying on a temporary catalyst
+#    - OR the reversal risk is so severe that CAUTIOUS or ELEVATED REVERSAL RISK
+#      does not adequately describe the situation
 #
-#  Examples include:
-#    - a war or geopolitical disruption
-#    - an unusual commodity-price shock
-#    - a temporary industry supply/demand imbalance
-#    - a one-time regulatory or legal event
-#    - an unusually strong temporary spending cycle
+#  These stocks are ineligible.
 #
-#  Do NOT assign WATCH merely because a stock:
-#    - has a high valuation
-#    - has insider selling
-#    - is volatile
-#    - operates in a cyclical industry
-#    - has ordinary geopolitical exposure
-#    - has risen substantially
-#    - has normal industry risks
+#  ------------------------------------------------------------
+#  MANDATORY NORMALIZATION TEST
+#  ------------------------------------------------------------
 #
-#  These factors may support a WATCH classification only when they
-#  materially affect the sustainability of the current QVM signal.
+#  For any stock materially affected by a temporary event, answer internally:
 #
-#  A stock whose current performance is strongly benefiting from an
-#  elevated-risk event should generally be WATCH even when its underlying
-#  business is otherwise strong.
+#  "If this event normalized today, would the stock still have a strong
+#  continuation thesis?"
 #
-#  Do not automatically reject an event-driven winner. WATCH is preferred
-#  when the catalyst creates meaningful reversal risk but does not make
-#  the underlying company unsuitable.
+#  YES, strongly:
+#    STRONG CONTINUATION or CONTINUATION may be used.
 #
-#  For WATCH stocks, classify reversal risk as:
-#    LOW / MODERATE / HIGH
+#  YES, but materially weaker:
+#    CAUTIOUS CONTINUATION.
 #
-#  This describes the potential impact if the catalyst normalizes.
-#  Do not invent precise percentage losses without credible evidence.
+#  NO, recent strength would be materially impaired:
+#    ELEVATED REVERSAL RISK.
 #
-#  For every investigated stock also assign:
-#  Confidence: HIGH / MEDIUM / LOW
+#  NO, and the underlying thesis is also deteriorating:
+#    REJECT.
 #
-#  CONSISTENCY RULE:
-#    Within the same research day, use the same PASS/WATCH/REJECT
-#    classification when the underlying facts are materially unchanged.
-#
-#  Do not change a classification simply because:
-#    - wording differs between runs
-#    - another stock appears more attractive
-#    - the portfolio composition changes
-#    - the stock's QVM rank changes slightly
-#    - additional research provides redundant confirmation of the same facts
-#
-#  Change a classification only when new credible evidence materially
-#  changes the underlying situation or demonstrates that a previous
-#  conclusion was factually incorrect.
-#
-#  When evidence is mixed, prefer the classification supported by the
-#  strongest and most current evidence and explain the uncertainty rather
-#  than changing classifications arbitrarily.
+#  Do not classify an event-driven stock as STRONG CONTINUATION or CONTINUATION
+#  when normalization of the event would materially impair the current thesis.
 #
 #  ============================================================
-#  RISK-EVENT GROUPING
+#  CROSS-STOCK CONSISTENCY
 #  ============================================================
 #
-#  For every WATCH stock, identify its primary elevated-risk event.
+#  When multiple researched stocks have materially similar exposure to the same
+#  industry condition, geopolitical event, commodity cycle, disruption, or
+#  temporary catalyst:
 #
-#  Use a broad event label so stocks affected by the same underlying event
-#  are grouped together.
+#    - apply the same normalization test to each
+#    - use the same standard for catalyst dependence
+#    - do not assign materially different classifications merely because the
+#      companies have different QVM scores or rankings
 #
-#  For example, Iran, Strait of Hormuz disruption, Middle East conflict,
-#  tanker disruption caused by the conflict, and related oil/shipping
-#  disruption should all be treated as the SAME risk event:
+#  Different classifications are allowed only when there is a specific
+#  company-level difference that materially changes the continuation thesis,
+#  such as different contract exposure, geographic exposure, balance-sheet
+#  strength, earnings sensitivity, business mix, or dependence on the catalyst.
+#
+#  If two stocks are materially dependent on the same temporary event, both
+#  must be evaluated as event-driven stocks even if one appears fundamentally
+#  stronger.
+#
+#  ============================================================
+#  7. REVERSAL ANALYSIS
+#  ============================================================
+#
+#  For every researched stock, determine the most credible current reason its
+#  recent strength could reverse.
+#
+#  Consider:
+#    - earnings deterioration
+#    - guidance reductions
+#    - slowing growth or demand
+#    - negative estimate revisions
+#    - weakening industry conditions
+#    - margin compression
+#    - customer weakness
+#    - competitive deterioration
+#    - regulatory or legal problems
+#    - geopolitical developments
+#    - war or military conflict
+#    - commodity-price normalization
+#    - supply/demand normalization
+#    - temporary catalysts ending
+#    - excessive expectations
+#    - valuation becoming difficult to support
+#    - speculative appreciation
+#    - other credible current reversal mechanisms
+#
+#  Ask:
+#
+#  "What specific current development could cause this stock's recent strength
+#  to weaken, and how credible is that risk?"
+#
+#  Do not invent a reversal mechanism simply because the stock has risen
+#  substantially.
+#
+#  ============================================================
+#  8. GEOPOLITICAL AND WAR RISK
+#  ============================================================
+#
+#  If current earnings, freight rates, commodity prices, demand, margins, or
+#  valuation are materially benefiting from an ACTIVE war or geopolitical
+#  disruption, assess the effect of:
+#
+#    - de-escalation
+#    - ceasefire
+#    - successful negotiations
+#    - reopened transportation routes
+#    - normalized supply
+#    - normalized commodity prices
+#    - normalized pricing or freight rates
+#
+#  If normalization could materially reduce unusually strong earnings or
+#  stock performance, do not classify the stock as STRONG CONTINUATION or
+#  CONTINUATION.
+#
+#  If the event is meaningful but not the primary driver of recent strength,
+#  CAUTIOUS CONTINUATION may be appropriate.
+#
+#  If the event is a major driver of recent strength, use ELEVATED REVERSAL RISK
+#  or REJECT.
+#
+#  Do not automatically penalize every company exposed to a geopolitical event.
+#  Assess actual exposure and dependence.
+#
+#  ============================================================
+#  9. DO NOT OVERREACT
+#  ============================================================
+#
+#  Do not use ELEVATED REVERSAL RISK or REJECT merely because:
+#
+#    - valuation is high
+#    - momentum is strong
+#    - the stock has risen substantially
+#    - the stock is volatile
+#    - the company operates in a cyclical industry
+#    - the company has ordinary geopolitical exposure
+#    - there is insider selling
+#    - an analyst downgraded the stock
+#    - the stock experienced a normal pullback
+#
+#  These factors matter only when current evidence connects them to a credible
+#  reversal mechanism.
+#
+#  Do not use STRONG CONTINUATION or CONTINUATION merely because:
+#
+#    - earnings are strong
+#    - the balance sheet is strong
+#    - the company has a competitive advantage
+#    - analysts remain positive
+#    - the sector is strong
+#
+#  ============================================================
+#  10. EVENT-DRIVEN STOCKS
+#  ============================================================
+#
+#  For event-driven winners, determine:
+#
+#    1. Is the event still active?
+#    2. Does it materially affect current earnings or valuation?
+#    3. Is it likely to persist?
+#    4. Does the current stock price assume it continues?
+#    5. Would normalization materially reduce earnings or valuation?
+#
+#  The more dependent recent strength is on an active temporary event, the more
+#  appropriate ELEVATED REVERSAL RISK or REJECT becomes.
+#
+#  ============================================================
+#  11. RISK-EVENT GROUPING
+#  ============================================================
+#
+#  For every CAUTIOUS CONTINUATION stock with a material current risk, identify
+#  its PRIMARY risk event internally.
+#
+#  Stocks affected by the same underlying event must share one event group.
+#
+#  For example:
+#
+#    Iran
+#    Strait of Hormuz disruption
+#    Middle East conflict
+#    tanker disruption caused by the conflict
+#    related oil/shipping disruption
+#
+#  all belong to:
 #
 #    "Iran/Middle East conflict"
 #
 #  Do not treat different manifestations of the same underlying event as
 #  separate events.
 #
-#  Other examples:
-#    - "Oil price shock"
-#    - "AI infrastructure spending"
-#    - "Semiconductor cycle"
-#    - "Regulatory change"
-#    - "Consumer slowdown"
-#
-#  A WATCH stock may have multiple risks, but identify the single primary
-#  risk event responsible for its WATCH classification.
-#
 #  ============================================================
-#  5. FINAL PORTFOLIO
+#  12. INTEGRATED SELECTION ALGORITHM
 #  ============================================================
 #
-#  Eligible:
-#    - PASS = fully eligible
-#    - WATCH = eligible with risk-event constraints
-#    - REJECT = excluded
+#  This is the AUTHORITATIVE portfolio-construction procedure.
 #
-#  Select primarily in descending QVMScore order.
+#  First determine whether the supplied DataFrame contains 5 or more distinct
+#  Sector Groups.
 #
-#  HARD PORTFOLIO CONSTRAINTS:
+#  Set:
+#    selected_count = 0
+#    selected_sector_count = 0 for each Sector Group
+#    selected_risk_event_count = 0 for each primary risk event
 #
-#  1. SECTOR LIMIT
+#  Process candidates strictly in descending QVMScore order.
 #
-#  First count the distinct Sector Groups among all eligible researched
-#  candidates.
+#  For EACH candidate:
 #
-#  If 5 OR MORE distinct Sector Groups are available:
-#    - HARD MAXIMUM = 2 stocks per Sector Group.
-#    - A third stock from any Sector Group is FORBIDDEN.
-#    - Once 2 stocks from a Sector Group have been selected, skip every
-#      later candidate from that Sector Group.
-#    - Do not override this limit because a third stock has a higher
-#      QVMScore than a candidate from another sector.
+#    1. SECTOR CAPACITY
 #
-#  If FEWER THAN 5 distinct Sector Groups are available:
-#    - A strict 2-per-sector limit cannot produce 10 stocks.
-#    - Additional stocks from the strongest available Sector Groups are
-#      permitted only when necessary to reach exactly 10 recommendations.
-#    - Prefer the highest-QVMScore eligible candidates for those
-#      additional slots.
-#    - Do not add extra stocks from a sector unnecessarily.
+#       If 5+ Sector Groups exist AND its Sector Group already has 2 selected
+#       stocks:
 #
-#  Sector diversification is a concentration safeguard, not a reason to
-#  select weak stocks, but the sector limit above is a HARD portfolio
-#  constraint whenever 5 or more distinct Sector Groups are available.
+#         SKIP WITHOUT RESEARCH.
 #
-#  2. RISK-EVENT LIMIT
+#       Continue to the next candidate.
 #
-#  Never recommend more than 2 WATCH stocks whose primary elevated-risk
-#  event is the same.
+#    2. ELIGIBILITY
 #
-#  All stocks materially benefiting from or exposed to the same
-#  underlying event count toward the same limit.
+#       If the candidate fails the eligibility rules:
 #
-#  For example, if INSW, LPG, DHT, and TNK are WATCH because their recent
-#  performance is materially elevated by the Iran/Middle East conflict,
-#  they are all part of the same risk event. At most 2 of them may be
-#  recommended.
+#         EXCLUDE WITHOUT RESEARCH.
 #
-#  3. NO FORCED DIVERSIFICATION
+#       Continue to the next candidate.
 #
-#  Do not sacrifice a materially stronger QVM opportunity merely to
-#  create equal sector representation.
+#    3. RESEARCH
 #
-#  However, the hard sector and risk-event limits above are mandatory
-#  portfolio constraints, not preferences.
+#       Investigate the candidate using Sections 4–11.
 #
-#  PORTFOLIO CONSTRUCTION:
+#    4. CLASSIFY
 #
-#  1. Count the distinct Sector Groups among eligible researched
-#     candidates.
+#       Assign exactly one of the five classifications.
 #
-#  2. Sort eligible candidates by descending QVMScore.
+#       Add every researched candidate to the Context Review.
 #
-#  3. Select candidates in QVM order.
+#    5. REJECT / HIGH REVERSAL RISK
 #
-#  4. If 5 or more distinct Sector Groups are available:
-#       - Select at most 2 stocks from each Sector Group.
-#       - Once a Sector Group reaches 2 selected stocks, SKIP every later
-#         candidate from that Sector Group.
-#       - A third stock from that Sector Group is not permitted.
+#       If ELEVATED REVERSAL RISK or REJECT:
 #
-#  5. If fewer than 5 distinct Sector Groups are available:
-#       - Allow a third or subsequent stock from a Sector Group only when
-#         necessary to reach exactly 10 stocks.
-#       - Use the highest-QVMScore eligible candidates for those
-#         additional slots.
+#         DO NOT SELECT.
 #
-#  6. Independently enforce the risk-event limit:
-#       - Maximum 2 WATCH stocks per primary risk event.
+#       Continue to the next candidate.
 #
-#  7. Continue down the QVM ranking until exactly 10 stocks have been
-#     selected.
+#    6. RISK-EVENT CAPACITY
 #
-#  If a top-10 candidate is REJECTED, continue down the QVM ranking and
-#  research additional candidates as needed.
+#       If CAUTIOUS CONTINUATION and its primary risk event already has
+#       2 selected CAUTIOUS CONTINUATION stocks:
 #
-#  Do not change a stock's PASS/WATCH/REJECT classification merely to make
-#  the portfolio fit these constraints.
+#         DO NOT SELECT.
 #
-#  FINAL VALIDATION:
+#       Continue to the next candidate.
 #
-#  Before producing the recommendations, explicitly verify:
+#    7. SELECT
+#
+#       Otherwise, select the candidate immediately.
+#
+#       Increment:
+#         selected_count
+#         its Sector Group count
+#         its risk-event count if CAUTIOUS CONTINUATION
+#
+#    8. STOP
+#
+#       Stop immediately when selected_count = 10.
+#
+#  Never select a candidate before it has been researched.
+#
+#  Never select more than 2 stocks from a Sector Group when 5+ Sector Groups
+#  exist in the supplied DataFrame.
+#
+#  Never select more than 2 CAUTIOUS CONTINUATION stocks sharing the same
+#  primary risk event.
+#
+#  Never skip ahead in QVM order.
+#
+#  ============================================================
+#  13. RESEARCH AND REPLACEMENT RULES
+#  ============================================================
+#
+#  There is no separate replacement phase.
+#
+#  A candidate that is ineligible, ELEVATED REVERSAL RISK, REJECT, or unable
+#  to satisfy the hard risk-event limit simply does not consume a final
+#  portfolio slot.
+#
+#  Continue to the next QVM-ranked candidate.
+#
+#  The next qualified candidate automatically fills the open slot.
+#
+#  Research candidates 11+ only when the sequential algorithm reaches them.
+#
+#  Candidates skipped because their sector already has 2 selected stocks are
+#  not replacements and must not be researched.
+#
+#  Never replace a selected higher-QVMScore stock with a lower-QVMScore stock
+#  merely for additional sector diversification.
+#
+#  ============================================================
+#  14. CONSISTENCY
+#  ============================================================
+#
+#  Use the same classification when the underlying facts are materially
+#  unchanged.
+#
+#  Do not change classifications because:
+#    - wording differs between runs
+#    - another stock appears more attractive
+#    - portfolio composition changes
+#    - QVM rank changes slightly
+#    - additional research merely confirms the same facts
+#
+#  Change a classification only when credible new evidence materially changes
+#  the situation or demonstrates that the previous conclusion was factually wrong.
+#
+#  Portfolio constraints must NEVER be used to change a stock's classification.
+#
+#  ============================================================
+#  15. FINAL VALIDATION
+#  ============================================================
+#
+#  Before producing the output, silently verify:
 #
 #    - exactly 10 stocks are selected
-#    - count the distinct eligible Sector Groups
-#    - IF 5 OR MORE distinct Sector Groups are available:
-#        - EVERY Sector Group has 2 OR FEWER selected stocks
-#        - ZERO Sector Groups have 3 selected stocks
-#    - IF FEWER THAN 5 distinct Sector Groups are available:
-#        - any Sector Group with more than 2 stocks is necessary to reach
-#          exactly 10
-#    - no risk event has more than 2 WATCH stocks
-#    - every selected stock is PASS or WATCH
-#    - every WATCH stock has a primary risk event
-#    - no REJECT stock appears in the recommendations
+#    - all 10 were actually researched
+#    - all 10 appear in the Context Review
+#    - no unresearched stock appears in the final HTML
+#    - all selected stocks are STRONG CONTINUATION, CONTINUATION, or
+#      CAUTIOUS CONTINUATION
+#    - no ELEVATED REVERSAL RISK or REJECT stock is selected
+#    - with 5+ Sector Groups, no sector has more than 2 selected stocks
+#    - no risk event has more than 2 selected CAUTIOUS CONTINUATION stocks
+#    - selected stocks follow descending QVMScore order under the algorithm
+#    - no sector-capacity-skipped candidate was researched or selected
+#    - the table contains exactly 10 rows
+#
+#  If any condition fails, correct the portfolio before outputting it.
 #
 #  ============================================================
-#  6. CONTEXT REVIEW OUTPUT
+#  16. CONTEXT REVIEW
 #  ============================================================
 #
-#  Before the HTML, provide a concise human-readable Context Review for
-#  the user's personal review.
-#
-#  Include EVERY stock actually investigated. Normally this will be the
-#  top 10 plus any lower-ranked replacement candidates that were needed.
-#
-#  Do NOT include the entire top 50.
-#
-#  Do NOT include stocks that were never researched.
-#
-#  Use:
+#  Before the HTML, provide:
 #
 #  CONTEXT REVIEW
 #
-#  | QVM Rank | Symbol | Status | Confidence | Reason |
-#  | -------- | ------ | ------ | ---------- | ------ |
+#  | QVM Rank | Symbol | Classification | Explanation |
+#  | -------- | ------ | -------------- | ----------- |
 #
-#  Give exactly one concise sentence per researched stock, preferably
-#  under 30 words.
+#  Include EVERY stock actually researched or considered.
 #
-#  For WATCH stocks, identify the specific risk/catalyst and, when
-#  material, its LOW/MODERATE/HIGH reversal risk.
+#  Do not include:
+#    - the entire top 50
 #
-#  For REJECT stocks, clearly state the specific reason for exclusion.
+#  Explain why candidates were skipped, ie because their sector or risk event reached capacity.
 #
-#  For PASS stocks, briefly state the most important current factor
-#  supporting the stock.
+#  Include researched:
+#    - selected stocks
+#    - ELEVATED REVERSAL RISK stocks
+#    - REJECT stocks
+#    - candidates researched but not selected because of the risk-event limit
+#    - lower-ranked candidates researched as replacements
+#
+#  Each row contains:
+#    - QVM Rank
+#    - Symbol
+#    - Classification
+#    - Explanation
+#
+#  Classification must be exactly one of:
+#
+#    STRONG CONTINUATION
+#    CONTINUATION
+#    CAUTIOUS CONTINUATION
+#    ELEVATED REVERSAL RISK
+#    REJECT
+#
+#  Use exactly ONE concise sentence per researched stock, preferably under
+#  30 words.
+#
+#  STRONG CONTINUATION:
+#    state the strongest evidence supporting durable continuation.
+#
+#  CONTINUATION:
+#    state the strongest current evidence supporting continued strength.
+#
+#  CAUTIOUS CONTINUATION:
+#    state the current factor creating moderate reversal risk and why
+#    continuation still appears more likely.
+#
+#  ELEVATED REVERSAL RISK:
+#    state the specific current catalyst, event, or condition making reversal
+#    sufficiently likely to exclude the stock.
+#
+#  REJECT:
+#    state the specific current evidence making the stock unsuitable.
 #
 #  ============================================================
-#  7. FINAL HTML OUTPUT
+#  17. HTML RECOMMENDATIONS TABLE
 #  ============================================================
 #
-#  Immediately after the Context Review, output the clean viewer-facing
-#  HTML recommendation page.
+#  Immediately after the Context Review, output clean viewer-facing HTML.
 #
-#  Do not put the Context Review or any rejected-stock explanations
-#  inside the HTML.
+#  Do not repeat the Context Review inside the HTML.
 #
-#  The HTML Output MUST consist of the following two sections:
-#  1. Recommendations Table for the 10 stocks <table class="recommendations-table">
-#  2. Summary block <div class="summary">
+#  The table MUST use exactly:
 #
-#  Do NOT expose search citations, grounding references, source markers,
-#  citation IDs, or source lists in the output.
-#  The Summary and Sector Overview must read as clean, standalone
-#  editorial content, not as a research transcript.
-#  NEVER output strings such as:
-#    - [cite: ...]
-#    - [citation: ...]
-#    - [source: ...]
-#    - [1], [2], [3] when used as source references
-#    - grounding citation markers
-#    - internal search-result references
-#  Before returning the final answer, scan the entire output and remove
-#  any citation markers, grounding references, source IDs, or source-list
-#  artifacts.
+#    <table class="recommendations-table">
 #
-#  ### REQUIRED HTML STRUCTURE
-#    1. Recommendations Table
+#  It must contain EXACTLY 10 rows.
+#
+#  Every row must correspond to one selected stock and every selected stock
+#  must appear in the Context Review.
+#
+#  If 5+ Sector Groups exist in the supplied DataFrame, the table MUST contain
+#  no more than 2 stocks from any Sector Group.
+#
+#  Do not include ELEVATED REVERSAL RISK or REJECT stocks.
+#
+#  Use exactly:
+#
 #    <table class="recommendations-table">
 #    <thead>
 #    <tr>
@@ -1221,54 +1661,107 @@ prompt: |
 #    </tr>
 #    </thead>
 #    <tbody>
-#      - One row per stock
-#      - In each row:
-#        – Stock Name cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">STOCK NAME</a>
-#        – Symbol cell: <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">SYMBOL</a>
+#  ...
 #    </tbody>
 #    </table>
 #
-#    2. Summary Block
+#  Each stock must use:
+#
+#    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">SYMBOL</a>
+#
+#  and:
+#
+#    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">STOCK NAME</a>
+#
+#  ============================================================
+#  18. HTML SUMMARY
+#  ============================================================
+#
+#  Immediately after the complete table:
+#
 #    <div class="summary">
 #
 #    <h2>Market Chat:</h2>
 #
 #    <p>
-#      Intro:
-#      Write ONE short paragraph giving a plain-English overview of the current U.S. stock market for an intelligent general reader who is familiar with everyday news but is not a stock-market expert.
-#
-#      Include:
-#        - Whether the S&P 500 is currently up, down, or roughly flat, with the relevant percentage and time period (today, this week, or this month).
-#        - A clear assessment of whether the overall market is doing WELL, MIXED, or POORLY.
-#        - The current investor mood in natural language (e.g. optimistic, cautious, or mixed).
-#        - The 1–2 biggest factors currently driving the market, such as company profits, interest rates, inflation, AI investment, economic growth, or geopolitical events.
-#        - Briefly mention any important area of strength or concern if it materially affects the overall picture.
-#
-#      Use normal financial language where appropriate, but avoid specialized jargon or explain it naturally when necessary. Do NOT define obvious terms or translate every financial phrase into simplistic language. For example, do not write “April–June profits, also known as Q2 earnings” or “the S&P 500 gained 3%, meaning stock prices went higher.”
-#
-#      The goal is to inform a reasonably intelligent reader about what is happening in the market and why, not to teach them basic investing terminology.
-#
-#      Keep the entire intro to approximately 3–5 sentences and one paragraph.
-#      Example style:
-#        “Overall, the U.S. stock market is doing fairly well right now. The S&P 500 is up 0.7% this week, meaning the prices of many large U.S. companies have generally risen. Investors are still optimistic because many companies reported stronger-than-expected profits, although concerns about the economy and geopolitical tensions are creating some caution. The biggest forces moving stocks right now are strong company results, continued spending on AI technology, and uncertainty surrounding global energy and shipping.”
+#    Write ONE short paragraph of approximately 3–5 sentences covering:
+#      - current S&P 500 direction and relevant percentage of the day, may include an additional percentage over a period of time if relevant
+#      - whether the market is STRONG, MIXED, or WEAK
+#      - investor mood
+#      - the 1–2 biggest market drivers
+#      - any important market concern
 #    </p>
 #
-#    Then for EACH Sector Group:
-#      <p>
-#        <strong>Sector Group Name (
-#          <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST</strong></a>,
-#          <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND</strong></a>
-#        ):</strong>
-#          Explain the sector and the specific stocks selected using plain English. Do NOT mention QVM scores, QVM rankings, scoring methodology, or other internal model terminology.
-#          Include:
-#            - explain why the sector currently looks attractive or relevant.
-#            - Current industry driver: explain the most important current event, trend, or economic factor benefiting or affecting the sector, and why it matters.
-#            - briefly explain what makes EACH specific stock attractive right now. Focus on recent news and company-specific strengths such as strong business performance, competitive position, growth, profitability, valuation, momentum, or exposure to the sector's current driver. Do not simply describe the stocks as a group.
-#            - Current context and market risks: explain the relevant current market, economic, geopolitical, regulatory, and industry conditions affecting the sector or stocks, and assess whether major risks appear LOW, CONTROLLED, MODERATE, or ELEVATED, briefly explaining the most important risks.
-#           Keep the explanation understandable to a non-expert. Avoid unexplained stock-market jargon and do not mention internal scoring systems.
-#          - Make every Stock Symbol and Stock Name bold and clickable using this exact format:
-#              `<a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL or NAME</strong></a>`
-#      </p>
+#    Then provide one paragraph for EACH Sector Group represented in the
+#    final 10.
+#    <p>
+#      <strong>Sector Group Name (
+#        <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST</strong></a>,
+#        <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND</strong></a>):
+#      </strong>
+#
+#      For each sector paragraph:
+#        - explain why the sector is currently attractive or relevant
+#        - explain the most important current industry driver
+#        - explain why EACH selected stock in the sector is attractive now
+#        - focus on recent news and company-specific strengths
+#        - use the classification to state how likely EACH selected stock is to continue to perform well and why
+#
+#      Make every Stock Symbol and Stock Name that appears in the text bold and clickable using:
+#
+#      <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL or NAME</strong></a>
+#
+#    </p>
 #    </div>
 #
-#  Dataset:
+#  Do not mention:
+#    - QVM scores
+#    - QVM rankings
+#    - scoring methodology
+#    - internal model terminology
+#    - rejected stocks
+#    - replacement candidates
+#    - research process
+#    - Context Review
+#    - portfolio-construction rules
+#
+#  The HTML summary is viewer-facing editorial content.
+#
+#  ============================================================
+#  19. OUTPUT CLEANLINESS
+#  ============================================================
+#
+#  Do not expose citations, grounding references, source IDs, search-result
+#  markers, or internal research artifacts.
+#
+#  Never output citation markers or search-result references.
+#
+#  Do not use Markdown code fences around the HTML.
+#
+#  ============================================================
+#  20. FINAL FORMAT CHECK
+#  ============================================================
+#
+#  Before returning the response, silently verify:
+#
+#    1. Context Review exists.
+#    2. Every researched stock is in the Context Review.
+#    3. Every final recommendation is in the Context Review.
+#    4. Exactly 10 final recommendations exist.
+#    5. Every final recommendation was researched.
+#    6. No ELEVATED REVERSAL RISK or REJECT stock is selected.
+#    7. With 5+ Sector Groups, no sector exceeds 2 final stocks.
+#    8. No risk event exceeds 2 CAUTIOUS CONTINUATION stocks.
+#    9. The final 10 follow the sequential QVM selection algorithm.
+#    10. No sector-capacity-skipped stock was researched or selected.
+#    11. The table contains exactly 10 rows.
+#    12. The exact opening tag is:
+#        <table class="recommendations-table">
+#    13. The table appears before:
+#        <div class="summary">
+#    14. The summary discusses every selected stock.
+#    15. No citation artifacts appear.
+#    16. No internal research or portfolio-construction terminology appears
+#        in the viewer-facing HTML.
+#
+#  Dataframe:

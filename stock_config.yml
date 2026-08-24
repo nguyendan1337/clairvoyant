@@ -793,7 +793,7 @@ prompt: |
         - explain why the sector is currently attractive or relevant
         - explain the most important current industry driver
         - explain why EACH selected stock in the sector is attractive now, focus on recent news and company-specific strengths
-        - explain how likely each selected stock is to continue performing well and why
+        - use the classification to explain how likely each selected stock is to continue performing well and why
 
       Make every Stock Symbol and Stock Name that appears in the text bold and clickable using:
 

@@ -91,8 +91,23 @@ def load_html_cache():
     if not os.path.exists(HTML_CACHE_FILE):
         return {}
 
-    with open(HTML_CACHE_FILE, "r") as f:
-        cache = json.load(f)
+    try:
+        with open(HTML_CACHE_FILE, "r", encoding="utf-8") as f:
+            cache = json.load(f)
+
+        if not isinstance(cache, dict):
+            print(
+                f"Warning: {HTML_CACHE_FILE} does not contain a JSON object. "
+                "Ignoring it."
+            )
+            return {}
+
+    except (json.JSONDecodeError, OSError) as e:
+        print(
+            f"Warning: could not read {HTML_CACHE_FILE}: {e}. "
+            "Ignoring the invalid cache and rebuilding it."
+        )
+        return {}
 
     fresh_cache = {}
     now = datetime.now(UTC)
@@ -100,21 +115,33 @@ def load_html_cache():
     for key, entry in cache.items():
         try:
             ts = datetime.fromisoformat(entry["timestamp"])
+
             if ts.tzinfo is None:
                 ts = ts.replace(tzinfo=UTC)
 
             if now - ts < timedelta(days=HTML_CACHE_EXPIRY_DAYS):
                 fresh_cache[key] = entry
-        except:
+        except (KeyError, TypeError, ValueError):
             continue
 
     return fresh_cache
 
 
-
 def save_html_cache(cache):
-    with open(HTML_CACHE_FILE, "w") as f:
-        json.dump(cache, f)
+    temp_file = f"{HTML_CACHE_FILE}.tmp"
+
+    try:
+        with open(temp_file, "w", encoding="utf-8") as f:
+            json.dump(cache, f)
+            f.flush()
+            os.fsync(f.fileno())
+
+        # Atomic replacement prevents a partially written real cache.
+        os.replace(temp_file, HTML_CACHE_FILE)
+
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 
 
@@ -312,13 +339,28 @@ CACHE_EXPIRY_DAYS = 1
 
 
 
-# ---------- CACHE HELPERS ----------
+# ---------- yfinance CACHE HELPERS ----------
 def load_cache():
     if not os.path.exists(CACHE_FILE):
         return {}
 
-    with open(CACHE_FILE, "r") as f:
-        cache = json.load(f)
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            cache = json.load(f)
+
+        if not isinstance(cache, dict):
+            print(
+                f"Warning: {CACHE_FILE} does not contain a JSON object. "
+                "Ignoring it."
+            )
+            return {}
+
+    except (json.JSONDecodeError, OSError) as e:
+        print(
+            f"Warning: could not read {CACHE_FILE}: {e}. "
+            "Ignoring the invalid cache and rebuilding it."
+        )
+        return {}
 
     fresh_cache = {}
     now = datetime.now(UTC)
@@ -326,18 +368,32 @@ def load_cache():
     for ticker, entry in cache.items():
         try:
             ts = datetime.fromisoformat(entry["timestamp"])
+
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=UTC)
+
             if now - ts < timedelta(days=CACHE_EXPIRY_DAYS):
                 fresh_cache[ticker] = entry
-        except:
+        except (KeyError, TypeError, ValueError):
             continue
 
     return fresh_cache
 
 
-
 def save_cache(cache):
-    with open(CACHE_FILE, "w") as f:
-        json.dump(cache, f)
+    temp_file = f"{CACHE_FILE}.tmp"
+
+    try:
+        with open(temp_file, "w", encoding="utf-8") as f:
+            json.dump(cache, f)
+            f.flush()
+            os.fsync(f.fileno())
+
+        os.replace(temp_file, CACHE_FILE)
+
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 
 

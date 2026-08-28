@@ -11,6 +11,17 @@ from datetime import datetime, timedelta, UTC
 import requests, time, random, json, yaml, os, hashlib
 from html import escape
 
+CACHE_DIR = Path("caches")
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def cache_file_path(filename):
+    """Route every relative cache filename through the caches directory."""
+    path = Path(filename)
+    if path.is_absolute() or (path.parts and path.parts[0] == CACHE_DIR.name):
+        return str(path)
+    return str(CACHE_DIR / path)
+
 
 
 def extract_number_with_suffix(s):
@@ -83,7 +94,7 @@ def clean_numeric_columns(df, cols):
 
 
 
-HTML_CACHE_FILE = "stock_pages_cache.json"
+HTML_CACHE_FILE = cache_file_path("stock_pages_cache.json")
 HTML_CACHE_EXPIRY_DAYS = 1
 
 
@@ -435,6 +446,50 @@ def print_gemini_metadata(stage, metadata):
     )
 
 
+def search_query_matches_candidate(query, candidate):
+    query_text = str(query).upper()
+    normalized_query = re.sub(r"[^A-Z0-9]+", " ", query_text).strip()
+
+    symbol = str(candidate["Symbol"]).upper()
+    symbol_found = re.search(
+        rf"(?<![A-Z0-9]){re.escape(symbol)}(?![A-Z0-9])",
+        query_text,
+    ) is not None
+
+    company_suffixes = {
+        "INC", "INCORPORATED", "CORP", "CORPORATION", "LTD",
+        "LIMITED", "PLC", "LLC", "CO", "COMPANY",
+    }
+    name_tokens = [
+        token
+        for token in re.sub(
+            r"[^A-Z0-9]+",
+            " ",
+            str(candidate.get("Name", "")).upper(),
+        ).split()
+        if token not in company_suffixes
+    ]
+    normalized_name = " ".join(name_tokens)
+    name_found = bool(normalized_name) and normalized_name in normalized_query
+    return symbol_found or name_found
+
+
+def candidate_search_count(search_queries, candidate):
+    return sum(
+        1
+        for query in search_queries or []
+        if search_query_matches_candidate(query, candidate)
+    )
+
+
+def minimum_sources_for_candidate(search_queries, candidate):
+    # One source is accepted only when metadata proves that both required
+    # company-specific searches ran for this exact candidate.
+    if candidate_search_count(search_queries, candidate) >= 2:
+        return 1
+    return 2
+
+
 def parse_json_response(text):
     """Parse a JSON-only response, tolerating an accidental Markdown fence."""
     cleaned = text.strip()
@@ -452,7 +507,7 @@ def parse_json_response(text):
         raise
 
 
-def validate_sources(sources, label, minimum=1):
+def validate_sources(sources, label, minimum=1, maximum=None):
     if not isinstance(sources, list) or len(sources) < minimum:
         raise ValueError(
             f"{label} requires at least {minimum} research sources."
@@ -477,6 +532,11 @@ def validate_sources(sources, label, minimum=1):
         raise ValueError(
             f"{label} requires at least {minimum} distinct source URLs."
         )
+    if maximum is not None and len(unique_urls) > maximum:
+        raise ValueError(
+            f"{label} returned {len(unique_urls)} distinct source URLs; "
+            f"the maximum is {maximum}."
+        )
 
 
 def validate_market_context(data):
@@ -497,16 +557,40 @@ def validate_market_context(data):
     validate_sources(data["sources"], "Market context")
 
 
-ALLOWED_CLASSIFICATIONS = {
-    "STRONG CONTINUATION",
-    "CONTINUATION",
-    "CAUTIOUS CONTINUATION",
-    "ELEVATED REVERSAL RISK",
-    "REJECT",
+ALLOWED_REVERSAL_RISKS = {
+    "MINIMAL",
+    "LOW",
+    "MODERATE",
+    "ELEVATED",
+    "SEVERE",
 }
 
 
-def validate_stock_batch(data, expected_candidates):
+def validate_stock_batch_structure(data, expected_candidates):
+    """Allow partial batches while rejecting duplicate or unexpected symbols."""
+    results = data.get("results")
+    if not isinstance(results, list):
+        raise ValueError("Stock batch response is missing a results array.")
+
+    expected_symbols = {
+        str(candidate["Symbol"]).upper() for candidate in expected_candidates
+    }
+    returned_symbols = [
+        str(result.get("symbol", "")).upper() for result in results
+    ]
+    if any(not symbol for symbol in returned_symbols):
+        raise ValueError("Stock batch contains a result without a symbol.")
+    if len(returned_symbols) != len(set(returned_symbols)):
+        raise ValueError("Stock batch contains duplicate symbols.")
+
+    unexpected = sorted(set(returned_symbols).difference(expected_symbols))
+    if unexpected:
+        raise ValueError(
+            "Stock batch contains unexpected symbols: " + ", ".join(unexpected)
+        )
+
+
+def validate_stock_batch(data, expected_candidates, minimum_sources=2):
     results = data.get("results")
     if not isinstance(results, list):
         raise ValueError("Stock batch response is missing a results array.")
@@ -526,9 +610,10 @@ def validate_stock_batch(data, expected_candidates):
         # Do not reject otherwise valid research if Gemini reproduces it incorrectly.
         result["qvm_rank"] = int(expected["QVM Rank"])
 
-        classification = str(result.get("classification", "")).upper()
-        if classification not in ALLOWED_CLASSIFICATIONS:
-            raise ValueError(f"{symbol} has invalid classification {classification!r}.")
+        reversal_risk = str(result.get("reversal_risk", "")).upper()
+        if reversal_risk not in ALLOWED_REVERSAL_RISKS:
+            raise ValueError(f"{symbol} has invalid reversal_risk {reversal_risk!r}.")
+        result["reversal_risk"] = reversal_risk
         catalyst_dependence = str(
             result.get("catalyst_dependence", "")
         ).strip().upper()
@@ -621,22 +706,22 @@ def validate_stock_batch(data, expected_candidates):
             reversal_evidence = str(reversal_evidence).strip() or None
         result["reversal_evidence"] = reversal_evidence
 
-        evidence_required_classifications = {
-            "CAUTIOUS CONTINUATION",
-            "ELEVATED REVERSAL RISK",
-            "REJECT",
+        evidence_required_risks = {
+            "MODERATE",
+            "ELEVATED",
+            "SEVERE",
         }
 
-        if classification in evidence_required_classifications:
+        if reversal_risk in evidence_required_risks:
             if not reversal_evidence:
                 raise ValueError(
-                    f"{symbol} classified as {classification} without "
+                    f"{symbol} assessed as {reversal_risk} reversal risk without "
                     "specific reversal_evidence."
                 )
 
             if risk_materiality not in {"MODERATE", "HIGH"}:
                 raise ValueError(
-                    f"{symbol} classified as {classification} with "
+                    f"{symbol} assessed as {reversal_risk} reversal risk with "
                     f"risk_materiality={risk_materiality}."
                 )
 
@@ -646,11 +731,16 @@ def validate_stock_batch(data, expected_candidates):
                 "6_12_MONTHS",
             }:
                 raise ValueError(
-                    f"{symbol} classified as {classification} with "
+                    f"{symbol} assessed as {reversal_risk} reversal risk with "
                     f"risk_time_horizon={risk_time_horizon!r}."
                 )
 
-        validate_sources(result.get("sources"), symbol, minimum=2)
+        validate_sources(
+            result.get("sources"),
+            symbol,
+            minimum=minimum_sources,
+            maximum=4,
+        )
 
         unique_source_urls = {
             str(source["url"]).strip()
@@ -672,24 +762,32 @@ def call_gemini_json(
         validator,
         request_budget,
         require_google_search=True,
-        required_search_candidates=None):
+        required_search_candidates=None,
+        max_attempts=None):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
     if model_fallback and model_fallback != model_primary:
         models.append(model_fallback)
 
+    attempt_limit = (
+        max_retries if max_attempts is None else max(1, int(max_attempts))
+    )
     last_error = None
     for model_name in models:
-        for attempt in range(max_retries):
+        for attempt in range(attempt_limit):
             attempt_prompt = prompt
             if attempt > 0:
-                attempt_prompt += """
-
-MANDATORY RETRY CORRECTION
-The previous attempt was rejected. Use the enabled Google Search tool, complete
-all required current research, return every required field, and output only the
-single valid JSON object requested by the schema.
-"""
+                attempt_prompt += f"""
+            
+            MANDATORY RETRY CORRECTION
+            The previous attempt failed for this exact reason:
+            {last_error}
+            
+            Correct that failure. If company-specific search coverage was incomplete,
+            execute both required searches for every supplied candidate before writing any
+            JSON. Return every supplied candidate exactly once with every required field.
+            Output only the single valid JSON object requested by the schema.
+            """
             try:
                 request_budget.consume(
                     f"{stage} ({model_name}, attempt {attempt + 1})"
@@ -761,10 +859,10 @@ single valid JSON object requested by the schema.
             except Exception as exc:
                 last_error = exc
                 print(
-                    f"Error on attempt {attempt + 1}/{max_retries} "
+                    f"Error on attempt {attempt + 1}/{attempt_limit} "
                     f"during {stage} with {model_name}: {exc}"
                 )
-                if attempt < max_retries - 1:
+                if attempt < attempt_limit - 1:
                     delay = initial_delay * (3 ** attempt)
                     print(f"Retrying in {delay}s...")
                     time.sleep(delay)
@@ -772,11 +870,11 @@ single valid JSON object requested by the schema.
         if model_name != models[-1]:
             print(f"Switching to fallback model after {stage} failure.")
 
-    raise RuntimeError(f"Gemini {stage} failed validation: {last_error}")
+    raise RuntimeError(f"Gemini {stage} failed: {last_error}")
 
 
 
-CACHE_FILE = "yf_cache.json"
+CACHE_FILE = cache_file_path("yf_cache.json")
 CACHE_EXPIRY_DAYS = 1
 
 
@@ -844,7 +942,7 @@ def save_cache(cache):
 # Gemini prompt testing can skip the expensive stock-data/QVM pipeline.
 # The cache file can be persisted by GitHub Actions in the same way as
 # the existing JSON caches.
-TOP_QVM_CACHE_FILE = "top_qvm_stocks_cache.pkl"
+TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 TOP_QVM_CACHE_VERSION = 1
 
@@ -1697,7 +1795,7 @@ def dataframe_records(df):
 
 def build_context_review(decision_ledger):
     headers = [
-        "QVM Rank", "Symbol", "Sector Group", "Classification / Status",
+        "QVM Rank", "Symbol", "Sector Group", "Reversal Risk / Status",
         "Sector Selected After", "Total Selected After", "Explanation"
     ]
     rows = []
@@ -1740,7 +1838,7 @@ def build_recommendations_table(selected):
         "<th>52 Wk Change (%)</th>",
         "<th>3 Mo Return (%)</th>",
         "<th>QVMScore</th>",
-        "<th>Classification</th>",
+        "<th>Reversal Risk</th>",
         "</tr>",
         "</thead>",
         "<tbody>",
@@ -1757,7 +1855,7 @@ def build_recommendations_table(selected):
             f"<td>{format_number(candidate.get('52 WkChange %'))}</td>",
             f"<td>{format_number(candidate.get('3M Return'))}</td>",
             f"<td>{format_number(candidate.get('QVMScore'))}</td>",
-            f"<td><strong>{escape(research['classification'])}</strong></td>",
+            f"<td><strong>{escape(research['reversal_risk'])}</strong></td>",
             "</tr>",
         ])
     lines.extend(["</tbody>", "</table>"])
@@ -1801,8 +1899,8 @@ def build_recommendations_summary(market_context, selected):
             symbol_link = yahoo_link(candidate["Symbol"], candidate["Symbol"])
             name_link = yahoo_link(candidate["Symbol"], candidate["Name"])
             sentences.append(
-                f"{symbol_link} ({name_link}) is classified as "
-                f"<strong>{escape(research['classification'])}</strong>: "
+                f"{symbol_link} ({name_link}) has "
+                f"<strong>{escape(research['reversal_risk'])}</strong> reversal risk: "
                 f"{escape(research['explanation'])}"
             )
 
@@ -1814,6 +1912,12 @@ def build_recommendations_summary(market_context, selected):
 
     lines.append("</div>")
     return "\n".join(lines)
+
+
+def validate_summary_presence(data):
+    summary_html = data.get("summary_html")
+    if not isinstance(summary_html, str) or not summary_html.strip():
+        raise ValueError("Final summary response has no summary_html.")
 
 
 def validate_summary_response(data, selected):
@@ -1854,11 +1958,6 @@ def validate_summary_response(data, selected):
         candidate = item["candidate"]
         research = item["research"]
         symbol = str(candidate["Symbol"]).upper()
-        if linked_symbol_sequence.count(symbol) != 3:
-            raise ValueError(
-                f"Final summary must link {symbol} exactly three times "
-                "(heading symbol, discussion symbol, and stock name)."
-            )
         stock_paragraphs = [
             paragraph
             for paragraph in paragraphs
@@ -1879,10 +1978,10 @@ def validate_summary_response(data, selected):
             raise ValueError(
                 f"Final summary placed {symbol} outside {candidate['Sector']}."
             )
-        if str(research["classification"]) not in paragraph_text:
+        if str(research["reversal_risk"]) not in paragraph_text:
             raise ValueError(
-                "Final summary omitted classification "
-                f"{research['classification']}."
+                "Final summary omitted reversal risk "
+                f"{research['reversal_risk']}."
             )
 
     expected_sector_count = len({
@@ -1919,18 +2018,18 @@ gemini_batch_size = int(config.get("gemini_batch_size", 5))
 max_candidates = int(config.get("max_candidates", 50))
 target_selected_stocks = int(config.get("target_selected_stocks", 10))
 max_stocks_per_sector = int(config.get("max_stocks_per_sector", 2))
-max_cautious_per_risk_event = int(
-    config.get("max_cautious_per_risk_event", 2)
+max_moderate_per_risk_event = int(
+    config.get("max_moderate_per_risk_event", 2)
 )
 thinking_budget = int(config.get("thinking_budget", 12288))
 require_google_search = bool(config.get("require_google_search", True))
 max_gemini_calls_per_run = int(config.get("max_gemini_calls_per_run", 12))
-market_context_cache_file = config.get(
+market_context_cache_file = cache_file_path(config.get(
     "market_context_cache_file", "gemini_market_context_cache.json"
-)
-stock_research_cache_file = config.get(
+))
+stock_research_cache_file = cache_file_path(config.get(
     "stock_research_cache_file", "gemini_stock_research_cache.json"
-)
+))
 gemini_research_cache_hours = float(
     config.get("gemini_research_cache_hours", 12)
 )
@@ -2131,7 +2230,7 @@ save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 selected = []
 decision_ledger = []
 sector_counts = {}
-cautious_event_counts = {}
+moderate_event_counts = {}
 prior_research_decisions = []
 models_used = [market_model]
 
@@ -2169,8 +2268,16 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
         ):
             try:
                 cached_result = entry["research"]
+                cached_search_queries = entry.get(
+                    "research_metadata", {}
+                ).get("search_queries", [])
+                minimum_sources = minimum_sources_for_candidate(
+                    cached_search_queries, candidate
+                )
                 validate_stock_batch(
-                    {"results": [cached_result]}, [candidate]
+                    {"results": [cached_result]},
+                    [candidate],
+                    minimum_sources=minimum_sources,
                 )
                 research_by_symbol[symbol] = cached_result
                 models_used.append(entry.get("model") or model_primary)
@@ -2181,64 +2288,128 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
         uncached_candidates.append(candidate)
 
     if uncached_candidates:
-        print(
-            "\n...calling Gemini for stock batch: "
-            + ", ".join(row["Symbol"] for row in uncached_candidates)
-            + "...\n"
-        )
-        stock_prompt = (
-            config["prompt_stock_batch"]
-            + "\n\nMARKET_CONTEXT:\n"
-            + json.dumps(market_context, ensure_ascii=False)
-            + "\n\nPRIOR_RESEARCH_DECISIONS:\n"
-            + json.dumps(prior_research_decisions, ensure_ascii=False)
-            + "\n\nCANDIDATES:\n"
-            + json.dumps(uncached_candidates, ensure_ascii=False)
-        )
-        batch_data, batch_model, batch_metadata = call_gemini_json(
-            client=client,
-            model_primary=model_primary,
-            model_fallback=model_fallback,
-            gemini_config=gemini_config,
-            prompt=stock_prompt,
-            stage=(
-                f"stock batch ranks {uncached_candidates[0]['QVM Rank']}-"
-                f"{uncached_candidates[-1]['QVM Rank']}"
-            ),
-            validator=lambda data, expected=uncached_candidates: (
-                validate_stock_batch(data, expected)
-            ),
-            request_budget=request_budget,
-            require_google_search=require_google_search,
-            required_search_candidates=uncached_candidates,
-        )
-        models_used.append(batch_model)
-        for result in batch_data["results"]:
-            symbol = str(result["symbol"]).upper()
-            research_by_symbol[symbol] = result
-            stock_research_cache["entries"][
-                cache_keys_by_symbol[symbol]
-            ] = {
-                "created_at": datetime.now(UTC).isoformat(),
-                "model": batch_model,
-                "market_context_hash": market_context_hash,
-                "stock_prompt_hash": stock_prompt_hash,
-                "candidate_hash": stable_json_hash(
-                    next(
-                        candidate
-                        for candidate in uncached_candidates
-                        if str(candidate["Symbol"]).upper() == symbol
-                    )
+        pending_candidates = list(uncached_candidates)
+        validation_errors = {}
+
+        for research_round in range(1, max_retries + 1):
+            print(
+                "\n...calling Gemini for stock batch: "
+                + ", ".join(row["Symbol"] for row in pending_candidates)
+                + "...\n"
+            )
+
+            retry_correction = ""
+            if research_round > 1:
+                retry_details = "\n".join(
+                    f"  - {symbol}: {message}"
+                    for symbol, message in validation_errors.items()
+                )
+                retry_correction = f"""
+
+TARGETED RETRY CORRECTION
+Valid research for other candidates has already been saved. Research and return
+only the candidates supplied below. Correct these exact validation errors:
+{retry_details}
+"""
+
+            stock_prompt = (
+                config["prompt_stock_batch"]
+                + retry_correction
+                + "\n\nMARKET_CONTEXT:\n"
+                + json.dumps(market_context, ensure_ascii=False)
+                + "\n\nPRIOR_RESEARCH_DECISIONS:\n"
+                + json.dumps(prior_research_decisions, ensure_ascii=False)
+                + "\n\nCANDIDATES:\n"
+                + json.dumps(pending_candidates, ensure_ascii=False)
+            )
+            stage = (
+                f"stock batch ranks {pending_candidates[0]['QVM Rank']}-"
+                f"{pending_candidates[-1]['QVM Rank']}"
+            )
+            if research_round > 1:
+                stage += f" targeted retry {research_round - 1}"
+
+            batch_data, batch_model, batch_metadata = call_gemini_json(
+                client=client,
+                model_primary=model_primary,
+                model_fallback=model_fallback,
+                gemini_config=gemini_config,
+                prompt=stock_prompt,
+                stage=stage,
+                validator=lambda data, expected=pending_candidates: (
+                    validate_stock_batch_structure(data, expected)
                 ),
-                "research": result,
-                "research_metadata": {
-                    "search_queries": batch_metadata["search_queries"],
-                    "tool_tokens": batch_metadata["tool_tokens"],
-                },
+                request_budget=request_budget,
+                require_google_search=require_google_search,
+                required_search_candidates=pending_candidates,
+            )
+            models_used.append(batch_model)
+            results_by_symbol = {
+                str(result.get("symbol", "")).upper(): result
+                for result in batch_data["results"]
             }
-        save_json_object_atomic(
-            stock_research_cache_file, stock_research_cache
-        )
+            next_pending = []
+            next_errors = {}
+
+            for candidate in pending_candidates:
+                symbol = str(candidate["Symbol"]).upper()
+                result = results_by_symbol.get(symbol)
+                if result is None:
+                    next_pending.append(candidate)
+                    next_errors[symbol] = "result was missing from the response"
+                    continue
+
+                minimum_sources = minimum_sources_for_candidate(
+                    batch_metadata["search_queries"], candidate
+                )
+                try:
+                    validate_stock_batch(
+                        {"results": [result]},
+                        [candidate],
+                        minimum_sources=minimum_sources,
+                    )
+                except (KeyError, TypeError, ValueError) as exc:
+                    next_pending.append(candidate)
+                    next_errors[symbol] = str(exc)
+                    print(
+                        f"Saving other valid results; {symbol} requires a "
+                        f"targeted retry: {exc}"
+                    )
+                    continue
+
+                research_by_symbol[symbol] = result
+                stock_research_cache["entries"][
+                    cache_keys_by_symbol[symbol]
+                ] = {
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "model": batch_model,
+                    "market_context_hash": market_context_hash,
+                    "stock_prompt_hash": stock_prompt_hash,
+                    "candidate_hash": stable_json_hash(candidate),
+                    "research": result,
+                    "research_metadata": {
+                        "search_queries": batch_metadata["search_queries"],
+                        "tool_tokens": batch_metadata["tool_tokens"],
+                    },
+                }
+
+            save_json_object_atomic(
+                stock_research_cache_file, stock_research_cache
+            )
+            if not next_pending:
+                break
+
+            pending_candidates = next_pending
+            validation_errors = next_errors
+        else:
+            error_summary = "; ".join(
+                f"{symbol}: {message}"
+                for symbol, message in validation_errors.items()
+            )
+            raise RuntimeError(
+                "Stock research remained invalid after targeted retries: "
+                + error_summary
+            )
 
     # Python alone owns portfolio selection and the authoritative ledger.
     for candidate in ranked_batch:
@@ -2270,12 +2441,12 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
                 f"No validated research was returned for eligible candidate {symbol}."
             )
 
-        classification = str(research["classification"]).upper()
+        reversal_risk = str(research["reversal_risk"]).upper()
         explanation = str(research["explanation"]).strip()
 
         prior_research_decisions.append({
             "symbol": symbol,
-            "classification": classification,
+            "reversal_risk": reversal_risk,
             "catalyst_dependence": research.get("catalyst_dependence"),
             "primary_risk_event_id": research.get("primary_risk_event_id"),
         })
@@ -2294,12 +2465,12 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             })
             continue
 
-        if classification in {"ELEVATED REVERSAL RISK", "REJECT"}:
+        if reversal_risk in {"ELEVATED", "SEVERE"}:
             decision_ledger.append({
                 "qvm_rank": candidate["QVM Rank"],
                 "symbol": symbol,
                 "sector_group": sector,
-                "status": f"NOT SELECTED — {classification}",
+                "status": f"NOT SELECTED — {reversal_risk}",
                 "sector_selected_after": sector_count,
                 "total_selected_after": len(selected),
                 "explanation": explanation,
@@ -2313,10 +2484,10 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             ).strip("_")
 
         if (
-                classification == "CAUTIOUS CONTINUATION"
+                reversal_risk == "MODERATE"
                 and primary_event
-                and cautious_event_counts.get(primary_event, 0)
-                >= max_cautious_per_risk_event
+                and moderate_event_counts.get(primary_event, 0)
+                >= max_moderate_per_risk_event
         ):
             decision_ledger.append({
                 "qvm_rank": candidate["QVM Rank"],
@@ -2327,7 +2498,7 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
                 "total_selected_after": len(selected),
                 "explanation": (
                     f"The {primary_event} risk group already contained "
-                    f"{max_cautious_per_risk_event} selected cautious stocks."
+                    f"{max_moderate_per_risk_event} selected moderate-risk stocks."
                 ),
             })
             continue
@@ -2335,16 +2506,16 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
         selected.append({"candidate": candidate, "research": research})
         sector_counts[sector] = sector_count + 1
 
-        if classification == "CAUTIOUS CONTINUATION" and primary_event:
-            cautious_event_counts[primary_event] = (
-                    cautious_event_counts.get(primary_event, 0) + 1
+        if reversal_risk == "MODERATE" and primary_event:
+            moderate_event_counts[primary_event] = (
+                    moderate_event_counts.get(primary_event, 0) + 1
             )
 
         decision_ledger.append({
             "qvm_rank": candidate["QVM Rank"],
             "symbol": symbol,
             "sector_group": sector,
-            "status": f"SELECTED — {classification}",
+            "status": f"SELECTED — {reversal_risk}",
             "sector_selected_after": sector_counts[sector],
             "total_selected_after": len(selected),
             "explanation": explanation,
@@ -2370,7 +2541,7 @@ if final_summary_enabled:
             "Symbol": item["candidate"]["Symbol"],
             "Name": item["candidate"]["Name"],
             "Sector Group": item["candidate"]["Sector"],
-            "Classification": item["research"]["classification"],
+            "Reversal Risk": item["research"]["reversal_risk"],
             "Explanation": item["research"]["explanation"],
             "Durable Drivers": item["research"].get("durable_drivers", []),
             "Reversal Mechanism": item["research"].get(
@@ -2393,24 +2564,23 @@ if final_summary_enabled:
         summary_data, summary_model, _ = call_gemini_json(
             client=client,
             model_primary=model_primary,
-            model_fallback=model_fallback,
+            model_fallback=None,
             gemini_config=build_gemini_config(
                 summary_thinking_budget, enable_search=False
             ),
             prompt=summary_prompt,
             stage="final HTML summary",
-            validator=lambda data: validate_summary_response(
-                data, selected
-            ),
+            validator=validate_summary_presence,
             request_budget=request_budget,
             require_google_search=False,
+            max_attempts=1,
         )
         recommendations_summary = summary_data["summary_html"].strip()
         models_used.append(summary_model)
-        print("Using validated Gemini-written HTML summary.")
+        print("Using Gemini-written HTML summary.")
     except Exception as exc:
         print(
-            "Warning: final Gemini summary failed validation; using the "
+            "Warning: final Gemini summary was unavailable; using the "
             f"deterministic Python summary instead: {exc}"
         )
 

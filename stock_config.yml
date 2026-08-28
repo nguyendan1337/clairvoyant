@@ -7,16 +7,16 @@ initial_delay: 10
 model_primary: gemini-2.5-flash
 # Research fails closed instead of silently publishing lower-quality Lite output.
 model_fallback: null
-gemini_batch_size: 10
+gemini_batch_size: 18
 max_candidates: 50
 target_selected_stocks: 10
 max_stocks_per_sector: 2
-max_cautious_per_risk_event: 2
+max_moderate_per_risk_event: 2
 thinking_budget: 12288
 require_google_search: true
 max_gemini_calls_per_run: 8
-market_context_cache_file: gemini_market_context_cache.json
-stock_research_cache_file: gemini_stock_research_cache.json
+market_context_cache_file: caches/gemini_market_context_cache.json
+stock_research_cache_file: caches/gemini_stock_research_cache.json
 gemini_research_cache_hours: 12
 cache_version: 1
 final_summary_enabled: true
@@ -93,38 +93,80 @@ prompt_stock_batch: |
 
   You will receive:
     1. MARKET_CONTEXT: validated current market and world research
-    2. PRIOR_RESEARCH_DECISIONS: compact classifications from earlier batches
-    3. CANDIDATES: up to ten stocks in strict descending QVMScore order
+    2. PRIOR_RESEARCH_DECISIONS: compact reversal-risk decisions from earlier batches
+    3. CANDIDATES: up to eighteen stocks in strict descending QVMScore order
   
   The supplied QVMScore is authoritative. Do not recalculate it, create a new
-  quantitative score, select a portfolio, enforce sector counts, or compare a
-  candidate's classification with another candidate. Classify every supplied
-  candidate independently. Python will perform portfolio construction.
+  quantitative score, select a portfolio, enforce sector counts, or change a
+  candidate's reversal risk to fill the portfolio.
+
+  First assess every candidate from its own evidence. Then perform the mandatory
+  shared-event consistency check across candidates exposed to the same industry,
+  commodity, geopolitical event, or temporary pricing condition. Python alone
+  will perform portfolio construction.
 
   MANDATORY COMPANY-SPECIFIC RESEARCH
-  Use Google Search for every supplied candidate. Normally use 2 consolidated
-  searches per stock and no more than 3 unless credible sources materially
-  conflict.
+  Execute exactly 2 consolidated Google Search queries for every supplied
+  candidate. Each query may return and support analysis from multiple sources.
 
-  Search 1 should combine the company name or Symbol with recent news, latest
-  earnings, guidance, management developments, and analyst outlook.
+  SEARCH 1 — COMPANY EVIDENCE
+  Combine the company name and Symbol with its latest earnings release, filing,
+  guidance, investor presentation, material company developments, and analyst
+  expectations. Use the results to identify durable operating drivers and obtain
+  current company-specific primary evidence.
 
-  Search 2 should combine the company name or Symbol with current industry
-  conditions, the reason for recent strength, geopolitical or macroeconomic
-  exposure, and the most credible reversal or normalization risk.
+  SEARCH 2 — REVERSAL EVIDENCE
+  Combine the company name and Symbol with current industry conditions, the
+  specific cause of recent strength, temporary or geopolitical drivers,
+  normalization exposure, and the most credible current 6-12 month reversal
+  mechanism. Use the results to obtain current independent evidence.
 
-  A broad market or industry search that does not contain the Symbol or company
-  name does not satisfy the company-specific requirement.
+  Do not repeat, reformulate, subdivide, or supplement either query. Do not
+  perform separate searches for earnings, guidance, industry conditions,
+  competition, valuation, or individual risks. Do not perform follow-up searches
+  merely to collect additional sources.
 
-  For each candidate, include at least 2 distinct credible sources:
-    - one company-specific primary source, such as an earnings release, filing,
-      investor presentation, or official company statement
-    - one independent source covering industry conditions, analyst expectations,
-      recent company developments, or the identified reversal risk
+  If the 2 searches do not establish a specific material reversal mechanism,
+  record that finding and assess reversal risk from the available durable
+  evidence. Absence of evidence for a material reversal mechanism supports LOW
+  rather than additional searches, speculative conclusions, or an invented risk.
 
-  Two well-targeted searches are normally sufficient. Do not add searches merely
-  to increase the source count. Use a third search only when a primary source is
-  unavailable or material evidence is missing, conflicting, or uncertain.
+  SOURCE REQUIREMENT
+  Return 2-4 distinct materially used sources per candidate whenever qualifying
+  sources from both searches are available.
+
+  Normally include:
+    - at least 1 current company-specific primary source
+    - at least 1 current independent source
+
+  Returning exactly 1 source is permitted only when both required company-
+  specific searches were executed but their results did not provide a second
+  distinct qualifying source. In that case, return the strongest source actually
+  used rather than performing another search, duplicating a source, or inventing
+  source information.
+
+  Up to 2 additional sources may be returned only when they materially support a
+  distinct claim, resolve conflicting evidence, or establish the reversal
+  mechanism.
+
+  Every returned source must have been materially used in the analysis. Do not
+  return duplicative, merely background, or unused sources. Do not execute
+  additional searches merely to increase the source count.
+  
+  BATCH RESEARCH COMPLETION GATE
+  Let N equal the exact number of supplied candidates.
+
+  Before writing any JSON:
+    1. verify that every supplied candidate was researched
+    2. verify that exactly 2 company-specific searches were executed for each
+       candidate
+    3. verify that the total search count is exactly 2 × N
+    4. complete all missing candidate searches before beginning the response
+
+  Never stop searching after the first candidate. Never begin the JSON response
+  while any supplied candidate has fewer than 2 company-specific searches.
+  Process candidates in their supplied order and internally mark each candidate
+  complete only after both searches have executed.
 
   ELIGIBILITY
   Set "eligible" to false only when current evidence clearly shows that the
@@ -156,45 +198,76 @@ prompt_stock_batch: |
     HIGH: recent strength substantially depends on a temporary event, abnormal
       pricing, disruption, or unusually favorable condition.
 
-  Apply classifications in this order:
+  REVERSAL RISK means the risk that the recent earnings, operating, or stock-
+  performance trend materially weakens or fails to persist within the next
+  6-12 months. It does not require predicting an immediate absolute price decline.
 
-  REJECT
+  REVERSAL-RISK CALIBRATION
+  LOW is the normal reversal-risk level when durable drivers remain intact and no
+  qualifying current reversal mechanism is established. MODERATE is not the
+  default reversal-risk level for an attractive company that merely has
+  identifiable business risks.
+
+  Distinguish exposure from a reversal mechanism:
+    - Exposure means the company could be affected if an ordinary adverse event
+      occurs. Exposure alone does not justify MODERATE.
+    - A reversal mechanism is a current, observable development or unusually
+      elevated condition that makes material weakening reasonably probable
+      within 6-12 months.
+
+  MODERATE, ELEVATED, and SEVERE require all four:
+    1. a specific current mechanism, not merely a general vulnerability
+    2. current evidence that the mechanism is active or unusually probable
+    3. a material expected effect on earnings, demand, margins, guidance, or the
+       driver of recent stock strength
+    4. a plausible connection to the next 6-12 months
+
+  If any requirement is missing, the stated risk must not raise the reversal-
+  risk level above LOW. Do not invent a mechanism to avoid LOW.
+
+  Assign one reversal-risk level by applying these definitions in order from
+  highest risk to lowest risk:
+
+  SEVERE
     The continuation thesis is broken or materially deteriorating; current
     evidence indicates recent strength is unlikely to persist; or reversal risk
-    is too severe for the other categories.
+    is too severe for the lower-risk levels.
 
-  ELEVATED REVERSAL RISK
-    REJECT does not apply, and either catalyst dependence is HIGH with material
+  ELEVATED
+    SEVERE does not apply, and either catalyst dependence is HIGH with material
     normalization damage, or reversal is at least as likely as continuation.
 
-  CAUTIOUS CONTINUATION
+  MODERATE
     Neither higher-risk category applies and continuation remains more likely
-    than reversal, but current evidence identifies a specific, material, and
-    reasonably probable reversal mechanism that could significantly weaken
-    earnings, demand, margins, guidance, or valuation over the next 6-12 months.
-    The risk must be supported by current company-specific or industry evidence,
-    not merely be a normal possibility.
+    than reversal, but all four reversal-risk requirements are satisfied. Current
+    evidence must show an active or unusually probable mechanism capable of
+    materially weakening the recent trend within 6-12 months.
 
-  CONTINUATION
+    Product, customer, geographic, or commodity concentration does not by itself
+    justify MODERATE. It qualifies only when a current development makes that
+    concentration materially more dangerous during the required time horizon.
+
+  LOW
     Durable drivers support continued strength, catalyst dependence is LOW, and
     no specific current reversal mechanism is both material and reasonably
     probable over the next 6-12 months. Normal competition, ordinary cyclicality,
     general market exposure, valuation that is merely above average, routine
     execution risk, or isolated insider selling may be acknowledged without
-    requiring CAUTIOUS CONTINUATION.
+    requiring MODERATE.
 
-  STRONG CONTINUATION
-    CONTINUATION applies, durable evidence is especially strong, no significant
+  MINIMAL
+    LOW applies, durable evidence is especially strong, no significant
     current reversal mechanism is present, and temporary-condition normalization
     would not materially weaken the thesis.
 
-  Never use STRONG CONTINUATION when an active temporary event materially drives
-  performance. Never use CONTINUATION for MODERATE catalyst dependence. When the
-  evidence is genuinely mixed and no higher-risk threshold is met, choose the
-  less extreme eligible classification.
+  Never use MINIMAL when an active temporary event materially drives
+  performance. MODERATE catalyst dependence does not by itself require MODERATE
+  reversal risk; the four reversal-risk requirements must still be satisfied.
+  When the evidence is genuinely mixed and no higher-risk threshold is met,
+  choose LOW.
   
   EVIDENCE REQUIRED FOR MATERIAL RISK
-  A risk may determine CAUTIOUS CONTINUATION or a higher-risk classification only
+  A risk may determine MODERATE or a higher reversal-risk level only
   when the response identifies:
     - a specific current reversal mechanism
     - current evidence supporting its probability
@@ -211,14 +284,22 @@ prompt_stock_batch: |
       mechanism, or null when no material current evidence exists
     - risk_time_horizon: 0_3_MONTHS, 3_6_MONTHS, 6_12_MONTHS, LONGER, or null
     - risk_materiality: LOW, MODERATE, or HIGH
+  
+  reversal_evidence must state an observable current fact. It must not consist
+  only of a hypothetical outcome, valuation opinion, stock-price reaction, or
+  generic risk label.
 
-  CAUTIOUS CONTINUATION, ELEVATED REVERSAL RISK, and REJECT require specific
+  For a shared MARKET_CONTEXT event, reversal_evidence may use current industry
+  evidence from MARKET_CONTEXT together with company-specific evidence showing
+  the candidate's exposure.
+
+  MODERATE, ELEVATED, and SEVERE require specific
   non-generic reversal_evidence tied to at least one returned source.
   risk_materiality must be MODERATE or HIGH.
 
   A risk with no current supporting evidence, only LOW materiality, or only a
-  LONGER time horizon must not by itself cause CAUTIOUS CONTINUATION or a
-  higher-risk classification.
+  LONGER time horizon must not by itself cause MODERATE or a higher
+  reversal-risk level.
 
   Use null reversal_evidence and null risk_time_horizon when no material current
   reversal evidence exists. Do not invent evidence merely to populate a field.
@@ -229,10 +310,23 @@ prompt_stock_batch: |
   de-escalation, ceasefire, reopened routes, normalized supply, commodity prices,
   pricing, and freight rates.
 
-  If normalization leaves the thesis strongly intact, CONTINUATION or STRONG
-  CONTINUATION may apply. If it leaves the thesis materially weaker, use CAUTIOUS
-  CONTINUATION. If it materially impairs recent performance, use ELEVATED
-  REVERSAL RISK. If it also reveals a deteriorating underlying thesis, use REJECT.
+  If normalization leaves the thesis strongly intact, LOW or MINIMAL may apply.
+  If it leaves the thesis materially weaker, use MODERATE. If it materially
+  impairs recent performance, use ELEVATED. If it also reveals a deteriorating
+  underlying thesis, use SEVERE.
+
+  Record earnings, record margins, record freight rates, or unusually large
+  dividends produced by an active temporary condition are evidence of material
+  catalyst dependence, not evidence that reversal risk is LOW.
+
+  A company may receive LOW only when current evidence shows that durable,
+  non-event drivers would preserve most of the recent earnings strength after
+  normalization. General statements about operational quality, fleet quality,
+  liquidity, or market position are insufficient.
+
+  When analysts forecast a material earnings or revenue decline after current
+  conditions normalize, incorporate that forecast into catalyst dependence and
+  reversal risk.
 
   A current filing or management statement that performance was driven primarily
   by a temporary event and the resulting conditions are unlikely to remain
@@ -240,42 +334,121 @@ prompt_stock_batch: |
   evidence clearly demonstrates otherwise.
 
   DO NOT OVERREACT
-  Do not reject merely because valuation is high, momentum is strong, the stock
+  Do not assign ELEVATED or SEVERE merely because valuation is high, momentum is strong, the stock
   has risen substantially, volatility is elevated, the industry is cyclical,
   exposure is ordinary, an insider sold shares, or one analyst downgraded it.
   Connect risk to a credible current reversal mechanism.
   
-  Do not assign CAUTIOUS CONTINUATION merely because valuation is high, the
+  Do not assign MODERATE merely because valuation is high, the
   industry is cyclical, competition exists, consumers or markets could weaken,
   an acquisition requires integration, an insider sold shares, or growth could
   moderate. These are ordinary risks unless current evidence shows a specific
   material trigger or unusually elevated exposure likely to affect the next
   6-12 months.
 
-  CROSS-STOCK CONSISTENCY
-  Apply the same normalization and catalyst-dependence standards to companies
-  exposed to the same event. A different classification requires a material
-  company-level difference such as contract exposure, geography, balance sheet,
-  earnings sensitivity, or business mix.
+  The following are LOW-risk background considerations unless current evidence
+  identifies an active and unusually material trigger:
+    - ordinary competition or possible future market-share loss
+    - general regulatory scrutiny without a specific current action or proposal
+    - the possibility of a market downturn
+    - normal commodity-price or freight-rate volatility
+    - geographic, customer, or product concentration by itself
+    - catastrophe, litigation, integration, reimbursement, or execution exposure
+      described only as something that could occur
+    - valuation sensitivity without a specific deterioration mechanism
 
-  Use PRIOR_RESEARCH_DECISIONS only to keep those standards consistent across
-  batches. Never change a candidate's evidence-based classification merely to
-  match another stock, fill a portfolio, or satisfy a sector allocation.
+  Do not combine several generic risks to manufacture a MODERATE assessment.
+  Multiple unsupported possibilities remain unsupported possibilities.
+
+  SHARED-EVENT CONSISTENCY
+  After independently assessing every candidate, group candidates whose recent
+  results materially depend on the same industry condition, commodity price,
+  geopolitical event, disruption, abnormal pricing environment, or
+  normalization risk.
+
+  MARKET_CONTEXT evidence applies to every candidate directly exposed to the
+  identified event. Do not treat a shared reversal mechanism as absent merely
+  because one company-specific search result failed to repeat it.
+
+  Apply the same normalization assumption to every company in the group. For
+  example, if de-escalation, reopened shipping routes, or normalized freight
+  rates are assumed for one tanker company, apply that same scenario to every
+  materially exposed tanker company.
+
+  Different reversal-risk levels within a shared-event group require current
+  evidence of a material company-level difference, such as:
+    - materially different spot-market or contract exposure
+    - charter duration or contracted revenue protection
+    - different earnings sensitivity to the shared condition
+    - materially different business mix or geography
+    - a balance sheet or cost structure that changes normalization damage
+
+  Durable operations, a strong balance sheet, fleet quality, or recent execution
+  do not by themselves eliminate reversal risk when record current earnings
+  remain highly dependent on the shared temporary condition.
+
+  If no material company-level difference is supported, use the same catalyst-
+  dependence standard and reversal-risk level across the shared-event group.
+
+  Use PRIOR_RESEARCH_DECISIONS only to apply these standards consistently across
+  batches. Never change a candidate's evidence-based reversal risk merely to
+  fill a portfolio or satisfy sector allocation.
 
   RISK EVENT
-  For CAUTIOUS CONTINUATION with a material shared risk, set primary_risk_event_id
+  For MODERATE with a material shared risk, set primary_risk_event_id
   to the matching MARKET_CONTEXT event_id. Use null when there is no material
   shared event. If a material event is absent from MARKET_CONTEXT, create a short
   stable UPPER_SNAKE_CASE identifier and apply it consistently within the batch.
 
   EXPLANATION
-  Write one concise viewer-ready sentence, preferably under 35 words, containing
-  both why the stock is attractive now and its most important reversal-risk or
-  normalization finding. A favorable explanation that omits a documented
-  material temporary driver is invalid.
+  Write one concise viewer-ready sentence, preferably under 35 words.
+
+  For MINIMAL or LOW, state the principal durable attraction and state that no
+  specific material current reversal mechanism was identified, or briefly
+  acknowledge the most relevant ordinary risk without overstating it.
+
+  For MODERATE, ELEVATED, or SEVERE, state the principal durable attraction,
+  name the specific current reversal mechanism, include the current fact showing
+  that it is active or unusually probable, and describe the expected material
+  effect. A favorable explanation that omits a documented material temporary
+  driver is invalid.
+
+  An explanation containing only competition, regulation, concentration,
+  cyclicality, volatility, market downturn, payer scrutiny, or catastrophe risk
+  is insufficient for MODERATE or higher unless it also states the specific
+  current supporting evidence.
 
   The explanation must not contain citations, URLs, source labels, Markdown,
   bracketed references, or internal terms such as MARKET_CONTEXT.
+  
+  FINAL REVERSAL-RISK AUDIT
+  Before returning the JSON, audit every result.
+
+  For every MODERATE, ELEVATED, or SEVERE result, confirm that the explanation
+  contains:
+    - the specific current reversal mechanism
+    - the current fact showing that it is active or unusually probable
+    - the expected material effect within 6-12 months
+
+  If the explanation relies only on valuation, a prior stock rally, a stock
+  selloff, investor concern, ordinary volatility, competition, concentration,
+  or an adverse event that merely could occur, change the reversal-risk level
+  to LOW.
+
+  For every LOW result, confirm that:
+    - no current temporary event materially drives recent earnings or stock
+      strength; or
+    - current company-specific evidence shows why normalization would not
+      materially weaken the thesis
+
+  LOW is invalid when the candidate is directly benefiting from a
+  MARKET_CONTEXT event that produced abnormal pricing or record earnings unless
+  the explanation identifies the specific company-level protection that keeps
+  normalization damage immaterial.
+
+  Finally, compare every shared-event group. If two exposed companies have
+  different reversal-risk levels, verify that each explanation identifies the
+  material company-level difference supporting that result.
 
   OUTPUT
   Return exactly one valid JSON object with no Markdown fences, citations outside
@@ -289,7 +462,7 @@ prompt_stock_batch: |
         "symbol": "SYMBOL",
         "eligible": true,
         "eligibility_reason": null,
-        "classification": "STRONG CONTINUATION | CONTINUATION | CAUTIOUS CONTINUATION | ELEVATED REVERSAL RISK | REJECT",
+        "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE",
         "catalyst_dependence": "LOW | MODERATE | HIGH",
         "durable_drivers": ["..."],
         "temporary_drivers": ["..."],
@@ -323,10 +496,10 @@ prompt_html_summary: |
   You will receive:
     1. MARKET_CONTEXT: validated current market research
     2. SELECTED_STOCKS: exactly 10 frozen selections containing exact Symbol,
-       Name, Sector Group, Classification, and validated research explanation
+       Name, Sector Group, Reversal Risk, and validated research explanation
 
   This is an editorial formatting task only. Do not use Google Search. Do not
-  add new facts, stocks, sectors, classifications, risks, or recommendations.
+  add new facts, stocks, sectors, reversal-risk levels, or recommendations.
   Do not reclassify, replace, remove, reorder, or independently evaluate stocks.
 
   Return exactly one valid JSON object with no Markdown fence or extra text:
@@ -364,7 +537,7 @@ prompt_html_summary: |
   For every selected stock:
     - mention its Symbol and Name, both bold and linked
     - explain why it is attractive now using only its supplied explanation
-    - state its exact supplied Classification in bold, unlinked text
+    - state its exact supplied Reversal Risk in bold, unlinked text
     - reflect its supplied continuation and reversal-risk balance
 
   Every selected symbol must appear under exactly its supplied Sector Group.

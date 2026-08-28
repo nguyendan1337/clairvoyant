@@ -1,0 +1,358 @@
+{
+  "version": 1,
+  "created_at": "2026-08-28T16:08:07.898297+00:00",
+  "prompt_hash": "ac86e9d309efc7626e2bbd95d97da703df2e632c41c9a53b8dee9a6674ae3dfd",
+  "model": "gemini-2.5-flash",
+  "market_context": {
+    "as_of_date": "2026-08-28",
+    "market_status": "STRONG",
+    "market_intro": "The U.S. stock market is currently strong, with the S&P 500 gaining approximately 12.8% year-to-date and 3.0% in August, reaching new all-time highs. Investor mood is a blend of optimism, fueled by robust corporate earnings and significant investment in artificial intelligence, alongside caution due to persistent inflation and ongoing geopolitical tensions. The primary drivers include the AI investment cycle and strong earnings, while the most important concern remains the Federal Reserve's potential response to inflation.",
+    "market_direction": "Upward trend with broadening participation beyond mega-caps, yet navigating headwinds from macro and geopolitical factors.",
+    "major_drivers": [
+      "Artificial Intelligence (AI) investment cycle and related infrastructure buildout",
+      "Strong corporate earnings, particularly in Technology and Communication Services",
+      "Geopolitical tensions, especially in the Middle East (Strait of Hormuz), impacting energy markets",
+      "Federal Reserve monetary policy expectations regarding interest rates"
+    ],
+    "macro_conditions": [
+      "The U.S. annual inflation rate was 3.4% for the 12 months ending July, with core inflation at 2.5% for the same period.",
+      "The effective federal funds rate is 3.63%, with futures markets pricing in gradual increases to approximately 3.8% by November and 4.1% by August 2027, as the Fed weighs inflation against economic data.",
+      "Real gross domestic product (GDP) increased at an annual rate of 1.5% in the second quarter of 2026, a slowdown from the first quarter's 2.1%.",
+      "The unemployment rate dipped to 4.1% in July, and initial unemployment claims remain at historically low levels, indicating a resilient labor market despite some job cuts.",
+      "Crude oil prices (WTI around $83.25/bbl, Brent around $87.52/bbl) remain elevated due to continued instability in the Strait of Hormuz.",
+      "Global container freight rates are mixed but generally firm, with some routes to the Americas strengthening due to steady demand, limited ship space, and Panama Canal restrictions."
+    ],
+    "strong_sectors": [
+      "Energy",
+      "Financials",
+      "Healthcare",
+      "Consumer Staples",
+      "Industrials",
+      "Utilities"
+    ],
+    "weak_sectors": [
+      "Technology (experienced weakness in July, though AI remains a driver)",
+      "Consumer Discretionary",
+      "Communication Services",
+      "Real Estate"
+    ],
+    "sector_context": {
+      "Energy": "Benefiting from elevated crude oil prices driven by geopolitical instability in the Middle East.",
+      "Financials": "Showing strength amid a broader market rotation and expectations for potentially higher interest rates.",
+      "Healthcare": "Attracting renewed interest as investors seek durable operations and consistent demand in a volatile environment.",
+      "Consumer Staples": "Gaining favor as investors prioritize steady, cash-generative businesses amidst economic uncertainties.",
+      "Information Technology": "Experienced a rotation out of AI infrastructure in July, but AI investment continues to be a significant market driver.",
+      "Consumer Discretionary": "Saw declines in July amidst a broader market rotation away from some growth-oriented sectors."
+    },
+    "active_risk_events": [
+      {
+        "event_id": "STRAIT_OF_HORMUZ_TENSIONS",
+        "description": "Continued instability and renewed hostilities in the Strait of Hormuz are disrupting oil shipments and keeping crude oil prices elevated, contributing to global energy market volatility.",
+        "affected_industries": [
+          "Energy",
+          "Transportation",
+          "Chemicals",
+          "Manufacturing"
+        ],
+        "normalization_risk": "De-escalation of tensions or a resolution to the US-Iran conflict would likely lead to increased oil supply, lower crude oil prices, and reduced freight costs, potentially reversing recent gains in energy and related sectors."
+      },
+      {
+        "event_id": "PANAMA_CANAL_RESTRICTIONS",
+        "description": "Drought-driven low water levels and transit restrictions in the Panama Canal are causing congestion and increasing freight rates on key trade routes, particularly to the US West Coast.",
+        "affected_industries": [
+          "Shipping",
+          "Logistics",
+          "Retail",
+          "Manufacturing"
+        ],
+        "normalization_risk": "Improved rainfall and increased allowable draft in the Panama Canal would ease transit restrictions, reduce shipping delays, and lower freight costs, potentially impacting industries that have absorbed or passed on these higher costs."
+      },
+      {
+        "event_id": "US_CHINA_TRADE_RESTRICTIONS",
+        "description": "New U.S. trade restrictions in July prompted a strategic shift in Mainland China's economic response, moving from broad tariffs to targeted measures aimed at sanctions enforcement and technology dependencies, creating ongoing trade friction.",
+        "affected_industries": [
+          "Technology",
+          "Manufacturing",
+          "Semiconductors",
+          "Retail"
+        ],
+        "normalization_risk": "A de-escalation of trade tensions and removal of tariffs or restrictions would likely benefit industries reliant on cross-border supply chains and technology exchange, potentially reversing some of the current strategic shifts."
+      }
+    ],
+    "sources": [
+      {
+        "title": "U.S. Unemployment Rate Dips to 4.1% Amid Job Cuts",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE3hlcN11bjWVvYIVKdVdhaId5fLlS3OZ8lr37KcbRkSkXxecpJFv_U-bjjU9vjfr5KhkhhE9g_GpCvuTPGphqpw0HkuxXRu6adohGI7R0Pv3lA94h3jXX06vjPLy1IGjobtDz1X27U3ip8DL_e4tCbbWl3Zug="
+      },
+      {
+        "title": "Current U.S. Inflation Rate, August 2026 | Official Data",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEZyTu7LZtlSlrmAMtabalowC70fT3q9-Lvaz-JM1CmvWR6OXcDTTPCs-Fr3qMpxDF1WtbSl71TeAt1GCM_UFM39SaU1ctUBcF-fVPIMi2Hemw-3oc4ri5wnI8RGZJ-P1PiJg9hU_-THpQ9f8QqT8o="
+      },
+      {
+        "title": "GDP (Second Estimate) and Corporate Profits, 2nd Quarter 2026",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFKwTl8U_k_2YRyZ2Wi4C3QEZqvBcQTKkUN7zWp_Y057D4-uV6rZEEOPIG3MtOG9RYhgN3mlc1ai7atUIgzY1ebYDAfDQZGlEsZEW_C7WZIVlZcNgrIQFyY5JSgR_H5dat36sEQWGBJDI654jKi_3Sq3gWxw-U8ObcqeoZWrT7ZEEyDhhSpzIbOX4EuUzmft9WQiDk="
+      },
+      {
+        "title": "High Crude Oil Prices Push Up National Average",
+        "date": "2026-08-20",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE7oFiXTTX4ccL4XEY0dtH9KYUVW17mC8jfu2rPfCAERnPzl1VXNbbMNkbA8mkYbzZmAZL6tJJfdga95Wuprn3e5SPuvpTf0gQVRMvILV-GaSarn4NyK15afWOlHDyV3AnbSpDBKkxP1k9rZFAKvHdtQ2uHbIKQhN3cT0FxtR2kQukl4Os="
+      },
+      {
+        "title": "United States GDP Growth Rate - Trading Economics",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE1y8WGsrjeIFUUl6MPnPt-AkHI2zjUpoBPwnAH1OQ7Wl5gJgT2uU4kzp1euZwiBnirqFxum60wGC9xqw-2F-HZsao141TcT0lVfsEr9Ep7F-6gFvGJq8WlJSCMKp8QlWhx-jWwFmEbm-iyWk9FXBe9"
+      },
+      {
+        "title": "GDP (Advance Estimate), 2nd Quarter 2026 | U.S. Bureau of Economic Analysis (BEA)",
+        "date": "2026-07-30",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGWw71MIHEzzs8eShVkjP1ujU4kN-PCA3fpOgz_vWXF9d5jPquKCBF14c08IgXavaQSD-7uvZKajK6Pl_lsFpMg6C2aTmnVUgqeEmmWCw_rxlnpLM8AhB4iz6rHWFDTZ3x119vZIq6-w4AfNqVVmIuvxe3HUpjlwQvHyjOsqqs="
+      },
+      {
+        "title": "Commodity Price Watch: August 2026 | S&P Global",
+        "date": "2026-08-19",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHE5mT9pXzd1xW9f1WbHIB4nlZTLN06cjY7Ttze326ZZUnDbzDC4QNiJ-JGx_riChPi6_eEvmU1sbD61wyE4_9yRHyHWbrSVz_RFGwL7hwuLUBryeKVTtRC2PB0acSFizX0_fTaOWaLAnqQg2Wxfg_iyo64Nj9VCFKxH1WT284wwY05W7As4tuEGNvUEXIMhiQmQSjvKAyaisM1mR4Uv0WJ6JmcUIX9c30dolw="
+      },
+      {
+        "title": "Crude Oil - Price - Chart - Historical Data - News - Trading Economics",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEQCsdD8n6jlD3ia5KwzGCC9WNsTQFOBJFWXkPN5kNToX2pZZSnMhR4yCjiKp02GiD-a0aZhJEerBmliinn1rkK4cW0Ct6n7PLNiMyxauJRo0XFChyqACyDsWBZr3KFEhR1EoXMq8Ijv4ftTQ=="
+      },
+      {
+        "title": "GDP (Second Estimate) and Corporate Profits, 2nd Quarter 2026 | U.S. Bureau of Economic Analysis (BEA)",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHHc6jrGEkgy9DnifNwidCjDG2OG_E4wKWQ8P8v_Yysvu-_cx1HyDjyiw_W11crUu9G9IMi2NFLAiLfZzy0wKhb-s1MNR4lsOAgDBPfxBXEQtNNEnbuX30BnPff5juoaELUCi6g33WDQsrelk-aoA=="
+      },
+      {
+        "title": "Second-Quarter GDP Growth Unchanged at 1.5% in Second Estimate - Morningstar",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEQNclKjPg8rDbZaBhHf3xPwIB0qm6Jsgj07oP25p77BqvrrQ4B4djLdfLjKOTmZzOln_d0H86Y37EF7aMth2h5CIGbipDiwn2H7iQpzy62delzKe-NOA_qKwNVZTFk68PlMGWBbpRgGPFgx0VOITkW1zvCi286dMtx1-M9I_zWJZMLq6SugZ635yWznPTP148v3bUS9H4HcPolibwpFCE3sDyfx9hhSdi_z6jFUAZ4"
+      },
+      {
+        "title": "August 2026 Fed & Rates Call Update - MUFG Research",
+        "date": "2026-08-20",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGWhNla9StsSHpUqatvFKKtPUnWAVT1bl9Wrzc479jV6YX08wZBk1ocxvNXa52Cov_yIhTTCY_XTXNl17qLeA8fS1A4g06_Hrx2T7ooy2SmeK-Qg3QNS83SOzRYEAL3EGhtMK3TFZZdiJM1JMPCl_bpegOY7_imwfFNH9AKUH9zuA=="
+      },
+      {
+        "title": "Current U.S. Inflation Rates: 2000-2026",
+        "date": "2026-08-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH548dPMD2g9ckBXIHPM9v0tFcbVo-zhy8E8BHKwRwBy0PlUQl6fm5VEegiFK_2tfyQh0jrNe0hBPSx9CtIT069xTNeGp_OsIb3h92NVRDv_laLUwgidQmLCvZr76StCNWE34yLkWqk7pwGV_M-_YtGho0zUwnvZfqwKVyMqKlsX7hXig=="
+      },
+      {
+        "title": "Fed Funds Rate Forecast 2026-2031 | StreetStats",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGZx-mMRLxwQs39Ilm9HSXVenKhRKC0xxHzY0srXpZrjofpDmRYhf_kquAhzdJJtEKqge1Dmke4WIRegT9TjJ1jtw1qFTZ3GmGHOvxDKF5Ta8ONONIvMxnqV5VQbIs-KR4xc7GJTw=="
+      },
+      {
+        "title": "Highlights of the Week Brent and WTI crude oil prices declined by US dollars 4.50 and US dollars 3.59 per barrel, respectively, compared to a week ago Weekly Average Weighted Prime Lending Rate for the week ending 28 August 2026 increased to 10.95 per cent compared to the previous week During the week, Treasury Bill yields marginally decreased in the primary and secondary markets, while Treasury Bond yields remained broadly stable in the secondary market Year to date depreciation of Sri Lanka rupee against the US dollar was 5.7 per cent as of 28 August 2026 Explore the full report - https://www.cbsl.gov.lk/en/statistics/economic-indicators/weekly - Facebook",
+        "date": "2026-08-28",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHtej6HLHP-VuAUUt_xHFyd6Xs9x-ja4a127Fg9Jj5rW1gVY1Lq8IKS3gKBYjaGzijIyOfBiS0j2Ecaeq1D8lbn_N8nozoJPFC5xNiMEfrcsvnJZQvFe5A1OvdBuUSyuu7x7PPs_ikTfdikwef9qHcbesb0kXWUDKtk8WswQS_OTssuC73q6-VVbpM2lmr5mkd-L1eMSVaW73iPCOP2D_RgQmCvwXEQEviLdiJg4KFHq9JGbyto1PtebIQiXVw9eOvA5vpbLYpK5f3ijdosPiZ9gsVQIXEy6wpvRajhvN2lmH7lN2rQHRDZKTR1Lat5-L5XuE38mWJkTP6QMcUSGR0FkLGbhvMEHyCDVCffxDAmwMcRq2LHwgRTyFWzU3uqZKC9V0N2-rD3yWJ0zfskeR4_Hiev0rEMcxYZ-paOk8ev8haNIJf01IRuRUQOa2_VmWq7ZT8PzwdjMtjIlxbESIZg571bEiN3ZlpeUygjdqimhijslMzFF3loRWPEEMiBVybN_OSHkHzpRKwwUk8fDXzQIj-E71qw-wv0f7pv5clo8Vl-jvzApREmeqKf2btYJPePpPVzshinenbVXZnqq5YJ14Pj--B5esQSu0G0wUWFdLBVo_wzU_2WtOEUw-JnL5iyEYUbDbDdC7Qi4pA8RO3BJ9NDcHHsm4nWBichOHJKIO5BZ0pyPm9mhkv-sHLpbNGTo9YDJDMWeV7VLVzFwaQnyurb8JVKA1MWQw_6YICR3xX-zTRTKUdj4BIzCbK7vh5UIVjy3jNu2wIuXqb-M1PorRVuUBzIXAasqNeuFirj2_2mcJaN3bafHVrDrIKfuGxcMuOOGffRRrLyRFYOPZCVH6hrXTo5Zf5qOc64rkOc4XfATVE0PjKd28m9ja8LeuQ4YbRxxiuJdxefTVw="
+      },
+      {
+        "title": "Market Commentary – August 2026 - James Investment",
+        "date": "2026-08-06",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEVoQNncItRtoqfA5s2V-jUuFs3KXNXeLInIvCiH6kPuEJ_sh7WZhKcAOFHNqXlcHawZZNP7HptPg1I2Ng2-WhGaFpAgOtSoI_HTef-BHV-xaDrKdQ6pwZ_mk9F2mtcWFEhfdu-8ddaD7vBvl9yvCZD5VwfdmLOK0Uh"
+      },
+      {
+        "title": "Stock Market Breadth & Momentum - S&P 500 - StreetStats",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHX_SoklHRfspubDjZYhD4wOQVP1POxIJrcHOb2_N5jRTqGPRWksNewrRaxqZHHp9vlbH5rgnLa3KEDRdCD99bwD1KiUsrPT39lVaeWqt__8QpsouEhqi1QVjpN_hbsPnv8TPnvH_Rtej_QcVncRdUOQAX6NQY="
+      },
+      {
+        "title": "Freight Rate Update, August 10, 2026 | The Credco Wire",
+        "date": "2026-08-17",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGX-rdHYVhPWqfSsG9pHS7B4UhFSl-AfWyi5Tv8l9LE1UzSBoBMqmFGJlHUiQtDm3ipFJ-YjHTboRQZMi8r9Zqwq7z8KKdyLOIYjMUnVDQcUBLyFZWhvJuJTvcqRHKZXZAhtuRtZTTcbQPhp_VQjdXMR7blcV2h8Q8eJmq_1gAo"
+      },
+      {
+        "title": "Commodities Update August 2026 - Westpac IQ",
+        "date": "2026-08-20",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE0TRCvntai9TZAHejRpFauys5N99F4R4kFGVk58d-0HihL9VEReB2Eq3NdNcwyA70JRgZS7CjEdC1NReyUc9KnUhRw8PRNfw-kwV3QVGGtWToLk1nv_cnjSqZvkHrkb-mFGodBbQy2sUg2SZbPOodMHHCUIOSFtOLL_0d2_ani414dzPwE7MD9"
+      },
+      {
+        "title": "August 2026 Market Review: Adapting to Economic Changes - Spartan Wealth Management",
+        "date": "2026-08-19",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjFkawn-OQ6XdAdIba2gEL1QhxW__JnJy-lKkDqTRkqpeFCuplZle27-sOEB7dxV5sgOubDpbI7n2ofs-QZnioeShr5EWijRdBlsuGZN569IJPVrqxjHjXU1_mnGNdJYXMHDause_xsfxK7KRp-edIUWSrI6aWuDpBcNdVKc_2Mae6aKNvGPJVc5ThGZVjzAyt"
+      },
+      {
+        "title": "Geopolitical Risk Brief: August 2026 | S&P Global",
+        "date": "2026-08-22",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHB6ZTCZkjs6QiUah3LLRaXUSCrgnCQYOtDdIyn5FOvDma8QEJbfyOO9ldMwT-h1XgQ_dm77H6PBNZ64d4eF4Zr8oMNM-TCT-F60bwag4j4h-9H5i19XMnCRvmAxGZNygb8a7FST9IWX_W348Ri5bR8vC3b0kQUuRANRZjlA2JWY6x6OVEHVnWX42DzPWjH3pgiH4Ylb73S-0X33fKWG1ms52Q71LWMXWlS3UMEMA=="
+      },
+      {
+        "title": "Market Breadth Returns: What the S&P 500's Broadening Rally Means for Portfolios",
+        "date": "2026-08-18",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFsfK9VqSurE2OQtwtu6yPMPqd9wX_pm08yJhfEE1rtGXmZ2OX5-Kxq1a6HdESnMGeoWsi1l00Ny6JCX8RspgA5xd4UcYtcyJAIq7IOxmXjSNaJkNNh8UtoLNguRWvIg_9IItE05TxJJl1pOA63kgUskzAz6RfhTQqKlVMsRHn2s5-ZDJwQdyrkqbmNZS7KsD9A_CK8S8AsNQEExfIVrdo7ejqkKzqacRLZpjMoSeIMtPfDbqk="
+      },
+      {
+        "title": "United States Unemployment Rate - Trading Economics",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFfXTIxC0TAV3UtMcs4BG7vQibW74RcEWFlbuqggNI5DRuU243R5Tz-Qrl4S6Ka9_50uHSREaWYDfONX_4HdjiAwalqq7m0lvzziazqPx5VwSgibpGlb72nhghPBRg6D8D49VUOyAmCQeGgULknz7nwE0BsjufyOQ=="
+      },
+      {
+        "title": "United States Inflation Rate - Trading Economics",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQECMM9tF04zg2e8zZAnCOIovaN-_18ylHJAdBWMpDSpefAaWiVbcz0FweS-sK0oaLhRFVdmFMO7CyCjUEfy8Nzuu8AP9f6Lqdh1LbiftHBerIiGLqcqeyDwLMynFwFxpd1IVB2JIoKv9bX8YOoIKfjiLC0x"
+      },
+      {
+        "title": "Unemployment Rate (UNRATE) | FRED | St. Louis Fed",
+        "date": "2026-08-07",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGA8Kx-A7q5enA_PtmhfJHysEzpDN_q9gDQDAt8IzHjmA6ZFU8B7uMyEnBt8CjrZ8VRZ-4w3R367f_GmIYBAuwBrxlbVXj44RT0eGOPsb8lzCOOStHd-YawSAyAF1_K7juRmOSk"
+      },
+      {
+        "title": "What's The Fed's Next Move? | J.P. Morgan Global Research",
+        "date": "2026-08-05",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF7pHZ_OWu3R5d2VYkxf8dOSOqodIv-CZ0bYpvvsqavP-5VSa8q0nj74HDbws7L3TJERmRXXC_6hpwM3QSo08bmgCOGTRmGOYIyTdFWL48x3PkNO1ahNbxuRMRDdUEvVMDPDy6mhmb-1ALwJ6GwDT7sKq9H__ZTMowhqalPVrwgrgeA"
+      },
+      {
+        "title": "Ocean Freight Rates Hold Firm as Carriers Keep Capacity Tight - TFX Update wk. August 24, 2026",
+        "date": "2026-08-24",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEyv02JP_8dWNTWkpddjRlwaCNkDFKxYJxXgk5rjPvAh0cnX1KmemrOgv1PNliqnM8flZLF-XRv96rjIKT_2O6B4wH9KVxVeaXV7HrR-DhyOx7WvJ7k4_PM5djP07_3cNN1vBF9PS32Qq8fLes8Zj237zqJvb2YgviASx0TnLCcC3_80aUD9Ckd-u9j9jhiDoF8mOIRtRliHSCJD9u7XULVeYiGHTdEhEwZtohSiGBhjY4Rto8Ek64="
+      },
+      {
+        "title": "Short-Term Energy Outlook - U.S. Energy Information Administration (EIA)",
+        "date": "2026-08-11",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH6-JGaYblkDYqC4q04TSEhknGXdiGKccizOsn7TxEm44cZIUHX07iYuNHMuSNIFGoLlbEfB2S6GWI6UP2u19PQTkJQFabY3t9dbAKFqfI-epj7z-v6I-5LDXKLOwY="
+      },
+      {
+        "title": "U.S. Initial Unemployment Claims Edge Down in the Week of August 22 - Haver Analytics",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGwqIqvSJ1soc5MduUjCLconuYtv-RiSiEHdJfkLDLx2Rby33xO4_CB1ABCUfWuUxRT0EEvPSjBtXxyW2QyVMrRDAjY83HkcajR89EjlUUbaKuSUKJscPEZikP3ThsOjbtSoSxJj_NOTjLt-R_1anFmyjiAAFFG4bxGtcMQrcs79rgeefbfFmUvDyMHch9PE5rSEWA6k_DBri59RV8="
+      },
+      {
+        "title": "Market Impact | Geopolitical Update — 26 August 2026 - ShineTrades",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHRElUlvGeMTqqQw8CHhzNNFGmCL1XE0akKPUQNdSbfzQXHtHQBpIqKBYhEpa67zZ9eJGcYHlbdXCibYoxjhCsCeG7eTVzFYKDdGjvmSHOe8Tx8suysyoZ1rcMLQ6YrCkBtV_rlp77Z-JgeSnFKUQPeJ40x88_42W3Y33VHJEPV1E2mO51bybkn"
+      },
+      {
+        "title": "Commodities Overview | August 2026 Edition - ADM Investor Services",
+        "date": "2026-08-24",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGMX1MxCI6-ZNlUhoOG-mqVPajeGm-pSBh6106oUHvraA2ZCWRiZWjCm4SgIsbDcs6sB_0LTVaU5IL7QMPIHkKMj9aQgTFMr-mrEDBX9vdLGs8CcKCQt4LWelJ8RsPPFa5dFbi8t6zq8Njl3qxR5sf8-3D7ixS4ju2Z0A=="
+      },
+      {
+        "title": "August WTI Crude Oil Historical Prices Charts - xHistorical Commodity Futures Charts",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQERwWnX3fF8JlpLf7WZl_1wH38aVfNaMBCJAg8jI-dCCXK-saUWf4cjO22fDYH3VvknKxVobT-FEvAxJqACt_BBWLuzkmjxb0A7zljLJAN91Ae_c1nyCXD9ivCKRYu-mX94EMy7ySMkxiC6uU0FiQRpF-bngMAAhXHEGhYOeL-T"
+      },
+      {
+        "title": "Container Freight Rates Rise for Fourth Straight Week on Americas Demand",
+        "date": "2026-08-26",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGRpjLaJDikqBpnU2E4-ewL86VI4NF_Q5LSGlYzhrugndWwH_HKyO_Q2UWTZgcYT-NEVK_zjsLcao_EJH32gg6ACqsG2WCuQqWV8sYkwscdkKd9VIVPt3723TUyYVM18KE_t6LleauklEBhGIxwtMbDF8mpGBqh_2FgNofODGrbzIt6GuqoLMS-bLcORw=="
+      },
+      {
+        "title": "Brent crude oil - Price - Chart - Historical Data - News",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEUXp8IP15SejYGQB7t2hBHvNd2S1PPohSyHspKdwRnzh1Fr857PLLN5IAUDwY3TV8exTGqoM13Vxsbi0oghCzJl3sgC2gwv9u_y2XKgaGqL237_dS9aIVVP7VnvwzcTq4i5T0Nj2cnSjRzLzmlnUKmeA=="
+      },
+      {
+        "title": "US stocks hold steady after expectations rise for the Federal Reserve to raise interest rates",
+        "date": "2026-08-28",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE8cshx2i6iVug2vQH5Leqo3oQWvAM3hOKAOxLzWevBTTL61qoj0EfOePSLpPJd5GfCgyVf5da_QVZG0o50UDP6FnOiV7iVA6zYG-U2cW2rE2PJfhPQpyI_vjFwZrNkYLERCoghfFRi_Siw03YFfTkX7jnkupvShbtXPT8auEbXctErZiVVOMunWNQ74XEbndorAZ4GZ3A_3f-ZuDGNwWdFsM-1oBiYN7r_zzjOZBs9XpPXDjAwlxGYycB-VQpJfA=="
+      },
+      {
+        "title": "Best Performing Stocks in August 2026 - Monthly Gainers | StockTitan",
+        "date": "2026-08-25",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH2vP9b84LM5XAJCkSBeOhlOrS7u9dxiuy_SYRpvl3Yb0VKvgB_B_xlmwT88-zHW-geBt5ISnXydV9qotorVZcf1cDjniogzsEUdhBEwEHlFV4wU1Dt-RRYnth_JOX8KopQeuCsi4H40PkRQi_ZRAdE8M6hOxJvQ3W5wOlB6SQ="
+      },
+      {
+        "title": "Monthly Market Commentary: August 2026 - Carnegie Investment Counsel Blog",
+        "date": "2026-08-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGEAzYOqAav4RQEi0kUpYkqrbxCDB0a0Prvwhrj3aOJezBkRxv_V3Y2W-3NeevImIZ96z7XbQIK9ZyPKkQewwmX8-qoYSKEZ6961Uscjrr2Kya7EQWTKEqFWYD5pQ0KBB6ZANWq9bqR9nfeTaHr9g45j5liWSanzofBv3N1c6CAqQ=="
+      },
+      {
+        "title": "Monthly market brief: equities, bonds, crypto, and commodities in August 2026",
+        "date": "2026-08-22",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFNsUydTe2-RgS6eFOzl6NS9aIi5IcAQm4DeQp20t8iBQCa3Y9tDzvFs0cmmxD7-gbJz7jazZPUHdO276toUcswCHuhCEEIFuFBSb8ScNpqUkWZI0FuB0jw5WHokMZ4SWIiSyxCcklVqxRERVd3sGvw_nbOpg6iYHFG8eXZ4hOVhHgigBRF2pHCVgt-2gWSBCRMdsrZGaonCM5cpGZZNYfWSGcg2fh23UeFgtxFdvZQeyn9qsBGcSCeCHza4n5mJi4uT28="
+      },
+      {
+        "title": "August 2026 Market Update: Strong economy, higher yields - Thrivent Mutual Funds",
+        "date": "2026-08-07",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHx7LGi3oj3CSW3_z9tCfhD4kbIKg9Ug9Rqd8wFUFLitHHR4myqzbowTbGa3IhZSkUo--H_Z4tVtmRqHE8RnHrRSo-9-lT-9KHfIJv-ZUnzH0iz_zVvj8ZSJYZcCN0uuZexyTgpXLfs2KIAWgnAKL1MJQCpPTms0UZNU-sVXlqNWgFLxCWo6B5bqILDNG0rXyZSf91lH80yrZTQRhanFk3wbbJn4KSL29tk2lQ="
+      },
+      {
+        "title": "Consumer Price Index Summary - 2026 M07 Results - Bureau of Labor Statistics",
+        "date": "2026-08-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEYiEnJpoc51EKtoGKSIYid7HT22abEfV8OjigPnsxeyvBqePt5p7Atq_ihjn2WEmR_p7o7BRTmtvAfvXdCZohOrCYtcUb_fswH0xx2EvYIJMAy6twwNafo1e6ydi3wcxnUc7F9T7la"
+      },
+      {
+        "title": "Minutes of the Federal Open Market Committee",
+        "date": "2026-08-19",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFro4D-bFhJ4ydE1pVghGBWLwaXFjfiuAHLmsCP5AgVPHuouXVyPow9m3Monnv41w3_xYCfDMUmNoQ-v28TE2j2Uyti6GVBgb6q3KjGOobPr6x51nIM4PIK-0wAtOsuWtDZVtGCOVJzO48iumXHHrJaGcLMs8oFo_3OTPnvsc9oPQ=="
+      },
+      {
+        "title": "Service Expertise - World Container Index - 27 Aug - Drewry",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH0VwSXjI0Eup2J3wUjsBIRomxJwY2eNLZI93akZi0lDYJaE38sfugNnRqQT28tvvFUtOQe7rKTHwGdkVzx7-dcThlfzkbavDf8dSBZNQPmhHFyt24NgpTlM_XRORRDYcG6GfQVarhNBBqTr2ASEMCRM9n-ItegSy1oDGPdSaXBNA9fzYOSyDst5soSMVSzJN5AKxkvfoxjc3Wj7dc_r5wsasL_M3Bu7lO_"
+      },
+      {
+        "title": "The options market is signaling further gains for the S&P 500, but one indicator is flashing a warning | Morningstar",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFiUC0EDEk7aTpL65wtIQhsJx0okmECOS04cuco_OB7rIEkZA2z6sWib1rnNDsGYMBJghktSqA-hhvEw6YcbjIxXXJEt24whRthskRqSkMgaP6eEh7zEQ9YrfZ4rmt2zxB1wbUc_Kc_MAXmkAYmSZsdfCaEHjdPqJHiKamBHwWJ36n941-Z_XJ794loWlpw-ktzmmEtKZupOZHiJUggHt46YJaBLi3e0cA85UaO_vQe6EOy7edJXVxcqv0UrZ2W5riHqW17VY6qJCpmXD5du2gAl-FDW1WwVkCf"
+      },
+      {
+        "title": "Labor market tightness to persist despite payroll slowdown - RBC Economics",
+        "date": "2026-08-28",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKZ8SXVtSEsNLjlO8yYU63IScErSEH51-Wqf0hwgggaA6KKU3K9SklKmeH_zEH5uEF3girnZhwn9TOU_3RCq9KdwPtSEUcqHEL4wUaagY2E-YpyC2ceRUJwXt6_P8jyf6Tw5Z0_YxGW0U9u7tD8YYhYuitXyNDvffVsRuG8AM8NGDmwOc8LpLyULMsk5kRvgINI5Bt6Ux0flp9GR0EVmtsd_yvJcw="
+      },
+      {
+        "title": "Oil Market Report - August 2026 – Analysis - IEA",
+        "date": "2026-08-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFdgF7W50FZ7c1Nj2EOWwPwymX0qoaf4-dLuGQcaaNbkFBPIcGA0OLeG_40w2d6W_PEx4FYlt2VLkMyKrx2ohhzLoGnSYJFOda9QKzqSLaAaHcHp3I6yGqpN4Ck9zPuT6GNmFmOv9FjTIStyUAWA29puEHNuA=="
+      },
+      {
+        "title": "S&P 500's strong August setup points to a favorable finish to 2026 | Seeking Alpha",
+        "date": "2026-08-28",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFwjg-TIA-UoDLDPmzs6rYiAwLNqnKoVofZpvPmGlge48f-aTUzS9FQqK5umLpsZTisIf92J-B_ROmW8C2ak-dDzvWdYzR7IO5FtKBgJ67XDC30qdsFND4xRADDfjZui8LwqJdFo33e4p2hG-kQ-KZ4t5hFI5F2S-Fk8nP2KVdQcAxnFBKtAy3Gnfa6Sd5YzM4JxsrAm_7ZZwjmy9gACg3HKg=="
+      },
+      {
+        "title": "Freight Market Shake-Up: August 2026 - YouTube",
+        "date": "2026-08-27",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEtouev2git-0QxBpY2ubdg9pvbbMBwasZ3fhg44CpcjSDvUPgP5nFB-eELipQn1CinC0j8FQM89P5GBKPcK6CuLaLMyOa9CKR-2JVQBMwA3o8hXJKePvfyeBOnGPgTjhQUCO5Uj24="
+      },
+      {
+        "title": "United States Core Inflation Rate - Trading Economics",
+        "date": "2026-08",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG1t4WFOqVPq4GgHBsmgIVjFsOkLU6w7nJFnJG49CiMnVNBfpN5yC9Fb_F3T7fpZeCtq8DqbXg1CoN0Y1qu1D6UjOa4AT5u4a_KdZzco-I6miDAtZbabCOP7JVrzuSBDQRARrNRyVxBDyK76qe-u3HcciX1ClEClqTJ"
+      },
+      {
+        "title": "QuantStreet August 2026 Letter: Sector Rotation Continues - Advisor Perspectives",
+        "date": "2026-08-05",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEGXAsz6CkELTdruVpqbKKBw3sptiF0YNJiRNECuDF4G9mmd_VVmJyDBvFCGsKY9ugYqkeV_SftV_XC4WQo1gIfAkRf974RIwEjfSy1o9QJUOZGFKfepmnmJcs2MxGz8tXDgRoOLNFwDZVOCGRtHKywoe7GtWsZusrfx4aNMpyHGqdUip-g4USmMOXOWI14dhNjvA=="
+      },
+      {
+        "title": "Sector tracker - State Street Global Advisors",
+        "date": "2026-08-25",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG-shsFRnz7h7-97wlu8smWdkKsDDN6v3qMLKZ8fSsaAcXmZb9CZSkNgZOYjAcd-tnAyn9UKobZB1cPoGT7qs56gXQsOrQB994OhyasOWO-_jxdL9MrIKF3gDB8YTcAs7K7Ej0LMdzO7VJ7hitsb0mrD_9DUCnEBnvHRxY="
+      }
+    ]
+  },
+  "research_metadata": {
+    "search_queries": [
+      "S&P 500 performance last 10 days August 2026",
+      "S&P 500 market breadth August 2026",
+      "US stock market health August 2026",
+      "Investor sentiment US stock market August 2026",
+      "Largest market drivers US August 2026",
+      "Market concerns US August 2026",
+      "US inflation rate August 2026",
+      "Federal Reserve interest rate expectations August 2026",
+      "FOMC meeting August 2026 summary",
+      "US GDP growth Q2 2026",
+      "US unemployment rate August 2026",
+      "US corporate earnings trends Q2 2026",
+      "US regulatory developments stock market August 2026",
+      "Major geopolitical events August 2026 market impact",
+      "Ukraine war market impact August 2026",
+      "China US relations market impact August 2026",
+      "Crude oil prices August 2026",
+      "Commodity prices August 2026",
+      "Global freight rates August 2026",
+      "Supply chain issues August 2026",
+      "Strongest US stock sectors August 2026",
+      "Weakest US stock sectors August 2026",
+      "Sector performance US August 2026"
+    ],
+    "tool_tokens": 1980
+  }
+}

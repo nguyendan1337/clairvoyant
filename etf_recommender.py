@@ -24,7 +24,7 @@ from yfinance import ETFQuery
 
 YF_CACHE_FILE = 'etf_yf_cache.json'
 YF_CACHE_EXPIRY_DAYS = 1
-TOP_QVM_CACHE_FILE = 'top_qvm_etfs_cache.pkl'
+TOP_QVM_CACHE_FILE = 'caches/top_qvm_etfs_cache.pkl'
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 TOP_QVM_CACHE_VERSION = 5
 
@@ -1046,7 +1046,7 @@ inspection_columns += [
     for period in ['1M', '3M', '6M', '9M', '1Y']
     if f'{period} Excess vs {benchmark}' in top_etfs.columns
 ]
-with open('top_qvm_etfs.md', 'w', encoding='utf-8') as f:
+with open('caches/top_qvm_etfs.md', 'w', encoding='utf-8') as f:
     f.write(top_etfs[inspection_columns].to_markdown(index=False))
 
 gemini_columns = [

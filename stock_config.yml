@@ -6,7 +6,7 @@ max_retries: 2
 initial_delay: 10
 model_primary: gemini-2.5-flash
 # Research fails closed instead of silently publishing lower-quality Lite output.
-model_fallback: null
+model_fallback: gemini-2.5-flash-lite
 gemini_batch_size: 18
 max_candidates: 50
 target_selected_stocks: 10
@@ -198,9 +198,14 @@ prompt_stock_batch: |
     HIGH: recent strength substantially depends on a temporary event, abnormal
       pricing, disruption, or unusually favorable condition.
 
-  REVERSAL RISK means the risk that the recent earnings, operating, or stock-
-  performance trend materially weakens or fails to persist within the next
-  6-12 months. It does not require predicting an immediate absolute price decline.
+  REVERSAL RISK means the risk that the company's recent earnings, revenue,
+  demand, margins, guidance, cash flow, or principal operating growth driver
+  materially weakens or fails to persist within the next 6-12 months.
+
+  Assess business and earnings reversal, not whether the share price could fall
+  because valuation is high, expectations are demanding, or the stock recently
+  rallied. Valuation may amplify the price reaction to an operating reversal,
+  but it cannot establish the reversal mechanism itself.
 
   REVERSAL-RISK CALIBRATION
   LOW is the normal reversal-risk level when durable drivers remain intact and no
@@ -239,13 +244,36 @@ prompt_stock_batch: |
 
   MODERATE
     Neither higher-risk category applies and continuation remains more likely
-    than reversal, but all four reversal-risk requirements are satisfied. Current
-    evidence must show an active or unusually probable mechanism capable of
-    materially weakening the recent trend within 6-12 months.
+    than reversal, but current evidence establishes a specific operating or
+    earnings mechanism that is already active or unusually probable and could
+    materially weaken the recent trend within 6-12 months.
 
-    Product, customer, geographic, or commodity concentration does not by itself
-    justify MODERATE. It qualifies only when a current development makes that
-    concentration materially more dangerous during the required time horizon.
+    A valid MODERATE assessment must complete this causal chain:
+
+      CURRENT FACT
+        -> makes SPECIFIC REVERSAL MECHANISM unusually probable
+        -> materially affects NAMED OPERATING OR FINANCIAL METRIC
+        -> within 6-12 MONTHS
+
+    All four links must be supported. If any link is hypothetical, generic,
+    unsupported, or based only on valuation or share-price behavior, assign LOW.
+
+    The following do not qualify as the current fact or reversal mechanism:
+      - a high valuation or demanding expectations
+      - a prior stock rally, momentum, volatility, or investor concern
+      - the possibility that growth could slow
+      - ordinary pipeline, commercialization, integration, execution, litigation,
+        reimbursement, regulatory, catastrophe, or competitive risk
+      - routine seasonal exposure, including hurricane season by itself
+      - geographic, product, customer, or commodity concentration by itself
+      - increased investment or operating expenses that accompany growth unless
+        current guidance or estimates show a material earnings deterioration
+      - a possible future regulation without a named current proposal, action,
+        expected effective date, and material company-specific effect
+
+    Product, geographic, customer, or commodity concentration qualifies only
+    when a documented current development makes that concentration materially
+    more dangerous during the next 6-12 months.
 
   LOW
     Durable drivers support continued strength, catalyst dependence is LOW, and
@@ -407,11 +435,15 @@ prompt_stock_batch: |
   specific material current reversal mechanism was identified, or briefly
   acknowledge the most relevant ordinary risk without overstating it.
 
-  For MODERATE, ELEVATED, or SEVERE, state the principal durable attraction,
-  name the specific current reversal mechanism, include the current fact showing
-  that it is active or unusually probable, and describe the expected material
-  effect. A favorable explanation that omits a documented material temporary
-  driver is invalid.
+  For MODERATE, ELEVATED, or SEVERE, the explanation must contain this causal
+  sequence in one concise sentence:
+
+    attraction; current observable fact; specific reversal mechanism; named
+    financial or operating effect within 6-12 months.
+
+  The explanation is invalid if the current observable fact is merely valuation,
+  a prior rally, investor concern, routine seasonality, ordinary concentration,
+  or an adverse event that could occur.
 
   An explanation containing only competition, regulation, concentration,
   cyclicality, volatility, market downturn, payer scrutiny, or catastrophe risk
@@ -422,33 +454,49 @@ prompt_stock_batch: |
   bracketed references, or internal terms such as MARKET_CONTEXT.
   
   FINAL REVERSAL-RISK AUDIT
-  Before returning the JSON, audit every result.
+  Before returning the JSON, audit every result using this order.
 
-  For every MODERATE, ELEVATED, or SEVERE result, confirm that the explanation
-  contains:
-    - the specific current reversal mechanism
-    - the current fact showing that it is active or unusually probable
-    - the expected material effect within 6-12 months
+  STEP 1 — IDENTIFY THE CURRENT FACT
+  For every MODERATE, ELEVATED, or SEVERE result, identify one observable current
+  fact from a returned source. The fact must be more specific than valuation,
+  stock performance, ordinary exposure, seasonality, or the possibility that an
+  adverse event could occur.
 
-  If the explanation relies only on valuation, a prior stock rally, a stock
-  selloff, investor concern, ordinary volatility, competition, concentration,
-  or an adverse event that merely could occur, change the reversal-risk level
-  to LOW.
+  STEP 2 — COMPLETE THE CAUSAL CHAIN
+  Confirm that the current fact makes a named reversal mechanism active or
+  unusually probable, identify the revenue, earnings, margin, demand, guidance,
+  cash-flow, or operating driver expected to weaken, and connect that effect to
+  the next 6-12 months.
 
-  For every LOW result, confirm that:
-    - no current temporary event materially drives recent earnings or stock
-      strength; or
-    - current company-specific evidence shows why normalization would not
-      materially weaken the thesis
+  STEP 3 — APPLY THE FORBIDDEN-RATIONALE TEST
+  If the assessment would become LOW after removing references to valuation,
+  share-price appreciation, investor expectations, ordinary concentration,
+  routine seasonality, or an adverse event that merely could occur, the correct
+  reversal-risk level is LOW.
 
-  LOW is invalid when the candidate is directly benefiting from a
-  MARKET_CONTEXT event that produced abnormal pricing or record earnings unless
-  the explanation identifies the specific company-level protection that keeps
-  normalization damage immaterial.
+  Examples that must normally be changed to LOW:
+    - "stretched valuation after a significant rally"
+    - "priced in substantial future growth"
+    - "vulnerable to any growth deceleration"
+    - "a major hurricane could affect earnings"
+    - "potential regulatory tightening"
+    - "increased pipeline spending pressures net income"
+    - "integration challenges could affect results"
 
-  Finally, compare every shared-event group. If two exposed companies have
-  different reversal-risk levels, verify that each explanation identifies the
-  material company-level difference supporting that result.
+  These examples may support MODERATE only when accompanied by a separate,
+  specific current fact showing that material operating or earnings weakening is
+  unusually probable within 6-12 months.
+
+  STEP 4 — TEMPORARY-DRIVER TEST
+  For every LOW result, confirm that no abnormal current event materially drives
+  recent earnings, or identify company-specific contractual or operating
+  protection showing why normalization would not materially weaken the trend.
+
+  STEP 5 — SHARED-EVENT CONSISTENCY
+  Apply the same normalization assumption across companies exposed to the same
+  temporary condition. Different risk levels require a documented material
+  difference in contract coverage, spot exposure, earnings sensitivity, business
+  mix, cost structure, or another company-specific protection.
 
   OUTPUT
   Return exactly one valid JSON object with no Markdown fences, citations outside

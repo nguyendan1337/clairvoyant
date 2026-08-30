@@ -3,7 +3,7 @@ name: Run recommenders and update page
 # Trigger workflow on weekdays at 7 AM (local time) + manual trigger
 on:
   schedule:
-    - cron: '0 21 * * *' # 1 PM PST, 2 PM PDT Daily After Market Close
+    - cron: '17 21 * * *' # 1 PM PST, 2 PM PDT Daily After Market Close, at 17 minutes to avoid automation congestion
   workflow_dispatch:
 
 permissions:

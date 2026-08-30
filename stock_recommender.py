@@ -858,10 +858,27 @@ def call_gemini_json(
                 return data, model_name, metadata
             except Exception as exc:
                 last_error = exc
+                error_text = str(exc).upper()
+                error_code = getattr(exc, "code", None)
+
+                resource_exhausted = (
+                        error_code == 429
+                        or "RESOURCE_EXHAUSTED" in error_text
+                        or "429 TOO MANY REQUESTS" in error_text
+                )
+
                 print(
                     f"Error on attempt {attempt + 1}/{attempt_limit} "
                     f"during {stage} with {model_name}: {exc}"
                 )
+
+                if resource_exhausted:
+                    print(
+                        f"{model_name} returned 429 RESOURCE_EXHAUSTED; "
+                        "skipping further retries for this model."
+                    )
+                    break
+
                 if attempt < attempt_limit - 1:
                     delay = initial_delay * (3 ** attempt)
                     print(f"Retrying in {delay}s...")

@@ -22,7 +22,7 @@ from tqdm import tqdm
 from yfinance import ETFQuery
 
 
-YF_CACHE_FILE = 'etf_yf_cache.json'
+YF_CACHE_FILE = 'caches/etf_yf_cache.json'
 YF_CACHE_EXPIRY_DAYS = 1
 TOP_QVM_CACHE_FILE = 'caches/top_qvm_etfs_cache.pkl'
 TOP_QVM_CACHE_EXPIRY_HOURS = 6

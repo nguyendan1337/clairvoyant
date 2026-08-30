@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from google.genai import types
 from datetime import datetime, timedelta, UTC
 import requests, time, random, json, yaml, os, hashlib
+from collections import Counter
 from html import escape
 
 CACHE_DIR = Path("caches")
@@ -507,6 +508,77 @@ def parse_json_response(text):
         raise
 
 
+def extract_partial_stock_results(text):
+    """Recover only independently valid objects from a malformed results array."""
+    cleaned = str(text).strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(
+            r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE
+        )
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+
+    match = re.search(r'"results"\s*:\s*\[', cleaned)
+    if not match:
+        return []
+
+    results = []
+    index = match.end()
+    text_length = len(cleaned)
+
+    while index < text_length:
+        while index < text_length and (
+                cleaned[index].isspace() or cleaned[index] == ","
+        ):
+            index += 1
+
+        if index >= text_length or cleaned[index] == "]":
+            break
+
+        if cleaned[index] != "{":
+            index += 1
+            continue
+
+        object_start = index
+        depth = 0
+        in_string = False
+        escaped = False
+
+        while index < text_length:
+            character = cleaned[index]
+
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif character == "\\":
+                    escaped = True
+                elif character == '"':
+                    in_string = False
+            else:
+                if character == '"':
+                    in_string = True
+                elif character == "{":
+                    depth += 1
+                elif character == "}":
+                    depth -= 1
+                    if depth == 0:
+                        object_text = cleaned[object_start:index + 1]
+                        try:
+                            result = json.loads(object_text)
+                        except json.JSONDecodeError:
+                            pass
+                        else:
+                            if isinstance(result, dict):
+                                results.append(result)
+                        index += 1
+                        break
+
+            index += 1
+        else:
+            break
+
+    return results
+
+
 def validate_sources(sources, label, minimum=1, maximum=None):
     if not isinstance(sources, list) or len(sources) < minimum:
         raise ValueError(
@@ -563,6 +635,28 @@ ALLOWED_REVERSAL_RISKS = {
     "MODERATE",
     "ELEVATED",
     "SEVERE",
+}
+
+ALLOWED_CATALYST_DEPENDENCE = {"LOW", "MODERATE", "HIGH"}
+ALLOWED_MECHANISM_STATUSES = {
+    "NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE"
+}
+ALLOWED_NORMALIZATION_PROBABILITIES = {
+    "NOT_APPLICABLE", "NOT_ESTABLISHED", "REASONABLY_PROBABLE",
+    "AT_LEAST_AS_LIKELY",
+}
+ALLOWED_CONTINUATION_OUTLOOKS = {
+    "CONTINUATION_MORE_LIKELY", "REVERSAL_AT_LEAST_AS_LIKELY",
+    "THESIS_BROKEN",
+}
+INCOMPLETE_RESEARCH_PHRASES = {
+    "no specific operating drivers",
+    "no operating drivers",
+    "from available search results",
+    "based on available information",
+    "insufficient information",
+    "unable to identify",
+    "could not identify",
 }
 
 
@@ -627,13 +721,86 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             catalyst_dependence
         )
 
-        if catalyst_dependence not in {"LOW", "MODERATE", "HIGH"}:
+        if catalyst_dependence not in ALLOWED_CATALYST_DEPENDENCE:
             raise ValueError(
                 f"{symbol} has invalid catalyst_dependence: "
                 f"{result.get('catalyst_dependence')!r}"
             )
 
         result["catalyst_dependence"] = catalyst_dependence
+
+        mechanism_status = str(
+            result.get("mechanism_status", "")
+        ).strip().upper()
+        if mechanism_status not in ALLOWED_MECHANISM_STATUSES:
+            raise ValueError(
+                f"{symbol} has invalid mechanism_status: "
+                f"{result.get('mechanism_status')!r}"
+            )
+        result["mechanism_status"] = mechanism_status
+
+        normalization_probability = str(
+            result.get("normalization_probability", "")
+        ).strip().upper()
+        if normalization_probability not in ALLOWED_NORMALIZATION_PROBABILITIES:
+            raise ValueError(
+                f"{symbol} has invalid normalization_probability: "
+                f"{result.get('normalization_probability')!r}"
+            )
+        result["normalization_probability"] = normalization_probability
+
+        continuation_outlook = str(
+            result.get("continuation_outlook", "")
+        ).strip().upper()
+        if continuation_outlook not in ALLOWED_CONTINUATION_OUTLOOKS:
+            raise ValueError(
+                f"{symbol} has invalid continuation_outlook: "
+                f"{result.get('continuation_outlook')!r}"
+            )
+        result["continuation_outlook"] = continuation_outlook
+
+        durable_drivers = result.get("durable_drivers")
+        if not isinstance(durable_drivers, list) or not 1 <= len(durable_drivers) <= 2:
+            raise ValueError(f"{symbol} must have 1-2 durable_drivers.")
+        durable_drivers = [str(item).strip() for item in durable_drivers]
+        if any(not item for item in durable_drivers):
+            raise ValueError(f"{symbol} has an empty durable_driver.")
+        if any(
+            phrase in " ".join(durable_drivers).lower()
+            for phrase in INCOMPLETE_RESEARCH_PHRASES
+        ):
+            raise ValueError(f"{symbol} has incomplete durable-driver research.")
+        result["durable_drivers"] = durable_drivers
+
+        temporary_drivers = result.get("temporary_drivers")
+        if not isinstance(temporary_drivers, list) or len(temporary_drivers) > 2:
+            raise ValueError(f"{symbol} must have 0-2 temporary_drivers.")
+        temporary_drivers = [str(item).strip() for item in temporary_drivers]
+        if any(not item for item in temporary_drivers):
+            raise ValueError(f"{symbol} has an empty temporary_driver.")
+        result["temporary_drivers"] = temporary_drivers
+        if temporary_drivers and normalization_probability == "NOT_APPLICABLE":
+            raise ValueError(
+                f"{symbol} has temporary drivers but normalization is "
+                "NOT_APPLICABLE."
+            )
+        if catalyst_dependence in {"MODERATE", "HIGH"} and not temporary_drivers:
+            raise ValueError(
+                f"{symbol} has {catalyst_dependence} catalyst dependence "
+                "without a temporary driver."
+            )
+        if mechanism_status == "NONE" and temporary_drivers:
+            raise ValueError(
+                f"{symbol} mechanism_status NONE conflicts with temporary drivers."
+            )
+        if (
+            mechanism_status == "NONE"
+            and normalization_probability != "NOT_APPLICABLE"
+        ):
+            raise ValueError(
+                f"{symbol} mechanism_status NONE requires "
+                "normalization_probability NOT_APPLICABLE."
+            )
 
         explanation = re.sub(
             r"\s*\[(?:cite|source|citation):[^\]]+\]",
@@ -644,6 +811,20 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
 
         if not explanation:
             raise ValueError(f"{symbol} has no explanation.")
+
+        explanation_lower = explanation.lower()
+        incomplete_phrase = next(
+            (
+                phrase for phrase in INCOMPLETE_RESEARCH_PHRASES
+                if phrase in explanation_lower
+            ),
+            None,
+        )
+        if incomplete_phrase:
+            raise ValueError(
+                f"{symbol} explanation indicates incomplete research: "
+                f"{incomplete_phrase!r}."
+            )
 
         result["explanation"] = explanation
         if not str(result.get("reversal_mechanism", "")).strip():
@@ -706,6 +887,15 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             reversal_evidence = str(reversal_evidence).strip() or None
         result["reversal_evidence"] = reversal_evidence
 
+        for field in (
+            "current_fact", "probability_evidence", "material_effect",
+            "company_difference",
+        ):
+            value = result.get(field)
+            if value is not None:
+                value = str(value).strip() or None
+            result[field] = value
+
         evidence_required_risks = {
             "MODERATE",
             "ELEVATED",
@@ -713,10 +903,18 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         }
 
         if reversal_risk in evidence_required_risks:
+            missing_evidence = [
+                field for field in (
+                    "current_fact", "probability_evidence", "material_effect"
+                )
+                if not result[field]
+            ]
             if not reversal_evidence:
+                missing_evidence.append("reversal_evidence")
+            if missing_evidence:
                 raise ValueError(
-                    f"{symbol} assessed as {reversal_risk} reversal risk without "
-                    "specific reversal_evidence."
+                    f"{symbol} assessed as {reversal_risk} without complete "
+                    "evidence: " + ", ".join(missing_evidence)
                 )
 
             if risk_materiality not in {"MODERATE", "HIGH"}:
@@ -735,11 +933,68 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                     f"risk_time_horizon={risk_time_horizon!r}."
                 )
 
+        if reversal_risk == "MINIMAL":
+            if (
+                mechanism_status != "NONE"
+                or catalyst_dependence != "LOW"
+                or continuation_outlook != "CONTINUATION_MORE_LIKELY"
+            ):
+                raise ValueError(
+                    f"{symbol} MINIMAL conflicts with its mechanism, catalyst, "
+                    "or continuation fields."
+                )
+        elif reversal_risk == "LOW":
+            if mechanism_status not in {"NONE", "HYPOTHETICAL"}:
+                raise ValueError(
+                    f"{symbol} LOW requires NONE or HYPOTHETICAL mechanism_status."
+                )
+            if continuation_outlook != "CONTINUATION_MORE_LIKELY":
+                raise ValueError(
+                    f"{symbol} LOW requires CONTINUATION_MORE_LIKELY."
+                )
+        elif reversal_risk == "MODERATE":
+            if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
+                raise ValueError(
+                    f"{symbol} MODERATE requires ACTIVE or "
+                    "UNUSUALLY_PROBABLE mechanism_status."
+                )
+            if continuation_outlook != "CONTINUATION_MORE_LIKELY":
+                raise ValueError(
+                    f"{symbol} MODERATE requires CONTINUATION_MORE_LIKELY."
+                )
+            if normalization_probability not in {
+                "NOT_APPLICABLE", "REASONABLY_PROBABLE"
+            }:
+                raise ValueError(
+                    f"{symbol} MODERATE has inconsistent "
+                    f"normalization_probability={normalization_probability}."
+                )
+        elif reversal_risk == "ELEVATED":
+            if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
+                raise ValueError(
+                    f"{symbol} ELEVATED requires ACTIVE or "
+                    "UNUSUALLY_PROBABLE mechanism_status."
+                )
+            if continuation_outlook != "REVERSAL_AT_LEAST_AS_LIKELY":
+                raise ValueError(
+                    f"{symbol} ELEVATED requires REVERSAL_AT_LEAST_AS_LIKELY."
+                )
+        elif reversal_risk == "SEVERE":
+            if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
+                raise ValueError(
+                    f"{symbol} SEVERE requires ACTIVE or "
+                    "UNUSUALLY_PROBABLE mechanism_status."
+                )
+            if continuation_outlook != "THESIS_BROKEN":
+                raise ValueError(f"{symbol} SEVERE requires THESIS_BROKEN.")
+
+        if not isinstance(result.get("sources"), list) or len(result["sources"]) != 2:
+            raise ValueError(f"{symbol} must return exactly two source objects.")
         validate_sources(
             result.get("sources"),
             symbol,
-            minimum=minimum_sources,
-            maximum=4,
+            minimum=max(2, minimum_sources),
+            maximum=2,
         )
 
         unique_source_urls = {
@@ -750,6 +1005,57 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             f"Validated JSON sources [{symbol}]: "
             f"{len(unique_source_urls)} distinct URLs"
         )
+
+
+def shared_event_consistency_errors(results, prior_results=None):
+    """Return current symbols whose shared-event classifications need retry."""
+    current_symbols = {
+        str(result.get("symbol", "")).strip().upper() for result in results
+    }
+    combined = list(prior_results or []) + list(results)
+    groups = {}
+    for result in combined:
+        event_id = result.get("primary_risk_event_id")
+        if not event_id:
+            continue
+        event_id = re.sub(
+            r"[^A-Z0-9]+", "_", str(event_id).upper()
+        ).strip("_")
+        if event_id:
+            groups.setdefault(event_id, []).append(result)
+
+    errors = {}
+    fields = (
+        "mechanism_status", "normalization_probability",
+        "continuation_outlook", "reversal_risk",
+    )
+    for event_id, members in groups.items():
+        if len(members) < 2:
+            continue
+        signatures = [
+            tuple(str(member.get(field, "")).strip().upper() for field in fields)
+            for member in members
+        ]
+        baseline = Counter(signatures).most_common(1)[0][0]
+        unsupported = [
+            member for member, signature in zip(members, signatures)
+            if signature != baseline
+            and not str(member.get("company_difference") or "").strip()
+        ]
+        if not unsupported:
+            continue
+        group_symbols = [
+            str(member.get("symbol", "")).strip().upper() for member in members
+        ]
+        message = (
+            f"shared event {event_id} has inconsistent classification fields "
+            "without a sourced company_difference; reassess the group baseline "
+            f"for {', '.join(symbol for symbol in group_symbols if symbol)}"
+        )
+        for symbol in group_symbols:
+            if symbol in current_symbols:
+                errors[symbol] = message
+    return errors
 
 
 def call_gemini_json(
@@ -763,6 +1069,7 @@ def call_gemini_json(
         request_budget,
         require_google_search=True,
         required_search_candidates=None,
+        allow_partial_stock_results=False,
         max_attempts=None):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
@@ -853,7 +1160,32 @@ def call_gemini_json(
                             + ", ".join(missing_symbols)
                         )
 
-                data = parse_json_response(response.text)
+                try:
+                    data = parse_json_response(response.text)
+                except json.JSONDecodeError as parse_error:
+                    if not allow_partial_stock_results:
+                        raise
+
+                    partial_results = extract_partial_stock_results(
+                        response.text
+                    )
+                    recovered_symbols = [
+                        str(result.get("symbol", "")).upper()
+                        for result in partial_results
+                        if str(result.get("symbol", "")).strip()
+                    ]
+                    print(
+                        "Malformed stock-batch JSON; recovered "
+                        f"{len(partial_results)} individual result(s): "
+                        + (", ".join(recovered_symbols) or "none")
+                    )
+                    print(
+                        "The recovered results will be validated and cached; "
+                        "only missing or invalid stocks will be retried. "
+                        f"Original JSON error: {parse_error}"
+                    )
+                    data = {"results": partial_results}
+
                 validator(data)
                 return data, model_name, metadata
             except Exception as exc:
@@ -2358,12 +2690,17 @@ only the candidates supplied below. Correct these exact validation errors:
                 request_budget=request_budget,
                 require_google_search=require_google_search,
                 required_search_candidates=pending_candidates,
+                allow_partial_stock_results=True,
+                max_attempts=1,
             )
             models_used.append(batch_model)
             results_by_symbol = {
                 str(result.get("symbol", "")).upper(): result
                 for result in batch_data["results"]
             }
+            shared_errors = shared_event_consistency_errors(
+                batch_data["results"], prior_research_decisions
+            )
             next_pending = []
             next_errors = {}
 
@@ -2373,6 +2710,15 @@ only the candidates supplied below. Correct these exact validation errors:
                 if result is None:
                     next_pending.append(candidate)
                     next_errors[symbol] = "result was missing from the response"
+                    continue
+
+                if symbol in shared_errors:
+                    next_pending.append(candidate)
+                    next_errors[symbol] = shared_errors[symbol]
+                    print(
+                        f"Saving unrelated valid results; {symbol} requires a "
+                        f"shared-event retry: {shared_errors[symbol]}"
+                    )
                     continue
 
                 minimum_sources = minimum_sources_for_candidate(
@@ -2464,6 +2810,12 @@ only the candidates supplied below. Correct these exact validation errors:
             "symbol": symbol,
             "reversal_risk": reversal_risk,
             "catalyst_dependence": research.get("catalyst_dependence"),
+            "mechanism_status": research.get("mechanism_status"),
+            "normalization_probability": research.get(
+                "normalization_probability"
+            ),
+            "continuation_outlook": research.get("continuation_outlook"),
+            "company_difference": research.get("company_difference"),
             "primary_risk_event_id": research.get("primary_risk_event_id"),
         })
 

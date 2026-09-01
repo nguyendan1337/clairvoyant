@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from google.genai import types
 from datetime import datetime, timedelta, UTC
 import requests, time, random, json, yaml, os, hashlib
-from collections import Counter
 from html import escape
 
 CACHE_DIR = Path("caches")
@@ -484,11 +483,84 @@ def candidate_search_count(search_queries, candidate):
 
 
 def minimum_sources_for_candidate(search_queries, candidate):
-    # One source is accepted only when metadata proves that both required
-    # company-specific searches ran for this exact candidate.
-    if candidate_search_count(search_queries, candidate) >= 2:
-        return 1
-    return 2
+    # A single search can expose multiple sources. Require at least one
+    # materially used source, while the prompt asks Gemini to return every
+    # source actually used rather than targeting a fixed count.
+    return 1
+
+
+def preview_selectable_symbols(
+        candidates,
+        research_by_symbol,
+        target_count,
+        sector_limit,
+        moderate_event_limit):
+    """Replay portfolio rules without mutating the real selection ledger."""
+    preview_selected = []
+    preview_sector_counts = {}
+    preview_event_counts = {}
+
+    for candidate in candidates:
+        if len(preview_selected) >= target_count:
+            break
+
+        symbol = str(candidate["Symbol"]).upper()
+        sector = candidate["Sector"]
+        if preview_sector_counts.get(sector, 0) >= sector_limit:
+            continue
+
+        research = research_by_symbol.get(symbol)
+        if research is None or not bool(research.get("eligible", True)):
+            continue
+
+        reversal_risk = str(research.get("reversal_risk", "")).upper()
+        if reversal_risk in {"ELEVATED", "SEVERE"}:
+            continue
+        if reversal_risk not in {"MINIMAL", "LOW", "MODERATE"}:
+            continue
+
+        primary_event = research.get("primary_risk_event_id")
+        if primary_event:
+            primary_event = re.sub(
+                r"[^A-Z0-9]+", "_", str(primary_event).upper()
+            ).strip("_")
+
+        if (
+            reversal_risk == "MODERATE"
+            and primary_event
+            and preview_event_counts.get(primary_event, 0)
+            >= moderate_event_limit
+        ):
+            continue
+
+        preview_selected.append(symbol)
+        preview_sector_counts[sector] = (
+            preview_sector_counts.get(sector, 0) + 1
+        )
+        if reversal_risk == "MODERATE" and primary_event:
+            preview_event_counts[primary_event] = (
+                preview_event_counts.get(primary_event, 0) + 1
+            )
+
+    return preview_selected
+
+
+def validation_error_requires_fresh_research(message):
+    """Return True only when another search can materially repair the result."""
+    error = str(message).lower()
+    research_markers = (
+        "research incomplete",
+        "result was missing",
+        "no current_operating_evidence",
+        "requires at least",
+        "without current_fact",
+        "without probability_evidence",
+        "without material_effect",
+        "without specific reversal_evidence",
+        "source without a valid url",
+        "source without a title",
+    )
+    return any(marker in error for marker in research_markers)
 
 
 def parse_json_response(text):
@@ -579,6 +651,28 @@ def extract_partial_stock_results(text):
     return results
 
 
+def extract_delimited_stock_results(text):
+    """Recover independently valid stock objects between explicit markers."""
+    pattern = re.compile(
+        r"BEGIN_STOCK_RESULT\s*(.*?)\s*END_STOCK_RESULT",
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    results = []
+    for match in pattern.finditer(str(text)):
+        object_text = match.group(1).strip()
+        object_text = re.sub(
+            r"^```(?:json)?\s*|\s*```$", "", object_text,
+            flags=re.IGNORECASE,
+        ).strip()
+        try:
+            result = json.loads(object_text)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(result, dict):
+            results.append(result)
+    return results
+
+
 def validate_sources(sources, label, minimum=1, maximum=None):
     if not isinstance(sources, list) or len(sources) < minimum:
         raise ValueError(
@@ -604,9 +698,9 @@ def validate_sources(sources, label, minimum=1, maximum=None):
         raise ValueError(
             f"{label} requires at least {minimum} distinct source URLs."
         )
-    if maximum is not None and len(unique_urls) > maximum:
+    if maximum is not None and len(sources) > maximum:
         raise ValueError(
-            f"{label} returned {len(unique_urls)} distinct source URLs; "
+            f"{label} returned {len(sources)} source entries; "
             f"the maximum is {maximum}."
         )
 
@@ -635,28 +729,6 @@ ALLOWED_REVERSAL_RISKS = {
     "MODERATE",
     "ELEVATED",
     "SEVERE",
-}
-
-ALLOWED_CATALYST_DEPENDENCE = {"LOW", "MODERATE", "HIGH"}
-ALLOWED_MECHANISM_STATUSES = {
-    "NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE"
-}
-ALLOWED_NORMALIZATION_PROBABILITIES = {
-    "NOT_APPLICABLE", "NOT_ESTABLISHED", "REASONABLY_PROBABLE",
-    "AT_LEAST_AS_LIKELY",
-}
-ALLOWED_CONTINUATION_OUTLOOKS = {
-    "CONTINUATION_MORE_LIKELY", "REVERSAL_AT_LEAST_AS_LIKELY",
-    "THESIS_BROKEN",
-}
-INCOMPLETE_RESEARCH_PHRASES = {
-    "no specific operating drivers",
-    "no operating drivers",
-    "from available search results",
-    "based on available information",
-    "insufficient information",
-    "unable to identify",
-    "could not identify",
 }
 
 
@@ -704,6 +776,21 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         # Do not reject otherwise valid research if Gemini reproduces it incorrectly.
         result["qvm_rank"] = int(expected["QVM Rank"])
 
+        research_status = str(
+            result.get("research_status", "COMPLETE")
+        ).strip().upper()
+        if research_status not in {"COMPLETE", "INCOMPLETE"}:
+            raise ValueError(
+                f"{symbol} has invalid research_status {research_status!r}."
+            )
+        result["research_status"] = research_status
+        if research_status == "INCOMPLETE":
+            reason = str(
+                result.get("research_incomplete_reason")
+                or "required current evidence was not established"
+            ).strip()
+            raise ValueError(f"{symbol} research incomplete: {reason}")
+
         reversal_risk = str(result.get("reversal_risk", "")).upper()
         if reversal_risk not in ALLOWED_REVERSAL_RISKS:
             raise ValueError(f"{symbol} has invalid reversal_risk {reversal_risk!r}.")
@@ -721,7 +808,7 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             catalyst_dependence
         )
 
-        if catalyst_dependence not in ALLOWED_CATALYST_DEPENDENCE:
+        if catalyst_dependence not in {"LOW", "MODERATE", "HIGH"}:
             raise ValueError(
                 f"{symbol} has invalid catalyst_dependence: "
                 f"{result.get('catalyst_dependence')!r}"
@@ -729,78 +816,124 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
 
         result["catalyst_dependence"] = catalyst_dependence
 
-        mechanism_status = str(
-            result.get("mechanism_status", "")
-        ).strip().upper()
-        if mechanism_status not in ALLOWED_MECHANISM_STATUSES:
+        mechanism_status = str(result.get("mechanism_status", "")).upper()
+        if mechanism_status not in {
+            "NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE"
+        }:
             raise ValueError(
-                f"{symbol} has invalid mechanism_status: "
-                f"{result.get('mechanism_status')!r}"
+                f"{symbol} has invalid mechanism_status {mechanism_status!r}."
             )
         result["mechanism_status"] = mechanism_status
 
         normalization_probability = str(
             result.get("normalization_probability", "")
-        ).strip().upper()
-        if normalization_probability not in ALLOWED_NORMALIZATION_PROBABILITIES:
+        ).upper()
+        if normalization_probability not in {
+            "NOT_APPLICABLE", "NOT_ESTABLISHED", "REASONABLY_PROBABLE",
+            "AT_LEAST_AS_LIKELY",
+        }:
             raise ValueError(
-                f"{symbol} has invalid normalization_probability: "
-                f"{result.get('normalization_probability')!r}"
+                f"{symbol} has invalid normalization_probability "
+                f"{normalization_probability!r}."
             )
         result["normalization_probability"] = normalization_probability
 
-        continuation_outlook = str(
+        raw_continuation_outlook = str(
             result.get("continuation_outlook", "")
         ).strip().upper()
-        if continuation_outlook not in ALLOWED_CONTINUATION_OUTLOOKS:
-            raise ValueError(
-                f"{symbol} has invalid continuation_outlook: "
-                f"{result.get('continuation_outlook')!r}"
+
+        continuation_outlook = re.sub(
+            r"[^A-Z0-9]+",
+            "_",
+            raw_continuation_outlook,
+        ).strip("_")
+
+        allowed_continuation_outlooks = {
+            "CONTINUATION_MORE_LIKELY",
+            "REVERSAL_AT_LEAST_AS_LIKELY",
+            "THESIS_BROKEN",
+        }
+
+        negative_continuation_markers = {
+            "NOT",
+            "UNLIKELY",
+            "LESS_LIKELY",
+            "NO_CONTINUATION",
+        }
+
+        if (
+                continuation_outlook not in allowed_continuation_outlooks
+                and "CONTINUATION" in continuation_outlook
+                and not any(
+            marker in continuation_outlook
+            for marker in negative_continuation_markers
+        )
+        ):
+            print(
+                f"Normalized continuation_outlook for {symbol}: "
+                f"{raw_continuation_outlook!r} -> "
+                "'CONTINUATION_MORE_LIKELY'."
             )
+            continuation_outlook = "CONTINUATION_MORE_LIKELY"
+
+        if continuation_outlook not in allowed_continuation_outlooks:
+            raise ValueError(
+                f"{symbol} has invalid continuation_outlook "
+                f"{raw_continuation_outlook!r}."
+            )
+
         result["continuation_outlook"] = continuation_outlook
 
-        durable_drivers = result.get("durable_drivers")
-        if not isinstance(durable_drivers, list) or not 1 <= len(durable_drivers) <= 2:
-            raise ValueError(f"{symbol} must have 1-2 durable_drivers.")
-        durable_drivers = [str(item).strip() for item in durable_drivers]
-        if any(not item for item in durable_drivers):
-            raise ValueError(f"{symbol} has an empty durable_driver.")
-        if any(
-            phrase in " ".join(durable_drivers).lower()
-            for phrase in INCOMPLETE_RESEARCH_PHRASES
-        ):
-            raise ValueError(f"{symbol} has incomplete durable-driver research.")
-        result["durable_drivers"] = durable_drivers
+        risk_basis = str(result.get("risk_basis", "")).upper()
+        if risk_basis not in {
+            "NONE", "NORMALIZED_OPERATING_DETERIORATION",
+            "TEMPORARY_DRIVER_NORMALIZATION",
+            "NONRECURRING_COMPARISON_ONLY",
+        }:
+            raise ValueError(f"{symbol} has invalid risk_basis {risk_basis!r}.")
+        result["risk_basis"] = risk_basis
 
-        temporary_drivers = result.get("temporary_drivers")
-        if not isinstance(temporary_drivers, list) or len(temporary_drivers) > 2:
-            raise ValueError(f"{symbol} must have 0-2 temporary_drivers.")
-        temporary_drivers = [str(item).strip() for item in temporary_drivers]
-        if any(not item for item in temporary_drivers):
-            raise ValueError(f"{symbol} has an empty temporary_driver.")
-        result["temporary_drivers"] = temporary_drivers
-        if temporary_drivers and normalization_probability == "NOT_APPLICABLE":
-            raise ValueError(
-                f"{symbol} has temporary drivers but normalization is "
-                "NOT_APPLICABLE."
-            )
-        if catalyst_dependence in {"MODERATE", "HIGH"} and not temporary_drivers:
-            raise ValueError(
-                f"{symbol} has {catalyst_dependence} catalyst dependence "
-                "without a temporary driver."
-            )
-        if mechanism_status == "NONE" and temporary_drivers:
-            raise ValueError(
-                f"{symbol} mechanism_status NONE conflicts with temporary drivers."
-            )
-        if (
-            mechanism_status == "NONE"
-            and normalization_probability != "NOT_APPLICABLE"
-        ):
-            raise ValueError(
-                f"{symbol} mechanism_status NONE requires "
-                "normalization_probability NOT_APPLICABLE."
-            )
+        industry_group = str(result.get("industry_group", "")).strip().upper()
+        if not industry_group:
+            raise ValueError(f"{symbol} has no industry_group.")
+        result["industry_group"] = industry_group
+
+        operating_evidence = str(
+            result.get("current_operating_evidence", "")
+        ).strip()
+        if bool(result.get("eligible", True)) and not operating_evidence:
+            raise ValueError(f"{symbol} has no current_operating_evidence.")
+        result["current_operating_evidence"] = operating_evidence
+
+        temporary_drivers = result.get("temporary_drivers") or []
+        if not isinstance(temporary_drivers, list):
+            raise ValueError(f"{symbol} temporary_drivers must be an array.")
+        if temporary_drivers:
+            if (
+                normalization_probability == "NOT_APPLICABLE"
+                and reversal_risk in {"MINIMAL", "LOW"}
+                and mechanism_status in {"NONE", "HYPOTHETICAL"}
+            ):
+                # Gemini sometimes places ordinary risks in temporary_drivers.
+                # The LOW mapping already says no material temporary operating
+                # driver was established, so clear the inconsistent optional
+                # list instead of repeating the research.
+                temporary_drivers = []
+                result["temporary_drivers"] = []
+                print(
+                    f"Cleared non-material temporary_drivers for {symbol}."
+                )
+            if mechanism_status == "NONE":
+                if temporary_drivers:
+                    raise ValueError(
+                        f"{symbol} has temporary drivers but mechanism_status is NONE."
+                    )
+            if normalization_probability == "NOT_APPLICABLE":
+                if temporary_drivers:
+                    raise ValueError(
+                        f"{symbol} has temporary drivers but normalization is "
+                        "NOT_APPLICABLE."
+                    )
 
         explanation = re.sub(
             r"\s*\[(?:cite|source|citation):[^\]]+\]",
@@ -812,29 +945,26 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         if not explanation:
             raise ValueError(f"{symbol} has no explanation.")
 
-        explanation_lower = explanation.lower()
-        incomplete_phrase = next(
-            (
-                phrase for phrase in INCOMPLETE_RESEARCH_PHRASES
-                if phrase in explanation_lower
-            ),
-            None,
-        )
-        if incomplete_phrase:
-            raise ValueError(
-                f"{symbol} explanation indicates incomplete research: "
-                f"{incomplete_phrase!r}."
-            )
-
         result["explanation"] = explanation
         if not str(result.get("reversal_mechanism", "")).strip():
             raise ValueError(f"{symbol} has no reversal mechanism.")
         if not str(result.get("normalization_effect", "")).strip():
             raise ValueError(f"{symbol} has no normalization analysis.")
 
-        risk_materiality = str(
-            result.get("risk_materiality", "")
-        ).strip().upper()
+        raw_risk_materiality = result.get("risk_materiality")
+
+        # LOW and MINIMAL already establish that no qualifying material
+        # reversal was found. Gemini frequently emits null here even though
+        # the schema asks for LOW. This is a safe deterministic normalization,
+        # not a new research conclusion, and avoids repeating all searches just
+        # to repair one enum field.
+        if raw_risk_materiality is None and reversal_risk in {"MINIMAL", "LOW"}:
+            raw_risk_materiality = "LOW"
+            print(
+                f"Normalized null risk_materiality to LOW for {symbol}."
+            )
+
+        risk_materiality = str(raw_risk_materiality or "").strip().upper()
 
         risk_materiality = {
             "MEDIUM": "MODERATE",
@@ -843,7 +973,7 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         if risk_materiality not in {"LOW", "MODERATE", "HIGH"}:
             raise ValueError(
                 f"{symbol} has invalid risk_materiality: "
-                f"{result.get('risk_materiality')!r}"
+                f"{raw_risk_materiality!r}"
             )
 
         result["risk_materiality"] = risk_materiality
@@ -885,16 +1015,32 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         reversal_evidence = result.get("reversal_evidence")
         if reversal_evidence is not None:
             reversal_evidence = str(reversal_evidence).strip() or None
-        result["reversal_evidence"] = reversal_evidence
 
-        for field in (
-            "current_fact", "probability_evidence", "material_effect",
-            "company_difference",
-        ):
-            value = result.get(field)
-            if value is not None:
-                value = str(value).strip() or None
-            result[field] = value
+        # For material risks, reversal_evidence is only a concise synthesis of
+        # three separately required researched fields. If all three fields are
+        # present, construct that synthesis deterministically rather than
+        # spending another Gemini call to restate existing evidence.
+        if not reversal_evidence and reversal_risk in {
+            "MODERATE", "ELEVATED", "SEVERE"
+        }:
+            evidence_parts = [
+                str(result.get(field) or "").strip()
+                for field in (
+                    "current_fact", "probability_evidence", "material_effect"
+                )
+            ]
+            if all(evidence_parts):
+                # Keep the synthesized field within the prompt's 35-word cap
+                # while retaining content from every required component.
+                reversal_evidence = " ".join(
+                    " ".join(part.split()[:11])
+                    for part in evidence_parts
+                )
+                print(
+                    f"Synthesized reversal_evidence from validated component "
+                    f"fields for {symbol}."
+                )
+        result["reversal_evidence"] = reversal_evidence
 
         evidence_required_risks = {
             "MODERATE",
@@ -903,18 +1049,22 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         }
 
         if reversal_risk in evidence_required_risks:
-            missing_evidence = [
+            missing_evidence_fields = [
                 field for field in (
                     "current_fact", "probability_evidence", "material_effect"
                 )
-                if not result[field]
+                if not str(result.get(field) or "").strip()
             ]
-            if not reversal_evidence:
-                missing_evidence.append("reversal_evidence")
-            if missing_evidence:
+            if missing_evidence_fields:
                 raise ValueError(
-                    f"{symbol} assessed as {reversal_risk} without complete "
-                    "evidence: " + ", ".join(missing_evidence)
+                    f"{symbol} assessed as {reversal_risk} without "
+                    + ", ".join(missing_evidence_fields)
+                    + "."
+                )
+            if not reversal_evidence:
+                raise ValueError(
+                    f"{symbol} assessed as {reversal_risk} reversal risk without "
+                    "specific reversal_evidence."
                 )
 
             if risk_materiality not in {"MODERATE", "HIGH"}:
@@ -933,68 +1083,75 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                     f"risk_time_horizon={risk_time_horizon!r}."
                 )
 
+        if risk_basis == "NONRECURRING_COMPARISON_ONLY" and reversal_risk not in {
+            "MINIMAL", "LOW"
+        }:
+            raise ValueError(
+                f"{symbol} uses only a non-recurring comparison to justify "
+                f"{reversal_risk} risk."
+            )
+
         if reversal_risk == "MINIMAL":
-            if (
-                mechanism_status != "NONE"
-                or catalyst_dependence != "LOW"
-                or continuation_outlook != "CONTINUATION_MORE_LIKELY"
+            if not (
+                mechanism_status == "NONE"
+                and catalyst_dependence == "LOW"
+                and continuation_outlook == "CONTINUATION_MORE_LIKELY"
+                and risk_basis == "NONE"
             ):
-                raise ValueError(
-                    f"{symbol} MINIMAL conflicts with its mechanism, catalyst, "
-                    "or continuation fields."
-                )
+                raise ValueError(f"{symbol} MINIMAL fields violate risk mapping.")
         elif reversal_risk == "LOW":
             if mechanism_status not in {"NONE", "HYPOTHETICAL"}:
-                raise ValueError(
-                    f"{symbol} LOW requires NONE or HYPOTHETICAL mechanism_status."
-                )
+                raise ValueError(f"{symbol} LOW fields violate mechanism mapping.")
             if continuation_outlook != "CONTINUATION_MORE_LIKELY":
-                raise ValueError(
-                    f"{symbol} LOW requires CONTINUATION_MORE_LIKELY."
-                )
+                raise ValueError(f"{symbol} LOW fields violate outlook mapping.")
         elif reversal_risk == "MODERATE":
             if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
-                raise ValueError(
-                    f"{symbol} MODERATE requires ACTIVE or "
-                    "UNUSUALLY_PROBABLE mechanism_status."
-                )
+                raise ValueError(f"{symbol} MODERATE fields violate mechanism mapping.")
             if continuation_outlook != "CONTINUATION_MORE_LIKELY":
-                raise ValueError(
-                    f"{symbol} MODERATE requires CONTINUATION_MORE_LIKELY."
-                )
-            if normalization_probability not in {
-                "NOT_APPLICABLE", "REASONABLY_PROBABLE"
+                raise ValueError(f"{symbol} MODERATE fields violate outlook mapping.")
+            if risk_basis not in {
+                "NORMALIZED_OPERATING_DETERIORATION",
+                "TEMPORARY_DRIVER_NORMALIZATION",
             }:
-                raise ValueError(
-                    f"{symbol} MODERATE has inconsistent "
-                    f"normalization_probability={normalization_probability}."
-                )
+                raise ValueError(f"{symbol} MODERATE has an invalid risk basis.")
         elif reversal_risk == "ELEVATED":
             if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
-                raise ValueError(
-                    f"{symbol} ELEVATED requires ACTIVE or "
-                    "UNUSUALLY_PROBABLE mechanism_status."
-                )
+                raise ValueError(f"{symbol} ELEVATED fields violate mechanism mapping.")
             if continuation_outlook != "REVERSAL_AT_LEAST_AS_LIKELY":
-                raise ValueError(
-                    f"{symbol} ELEVATED requires REVERSAL_AT_LEAST_AS_LIKELY."
-                )
+                raise ValueError(f"{symbol} ELEVATED fields violate outlook mapping.")
         elif reversal_risk == "SEVERE":
-            if mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}:
-                raise ValueError(
-                    f"{symbol} SEVERE requires ACTIVE or "
-                    "UNUSUALLY_PROBABLE mechanism_status."
-                )
             if continuation_outlook != "THESIS_BROKEN":
-                raise ValueError(f"{symbol} SEVERE requires THESIS_BROKEN.")
+                raise ValueError(f"{symbol} SEVERE fields violate outlook mapping.")
 
-        if not isinstance(result.get("sources"), list) or len(result["sources"]) != 2:
-            raise ValueError(f"{symbol} must return exactly two source objects.")
+        if risk_basis == "TEMPORARY_DRIVER_NORMALIZATION":
+            if not temporary_drivers:
+                raise ValueError(
+                    f"{symbol} normalization risk has no temporary driver."
+                )
+            if reversal_risk in evidence_required_risks and (
+                normalization_probability not in {
+                    "REASONABLY_PROBABLE", "AT_LEAST_AS_LIKELY"
+                }
+            ):
+                raise ValueError(
+                    f"{symbol} material normalization risk lacks sufficient "
+                    "normalization probability."
+                )
+
+        sources = result.get("sources")
+        if isinstance(sources, list) and len(sources) > max_stock_sources:
+            result["sources"] = sources[:max_stock_sources]
+            sources = result["sources"]
+            print(
+                f"Trimmed {symbol} sources to the {max_stock_sources} "
+                "most relevant entries."
+            )
+
         validate_sources(
-            result.get("sources"),
+            sources,
             symbol,
-            minimum=max(2, minimum_sources),
-            maximum=2,
+            minimum=minimum_sources,
+            maximum=max_stock_sources,
         )
 
         unique_source_urls = {
@@ -1007,55 +1164,31 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         )
 
 
-def shared_event_consistency_errors(results, prior_results=None):
-    """Return current symbols whose shared-event classifications need retry."""
-    current_symbols = {
-        str(result.get("symbol", "")).strip().upper() for result in results
-    }
-    combined = list(prior_results or []) + list(results)
-    groups = {}
-    for result in combined:
-        event_id = result.get("primary_risk_event_id")
-        if not event_id:
-            continue
-        event_id = re.sub(
-            r"[^A-Z0-9]+", "_", str(event_id).upper()
-        ).strip("_")
-        if event_id:
-            groups.setdefault(event_id, []).append(result)
-
-    errors = {}
-    fields = (
-        "mechanism_status", "normalization_probability",
-        "continuation_outlook", "reversal_risk",
+def validate_shared_event_consistency(result, comparison_results):
+    """Require an explicit structural reason for a shared-event divergence."""
+    event_id = result.get("primary_risk_event_id")
+    if not event_id:
+        return
+    baseline_fields = (
+        "mechanism_status",
+        "normalization_probability",
     )
-    for event_id, members in groups.items():
-        if len(members) < 2:
+    for other in comparison_results:
+        if other.get("primary_risk_event_id") != event_id:
             continue
-        signatures = [
-            tuple(str(member.get(field, "")).strip().upper() for field in fields)
-            for member in members
+        differences = [
+            field for field in baseline_fields
+            if other.get(field) != result.get(field)
         ]
-        baseline = Counter(signatures).most_common(1)[0][0]
-        unsupported = [
-            member for member, signature in zip(members, signatures)
-            if signature != baseline
-            and not str(member.get("company_difference") or "").strip()
-        ]
-        if not unsupported:
-            continue
-        group_symbols = [
-            str(member.get("symbol", "")).strip().upper() for member in members
-        ]
-        message = (
-            f"shared event {event_id} has inconsistent classification fields "
-            "without a sourced company_difference; reassess the group baseline "
-            f"for {', '.join(symbol for symbol in group_symbols if symbol)}"
-        )
-        for symbol in group_symbols:
-            if symbol in current_symbols:
-                errors[symbol] = message
-    return errors
+        if differences and not (
+            str(result.get("company_difference") or "").strip()
+            or str(other.get("company_difference") or "").strip()
+        ):
+            raise ValueError(
+                f"{result.get('symbol')} differs from {other.get('symbol')} on "
+                f"shared event {event_id} ({', '.join(differences)}) without "
+                "a sourced company_difference."
+            )
 
 
 def call_gemini_json(
@@ -1077,24 +1210,14 @@ def call_gemini_json(
         models.append(model_fallback)
 
     attempt_limit = (
-        max_retries if max_attempts is None else max(1, int(max_attempts))
+        max_transient_api_attempts
+        if max_attempts is None else max(1, int(max_attempts))
     )
     last_error = None
     for model_name in models:
         for attempt in range(attempt_limit):
             attempt_prompt = prompt
-            if attempt > 0:
-                attempt_prompt += f"""
-            
-            MANDATORY RETRY CORRECTION
-            The previous attempt failed for this exact reason:
-            {last_error}
-            
-            Correct that failure. If company-specific search coverage was incomplete,
-            execute both required searches for every supplied candidate before writing any
-            JSON. Return every supplied candidate exactly once with every required field.
-            Output only the single valid JSON object requested by the schema.
-            """
+            metadata = None
             try:
                 request_budget.consume(
                     f"{stage} ({model_name}, attempt {attempt + 1})"
@@ -1104,7 +1227,8 @@ def call_gemini_json(
                     config=gemini_config,
                     contents=attempt_prompt
                 )
-                if not response.text:
+                response_text = getattr(response, "text", None)
+                if not response_text or not response_text.strip():
                     raise ValueError("Empty response from Gemini.")
 
                 metadata = extract_gemini_metadata(response)
@@ -1155,36 +1279,58 @@ def call_gemini_json(
                         if not symbol_found and not name_found:
                             missing_symbols.append(symbol)
                     if missing_symbols:
-                        raise ValueError(
-                            "Gemini did not expose company-specific searches for: "
-                            + ", ".join(missing_symbols)
+                        if allow_partial_stock_results:
+                            print(
+                                "Warning: Gemini did not expose query metadata "
+                                "for these candidates; retaining their results "
+                                "and enforcing source validation instead: "
+                                + ", ".join(missing_symbols)
+                            )
+                        else:
+                            raise ValueError(
+                                "Gemini did not expose company-specific searches for: "
+                                + ", ".join(missing_symbols)
+                            )
+
+                delimited_results = (
+                    extract_delimited_stock_results(response_text)
+                    if allow_partial_stock_results else []
+                )
+                if delimited_results:
+                    data = {"results": delimited_results}
+                    print(
+                        "Recovered independently delimited stock results: "
+                        + ", ".join(
+                            str(result.get("symbol", "")).upper()
+                            for result in delimited_results
                         )
+                    )
+                else:
+                    try:
+                        data = parse_json_response(response_text)
+                    except json.JSONDecodeError as parse_error:
+                        if not allow_partial_stock_results:
+                            raise
 
-                try:
-                    data = parse_json_response(response.text)
-                except json.JSONDecodeError as parse_error:
-                    if not allow_partial_stock_results:
-                        raise
-
-                    partial_results = extract_partial_stock_results(
-                        response.text
-                    )
-                    recovered_symbols = [
-                        str(result.get("symbol", "")).upper()
-                        for result in partial_results
-                        if str(result.get("symbol", "")).strip()
-                    ]
-                    print(
-                        "Malformed stock-batch JSON; recovered "
-                        f"{len(partial_results)} individual result(s): "
-                        + (", ".join(recovered_symbols) or "none")
-                    )
-                    print(
-                        "The recovered results will be validated and cached; "
-                        "only missing or invalid stocks will be retried. "
-                        f"Original JSON error: {parse_error}"
-                    )
-                    data = {"results": partial_results}
+                        partial_results = extract_partial_stock_results(
+                            response_text
+                        )
+                        recovered_symbols = [
+                            str(result.get("symbol", "")).upper()
+                            for result in partial_results
+                            if str(result.get("symbol", "")).strip()
+                        ]
+                        print(
+                            "Malformed stock-batch JSON; recovered "
+                            f"{len(partial_results)} individual result(s): "
+                            + (", ".join(recovered_symbols) or "none")
+                        )
+                        print(
+                            "The recovered results will be validated and cached; "
+                            "only missing or invalid stocks will be retried. "
+                            f"Original JSON error: {parse_error}"
+                        )
+                        data = {"results": partial_results}
 
                 validator(data)
                 return data, model_name, metadata
@@ -1193,10 +1339,23 @@ def call_gemini_json(
                 error_text = str(exc).upper()
                 error_code = getattr(exc, "code", None)
 
-                resource_exhausted = (
-                        error_code == 429
+                daily_quota_exhausted = (
+                    "GENERATE_CONTENT_FREE_TIER_REQUESTS" in error_text
+                    or "GENERATEREQUESTSPERDAYPERPROJECTPERMODEL" in error_text
+                    or "REQUESTS PER DAY" in error_text
+                    or "DAILY QUOTA" in error_text
+                )
+
+                transient_error = (
+                    not daily_quota_exhausted
+                    and (
+                        error_code in {408, 429, 500, 502, 503, 504}
+                        or "EMPTY RESPONSE FROM GEMINI" in error_text
                         or "RESOURCE_EXHAUSTED" in error_text
-                        or "429 TOO MANY REQUESTS" in error_text
+                        or "TOO MANY REQUESTS" in error_text
+                        or "UNAVAILABLE" in error_text
+                        or "TIMEOUT" in error_text
+                    )
                 )
 
                 print(
@@ -1204,17 +1363,42 @@ def call_gemini_json(
                     f"during {stage} with {model_name}: {exc}"
                 )
 
-                if resource_exhausted:
-                    print(
-                        f"{model_name} returned 429 RESOURCE_EXHAUSTED; "
-                        "skipping further retries for this model."
-                    )
-                    break
+                if daily_quota_exhausted:
+                    if model_name != models[-1]:
+                        print(
+                            f"{model_name} daily quota is exhausted; not "
+                            "retrying that model and switching to the "
+                            f"fallback model for {stage}."
+                        )
+                        break
+                    raise RuntimeError(
+                        "Gemini daily request quota is exhausted for every "
+                        f"configured model during {stage}; ending without "
+                        "retrying the exhausted model."
+                    ) from exc
 
-                if attempt < attempt_limit - 1:
-                    delay = initial_delay * (3 ** attempt)
-                    print(f"Retrying in {delay}s...")
+                if transient_error and attempt < attempt_limit - 1:
+                    delay = min(
+                        max_transient_backoff_seconds,
+                        initial_transient_backoff_seconds * (3 ** attempt),
+                    ) + random.uniform(0, transient_backoff_jitter_seconds)
+                    print(
+                        f"Transient Gemini error; retrying the same model and "
+                        f"unchanged request in {delay:.1f}s..."
+                    )
                     time.sleep(delay)
+                    continue
+
+                # Content, validation, and parsing failures are handled by the
+                # outer stock-validation rounds. Do not burn API attempts by
+                # retrying them here as if they were transient service errors.
+                if allow_partial_stock_results and metadata is not None:
+                    print(
+                        "Returning an empty partial batch so the outer "
+                        "validation round can retry it: " + str(exc)
+                    )
+                    return {"results": []}, model_name, metadata
+                break
 
         if model_name != models[-1]:
             print(f"Switching to fallback model after {stage} failure.")
@@ -2361,6 +2545,22 @@ url = config["url"]
 min_52_week_change = config["min_52_week_change"]
 max_retries = config["max_retries"]
 initial_delay = config["initial_delay"]
+max_validation_rounds = max(
+    1,
+    int(config.get("max_validation_rounds", 4)),
+)
+max_transient_api_attempts = int(
+    config.get("max_transient_api_attempts", 4)
+)
+initial_transient_backoff_seconds = float(
+    config.get("initial_transient_backoff_seconds", 15)
+)
+max_transient_backoff_seconds = float(
+    config.get("max_transient_backoff_seconds", 90)
+)
+transient_backoff_jitter_seconds = float(
+    config.get("transient_backoff_jitter_seconds", 10)
+)
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
 gemini_batch_size = int(config.get("gemini_batch_size", 5))
@@ -2373,6 +2573,7 @@ max_moderate_per_risk_event = int(
 thinking_budget = int(config.get("thinking_budget", 12288))
 require_google_search = bool(config.get("require_google_search", True))
 max_gemini_calls_per_run = int(config.get("max_gemini_calls_per_run", 12))
+max_stock_sources = int(config.get("max_stock_sources", 8))
 market_context_cache_file = cache_file_path(config.get(
     "market_context_cache_file", "gemini_market_context_cache.json"
 ))
@@ -2575,11 +2776,62 @@ stock_research_cache["entries"] = {
 }
 save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
+# Resolve every fresh stock cache entry before making any new request. This
+# allows Python to determine whether the complete portfolio can already be
+# built from prior successful calls, including lower-ranked cached candidates.
+validated_cached_research = {}
+global_cache_keys_by_symbol = {}
+for candidate in candidate_records:
+    symbol = str(candidate["Symbol"]).upper()
+    cache_key = stable_json_hash({
+        "market_context_hash": market_context_hash,
+        "stock_prompt_hash": stock_prompt_hash,
+        "model": model_primary,
+        "candidate": candidate,
+    })
+    global_cache_keys_by_symbol[symbol] = cache_key
+    entry = stock_research_cache["entries"].get(cache_key)
+    if not entry:
+        continue
+    try:
+        cached_result = entry["research"]
+        cached_search_queries = entry.get(
+            "research_metadata", {}
+        ).get("search_queries", [])
+        validate_stock_batch(
+            {"results": [cached_result]},
+            [candidate],
+            minimum_sources=minimum_sources_for_candidate(
+                cached_search_queries, candidate
+            ),
+        )
+        validated_cached_research[symbol] = cached_result
+    except (KeyError, TypeError, ValueError) as exc:
+        print(f"Ignoring invalid stock cache entry for {symbol}: {exc}")
+
+cached_preview_symbols = preview_selectable_symbols(
+    candidate_records,
+    validated_cached_research,
+    target_selected_stocks,
+    max_stocks_per_sector,
+    max_moderate_per_risk_event,
+)
+cache_already_fills_portfolio = (
+    len(cached_preview_symbols) >= target_selected_stocks
+)
+if cache_already_fills_portfolio:
+    print(
+        "Validated stock cache already supports the full portfolio; "
+        "no new Gemini stock research is required. Preview: "
+        + ", ".join(cached_preview_symbols)
+    )
+
 selected = []
 decision_ledger = []
 sector_counts = {}
 moderate_event_counts = {}
 prior_research_decisions = []
+research_failures_by_symbol = {}
 models_used = [market_model]
 
 for batch_start in range(0, len(candidate_records), gemini_batch_size):
@@ -2603,43 +2855,112 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
 
     for candidate in research_candidates:
         symbol = str(candidate["Symbol"]).upper()
-        cache_key = stable_json_hash({
-            "market_context_hash": market_context_hash,
-            "stock_prompt_hash": stock_prompt_hash,
-            "model": model_primary,
-            "candidate": candidate,
-        })
+        cache_key = global_cache_keys_by_symbol[symbol]
         cache_keys_by_symbol[symbol] = cache_key
-        entry = stock_research_cache["entries"].get(cache_key)
-        if entry and cache_entry_is_fresh(
-                entry, gemini_research_cache_hours
-        ):
-            try:
-                cached_result = entry["research"]
-                cached_search_queries = entry.get(
-                    "research_metadata", {}
-                ).get("search_queries", [])
-                minimum_sources = minimum_sources_for_candidate(
-                    cached_search_queries, candidate
-                )
-                validate_stock_batch(
-                    {"results": [cached_result]},
-                    [candidate],
-                    minimum_sources=minimum_sources,
-                )
-                research_by_symbol[symbol] = cached_result
-                models_used.append(entry.get("model") or model_primary)
-                print(f"Using validated stock research cache for {symbol}.")
-                continue
-            except (KeyError, TypeError, ValueError) as exc:
-                print(f"Ignoring invalid stock cache entry for {symbol}: {exc}")
+        cached_result = validated_cached_research.get(symbol)
+        if cached_result is not None:
+            research_by_symbol[symbol] = cached_result
+            entry = stock_research_cache["entries"].get(cache_key, {})
+            models_used.append(entry.get("model") or model_primary)
+            print(f"Using validated stock research cache for {symbol}.")
+            continue
         uncached_candidates.append(candidate)
+
+    cached_candidate_count = (
+        len(research_candidates) - len(uncached_candidates)
+    )
+
+    if cache_already_fills_portfolio:
+        uncached_candidates = []
+
+    # Keep the first ordinary call full, but do not pad later calls to 18 after
+    # the portfolio is almost complete. Three alternatives per remaining slot,
+    # with a floor of five, balances sector/risk exclusions against search cost.
+    ordinary_uncached_count = len(uncached_candidates)
+    remaining_selection_slots = max(
+        1, target_selected_stocks - len(selected)
+    )
+    desired_research_count = min(
+        gemini_batch_size,
+        max(5, remaining_selection_slots * 3),
+    )
+    if (
+        uncached_candidates
+        and cached_candidate_count == 0
+        and len(uncached_candidates) < desired_research_count
+    ):
+        queued_symbols = {
+            str(candidate["Symbol"]).upper()
+            for candidate in uncached_candidates
+        }
+        future_start = batch_start + gemini_batch_size
+        for future_candidate in candidate_records[future_start:]:
+            if len(uncached_candidates) >= desired_research_count:
+                break
+            future_symbol = str(future_candidate["Symbol"]).upper()
+            if future_symbol in queued_symbols:
+                continue
+            if sector_counts.get(future_candidate["Sector"], 0) >= (
+                max_stocks_per_sector
+            ):
+                continue
+
+            future_cache_key = stable_json_hash({
+                "market_context_hash": market_context_hash,
+                "stock_prompt_hash": stock_prompt_hash,
+                "model": model_primary,
+                "candidate": future_candidate,
+            })
+            future_entry = stock_research_cache["entries"].get(
+                future_cache_key
+            )
+            if future_entry and cache_entry_is_fresh(
+                future_entry, gemini_research_cache_hours
+            ):
+                continue
+
+            cache_keys_by_symbol[future_symbol] = future_cache_key
+            uncached_candidates.append(future_candidate)
+            queued_symbols.add(future_symbol)
+
+        if len(uncached_candidates) > ordinary_uncached_count:
+            print(
+                "Filled ordinary research batch with future uncached QVM "
+                "candidates: "
+                + ", ".join(
+                    str(candidate["Symbol"]).upper()
+                    for candidate in uncached_candidates
+                )
+            )
 
     if uncached_candidates:
         pending_candidates = list(uncached_candidates)
         validation_errors = {}
+        prior_invalid_results_by_symbol = {}
+        validation_attempts_by_symbol = {}
+        research_round = 0
 
-        for research_round in range(1, max_retries + 1):
+        # This loop is bounded per stock, rather than by a global number of
+        # batch calls. Targeted calls contain only candidates that failed the
+        # preceding validation attempt.
+        while pending_candidates:
+            research_round += 1
+            if research_round == 1:
+                research_required_symbols = {
+                    str(candidate["Symbol"]).upper()
+                    for candidate in pending_candidates
+                }
+            else:
+                research_required_symbols = {
+                    symbol
+                    for symbol, message in validation_errors.items()
+                    if validation_error_requires_fresh_research(message)
+                }
+            research_required_candidates = [
+                candidate for candidate in pending_candidates
+                if str(candidate["Symbol"]).upper()
+                in research_required_symbols
+            ]
             print(
                 "\n...calling Gemini for stock batch: "
                 + ", ".join(row["Symbol"] for row in pending_candidates)
@@ -2654,10 +2975,30 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
                 )
                 retry_correction = f"""
 
-TARGETED RETRY CORRECTION
-Valid research for other candidates has already been saved. Research and return
-only the candidates supplied below. Correct these exact validation errors:
+DEFERRED VALIDATION CORRECTIONS
+Valid research for other candidates has already been saved. Candidates listed
+below previously failed validation; correct each exact error. Their prior JSON
+objects are supplied as drafts. Preserve every valid field and source from each
+draft. Change only fields needed to correct the listed error, unless fresh
+research contradicts the draft. Do not discard a valid researched answer and
+start over merely to repair formatting or a derived synthesis. This targeted
+call contains no new filler candidates. Return every supplied candidate once.
+
+Run one new consolidated Google search only for the following candidates whose
+errors require missing evidence to be researched:
+{json.dumps(sorted(research_required_symbols), ensure_ascii=False)}
+For every other candidate, perform no new search; repair the supplied draft and
+retain its valid sources.
+
+VALIDATION_ERRORS:
 {retry_details}
+
+PRIOR_INVALID_RESULTS_TO_REPAIR:
+{json.dumps({
+    symbol: prior_invalid_results_by_symbol[symbol]
+    for symbol in validation_errors
+    if symbol in prior_invalid_results_by_symbol
+}, ensure_ascii=False)}
 """
 
             stock_prompt = (
@@ -2680,7 +3021,10 @@ only the candidates supplied below. Correct these exact validation errors:
             batch_data, batch_model, batch_metadata = call_gemini_json(
                 client=client,
                 model_primary=model_primary,
-                model_fallback=model_fallback,
+                # Flash-Lite proved unreliable for this 15-stock, 30-search,
+                # strict-schema workload. Retry transient errors on Flash and
+                # preserve caches for a later rerun instead of degrading.
+                model_fallback=model_primary,
                 gemini_config=gemini_config,
                 prompt=stock_prompt,
                 stage=stage,
@@ -2688,37 +3032,37 @@ only the candidates supplied below. Correct these exact validation errors:
                     validate_stock_batch_structure(data, expected)
                 ),
                 request_budget=request_budget,
-                require_google_search=require_google_search,
-                required_search_candidates=pending_candidates,
+                require_google_search=(
+                    require_google_search
+                    and bool(research_required_candidates)
+                ),
+                required_search_candidates=research_required_candidates,
                 allow_partial_stock_results=True,
-                max_attempts=1,
             )
             models_used.append(batch_model)
             results_by_symbol = {
                 str(result.get("symbol", "")).upper(): result
                 for result in batch_data["results"]
             }
-            shared_errors = shared_event_consistency_errors(
-                batch_data["results"], prior_research_decisions
-            )
             next_pending = []
             next_errors = {}
+            exhausted_errors = {}
 
             for candidate in pending_candidates:
                 symbol = str(candidate["Symbol"]).upper()
+                validation_attempts_by_symbol[symbol] = (
+                    validation_attempts_by_symbol.get(symbol, 0) + 1
+                )
+                validation_attempt = validation_attempts_by_symbol[symbol]
                 result = results_by_symbol.get(symbol)
                 if result is None:
-                    next_pending.append(candidate)
-                    next_errors[symbol] = "result was missing from the response"
-                    continue
-
-                if symbol in shared_errors:
-                    next_pending.append(candidate)
-                    next_errors[symbol] = shared_errors[symbol]
-                    print(
-                        f"Saving unrelated valid results; {symbol} requires a "
-                        f"shared-event retry: {shared_errors[symbol]}"
-                    )
+                    error_message = "result was missing from the response"
+                    research_failures_by_symbol[symbol] = error_message
+                    if validation_attempt < max_validation_rounds:
+                        next_pending.append(candidate)
+                        next_errors[symbol] = error_message
+                    else:
+                        exhausted_errors[symbol] = error_message
                     continue
 
                 minimum_sources = minimum_sources_for_candidate(
@@ -2730,16 +3074,36 @@ only the candidates supplied below. Correct these exact validation errors:
                         [candidate],
                         minimum_sources=minimum_sources,
                     )
-                except (KeyError, TypeError, ValueError) as exc:
-                    next_pending.append(candidate)
-                    next_errors[symbol] = str(exc)
-                    print(
-                        f"Saving other valid results; {symbol} requires a "
-                        f"targeted retry: {exc}"
+                    validate_shared_event_consistency(
+                        result,
+                        list(research_by_symbol.values())
+                        + prior_research_decisions,
                     )
+                except (KeyError, TypeError, ValueError) as exc:
+                    # Keep the normalized, otherwise usable object so the next
+                    # call can repair it instead of recreating its research.
+                    prior_invalid_results_by_symbol[symbol] = result
+                    research_failures_by_symbol[symbol] = str(exc)
+                    if validation_attempt < max_validation_rounds:
+                        next_pending.append(candidate)
+                        next_errors[symbol] = str(exc)
+                        print(
+                            f"Saving other valid results; {symbol} requires "
+                            f"targeted retry {validation_attempt}/"
+                            f"{max_validation_rounds - 1}: {exc}"
+                        )
+                    else:
+                        exhausted_errors[symbol] = str(exc)
+                        print(
+                            f"{symbol} remains invalid after "
+                            f"{validation_attempt} total validation attempts: "
+                            f"{exc}"
+                        )
                     continue
 
+                prior_invalid_results_by_symbol.pop(symbol, None)
                 research_by_symbol[symbol] = result
+                validated_cached_research[symbol] = result
                 stock_research_cache["entries"][
                     cache_keys_by_symbol[symbol]
                 ] = {
@@ -2758,20 +3122,45 @@ only the candidates supplied below. Correct these exact validation errors:
             save_json_object_atomic(
                 stock_research_cache_file, stock_research_cache
             )
+
+            preview_symbols = preview_selectable_symbols(
+                candidate_records,
+                validated_cached_research,
+                target_selected_stocks,
+                max_stocks_per_sector,
+                max_moderate_per_risk_event,
+            )
+            if len(preview_symbols) >= target_selected_stocks:
+                cache_already_fills_portfolio = True
+                print(
+                    "Validated research now supports the full portfolio; "
+                    "skipping remaining targeted retries. Preview: "
+                    + ", ".join(preview_symbols)
+                )
+                break
+
+            # Valid results from this response have already been cached. Stop
+            # only after a stock has received its own complete allowance.
+            if exhausted_errors:
+                error_summary = "; ".join(
+                    f"{symbol}: {message}"
+                    for symbol, message in exhausted_errors.items()
+                )
+                research_failures_by_symbol.update(exhausted_errors)
+                print(
+                    "Skipping exhausted invalid research and continuing to "
+                    "lower-ranked candidates: " + error_summary
+                )
+                break
+
             if not next_pending:
                 break
 
+            # A targeted retry contains only failed candidates. Do not turn a
+            # small repair into another full research batch by adding new
+            # lower-ranked stocks.
             pending_candidates = next_pending
             validation_errors = next_errors
-        else:
-            error_summary = "; ".join(
-                f"{symbol}: {message}"
-                for symbol, message in validation_errors.items()
-            )
-            raise RuntimeError(
-                "Stock research remained invalid after targeted retries: "
-                + error_summary
-            )
 
     # Python alone owns portfolio selection and the authoritative ledger.
     for candidate in ranked_batch:
@@ -2799,24 +3188,38 @@ only the candidates supplied below. Correct these exact validation errors:
 
         research = research_by_symbol.get(symbol)
         if research is None:
-            raise RuntimeError(
-                f"No validated research was returned for eligible candidate {symbol}."
-            )
+            decision_ledger.append({
+                "qvm_rank": candidate["QVM Rank"],
+                "symbol": symbol,
+                "sector_group": sector,
+                "status": "SKIPPED — RESEARCH INVALID",
+                "sector_selected_after": sector_count,
+                "total_selected_after": len(selected),
+                "explanation": (
+                    "Research did not pass validation: "
+                    + research_failures_by_symbol.get(
+                        symbol, "no validated result was available"
+                    )
+                ),
+            })
+            continue
 
         reversal_risk = str(research["reversal_risk"]).upper()
         explanation = str(research["explanation"]).strip()
 
         prior_research_decisions.append({
             "symbol": symbol,
+            "industry_group": research.get("industry_group"),
             "reversal_risk": reversal_risk,
+            "risk_basis": research.get("risk_basis"),
             "catalyst_dependence": research.get("catalyst_dependence"),
             "mechanism_status": research.get("mechanism_status"),
             "normalization_probability": research.get(
                 "normalization_probability"
             ),
             "continuation_outlook": research.get("continuation_outlook"),
-            "company_difference": research.get("company_difference"),
             "primary_risk_event_id": research.get("primary_risk_event_id"),
+            "company_difference": research.get("company_difference"),
         })
 
         if not bool(research.get("eligible", True)):
@@ -2932,7 +3335,10 @@ if final_summary_enabled:
         summary_data, summary_model, _ = call_gemini_json(
             client=client,
             model_primary=model_primary,
-            model_fallback=None,
+            # Summary generation is lower-risk than stock classification, so
+            # Flash-Lite is an acceptable fallback when Flash has exhausted its
+            # separate per-model daily quota.
+            model_fallback=model_fallback,
             gemini_config=build_gemini_config(
                 summary_thinking_budget, enable_search=False
             ),

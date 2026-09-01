@@ -119,11 +119,15 @@
 <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('.recommendations-table').DataTable({
-            paging: true,
-            searching: true,
-            info: false,
-            order: [[5, 'desc']]
+        $('.recommendations-table').each(function() {
+            if (!$.fn.DataTable.isDataTable(this)) {
+                $(this).DataTable({
+                    paging: true,
+                    searching: true,
+                    info: false,
+                    order: [[5, 'desc']]
+                });
+            }
         });
     });
 </script>

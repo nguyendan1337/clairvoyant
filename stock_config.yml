@@ -7,22 +7,26 @@ initial_delay: 10
 model_primary: gemini-2.5-flash
 # Research fails closed instead of silently publishing lower-quality Lite output.
 model_fallback: gemini-2.5-flash-lite
-gemini_batch_size: 18
+gemini_batch_size: 15
 max_candidates: 50
 target_selected_stocks: 10
 max_stocks_per_sector: 2
 max_moderate_per_risk_event: 2
 thinking_budget: 12288
 require_google_search: true
-max_gemini_calls_per_run: 5
-max_validation_rounds: 2
+max_gemini_calls_per_run: 7
+max_stock_research_calls_per_run: 5
+reserved_summary_calls: 1
+max_validation_rounds: 4
+max_research_attempts_per_stock: 2
+max_structural_repairs_per_stock: 2
 max_transient_api_attempts: 2
 max_stock_sources: 5
 market_context_cache_file: caches/gemini_market_context_cache.json
 stock_research_cache_file: caches/gemini_stock_research_cache.json
 gemini_research_cache_hours: 12
 # Increment whenever research semantics change so stale classifications are not reused.
-cache_version: 1
+cache_version: 3
 final_summary_enabled: true
 summary_thinking_budget: 4096
 
@@ -51,6 +55,22 @@ prompt_market_context: |
   Treat wars and geopolitical disruptions as possible earnings and valuation
   drivers, not generic background. Identify the normalization mechanism for
   every material temporary event.
+
+  MARKET AND SECTOR WRITING QUALITY
+  - market_intro must include at least one explicit S&P 500 percentage and the
+    period measured.
+  - Separate positive market supports from negative pressures. Never describe
+    cautious or bearish sentiment as being caused by positive earnings or
+    investment.
+  - State Federal Reserve actions as market expectations unless an official
+    decision has occurred. Persistent inflation alone does not establish that a
+    rate increase is expected.
+  - Every sector_context value must identify a specific current operating,
+    demand, pricing, regulatory, or financing condition. Never use generic
+    filler such as "most sectors are weak," "conditions are mixed," or "the
+    sector remains relevant."
+  - Cover every sector named in REQUIRED_SECTOR_GROUPS when that section is
+    supplied by Python.
 
   OUTPUT
   Return exactly one valid JSON object with no Markdown fences, citations outside
@@ -104,28 +124,41 @@ prompt_stock_batch: |
   Return every candidate exactly once and never select or omit stocks.
 
   RESEARCH EFFICIENCY
-  For each new candidate, execute one consolidated company-specific Google
+  For each new candidate, execute exactly one consolidated company-specific Google
   search containing the company name, symbol, latest earnings release or filing,
   guidance, material developments, current operating metrics, industry demand,
   pricing, capacity or contracts, temporary drivers, and 6-12 month outlook.
   Do not assume a calendar-quarter label; use the issuer's latest reported
-  fiscal period. One search can return multiple sources. Do not split current
-  operations and forward conditions into separate queries or repeat a successful
-  search.
+  fiscal period. One search can return multiple sources. Do not issue follow-up,
+  investor-relations, earnings-period, or alternative-query searches in the same
+  response. The maximum search-query count equals the number of candidates
+  explicitly requiring fresh research. If one search is insufficient, return
+  INCOMPLETE rather than issuing another query.
 
   If a DEFERRED VALIDATION CORRECTIONS section is supplied, it overrides the
   preceding search rule. Search only symbols explicitly listed there as
-  requiring fresh research. For every other retry, repair the supplied prior
-  JSON without another search and preserve its valid facts and sources.
+  requiring fresh research, using exactly one focused query for the missing
+  evidence. This is the only permitted second lifetime search for a stock. For
+  every other retry, repair the supplied prior JSON without another search and
+  preserve its valid facts and sources.
 
   Use the 2-4 most decision-relevant distinct sources returned by the search,
   prioritizing an official earnings release, SEC filing, or investor-relations
   page plus a credible forward-industry source when relevant. Never return more
   than 5 sources. Do not invent, duplicate, or include unused URLs.
 
+  Label every source with one or more supported claims chosen only from:
+  BUSINESS, CURRENT_OPERATIONS, DURABLE_DRIVER, INDUSTRY_CONTEXT,
+  TEMPORARY_DRIVER, REVERSAL_PROBABILITY, REVERSAL_EVIDENCE, and
+  MATERIAL_EFFECT. Every COMPLETE result needs a
+  CURRENT_OPERATIONS source. MODERATE/ELEVATED/SEVERE need at least two distinct
+  sources, including a separate source supporting REVERSAL_PROBABILITY and a
+  source supporting MATERIAL_EFFECT.
+
   COMPLETENESS
   COMPLETE requires:
   - one concrete recent current_operating_evidence fact from a current source
+  - a plain-English business_description and company-specific industry_context
   - 1-2 company-specific durable_drivers
   - enough current company or industry evidence to test the strongest plausible
     6-12 month reversal mechanism
@@ -181,6 +214,29 @@ prompt_stock_batch: |
   merely "results would weaken if conditions changed," use HYPOTHETICAL,
   NOT_ESTABLISHED, CONTINUATION_MORE_LIKELY, and LOW.
 
+  PROBABILITY EVIDENCE TEST
+  probability_evidence must identify a current observable company or industry
+  indicator showing that the adverse mechanism is occurring or has become
+  unusually probable. Examples include reduced guidance, contracting orders,
+  falling utilization, active price or margin compression, announced capacity,
+  contract expirations, current inventory changes, regulatory action, or an
+  evidenced forward-market change.
+
+  An analyst EPS or revenue forecast, historical cyclicality, record conditions,
+  ordinary volatility, a difficult comparison, eventual normalization, or a
+  scenario using only "if," "could," "may," or "potential" does not establish
+  probability. A forecast may support material_effect only when a current causal
+  indicator separately establishes probability.
+
+  probability_indicator_type records the current observable basis for
+  probability and must be one of NONE, GUIDANCE_REDUCTION, ORDER_CONTRACTION,
+  UTILIZATION_DECLINE, PRICE_OR_MARGIN_COMPRESSION, CAPACITY_INCREASE,
+  CONTRACT_EXPIRY, INVENTORY_CHANGE, REGULATORY_ACTION,
+  FORWARD_MARKET_CHANGE, or OTHER_CURRENT_INDICATOR. Analyst forecasts and
+  historical cyclicality are not indicator types. MODERATE/ELEVATED/SEVERE may
+  not use NONE. OTHER_CURRENT_INDICATOR must name a specific current fact in
+  probability_evidence.
+
   RISK MAPPING
   - MINIMAL: mechanism NONE, catalyst dependence LOW, unusually strong durable
     continuation evidence, and CONTINUATION_MORE_LIKELY.
@@ -228,7 +284,17 @@ prompt_stock_batch: |
   - LOW/MINIMAL normally use current_fact, probability_evidence,
     material_effect, and reversal_evidence as null unless needed to describe a
     hypothetical exposure
-  - explanation is one viewer-ready company-specific sentence of 25-45 words
+  - business_description is a factual 8-20 word plain-English description of
+    the principal products, services, and operating market
+  - industry_context is a current 12-25 word operating-industry condition, not
+    broad stock-sector performance
+  - explanation is a viewer-ready company-specific passage of 35-55 words
+    covering current operating evidence, a durable driver, and the
+    continuation/reversal balance; business_description separately supplies
+    the introductory company overview
+  - MODERATE/ELEVATED/SEVERE explanations explicitly state the current
+    probability indicator, recurring metric affected, and 0-12 month link;
+    "analysts forecast a decline" or "if conditions normalize" is insufficient
 
   SHARED EVENTS
   Use primary_risk_event_id only when current sources show the same documented
@@ -236,9 +302,17 @@ prompt_stock_batch: |
   enough. Different mechanism status or normalization probability within a real
   shared event requires a sourced company_difference involving contracts,
   geography, business mix, sensitivity, costs, or operating market.
+  Shared-event consistency applies only to companies with comparable normalized
+  risk_exposure_group values; an event alone does not make unlike business
+  mechanisms comparable. Use a stable UPPER_SNAKE_CASE risk_exposure_group for
+  the operating transmission mechanism, such as CRUDE_TANKER_SPOT_RATES or
+  REFINING_CRACK_SPREADS, whenever primary_risk_event_id is non-null.
 
   FIELD LIMITS
   - industry_group: concise UPPER_SNAKE_CASE label
+  - business_description: 8-20 words
+  - industry_context: 12-25 words
+  - risk_exposure_group: concise UPPER_SNAKE_CASE label or null
   - research_incomplete_reason: at most 25 words or null
   - current_operating_evidence: at most 25 words
   - durable_drivers: 1-2 items, at most 18 words each
@@ -250,7 +324,7 @@ prompt_stock_batch: |
   - reversal_evidence: at most 35 words or null
   - normalization_effect: at most 25 words
   - company_difference: at most 25 words or null
-  - explanation: 25-45 words or null only for INCOMPLETE
+  - explanation: 35-55 words or null only for INCOMPLETE
   - sources: 1-5 distinct materially used sources
 
   OUTPUT
@@ -271,6 +345,8 @@ prompt_stock_batch: |
     "eligible": true,
     "eligibility_reason": null,
     "industry_group": "OPERATING_MARKET",
+    "business_description": "Plain-English principal business description",
+    "industry_context": "Current company-specific operating-industry condition",
     "current_operating_evidence": "Concrete current operating fact",
     "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE | null only when INCOMPLETE",
     "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | null only when INCOMPLETE",
@@ -283,6 +359,7 @@ prompt_stock_batch: |
     "reversal_mechanism": "...",
     "current_fact": null,
     "probability_evidence": null,
+    "probability_indicator_type": "NONE | GUIDANCE_REDUCTION | ORDER_CONTRACTION | UTILIZATION_DECLINE | PRICE_OR_MARGIN_COMPRESSION | CAPACITY_INCREASE | CONTRACT_EXPIRY | INVENTORY_CHANGE | REGULATORY_ACTION | FORWARD_MARKET_CHANGE | OTHER_CURRENT_INDICATOR",
     "material_effect": null,
     "reversal_evidence": null,
     "risk_time_horizon": "0_3_MONTHS | 3_6_MONTHS | 6_12_MONTHS | LONGER | null",
@@ -290,9 +367,10 @@ prompt_stock_batch: |
     "normalization_effect": "...",
     "company_difference": null,
     "primary_risk_event_id": null,
+    "risk_exposure_group": null,
     "explanation": "...",
     "sources": [
-      {"title": "...", "date": "YYYY-MM-DD", "url": "https://..."}
+      {"title": "...", "date": "YYYY-MM-DD", "url": "https://...", "supports": ["CURRENT_OPERATIONS", "DURABLE_DRIVER"]}
     ]
   }
 
@@ -307,7 +385,8 @@ prompt_html_summary: |
   You will receive:
     1. MARKET_CONTEXT: validated current market research
     2. SELECTED_STOCKS: exactly 10 frozen selections containing exact Symbol,
-       Name, Sector Group, Reversal Risk, and validated research explanation
+       Name, Sector Group, Reversal Risk, Business Description, Industry
+       Context, and validated research evidence
 
   This is an editorial formatting task only. Do not use Google Search. Do not
   add new facts, stocks, sectors, reversal-risk levels, or recommendations.
@@ -341,15 +420,19 @@ prompt_html_summary: |
     <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL OR STOCK NAME</strong></a>
 
   Immediately after the colon, write one concise sentence describing the current
-  context for that sector using only MARKET_CONTEXT. This sector-context sentence
-  must come before all stock-specific sentences. Then provide one sentence for
-  each selected stock in that sector.
+  context relevant to the selected companies using MARKET_CONTEXT and their
+  supplied Industry Context fields. This sentence must come before all
+  stock-specific discussions. Never use generic filler such as "most sectors are
+  weak," "conditions are mixed," or "the sector remains relevant."
 
   For every selected stock:
     - mention its Symbol and Name, both bold and linked
-    - explain why it is attractive now using only its supplied explanation
+    - briefly explain what it does using its supplied Business Description
+    - explain why it is attractive now using only its supplied research fields
     - state its exact supplied Reversal Risk in bold, unlinked text
     - reflect its supplied continuation and reversal-risk balance
+    - use approximately 45-70 words so an unfamiliar reader understands the
+      business, current thesis, and principal risk
 
   Every selected symbol must appear under exactly its supplied Sector Group.
   Every selected stock must be discussed exactly once. No unselected symbol may

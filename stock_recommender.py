@@ -322,17 +322,41 @@ def build_gemini_config(thinking_budget, enable_search=True):
 
 
 class GeminiRequestBudget:
-    def __init__(self, maximum):
+    def __init__(
+            self, maximum, stock_maximum=None, reserved_summary_calls=0):
         self.maximum = int(maximum)
+        self.stock_maximum = (
+            None if stock_maximum is None else int(stock_maximum)
+        )
+        self.reserved_summary_calls = int(reserved_summary_calls)
         self.used = 0
+        self.stock_used = 0
 
-    def consume(self, stage):
+    def consume(self, stage, category="general"):
+        if category == "stock" and (
+                self.stock_maximum is not None
+                and self.stock_used >= self.stock_maximum
+        ):
+            raise RuntimeError(
+                f"Gemini stock-research request budget of "
+                f"{self.stock_maximum} was exhausted before {stage}."
+            )
+        if category != "summary" and self.used >= (
+                self.maximum - self.reserved_summary_calls
+        ):
+            raise RuntimeError(
+                f"Gemini request budget is reserving "
+                f"{self.reserved_summary_calls} final-summary call(s) before "
+                f"{stage}."
+            )
         if self.used >= self.maximum:
             raise RuntimeError(
                 f"Gemini request budget of {self.maximum} was exhausted "
                 f"before {stage}."
             )
         self.used += 1
+        if category == "stock":
+            self.stock_used += 1
         print(
             f"Gemini request {self.used}/{self.maximum}: {stage}"
         )
@@ -673,13 +697,21 @@ def extract_delimited_stock_results(text):
     return results
 
 
-def validate_sources(sources, label, minimum=1, maximum=None):
+def validate_sources(
+        sources, label, minimum=1, maximum=None,
+        require_support_labels=False):
     if not isinstance(sources, list) or len(sources) < minimum:
         raise ValueError(
             f"{label} requires at least {minimum} research sources."
         )
 
     unique_urls = set()
+    support_urls = {}
+    allowed_supports = {
+        "BUSINESS", "CURRENT_OPERATIONS", "DURABLE_DRIVER",
+        "INDUSTRY_CONTEXT", "TEMPORARY_DRIVER", "REVERSAL_PROBABILITY",
+        "REVERSAL_EVIDENCE", "MATERIAL_EFFECT",
+    }
 
     for source in sources:
         if not isinstance(source, dict):
@@ -694,6 +726,25 @@ def validate_sources(sources, label, minimum=1, maximum=None):
 
         unique_urls.add(url)
 
+        supports = source.get("supports")
+        if not require_support_labels and supports is None:
+            continue
+        if not isinstance(supports, list) or not supports:
+            raise ValueError(f"{label} has a source without support labels.")
+        normalized_supports = {
+            re.sub(r"[^A-Z0-9]+", "_", str(value).upper()).strip("_")
+            for value in supports
+        }
+        invalid_supports = normalized_supports.difference(allowed_supports)
+        if invalid_supports:
+            raise ValueError(
+                f"{label} has invalid source support labels: "
+                f"{sorted(invalid_supports)}."
+            )
+        source["supports"] = sorted(normalized_supports)
+        for support in normalized_supports:
+            support_urls.setdefault(support, set()).add(url)
+
     if len(unique_urls) < minimum:
         raise ValueError(
             f"{label} requires at least {minimum} distinct source URLs."
@@ -703,6 +754,8 @@ def validate_sources(sources, label, minimum=1, maximum=None):
             f"{label} returned {len(sources)} source entries; "
             f"the maximum is {maximum}."
         )
+
+    return support_urls
 
 
 def validate_market_context(data):
@@ -718,6 +771,8 @@ def validate_market_context(data):
         raise ValueError("Market context has an invalid market_status.")
     if not str(data["market_intro"]).strip():
         raise ValueError("Market context has an empty market_intro.")
+    if not re.search(r"\d+(?:\.\d+)?\s*%", str(data["market_intro"])):
+        raise ValueError("Market context market_intro has no S&P 500 percentage.")
     if not isinstance(data["sector_context"], dict):
         raise ValueError("Market context sector_context must be an object.")
     validate_sources(data["sources"], "Market context")
@@ -898,12 +953,29 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             raise ValueError(f"{symbol} has no industry_group.")
         result["industry_group"] = industry_group
 
+        risk_exposure_group = result.get("risk_exposure_group")
+        if risk_exposure_group is not None:
+            risk_exposure_group = re.sub(
+                r"[^A-Z0-9]+", "_", str(risk_exposure_group).upper()
+            ).strip("_") or None
+        if result.get("primary_risk_event_id") and not risk_exposure_group:
+            raise ValueError(
+                f"{symbol} has a primary risk event without risk_exposure_group."
+            )
+        result["risk_exposure_group"] = risk_exposure_group
+
         operating_evidence = str(
             result.get("current_operating_evidence", "")
         ).strip()
         if bool(result.get("eligible", True)) and not operating_evidence:
             raise ValueError(f"{symbol} has no current_operating_evidence.")
         result["current_operating_evidence"] = operating_evidence
+
+        for field in ("business_description", "industry_context"):
+            value = " ".join(str(result.get(field, "")).split())
+            if not value:
+                raise ValueError(f"{symbol} has no {field}.")
+            result[field] = value
 
         temporary_drivers = result.get("temporary_drivers") or []
         if not isinstance(temporary_drivers, list):
@@ -1048,6 +1120,32 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             "SEVERE",
         }
 
+        probability_indicator_type = re.sub(
+            r"[^A-Z0-9]+", "_",
+            str(result.get("probability_indicator_type") or "NONE").upper(),
+        ).strip("_")
+        allowed_probability_indicators = {
+            "NONE", "GUIDANCE_REDUCTION", "ORDER_CONTRACTION",
+            "UTILIZATION_DECLINE", "PRICE_OR_MARGIN_COMPRESSION",
+            "CAPACITY_INCREASE", "CONTRACT_EXPIRY", "INVENTORY_CHANGE",
+            "REGULATORY_ACTION", "FORWARD_MARKET_CHANGE",
+            "OTHER_CURRENT_INDICATOR",
+        }
+        if probability_indicator_type not in allowed_probability_indicators:
+            raise ValueError(
+                f"{symbol} has invalid probability_indicator_type "
+                f"{probability_indicator_type!r}."
+            )
+        if (
+                reversal_risk in evidence_required_risks
+                and probability_indicator_type == "NONE"
+        ):
+            raise ValueError(
+                f"{symbol} assessed as {reversal_risk} without a current "
+                "probability_indicator_type."
+            )
+        result["probability_indicator_type"] = probability_indicator_type
+
         if reversal_risk in evidence_required_risks:
             missing_evidence_fields = [
                 field for field in (
@@ -1147,12 +1245,32 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                 "most relevant entries."
             )
 
-        validate_sources(
+        required_source_count = max(
+            minimum_sources,
+            2 if reversal_risk in evidence_required_risks else 1,
+        )
+        support_urls = validate_sources(
             sources,
             symbol,
-            minimum=minimum_sources,
+            minimum=required_source_count,
             maximum=max_stock_sources,
+            require_support_labels=True,
         )
+        if not support_urls.get("CURRENT_OPERATIONS"):
+            raise ValueError(
+                f"{symbol} has no source supporting CURRENT_OPERATIONS."
+            )
+        if reversal_risk in evidence_required_risks:
+            if not support_urls.get("REVERSAL_PROBABILITY"):
+                raise ValueError(
+                    f"{symbol} material risk has no source supporting "
+                    "REVERSAL_PROBABILITY."
+                )
+            if not support_urls.get("MATERIAL_EFFECT"):
+                raise ValueError(
+                    f"{symbol} material risk has no source supporting "
+                    "MATERIAL_EFFECT."
+                )
 
         unique_source_urls = {
             str(source["url"]).strip()
@@ -1175,6 +1293,13 @@ def validate_shared_event_consistency(result, comparison_results):
     )
     for other in comparison_results:
         if other.get("primary_risk_event_id") != event_id:
+            continue
+        normalize_group = lambda value: re.sub(
+            r"[^A-Z0-9]+", "_", str(value or "").upper()
+        ).strip("_")
+        exposure_group = normalize_group(result.get("risk_exposure_group"))
+        other_exposure_group = normalize_group(other.get("risk_exposure_group"))
+        if not exposure_group or exposure_group != other_exposure_group:
             continue
         differences = [
             field for field in baseline_fields
@@ -1203,7 +1328,8 @@ def call_gemini_json(
         require_google_search=True,
         required_search_candidates=None,
         allow_partial_stock_results=False,
-        max_attempts=None):
+        max_attempts=None,
+        budget_category="general"):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
     if model_fallback and model_fallback != model_primary:
@@ -1220,7 +1346,8 @@ def call_gemini_json(
             metadata = None
             try:
                 request_budget.consume(
-                    f"{stage} ({model_name}, attempt {attempt + 1})"
+                    f"{stage} ({model_name}, attempt {attempt + 1})",
+                    category=budget_category,
                 )
                 response = client.models.generate_content(
                     model=model_name,
@@ -2425,14 +2552,23 @@ def build_recommendations_summary(market_context, selected):
             yahoo_link(item["candidate"]["Symbol"], item["candidate"]["Symbol"])
             for item in items
         )
-        sentences = [escape(sector_context_sentence(market_context, sector))]
+        industry_contexts = list(dict.fromkeys(
+            str(item["research"].get("industry_context", "")).strip()
+            for item in items
+            if str(item["research"].get("industry_context", "")).strip()
+        ))
+        sector_context = " ".join(industry_contexts) or sector_context_sentence(
+            market_context, sector
+        )
+        sentences = [escape(sector_context)]
         for item in items:
             candidate = item["candidate"]
             research = item["research"]
             symbol_link = yahoo_link(candidate["Symbol"], candidate["Symbol"])
             name_link = yahoo_link(candidate["Symbol"], candidate["Name"])
             sentences.append(
-                f"{symbol_link} ({name_link}) has "
+                f"{symbol_link} ({name_link}), "
+                f"{escape(research['business_description'])}, has "
                 f"<strong>{escape(research['reversal_risk'])}</strong> reversal risk: "
                 f"{escape(research['explanation'])}"
             )
@@ -2486,6 +2622,16 @@ def validate_summary_response(data, selected):
 
     summary_text = soup.get_text(" ", strip=True)
     paragraphs = summary_divs[0].find_all("p")
+    if not paragraphs or not re.search(
+            r"\d+(?:\.\d+)?\s*%", paragraphs[0].get_text(" ", strip=True)):
+        raise ValueError("Final summary market paragraph has no percentage.")
+    prohibited_filler = re.compile(
+        r"\b(?:most other sectors are currently experiencing general weakness|"
+        r"conditions are mixed|the sector remains relevant)\b",
+        flags=re.IGNORECASE,
+    )
+    if prohibited_filler.search(summary_text):
+        raise ValueError("Final summary contains generic sector filler.")
     matched_sector_paragraph_ids = set()
     for item in selected:
         candidate = item["candidate"]
@@ -2573,6 +2719,16 @@ max_moderate_per_risk_event = int(
 thinking_budget = int(config.get("thinking_budget", 12288))
 require_google_search = bool(config.get("require_google_search", True))
 max_gemini_calls_per_run = int(config.get("max_gemini_calls_per_run", 12))
+max_stock_research_calls_per_run = int(
+    config.get("max_stock_research_calls_per_run", max_gemini_calls_per_run)
+)
+reserved_summary_calls = int(config.get("reserved_summary_calls", 1))
+max_research_attempts_per_stock = int(
+    config.get("max_research_attempts_per_stock", 2)
+)
+max_structural_repairs_per_stock = int(
+    config.get("max_structural_repairs_per_stock", 2)
+)
 max_stock_sources = int(config.get("max_stock_sources", 8))
 market_context_cache_file = cache_file_path(config.get(
     "market_context_cache_file", "gemini_market_context_cache.json"
@@ -2606,7 +2762,7 @@ if top_stocks is None:
     df = df[
         (df['Market Cap'] >= 300_000_000) &
         (df['Price'] >= 5.0) &
-        (df['Avg Vol (3M)'] >= 100_000) &
+        (df['Avg Vol (3M)'] >= 75_000) &
         ((df['P/E Ratio(TTM)'].isna()) | (df['P/E Ratio(TTM)'] > 0))
     ].copy()
 
@@ -2696,14 +2852,42 @@ essential_columns_for_gemini = [
 df_gemini = top_stocks[essential_columns_for_gemini].copy().reset_index(drop=True)
 df_gemini.insert(0, "QVM Rank", range(1, len(df_gemini) + 1))
 candidate_records = dataframe_records(df_gemini)
+required_sector_groups = list(dict.fromkeys(
+    str(candidate["Sector"]) for candidate in candidate_records
+))
+
+
+def validate_current_market_context(data):
+    validate_market_context(data)
+    context = data.get("sector_context", {})
+    normalized_context = {
+        str(key).strip().casefold(): str(value).strip()
+        for key, value in context.items()
+    }
+    missing_sectors = [
+        sector for sector in required_sector_groups
+        if not normalized_context.get(sector.strip().casefold())
+    ]
+    if missing_sectors:
+        raise ValueError(
+            "Market context is missing required sector context: "
+            + ", ".join(missing_sectors)
+        )
 
 client = initialize_gemini_client()
 gemini_config = build_gemini_config(thinking_budget)
-request_budget = GeminiRequestBudget(max_gemini_calls_per_run)
+request_budget = GeminiRequestBudget(
+    max_gemini_calls_per_run,
+    stock_maximum=max_stock_research_calls_per_run,
+    reserved_summary_calls=(reserved_summary_calls if final_summary_enabled else 0),
+)
 
 market_prompt = (
     config["prompt_market_context"]
     + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
+    + "REQUIRED_SECTOR_GROUPS:\n"
+    + json.dumps(required_sector_groups, ensure_ascii=False)
+    + "\n"
 )
 market_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
@@ -2723,7 +2907,7 @@ if (
         )
 ):
     try:
-        validate_market_context(market_cache["market_context"])
+        validate_current_market_context(market_cache["market_context"])
         market_context = market_cache["market_context"]
         market_model = market_cache["model"]
         print(f"Using validated market context cache: {market_context_cache_file}")
@@ -2739,9 +2923,10 @@ if market_context is None:
         gemini_config=gemini_config,
         prompt=market_prompt,
         stage="market context",
-        validator=validate_market_context,
+        validator=validate_current_market_context,
         request_budget=request_budget,
         require_google_search=require_google_search,
+        budget_category="market",
     )
     save_json_object_atomic(market_context_cache_file, {
         "version": cache_version,
@@ -2766,11 +2951,20 @@ stock_prompt_hash = stable_json_hash({
 })
 stock_research_cache = load_json_object(stock_research_cache_file)
 if stock_research_cache.get("version") != cache_version:
-    stock_research_cache = {"version": cache_version, "entries": {}}
+    stock_research_cache = {
+        "version": cache_version, "entries": {}, "deferred_entries": {}
+    }
 stock_research_cache.setdefault("entries", {})
+stock_research_cache.setdefault("deferred_entries", {})
 stock_research_cache["entries"] = {
     key: entry
     for key, entry in stock_research_cache["entries"].items()
+    if isinstance(entry, dict)
+    and cache_entry_is_fresh(entry, gemini_research_cache_hours)
+}
+stock_research_cache["deferred_entries"] = {
+    key: entry
+    for key, entry in stock_research_cache["deferred_entries"].items()
     if isinstance(entry, dict)
     and cache_entry_is_fresh(entry, gemini_research_cache_hours)
 }
@@ -2935,9 +3129,37 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
 
     if uncached_candidates:
         pending_candidates = list(uncached_candidates)
+        batched_symbols = {
+            str(candidate["Symbol"]).upper()
+            for candidate in pending_candidates
+        }
+        exhausted_symbols = set()
         validation_errors = {}
         prior_invalid_results_by_symbol = {}
-        validation_attempts_by_symbol = {}
+        research_attempts_by_symbol = {}
+        repair_attempts_by_symbol = {}
+        for candidate in pending_candidates:
+            symbol = str(candidate["Symbol"]).upper()
+            deferred = stock_research_cache["deferred_entries"].get(
+                cache_keys_by_symbol[symbol]
+            )
+            if not isinstance(deferred, dict):
+                continue
+            draft = deferred.get("research")
+            error = str(deferred.get("validation_error") or "").strip()
+            if isinstance(draft, dict) and error:
+                prior_invalid_results_by_symbol[symbol] = draft
+                validation_errors[symbol] = error
+                research_attempts_by_symbol[symbol] = int(
+                    deferred.get("research_attempts", 1)
+                )
+                repair_attempts_by_symbol[symbol] = int(
+                    deferred.get("repair_attempts", 0)
+                )
+                print(
+                    f"Using deferred research draft for {symbol}; "
+                    "repairing it before repeating research."
+                )
         research_round = 0
 
         # This loop is bounded per stock, rather than by a global number of
@@ -2945,22 +3167,29 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
         # preceding validation attempt.
         while pending_candidates:
             research_round += 1
-            if research_round == 1:
-                research_required_symbols = {
-                    str(candidate["Symbol"]).upper()
-                    for candidate in pending_candidates
-                }
-            else:
-                research_required_symbols = {
-                    symbol
-                    for symbol, message in validation_errors.items()
-                    if validation_error_requires_fresh_research(message)
-                }
+            research_required_symbols = {
+                str(candidate["Symbol"]).upper()
+                for candidate in pending_candidates
+                if str(candidate["Symbol"]).upper() not in validation_errors
+                or validation_error_requires_fresh_research(
+                    validation_errors[str(candidate["Symbol"]).upper()]
+                )
+            }
             research_required_candidates = [
                 candidate for candidate in pending_candidates
                 if str(candidate["Symbol"]).upper()
                 in research_required_symbols
             ]
+            for candidate in pending_candidates:
+                symbol = str(candidate["Symbol"]).upper()
+                if symbol in research_required_symbols:
+                    research_attempts_by_symbol[symbol] = (
+                        research_attempts_by_symbol.get(symbol, 0) + 1
+                    )
+                else:
+                    repair_attempts_by_symbol[symbol] = (
+                        repair_attempts_by_symbol.get(symbol, 0) + 1
+                    )
             print(
                 "\n...calling Gemini for stock batch: "
                 + ", ".join(row["Symbol"] for row in pending_candidates)
@@ -2968,7 +3197,7 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             )
 
             retry_correction = ""
-            if research_round > 1:
+            if validation_errors:
                 retry_details = "\n".join(
                     f"  - {symbol}: {message}"
                     for symbol, message in validation_errors.items()
@@ -3021,7 +3250,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             batch_data, batch_model, batch_metadata = call_gemini_json(
                 client=client,
                 model_primary=model_primary,
-                # Flash-Lite proved unreliable for this 15-stock, 30-search,
+                # Flash-Lite proved unreliable for this large, search-grounded,
                 # strict-schema workload. Retry transient errors on Flash and
                 # preserve caches for a later rerun instead of degrading.
                 model_fallback=model_primary,
@@ -3038,6 +3267,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 ),
                 required_search_candidates=research_required_candidates,
                 allow_partial_stock_results=True,
+                budget_category="stock",
             )
             models_used.append(batch_model)
             results_by_symbol = {
@@ -3050,15 +3280,16 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
 
             for candidate in pending_candidates:
                 symbol = str(candidate["Symbol"]).upper()
-                validation_attempts_by_symbol[symbol] = (
-                    validation_attempts_by_symbol.get(symbol, 0) + 1
-                )
-                validation_attempt = validation_attempts_by_symbol[symbol]
                 result = results_by_symbol.get(symbol)
                 if result is None:
                     error_message = "result was missing from the response"
                     research_failures_by_symbol[symbol] = error_message
-                    if validation_attempt < max_validation_rounds:
+                    can_retry = (
+                        research_round < max_validation_rounds
+                        and research_attempts_by_symbol.get(symbol, 0)
+                        < max_research_attempts_per_stock
+                    )
+                    if can_retry:
                         next_pending.append(candidate)
                         next_errors[symbol] = error_message
                     else:
@@ -3084,24 +3315,60 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     # call can repair it instead of recreating its research.
                     prior_invalid_results_by_symbol[symbol] = result
                     research_failures_by_symbol[symbol] = str(exc)
-                    if validation_attempt < max_validation_rounds:
+                    needs_research = validation_error_requires_fresh_research(exc)
+                    attempts_used = (
+                        research_attempts_by_symbol.get(symbol, 0)
+                        if needs_research
+                        else repair_attempts_by_symbol.get(symbol, 0)
+                    )
+                    attempt_limit = (
+                        max_research_attempts_per_stock
+                        if needs_research
+                        else max_structural_repairs_per_stock
+                    )
+                    can_retry = (
+                        research_round < max_validation_rounds
+                        and attempts_used < attempt_limit
+                    )
+                    stock_research_cache["deferred_entries"][
+                        cache_keys_by_symbol[symbol]
+                    ] = {
+                        "created_at": datetime.now(UTC).isoformat(),
+                        "model": batch_model,
+                        "research": result,
+                        "validation_error": str(exc),
+                        "research_attempts": research_attempts_by_symbol.get(
+                            symbol, 0
+                        ),
+                        "repair_attempts": repair_attempts_by_symbol.get(
+                            symbol, 0
+                        ),
+                        "research_metadata": {
+                            "search_queries": batch_metadata["search_queries"],
+                            "tool_tokens": batch_metadata["tool_tokens"],
+                        },
+                    }
+                    if can_retry:
                         next_pending.append(candidate)
                         next_errors[symbol] = str(exc)
                         print(
                             f"Saving other valid results; {symbol} requires "
-                            f"targeted retry {validation_attempt}/"
-                            f"{max_validation_rounds - 1}: {exc}"
+                            f"a targeted {'research' if needs_research else 'repair'} "
+                            f"retry: {exc}"
                         )
                     else:
                         exhausted_errors[symbol] = str(exc)
                         print(
                             f"{symbol} remains invalid after "
-                            f"{validation_attempt} total validation attempts: "
+                            "its permitted research/repair attempts: "
                             f"{exc}"
                         )
                     continue
 
                 prior_invalid_results_by_symbol.pop(symbol, None)
+                stock_research_cache["deferred_entries"].pop(
+                    cache_keys_by_symbol[symbol], None
+                )
                 research_by_symbol[symbol] = result
                 validated_cached_research[symbol] = result
                 stock_research_cache["entries"][
@@ -3147,18 +3414,81 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     for symbol, message in exhausted_errors.items()
                 )
                 research_failures_by_symbol.update(exhausted_errors)
+                exhausted_symbols.update(exhausted_errors)
                 print(
                     "Skipping exhausted invalid research and continuing to "
                     "lower-ranked candidates: " + error_summary
                 )
-                break
 
             if not next_pending:
                 break
 
-            # A targeted retry contains only failed candidates. Do not turn a
-            # small repair into another full research batch by adding new
-            # lower-ranked stocks.
+            # Carry retryable drafts into the next research call, then fill its
+            # remaining capacity with fresh lower-ranked candidates. This keeps
+            # a small no-search repair set from consuming an otherwise mostly
+            # empty Gemini call. Only the fresh candidates (and retries whose
+            # errors genuinely require evidence) are included in the next
+            # call's required-search list.
+            retry_symbols = {
+                str(candidate["Symbol"]).upper()
+                for candidate in next_pending
+            }
+            for future_candidate in candidate_records:
+                if len(next_pending) >= gemini_batch_size:
+                    break
+                future_symbol = str(future_candidate["Symbol"]).upper()
+                if (
+                        future_symbol in batched_symbols
+                        or future_symbol in retry_symbols
+                        or future_symbol in exhausted_symbols
+                        or future_symbol in validated_cached_research
+                        or future_symbol in research_failures_by_symbol
+                ):
+                    continue
+                if sector_counts.get(future_candidate["Sector"], 0) >= (
+                        max_stocks_per_sector
+                ):
+                    continue
+
+                future_cache_key = global_cache_keys_by_symbol[future_symbol]
+                valid_entry = stock_research_cache["entries"].get(
+                    future_cache_key
+                )
+                if valid_entry and cache_entry_is_fresh(
+                        valid_entry, gemini_research_cache_hours):
+                    continue
+
+                next_pending.append(future_candidate)
+                cache_keys_by_symbol[future_symbol] = future_cache_key
+                batched_symbols.add(future_symbol)
+                deferred = stock_research_cache["deferred_entries"].get(
+                    future_cache_key
+                )
+                if isinstance(deferred, dict):
+                    draft = deferred.get("research")
+                    error = str(
+                        deferred.get("validation_error") or ""
+                    ).strip()
+                    if isinstance(draft, dict) and error:
+                        prior_invalid_results_by_symbol[future_symbol] = draft
+                        next_errors[future_symbol] = error
+                        research_attempts_by_symbol[future_symbol] = int(
+                            deferred.get("research_attempts", 1)
+                        )
+                        repair_attempts_by_symbol[future_symbol] = int(
+                            deferred.get("repair_attempts", 0)
+                        )
+
+            added_symbols = [
+                str(candidate["Symbol"]).upper()
+                for candidate in next_pending
+                if str(candidate["Symbol"]).upper() not in retry_symbols
+            ]
+            if added_symbols:
+                print(
+                    "Carrying retryable stocks into the next batch and filling "
+                    "remaining capacity with: " + ", ".join(added_symbols)
+                )
             pending_candidates = next_pending
             validation_errors = next_errors
 
@@ -3217,8 +3547,12 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             "normalization_probability": research.get(
                 "normalization_probability"
             ),
+            "probability_indicator_type": research.get(
+                "probability_indicator_type"
+            ),
             "continuation_outlook": research.get("continuation_outlook"),
             "primary_risk_event_id": research.get("primary_risk_event_id"),
+            "risk_exposure_group": research.get("risk_exposure_group"),
             "company_difference": research.get("company_difference"),
         })
 
@@ -3314,6 +3648,16 @@ if final_summary_enabled:
             "Sector Group": item["candidate"]["Sector"],
             "Reversal Risk": item["research"]["reversal_risk"],
             "Explanation": item["research"]["explanation"],
+            "Business Description": item["research"]["business_description"],
+            "Industry Group": item["research"].get("industry_group"),
+            "Industry Context": item["research"]["industry_context"],
+            "Current Operating Evidence": item["research"].get(
+                "current_operating_evidence"
+            ),
+            "Probability Evidence": item["research"].get(
+                "probability_evidence"
+            ),
+            "Material Effect": item["research"].get("material_effect"),
             "Durable Drivers": item["research"].get("durable_drivers", []),
             "Reversal Mechanism": item["research"].get(
                 "reversal_mechanism"
@@ -3344,10 +3688,11 @@ if final_summary_enabled:
             ),
             prompt=summary_prompt,
             stage="final HTML summary",
-            validator=validate_summary_presence,
+            validator=lambda data: validate_summary_response(data, selected),
             request_budget=request_budget,
             require_google_search=False,
             max_attempts=1,
+            budget_category="summary",
         )
         recommendations_summary = summary_data["summary_html"].strip()
         models_used.append(summary_model)

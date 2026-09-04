@@ -1,179 +1,290 @@
 {
-  "version": 3,
-  "created_at": "2026-09-02T18:49:30.949018+00:00",
-  "prompt_hash": "5540a258df77bed5b23acd93ec4289e733a01054348c1bccb21b92d5695a4397",
+  "version": 4,
+  "created_at": "2026-09-04T17:19:31.461941+00:00",
+  "prompt_hash": "eb7d879d17dd1f927aa2a08e493037bc261dab1f4bf1651607fea8a5db92c00e",
   "model": "gemini-2.5-flash",
   "market_context": {
-    "as_of_date": "2026-09-02",
+    "as_of_date": "2026-09-04",
     "market_status": "MIXED",
-    "market_intro": "The U.S. stock market is entering September with a mixed outlook, following a robust August where the S&P 500 gained approximately 3% and remained near record highs. However, the start of September has seen U.S. stocks open lower, primarily driven by a surge in oil prices due to escalating geopolitical tensions and hawkish signals from the Federal Reserve regarding interest rates. Investor mood is cautious as concerns about persistent inflation and the Fed's potential response remain the most significant drivers of market uncertainty.",
-    "market_direction": "Currently facing headwinds after a strong August, with downward pressure from macro and geopolitical factors, particularly rising oil prices and expectations of a Federal Reserve rate hike.",
+    "market_intro": "The U.S. stock market is currently mixed, with the S&P 500 posting a 2.7% gain in August, contributing to a 13.1% year-to-date increase, despite a rocky start to September. Investor sentiment remains cautious amid persistent inflation, rising interest rates, and escalating geopolitical tensions in the Middle East. The AI buildout boom continues to be a significant driver for corporate earnings and technology sector performance, yet overall market undervaluation is heavily concentrated in a few mega-cap tech stocks.",
+    "market_direction": "Cautiously mixed, with underlying strength in specific growth areas offset by macro and geopolitical headwinds.",
     "major_drivers": [
-      "Federal Reserve monetary policy and rising interest rate expectations",
-      "Geopolitical tensions, specifically the US-Iran conflict and its impact on oil prices",
-      "Persistent inflation remaining above the Fed's target",
-      "Global supply chain conditions, including elevated freight rates and Panama Canal restrictions"
+      "Artificial Intelligence (AI) buildout boom and related capital expenditure.",
+      "Strong corporate earnings, particularly in Q2 2026.",
+      "Resilient private-sector demand."
     ],
     "macro_conditions": [
-      "The annual CPI inflation rate in the U.S. was 3.4% for the 12 months ending July 2026, down from 3.5% in June. The trailing 12-month CPI is 3.36% as of September 2026.",
-      "Core inflation in the U.S. increased 2.50% in July 2026 year-over-year. The PCE Price Index changed by 2.80% per year on average between 2025 and 2026.",
-      "Expectations for a 25-basis-point Federal Reserve interest rate hike at the September 15-16, 2026 FOMC meeting have risen to approximately 60-66% following hawkish comments from Fed Chair Kevin Warsh.",
-      "The 10-year Treasury yield has risen from 4.2% to above 4.7% during 2026.",
-      "U.S. S&P Global August final manufacturing PMI was 53.4, slightly below the estimated 53.9.",
-      "JOLTS job openings rose to 7.271 million in July, while July construction spending declined by 0.5%.",
-      "U.S. GDP expanded at an annualized rate of 1.5% in the second quarter, a moderation from 2.1% in the first quarter."
+      "The US annual Consumer Price Index (CPI) inflation rate was 3.4% for the 12 months ending July 2026, with the August report scheduled for release on September 11.",
+      "Federal Reserve interest rate expectations are mixed, with roughly 50-50 odds for a September hike after recent conflicting statements from Fed officials, ahead of the FOMC meeting on September 15-16.",
+      "Long-term Treasury yields are elevated, with the 10-year Treasury yield reaching approximately 4.8% and the 30-year Treasury yield climbing to just below 5.3% on September 1, 2026.",
+      "August nonfarm payrolls increased by 162,000, exceeding expectations, while the unemployment rate held steady at 4.1%.",
+      "Global ocean freight rates are diverging, with Transpacific rates high due to capacity cuts and Panama Canal restrictions, while Asia-Europe rates are softening.",
+      "Oil prices remain elevated, with Brent crude above $90 per barrel, contributing to inflation concerns."
     ],
     "strong_sectors": [
       "Technology",
-      "Energy",
-      "Industrials",
+      "Financial Services",
       "Healthcare"
     ],
     "weak_sectors": [
+      "Industrials",
+      "Utilities",
       "Basic Materials",
       "Consumer Cyclical"
     ],
     "sector_context": {
-      "Energy": "Oil prices are surging due to escalating US-Iran tensions near the Strait of Hormuz, pushing Brent crude to around $95 a barrel and supporting sector performance.",
-      "Financial Services": "The sector is highly sensitive to interest rate changes, with rising expectations of a potential Fed rate hike influencing net interest income and returns.",
-      "Healthcare": "Supported by increasing health awareness, technological innovation, and an aging population, leading to relatively steady demand and positive ETF flows, particularly in biotechnology.",
-      "Basic Materials": "Facing challenges with the lowest breadth of positive EPS revisions among major sectors (48%), indicating potential headwinds despite some year-to-date gains.",
-      "Technology": "Benefiting from strong data center demand and continued investor enthusiasm for AI, leading to robust earnings growth expectations and the broadest positive EPS revisions (86%).",
-      "Industrials": "Showing strong positive earnings-per-share revisions (80%), indicating a healthy operating environment and demand.",
-      "Consumer Cyclical": "While consumer spending continues to support the U.S. economy, the sector's year-to-date performance is modest compared to other growth sectors, and it faces potential headwinds from higher interest rates impacting consumer demand."
+      "Financial Services": "The sector has seen a rise of about 7% quarter-to-date, benefiting from the broader market's resilience despite rising interest rates.",
+      "Energy": "Elevated oil prices, with Brent crude above $90 per barrel due to geopolitical tensions, are a key factor, potentially increasing headline inflation and transportation costs.",
+      "Technology": "The sector continues to be a primary market driver, fueled by the AI buildout boom and strong demand for AI computing, though consumer tech purchases are being delayed due to value concerns.",
+      "Basic Materials": "Input price inflation remains elevated, driven by US tariffs, higher fuel prices, and increased costs for certain metals, impacting operating margins.",
+      "Healthcare": "The sector has risen approximately 7% quarter-to-date, indicating robust performance within the current market environment.",
+      "Industrials": "This sector has dropped almost 8% quarter-to-date and is now trading at a modest 3% premium, having been the most overvalued sector previously.",
+      "Consumer Cyclical": "Consumers are increasingly evaluating purchases based on long-term value, leading to delayed technology purchases and a mixed outlook for the sector."
     },
     "active_risk_events": [
       {
         "event_id": "US_IRAN_GEOPOLITICAL_TENSIONS",
-        "description": "U.S. military strikes on Iranian targets near the Strait of Hormuz have caused oil prices to surge and increased overall market uncertainty, also impacting global freight rates.",
+        "description": "Renewed escalation between the United States and Iran, including U.S. strikes and military action near the Strait of Hormuz, is keeping oil prices elevated and contributing to market caution.",
         "affected_industries": [
           "Energy",
-          "Transportation & Logistics",
-          "Manufacturing",
-          "Retail"
+          "Transportation",
+          "Consumer Cyclical"
         ],
-        "normalization_risk": "De-escalation or a resolution of the US-Iran conflict would likely lead to a decrease in oil prices and global freight costs, potentially reversing recent gains for energy companies and easing inflationary pressures across various industries."
+        "normalization_risk": "De-escalation, such as a peace agreement or the establishment of an Iran-Oman shipping corridor, could lead to a significant decline in oil prices, reversing gains in energy-related investments and easing inflationary pressures."
       },
       {
         "event_id": "PANAMA_CANAL_RESTRICTIONS",
-        "description": "Panama Canal daily transits are dropping and draft limits are cutting cargo capacity due to drought conditions, tightening Transpacific freight and increasing shipping costs.",
+        "description": "Panama Canal daily transits are tightening, dropping to 34 vessels from September 4 and 32 from mid-September, with draft limits cutting cargo capacity, contributing to high Transpacific freight rates.",
         "affected_industries": [
-          "Shipping & Logistics",
+          "Shipping",
           "Retail",
-          "Consumer Goods"
+          "Manufacturing"
         ],
-        "normalization_risk": "Increased rainfall and improved water levels in the Panama Canal would ease transit restrictions, reducing freight costs and potentially reversing some of the recent price increases for shipping companies and benefiting importers."
+        "normalization_risk": "A return to normal Panama Canal transit capacity and draft limits would ease capacity constraints on Transpacific routes, potentially leading to a reduction in ocean freight rates."
+      },
+      {
+        "event_id": "RED_SEA_SHIPPING_DISRUPTIONS",
+        "description": "Houthi attacks in the Red Sea continue to force vessels onto longer routes around the Cape of Good Hope, adding 10-14 days to Asia-Europe transit times and consuming vessel capacity, keeping freight rates elevated.",
+        "affected_industries": [
+          "Shipping",
+          "Retail",
+          "Manufacturing"
+        ],
+        "normalization_risk": "A full and rapid resumption of Red Sea transits would release substantial effective shipping capacity, which analysts suggest could cause a significant fall in Asia-Europe freight rates."
+      },
+      {
+        "event_id": "US_GOVERNMENT_SHUTDOWN_RISK",
+        "description": "The end of the US federal fiscal year on September 30 poses a risk of government shutdown if Congress fails to pass appropriations bills, especially with midterm elections approaching.",
+        "affected_industries": [
+          "Government Contractors",
+          "Financial Services",
+          "Broad Market"
+        ],
+        "normalization_risk": "Successful passage of appropriations bills by Congress would avert a shutdown, removing a source of political and economic uncertainty."
       }
     ],
     "sources": [
       {
-        "title": "Current U.S. Inflation Rate, September 2026 | Official Data",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGkIm8c5SbxMMic81Z490NCvCrM5JhWX7o_baQqYbrIfTDlGiK51kn1Pr2xCxlnzq3y5GCGw4Qyp5DnMZ5dti80MLhfobgrELIwWgXh1l-YxB93cB3rUULkzCILX3ushPCAIf7N1WL_sAS_yihzSQ=="
-      },
-      {
         "title": "Global Ocean Freight Rates in September 2026: One Market, Two Directions",
         "date": "2026-08-20",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHC6kR3BVz9E4OamscbUjvqR25dPcrNcgYrHrLHu8bfZZwO2cgAHQ_Vfl-QunkJo3-8DP7XsG8q-xH3qQNi9EMDFaXv82BdOHK3cL07bDZeA-pgnMO10bYZTgxVoSs4_JrwmaM6EAp1MhHXlInOnU0RhTmKh_wGYAc-FDtGzIkcJtypFY-FhxxHYwiy6zg4qX0JzmHJIe-ekhgf3ijnZXwxnevKXUj9RaQCxRhLQz0="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEoX8TXK5bD9i4uXtdOFX7zRo6T2OgdtMi-EZjPLs44XoLBmWS8xYLBuyZMGBd9mtss4P2FM3sMKVsu9aNtOJBRF3Yj0o76KXDRCkwdjaDYY3O1-5GFcvNIcwRX2gOC79SeT82K5x6QJOEKvBsllk9yG1EwhlcNUXtvQ5OZ8-ouNu0SK7MjSSZ58VTenpQTgTIOdZ3AdJWBCeQvsFGep6Woy_7QRVVbP7WCc24WjXw1"
       },
       {
-        "title": "WTI And Brent Prices Decline After Recent Gains - Forbes",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGqKPSlaHXLaiCSBkv3Gw4Z61FvE1j-8fBNZ2Tq59dnFBAZ-7EF2vMxV_OOdNCmQEZWDEIuKOZn7BGknObT9raKkjV82uZaQDzeZGPR5-KEQnnOQLtvxmsdpK7d9RAaC7zoVMSntfNg6vhhjjrbau6wod4Stg=="
-      },
-      {
-        "title": "Will the US Fed Hike Interest Rates in September? | Morningstar Nordics",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEuFlX5-dfnfgIdrnYpxEuDGYVFzEsDr632Z55NyFWN5J_dDK8ByB5hSloS8X6gLZfwzyalF8NTZ5wy7FZfDM5o-uiifStUzC3Ya7sWqBolQevs7wcw5No8YT182Xo0rqbqJsIi-P7w98PwBpYd9ZINR2vcHMVYt4qHbBRcmcK0jZ2STkUy_wDQ8aB4ayWxl3w=="
-      },
-      {
-        "title": "Market Review: September 01, 2026 - Investrade",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHwtc1rMBWH4ZfIAc7RPxf-jI0TNRc7N5UGVCEKNiCyGXR99VkcjAoC8lnhELuA4xuDr12gIyBV0WD2PagSAlxMjrPMs7H5mZXCCYEMWp71M2aQP-AvO_cWODuHCwOWxzxwrbvwWjG0lXANqG1hbD_W0A=="
-      },
-      {
-        "title": "September Effect Meets a Strong 2026 Market and Rising Rate Risk",
+        "title": "Ocean Freight Rates 2026: FCL & LCL by Route | Suaid Global",
         "date": "2026-09-01",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF4IPxiZYwO4pVVIzbOZZW4s_1jz3tZ60Zpj2lO6Qr4n4fR3mWLb6fpF9CN6bWVHg7dKUc5sT1_OIuJfFurc_Ea80KpM-XPvJ0UoCzjPXM12Fl8CUkT_QMF0P6MmRTgW3F5pzEivYSKzygd5gR0m8KkMfPKtuAE0Md7T2BOdAMGddYHfROm3vIpWmAz_ZC2vBi91BJaqjPZ6RI5Ww=="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEJJXJpB-cNiJWyOl8TtdtnAap-n7M2TjS1VMMt-HIdt-yudB1RMHBQTaMjich2Iy9SkCbIaX6e2yIlju6c1x1OCQSB8bz4xg_hX7kmvOF0osz_u6trzJC1bz38jwKpKFzO4VkkPy3nmwEzWqXCgCnEvU1YILc="
       },
       {
-        "title": "Global Markets Enter September Facing a Collision of Inflation, Debt and Geopolitical Risk",
+        "title": "Current U.S. Inflation Rate, September 2026 | Official Data",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGjFibGx8EIAl4-L7Kr399CcEIRPmdUaMrxZmev2dRHl8HFW0hmRAXW6Iq2okEo4bDj_KyEzRQaFBsetBL48Ql5dumwnvhVZ-o6tNRhVQtP61A23Mim7ajt7rXqKO4T0WRZ06_El9r6FC_9vR5hNqU="
+      },
+      {
+        "title": "Stock Market News Today | Edward Jones",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH1hYO979GsP5Zp64DfQS0lPV5DQzK4u7l_rN_tljNqlHrIsou1Ef_0G2jz7WW2RtO1BzrjoBWZX0mtFxFYddRx7-d332dcC22fEkiXe5VSp58f4ShgtFcsScTonv8xTWASwH4G3v0--GKO8Qr-JLyYAqZR15AUxx025Ut4K4DtXPQDag00l5GnIRZyu13eadjNGjN3ZKo="
+      },
+      {
+        "title": "Global Tech Sales Forecast to Reach $1.4 Trillion in 2026, Even as 56% of Consumers Delay Purchases, NIQ Finds - Barchart.com",
+        "date": "2026-09-01",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHo07XTHgEiSMtfkS3kdEaF8vm7PBwMMOaQtxJUH_VJv1PwLrzyRYiNPsi1tcqlsCraQxY3fHUwXdOngcb_trrn5tXCQc8hkBUH9yyLDu_vNG6kEa5Hh8Dr0GRUqP6Z7H-7NxS_Npk1LITb9uaMPYIfst422rbXZSZJzrO4Q_HPD0f_O5rrn9VSVmTbGlIZUh0gsLMZz2gd6vxfPVBHyyihYxtdoLiTIpxnIu0lCFDvEB_kwCkUmEnaJq1ap-k_RsH94VN_yAPoPXVZ-kHHOVnVZgv0="
+      },
+      {
+        "title": "September Struggle Begins, but a Trio of Econ Misses Tempered Yield Pressures: Sept. 1, 2026 - Interactive Brokers",
+        "date": "2026-09-01",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEOhe84Jh8Ov2roDACglXv1ouMZQ8jJT-Z4C3jaFdGhgh0LUu52VqH88exG1syMc-N2blgx_59imJoh3v-25pcpjn0VExRzITSo_R9hTSb2yVoKu-282espAeA8Rnvb3i3jY6z53uD4m_KMw5h73rTma6dZH7KxqaLVyBL_lbqNqp8iJqqng6OTNMayGo9_4yiUJMYBaXGIdH3Z8Xw9hAcYMpMGGD6rRJFUuOnsgLSw9DhTsm_Dp_lmroZW41hpb1zzD4fiQmv62MPVEyHt6NAkjyOgYwhgG6w-Htk="
+      },
+      {
+        "title": "September 2026 Freight Market Update",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHmTzH3BIHp4k3qng3H4excgObAPp493RbpF03Gfiswvj7FTPVkZ7SRCSs1Pvv8Ei_Z9VLt94hI9Ngk_4Q_r63UhYhdEjb_gImFOzzJZn3aU1GnXARt5LeqzipROKfnOIpvoMp9_dKyQsQ8TeFqAYYt1Vc9r-L4jI41AEU_r0CSKHzBdQ=="
+      },
+      {
+        "title": "Will the US Fed Hike Interest Rates in September? | Morningstar UK",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEBY272xXsIBbOf-c2YKHAjachEoc51Qp1w1bibbqLSJ2Euhn8iSr8g2akHtPZnooC6yv2TvJbOypkFORvOawjzrv81bgkH3p6Av0OS3a8PqGVZfDLUW6_Lx63CiYSILOjixH1lk6oAVvsQwg-qmA2c0B6q0W9-yvjBNLv8f5b05H3g08g6t-ll9envmSDEz9Nr"
+      },
+      {
+        "title": "Gold Rebounds As September Interest Rate Hike Expectations Dip - Forbes",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHzvlpEzGoN_Rx7G9845LnzjWcpl6d_fYh0XA8_HhY7TiwFqbDxD48TQY3x00bybpdZojMnIo87jglun4gN_QIwezs0Ea1zUiGt44dG-yyoHQbWDyjEtTwg8pvZTeQGDBNKvDfPQqKcPqhn0Be3yos6bQnsOlaacnv72DnICQrRLWU9SlpNFQOawo1hkGIt6_PNPQw-sU7TymNszf4AqhsUr6ORRNlEaKXXSoD4U00="
+      },
+      {
+        "title": "US Investor Sentiment, % Bullish (Weekly) - United States - Historical Data & Trends",
         "date": "2026-08-28",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQECoWKwFgRjQW2riPY5W4s_1jz3tZ60Zpj2lO6Qr4n4fR3mWLb6fpF9CN6bWVHg7dKUc5sT1_OIuJfFurc_Ea80KpM-XPvJ0UoCzjPXM12Fl8CUkT_QMF0P6MmRTgW3F5pzEivYSKzygd5gR0m8KkMfPKtuAE0Md7T2BOdAMGddYHfROm3vIpWmAz_ZC2vBi91BJaqjPZ6RI5Ww=="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHU_ch1QJRiZjjfxTxUQeg83a92d4G7uDjH90P9tF1_jXvFcKZZqYCGKP7r4rfNeZLYv2dDSo3sm7BLzJkZ-S83Sk4cqxJOXX40Q3-FCbNRSoM9lzjTDgxHKqlwdne_37mQ-sz57-cmZHyVy4r_qguXSfi7ubJugw=="
       },
       {
-        "title": "5 shocks that could keep US interest rates higher for longer - CommBank",
-        "date": "2026-08-31",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE6GDkWlfTEO-IFihzATY8D5rfpPO8PkKeivnRoWicOpbCumxtsXxRAfU0a37vLKbWD-os8x2GPlBp8DYA456YWq0VwY1ttQz4bi8pzmWzXyABERjZB28Bl267vBh5wBgmqQ3US18EOLWR21OYZDhVYikAgimlgiR2LgOWcob4Dof1AgOcmWqfmAaaLh_WHhyvCnEIztcOVOxmxY9-JVJqa5JGE-frkd3JkxRL5"
+        "title": "2026 Capital Markets Regulatory Outlook | Deloitte US",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFvrynZizGwYvSdjvEIyL3whAvMaIIigcZZ5k9jQqva9SF9qC9TY_OhjujWCC7XdttY4PYSvc4SuYsLNCgvusWTfnlqc2cRN3xRIB1mm7T4ZFwTL6iE8Aj3I6mSo5E2v94s5FfOYSzCHuEI_aWaWQMJgHgqIyHtaXRYF4uf6zltPQf_Sq3qUe8IQer0jItDvY4TFJDfhcc9-_c="
       },
       {
-        "title": "The Rush for Resources - J.P. Morgan",
+        "title": "September Stock Market Outlook: How to Position Your Portfolio During a Risky Stage",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFr-E9OeynnNmwcsQ1oBOYsfpe87T-hGRwnFZlfjCOEB5HcuZli9uuQ6EREQon0TVO06ShKdpLHIK1vzGgw4maUE-wBDi2_2q8vYckIQLg7qleoslcLCxbx4O8-UwtI04TqOXb0n-bMdm2m7V1s9WEZj_W017skgy8bNnZmTAmx5Q_QfZc6capL48Hz7XW6ZF8keSKHjAc-slsQYTTKgnFNSGUdoPbRvzS24Ng="
+      },
+      {
+        "title": "September 2026 Market Outlook | MRA Advisory Group",
         "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGXJI6YoP6m65-9-Oz3doGh2-vi6uwELbGIiMvS580ci5ZJ3sk5CUriAb9oqt0kCNgfVzu4WLIq6IETuvBu1fGx4hKxc8t3-GJ3484cOKzcrZMFeSvCpCrVGuZvIimVRk930irEDCvemcr324ZuTJOtG1NVoVaNhJCWDfpIiu3lBGW-sRA7z4VTsIkC9rkq"
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGQbZcwTvKFKgFEKwQaVbm1m_TRr_naICKgoPVrQXUQfxXNfvgp4BeYt1o7Dx3rC8p6CobiVStJsSjjycCQ0Vi7h2_oukSLZDJMcoqR7aZKBSK1t9eePMpmZMPA_XDM85TXe7wdq2p25SGcKh4MaTVPHM9TbPkb17Pjcuu1DwD6"
       },
       {
-        "title": "U.S. Tech Sector Analysis - Simply Wall St",
+        "title": "Late peak demand sees container spot rates to the US surge - The Loadstar",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGjHgD_5FX2xF5IXPuZMxQOkUYLNn6RCM47bCUaeej2N-Z147pUq17KzXr-YQGh3Qgsai5IKabfu6aYZJo3UMWfyqrn6HY6kLQkTFFqra-t_ywyyuQTkwIgEntAp26M2ZXWr0ZtArLoP80xvkZlcSHtwS598a7JCBCkipU3jzs70cK1qq0cAAU8u8TthnsU"
+      },
+      {
+        "title": "Fed governor Waller muddies outlook on possible rate hike later this month | PBS News",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE1wxelLHoRHmSil-zObI-hpHg3ADamjsHwO0JITlLgHFWuj6_sj6yP35OXClYXLbSS2Lftzs7dyKq9UkYW9FD0EMNLjkdjkrhsKnLqH1KDS8eI98QAUh0jy5mfjkT3UxiKVTfQo5sDxrYSkys8PXQIbZloHZK6Jup1yowa-_KHlwLElU44wQWoKxVwveI97BPPRNb2Xmsx1P82bgdsKhFkU7lWJAEtM1Y7gw=="
+      },
+      {
+        "title": "Fed decision in September? Odds & Predictions 2026 - Kalshi",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGurpdRe5L6EQSKL9ObyaA3UijzPGYasH-Orh1s-EJEdGeC2XPlnbKpWJ5xUWS9YhvkUfzbvhow5_4vSpIImExF1G0rm6sNIruc-VKn4oWT0Vl0JBNAfx5Q4t0gzXBwyEmorha6G5F2CeszUOI75K8nNQJwvPasQkGODt21wKKH6j6YOQ=="
+      },
+      {
+        "title": "SEC Publishes 2026 Regulatory Agenda: Realigning Regulation Around Innovation and Capital Formation - Leech Tishman: Legal Services",
+        "date": "2026-08-17",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjtQkgwRukS7j3lmX9u1ofkl0RHJ9aaNwTGtAQNJ_WtxzOfCEVccE0xJDsCNjJ3vFi55VTYBTqP5HIoJdv176BBvHQ1gdxOlasD-_GQ23eRSIRM3z6C2fopxQlHQN1jcE5bggrcm3zJaoi7-cF0THlh5VlFOdmM5HyAK6y1f7q4TVu9RxLLb52R2FBoa6sh_3dlSGHhQkdyZtwk3x79dDVYYXlzXREZFwuA5vCzVLKoiGqycplIarfUqkuaj3710HmtBMj0NnvLue-"
+      },
+      {
+        "title": "Could Stocks Crash This September? History Gives Investors Reason to Worry",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGV0l8XpsSG0uzlnn0UJjEoFIV_ypaE_pDQVjdeUlP4zP_O0VhkZeco9rVUUYxGJSpbB7m4DxdgcLlANfkF4C4W3DejGGQEE1cmEO3kViqcV984nGy5kx3Z8r9CKO6y0a1-vZyqavoR-OIsB60dQ9IrI67olgA-fAC7fJaROiQn2C2taWgm3KEh3tjj46QeqbMcVluajpReQrC5nqJ3z3PxnSwzATzekHf5p3euxN9UiHPu"
+      },
+      {
+        "title": "Current U.S. Inflation Rates: 2000-2026",
+        "date": "2026-08-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFW8hotaUmpJWwfyvS-hVqN1oLH2hjW372g5oP-6MMHm3xz2wxd8nLn-rBe4BsAg6INPFbfrjdyAK19T0XtQ4GY1_-nqAGnuunSqpcaD1LNYORu65eBZMiC49WT0rVKcz0eWjd8KMleqCfdr3bl1dEj7g-32h8dPewPXbLDZmeTDV2LOQ=="
+      },
+      {
+        "title": "The geopolitical events to watch in September - Investor Daily",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGB4H6DWWIEOKgT2Zu-HGCyIG8RLrkw7bbL7lDUwtKsCot2nBg5rXvhJ2KC_ZCkOZJ1njhaSlPk9YZqmoLereIcNbIRwCQCMbpRiSAKD3DF5K3fvCpo_3BOCli7zozBkKnhaj44CPEz3lx7BCW4ckoDtb90PYSF9SPfWaR1zZyGDBCEedxRwr9P_zI="
+      },
+      {
+        "title": "Employment Situation News Release - 2026 M08 Results - Bureau of Labor Statistics",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXQxtSrOkYDeQn3Eihd27mGCTdBtX2GgVXC856QAmREbN4SVsbKBho3OljlLA9kxXoZ5Rrm2xAcGFf9Z9B_KnQ3HVwZeRH38lkk--1bWxaad9mZBJSq4y_Xo5FNwZgkeMp38Ka3culFPqhtz24eVhnJE4-CC6_c_V4="
+      },
+      {
+        "title": "AAII Investor Sentiment Survey",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGViVwXvKo5E9qy0HpTVPn59TDIMgZtcN7e-_9E2j0BdqMDJefYaR_sZJ0s94oVeeaGxDONubqwxljyCiCw2BxJkTr7rtg9ER8hF5tulGnNv-uf7Vo-KkJK0dM2-rc_6A=="
+      },
+      {
+        "title": "Wall Street rises as tech stocks climb and oil steadies - CommBank",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGqUxClbCrWlqifYEiRTG_kdxFT29xPAy9kMpKdiI01JAZJs0lyb5HOdnHELahA78_JlmFndzjSLPvCx_2uAdMVT1Lokeunimg3b6FvmEtw2SSP4noH6P27JGkZf7sQ1iMxg4v8E6XqMNV_n1mS1KRPDX-HVom2gjT_8CzVFdKumfV0_VqaJ9uufNoryPj2A1dIl6267h5RRLU1JeBzokcsO0ZhBIc_DtsvPBIFWg=="
+      },
+      {
+        "title": "Bull Market Remains Intact as Earnings Momentum Builds - SouthState Bank",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGI0e3ZYuuhW3zAXP-sBV7VqblM1DiSrVK13pVv23C9JTs0UKE_Rd0BPuglbn7CLSSZkKXA9Z98ubBmBs4QWqaOirXKUbtGo4N0ZKWqdktlUSuAg3pQu8qhgDNExjLfu2mLvy85t5telrp_6DWlHSyRumDNWVlNpikGup9gAUHbCMRIDHldzBjV6qyXFRnALNvwIb2SutE_7svl3b2KoVHFTTan9sx-sL3crVZOgDcOBoi0"
+      },
+      {
+        "title": "Statement on the 2026 Regulatory Agenda - SEC.gov",
+        "date": "2026-07-07",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFye-9D55Kt7DNrFS3roY8ojAGalI3cxvOvJ24GXNcRaUVT90OZmbkNamU8i2GFB_ZPUQAr_63_5TlgAkfTeuVeKZpdM5gGAuRC5hnon_KK3TVjNEb40cidbfJefK2RUz8ayQd1rMaBFLiaPruxRtQa-g6bPWehJXITj3606FR1RHwbPYggyThSorKFf6XC8M-YPwOWAuYgIBuR"
+      },
+      {
+        "title": "SEC Announces 2026 Regulatory Agenda | Insights - Ropes & Gray LLP",
+        "date": "2026-07-09",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFzQnqo0kjK2yESr1Mo8L4hEIIEfMsFvfUwOWOPhxxkt_FMbx4M0Q5FlWtdHLHxlKKxIrqvZO_SATOl9rZN5eolgylvxuZshq4Yu_z-U3yEAibADXqptaQAaSgwAd8yk1eDjh5IfbpJM1xzBmfXiR21UrV0eKlpjPvHQKS4ImJ_bLjjILvzWuy1BAhg4VdV3C7CA7_k"
+      },
+      {
+        "title": "Market Call: Kim Bolton's outlook on technology stocks (Sept. 3, 2026) - YouTube",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGVm_o_iI8HreE5yUYCrx0pB5U7utrRAuAJEwwhjqNfItFptKiWx1duB1gnzrQMlQp6VWaY9ppBT1MuA_OXvOJVM9L2MG2iGPqij8V-Ne1k3mwz4rQNXe4sNOB8MRMh-on9sQfNkQI="
+      },
+      {
+        "title": "Where $31.6 trillion of capex flows in the era-defining AI build-out | PwC",
+        "date": "2026-09-02",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEq295Rt802fMeAV1lG7S7TZXqc_5BUrmQZrSavcz2I2aLaMEU_kLl6yLa1n-ZqME9N3UDx1C5YXGJSGCPS9VbOur4mJ_IZ1xbkDua6O4QvhHsXyrKq_jHLczPQ83Mc1uaV1hxpikF9wx5Jw8NG43_oEnld16OtKotedklFUugN9yfSVa1S1s7cW41vN_bt"
+      },
+      {
+        "title": "2026 technology industry trends | Our Insights - Plante Moran",
+        "date": "2026-09-04",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGndAbC8TizvEE6b6PKiCUI-UUW6EmT2iNo8-C1moEJowa9B0WXMlTR7B7iSzQeHSVtBjLqckynGeOzKNKiUJyn5k4yzuqdjIRJlZQddzaki-yUuBvJ11nF5DdxXTb5rRCvAoXFgjNB_NljAU8UcY0naBgbsRq4ZCKEmLj113XmlvtAfUXrYnb3m1Q7ifn9u9dCczDpXA=="
+      },
+      {
+        "title": "Fall 2026 Investment Directions - iShares",
         "date": "2026-09-01",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGevC2Gsb2brUlAThTq5CFbKdRxwtIsKAFFKWGT2tJJXJE2EINTB9A0Mxi54XxobNAR_xJF8BogBejmUZ8fvLtPpWkYilmN_YyILxCGLRh_04wh8JRjZc6aGVWh1Dbx3g=="
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjgkR3UPWBtvL3nKR17VFDZeXwhLhkHGdY014_P-kO7aaq4LSeJf1gLJtWEarihIKLGTMHKUbdq3ahZYbvVFAoBe3k_RwKifl58Foq6pWCeWoLfpMzmq8vE8Tlv1A870iwtprVPfnApkqE2Ejz0SMAYoEfi9Mnd_ZfD-_pQpEiJXhrljC-3X52XCWoUSfRy-NfcP7X4A=="
       },
       {
-        "title": "Tech leads S&P 500 sectors in positive 2026 EPS revisions since July - Seeking Alpha",
-        "date": "2026-09-01",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUYf8hsGwteBly6Amkt4HuCsAMATR74WBw4PXWoAafqCHv73hcdg2WAaD8vD0ijiXuf6uXRsv5TA9Xq7K3-Adyz9ZhDsxdJzbcsjNNnX97Mh_WtPQUVxCF2bzEYsp5LzYS3HEQxUgefE_tE8DtWYW3HxfLGmjb1Nv3I25tYjAMP5RW9nvG4aRuNgErpuIFQJPrK-ucCGzPvfPepQ4H-29IM56Y"
+        "title": "Monthly Market Update - September 2026 - Madison Investments",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQENqsOhUAub_N-HXeYHV1MhvntXwLAwA0BHIHfuy5N41Z3vb9IJeI8ogXet48GvwsjZFfM6zUtdGagqCR9YZXznpwFI59wg-hzGx3LMcl9N8rPenf9by8ag5Tv0vklyKygznrQpGUWM9Fx9bqEyyXIpwMwUMnQEMym8lDE18VtT"
       },
       {
-        "title": "Fantastic Fundamentals vs. Fissures and Fragility Fundamentals U.S. ECONOMIC & MARKET REVIEW—SEPTEMBER 2026 U.S. Hires Rat",
-        "date": "2026-08-30",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEn_tzTR9Lb4X0UsGGVeEnyPlk0Y8F5IiINgqMF9qRgYVCBYC8gyfwRd0fNjQY5wr78sUeaYSXVLSZGzgXt7hfCWLqcTXqDvz3_PDiU5GoFnX6x-_RykQcjOMBOAr1i8MrMGJy-za2Cb30CvDOIFSrCoT1woSAuR9lpoq-Why3bvhv_kpWYdw=="
+        "title": "Consumer Price Index Summary - 2026 M07 Results - Bureau of Labor Statistics",
+        "date": "2026-08-12",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEkiEMES3U5Dl8P0oLMTwnvHpLm9u0UEPHAPiBlXZb2eoZ26aV5ZZ2F5MIUhv46qR5b-oYHltB0oP-w10wg9SP5ChBm1-Jdklqp5RnamZzTZhBdZ-MSyLIn5Lu-ds6g8-1u41MuGj0A"
       },
       {
-        "title": "2nd September 2026 - Athelney Trust",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH43Q3tXcUfLvmrNGtSCxSHhLshMGqWqKh6I7c_NTUw9c6hF1Twd6BV9n1_KVhAF3irXDmaPVz68KObpkbga62wSFsvg3vV1dVUNS1LaK73sFCvQqt90UeTx7cLpY6qzfAuOveWtrH0EVziCDJ1aztOiUKM76oXjwp00e3gdMWFLOU="
+        "title": "U.S. Inflation – A Tale of Crosscurrents - TD Economics",
+        "date": "2026-09-03",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQErtPG392I9zptOE6FwNTXWbWSh_P5WzPNrHnsZCemQKhZ9HxcDIuNhsG75eZnxUNCJSSIeoXz6n3AO6b9b_eMxBgB9TEmlnZfCVYE-sW4vXamZT2tMg3AYgsh_JaFQdyWIiaaRinNz8oVdLdmbLg=="
       },
       {
-        "title": "Weekly Economic Trends & Indicators Sept. 1, 2026 - Quad Cities Chamber",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHwDQJvYaHqgcYs06eiYw2U1grISjDugLMEdph4RoSrKEJu5uGtTh-nIbey0fuj1tpaWzjN4A_J99hbVFGKNHTQ316a6UyWFsQOSZ_xlj6F5PwrHhI1JPDiuWHpokVZKnz8voaHSeccP2YHI34cZ4Kau062zNiUF-I-qCuJ9LmD4hfHtlEcN2rDeW5Vm76tm4DPXw=="
-      },
-      {
-        "title": "Sector Views: Monthly Stock Sector Outlook - Charles Schwab",
-        "date": "2026-07-31",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFYXWdeUc61JMKViZ-xlb01AvqEFp_KndJo-hcCtHDRgo3SAvEku61qoDV226kR3th8kJYYz55FOEN4kPLL_3qnCss0e17_QXWqrcDDuBB7FbV1Hrz9AhjQT6FK24I5kiwM1Z_6uD7BHyAlE8FJ2ceVDQ=="
+        "title": "Top 10 Global Economic Events of 2026 That Moved Financial Markets - Investing.com",
+        "date": "2026-06-17",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHQMg_Ce7sPVNhF8IB92xiixCMU18GpvLOqPOSKdiwN-5aq6nwMd88KrdR__ZnxIutDLtECg8G2fnrDEuOAnMZlSlIpmIfCYLRZy1Va_h7N4V5ssSXuCMTCW3I9M69E5PY24Zkikrmfl9_5ZtEBRTu6yWfV22Cu_A9Hmhp0LbcvXrefotPKEHSqoOfSZ9nVNLOFBlQbJFKhRds0juJfKAz5WsLZWcc1r0mxmA=="
       }
     ]
   },
   "research_metadata": {
     "search_queries": [
-      "S&P 500 performance last 5 days September 2026",
-      "S&P 500 performance last 30 days September 2026",
-      "S&P 500 market breadth current September 2026",
-      "US stock market health indicators September 2026",
-      "investor sentiment US stock market current September 2026",
-      "largest market drivers US stock market today September 2026",
-      "factors influencing US stock market September 2026",
-      "US inflation rate current September 2026",
+      "S&P 500 performance last 5 days",
+      "S&P 500 performance last 30 days",
+      "US market breadth indicators recent",
+      "investor sentiment US stock market current",
+      "largest drivers US stock market today",
+      "US inflation rate latest September 2026",
       "Federal Reserve interest rate expectations September 2026",
-      "FOMC meeting outlook September 2026",
       "US economic data recent releases September 2026",
-      "US corporate earnings trends Q3 2026 outlook",
-      "US regulatory developments stock market impact September 2026",
-      "current geopolitical events affecting global markets September 2026",
-      "major world developments September 2026",
-      "current oil prices trend September 2026",
+      "US earnings season trends Q3 2026",
+      "US regulatory developments affecting stock market 2026",
+      "geopolitical events impact on stock market September 2026",
+      "major world developments stock market impact September 2026",
+      "oil prices recent trends September 2026",
       "commodity prices outlook September 2026",
-      "global freight rates current September 2026",
-      "supply chain conditions update September 2026",
-      "strongest US stock sectors current September 2026",
-      "weakest US stock sectors current September 2026",
-      "US sector performance last month September 2026 Energy",
-      "US sector performance last month September 2026 Financial Services",
-      "US sector performance last month September 2026 Healthcare",
-      "US sector performance last month September 2026 Basic Materials",
-      "US sector performance last month September 2026 Technology",
-      "US sector performance last month September 2026 Industrials",
-      "US sector performance last month September 2026 Consumer Cyclical"
+      "global freight rates September 2026",
+      "supply chain conditions US September 2026",
+      "strongest US stock sectors September 2026",
+      "weakest US stock sectors September 2026",
+      "Financial Services sector outlook September 2026",
+      "Energy sector outlook September 2026",
+      "Technology sector outlook September 2026",
+      "Basic Materials sector outlook September 2026",
+      "Healthcare sector outlook September 2026",
+      "Industrials sector outlook September 2026",
+      "Consumer Cyclical sector outlook September 2026",
+      "temporary market events September 2026"
     ],
-    "tool_tokens": 1959
+    "tool_tokens": 2156
   }
 }

@@ -8,10 +8,17 @@ model_primary: gemini-2.5-flash
 # Research fails closed instead of silently publishing lower-quality Lite output.
 model_fallback: gemini-2.5-flash-lite
 gemini_batch_size: 15
+max_research_candidates_per_open_sector_slot: 3
 max_candidates: 50
 target_selected_stocks: 10
 max_stocks_per_sector: 2
 max_moderate_per_risk_event: 2
+cautious_exposure_floor_enabled: true
+cautious_exposure_floor_min_dependence: MODERATE
+exclude_high_catalyst_dependence: true
+excluded_crypto_dependence:
+  - MATERIAL
+  - PRIMARY
 thinking_budget: 12288
 require_google_search: true
 max_gemini_calls_per_run: 7
@@ -19,14 +26,17 @@ max_stock_research_calls_per_run: 5
 reserved_summary_calls: 1
 max_validation_rounds: 4
 max_research_attempts_per_stock: 2
+# A deferred failure gets one fresh, batched chance in each later execution.
+max_deferred_research_attempts_per_run: 1
 max_structural_repairs_per_stock: 2
 max_transient_api_attempts: 2
 max_stock_sources: 5
 market_context_cache_file: caches/gemini_market_context_cache.json
 stock_research_cache_file: caches/gemini_stock_research_cache.json
 gemini_research_cache_hours: 12
-# Increment whenever research semantics change so stale classifications are not reused.
-cache_version: 3
+# Stock prompt content is hashed separately, so prompt edits invalidate stock
+# research without unnecessarily invalidating a still-current market context.
+cache_version: 4
 final_summary_enabled: true
 summary_thinking_budget: 4096
 
@@ -124,10 +134,9 @@ prompt_stock_batch: |
   Return every candidate exactly once and never select or omit stocks.
 
   RESEARCH EFFICIENCY
-  For each new candidate, execute exactly one consolidated company-specific Google
-  search containing the company name, symbol, latest earnings release or filing,
-  guidance, material developments, current operating metrics, industry demand,
-  pricing, capacity or contracts, temporary drivers, and 6-12 month outlook.
+  For each new candidate, execute exactly one focused company-specific Google
+  search using this compact pattern:
+  "[Company Name] [Symbol] latest earnings results guidance operating metrics"
   Do not assume a calendar-quarter label; use the issuer's latest reported
   fiscal period. One search can return multiple sources. Do not issue follow-up,
   investor-relations, earnings-period, or alternative-query searches in the same
@@ -138,22 +147,15 @@ prompt_stock_batch: |
   If a DEFERRED VALIDATION CORRECTIONS section is supplied, it overrides the
   preceding search rule. Search only symbols explicitly listed there as
   requiring fresh research, using exactly one focused query for the missing
-  evidence. This is the only permitted second lifetime search for a stock. For
-  every other retry, repair the supplied prior JSON without another search and
-  preserve its valid facts and sources.
+  evidence. Prefer this pattern when current company facts or sources are absent:
+  "[Company Name] [Symbol] investor relations latest results guidance"
+  For every other retry, repair the supplied prior JSON without another search
+  and preserve its valid facts and sources.
 
   Use the 2-4 most decision-relevant distinct sources returned by the search,
   prioritizing an official earnings release, SEC filing, or investor-relations
   page plus a credible forward-industry source when relevant. Never return more
   than 5 sources. Do not invent, duplicate, or include unused URLs.
-
-  Label every source with one or more supported claims chosen only from:
-  BUSINESS, CURRENT_OPERATIONS, DURABLE_DRIVER, INDUSTRY_CONTEXT,
-  TEMPORARY_DRIVER, REVERSAL_PROBABILITY, REVERSAL_EVIDENCE, and
-  MATERIAL_EFFECT. Every COMPLETE result needs a
-  CURRENT_OPERATIONS source. MODERATE/ELEVATED/SEVERE need at least two distinct
-  sources, including a separate source supporting REVERSAL_PROBABILITY and a
-  source supporting MATERIAL_EFFECT.
 
   COMPLETENESS
   COMPLETE requires:
@@ -170,6 +172,13 @@ prompt_stock_batch: |
   current operations and the reversal test can be established from other
   returned sources.
 
+  A concrete fact from the latest reliable reported period, such as revenue,
+  recurring demand, production, shipments, realized pricing or TCE, utilization,
+  margin, bookings, contracts, or guidance, satisfies current operating evidence.
+  An uncertain forward outlook does not make research INCOMPLETE. When current
+  operations are established but reversal probability is not, return COMPLETE
+  with LOW risk.
+
   INCOMPLETE is reserved for a genuinely missing current operating fact, missing
   usable source, or insufficient evidence to test any plausible reversal
   mechanism. It is not LOW. Set research_incomplete_reason and use null only for
@@ -183,6 +192,10 @@ prompt_stock_batch: |
   operating growth driver materially weakening within 6-12 months. It does not
   measure valuation, share-price correction, sentiment, or ordinary uncertainty.
 
+  MARKET_CONTEXT supplies hypotheses and shared background only. It does not
+  establish company-level reversal probability. Confirm a current probability
+  indicator from candidate research before assigning MODERATE or higher.
+
   Evaluate in this order:
   1. current operating fact and durable drivers
   2. any material temporary operating drivers
@@ -192,11 +205,17 @@ prompt_stock_batch: |
   6. continuation outlook and deterministic risk classification
 
   mechanism_status:
-  - NONE: no specific material reversal mechanism exists
-  - HYPOTHETICAL: damage is possible, but current probability is not established
-  - ACTIVE: the adverse recurring operating change is currently occurring
-  - UNUSUALLY_PROBABLE: current forward evidence makes it materially more likely
-    than an ordinary possibility
+  - NONE: no company-specific reversal mechanism was identified
+  - HYPOTHETICAL: a mechanism is plausible, but no current adverse change or
+    measurable leading indicator establishes its probability
+  - ACTIVE: reported recurring operations are already deteriorating on a
+    comparable basis
+  - UNUSUALLY_PROBABLE: a current measurable leading indicator establishes that
+    a specific adverse operating change is likely within 6-12 months
+
+  A reported recurring metric compares the company's actual operations with its
+  own prior comparable period or current guidance. A result relative to an
+  external expectation is not an operating change.
 
   normalization_probability:
   - NOT_APPLICABLE: no material temporary operating driver exists
@@ -205,28 +224,22 @@ prompt_stock_batch: |
     within 6-12 months
   - AT_LEAST_AS_LIKELY: normalization is at least as likely as continuation
 
+  The existence of a temporary event establishes exposure, not the probability
+  that it will end. REASONABLY_PROBABLE or AT_LEAST_AS_LIKELY requires current
+  evidence that normalization has begun or become measurably more likely. Do not
+  infer normalization probability merely because an event is temporary.
+
   catalyst_dependence measures damage if a material temporary operating driver
   disappears: LOW, MODERATE, or HIGH.
 
-  Probability and damage are separate. Record conditions, historical cyclicality,
-  ordinary volatility, valuation, conditional normalization, or a forecast
-  decline without a current mechanism establish exposure only. If the thesis is
-  merely "results would weaken if conditions changed," use HYPOTHETICAL,
-  NOT_ESTABLISHED, CONTINUATION_MORE_LIKELY, and LOW.
-
   PROBABILITY EVIDENCE TEST
-  probability_evidence must identify a current observable company or industry
-  indicator showing that the adverse mechanism is occurring or has become
-  unusually probable. Examples include reduced guidance, contracting orders,
-  falling utilization, active price or margin compression, announced capacity,
-  contract expirations, current inventory changes, regulatory action, or an
-  evidenced forward-market change.
-
-  An analyst EPS or revenue forecast, historical cyclicality, record conditions,
-  ordinary volatility, a difficult comparison, eventual normalization, or a
-  scenario using only "if," "could," "may," or "potential" does not establish
-  probability. A forecast may support material_effect only when a current causal
-  indicator separately establishes probability.
+  Probability requires either an adverse change already visible in comparable
+  recurring operations or a measurable leading indicator with an established
+  direction. Evidence describing only exposure, possible damage, or an external
+  expectation does not establish probability. When probability is not
+  established, use HYPOTHETICAL, NOT_ESTABLISHED, CONTINUATION_MORE_LIKELY, and
+  LOW unless the cautious temporary-dependence floor applies. Forecasts may
+  quantify material_effect but cannot establish probability.
 
   probability_indicator_type records the current observable basis for
   probability and must be one of NONE, GUIDANCE_REDUCTION, ORDER_CONTRACTION,
@@ -237,35 +250,84 @@ prompt_stock_batch: |
   not use NONE. OTHER_CURRENT_INDICATOR must name a specific current fact in
   probability_evidence.
 
-  RISK MAPPING
-  - MINIMAL: mechanism NONE, catalyst dependence LOW, unusually strong durable
-    continuation evidence, and CONTINUATION_MORE_LIKELY.
-  - LOW: mechanism NONE or HYPOTHETICAL and CONTINUATION_MORE_LIKELY. LOW may
-    coexist with material exposure when its normalization probability is not
-    established.
-  - MODERATE: mechanism ACTIVE or UNUSUALLY_PROBABLE; complete sourced current
-    fact, probability evidence, and material effect; MODERATE/HIGH materiality
-    inside 12 months; continuation remains more likely. A normalization mechanism
-    also requires REASONABLY_PROBABLE normalization.
-  - ELEVATED: the same complete causal chain, but material reversal is at least
-    as likely as continuation.
-  - SEVERE: current evidence shows the continuation thesis is broken.
+  FORWARD_MARKET_CHANGE means observable operating-market data such as a
+  contracted price, forward curve, order book, utilization outlook, announced
+  supply, or documented demand change. An analyst forecast of company revenue,
+  EPS, or stock performance is not a FORWARD_MARKET_CHANGE.
 
-  MODERATE, ELEVATED, and SEVERE require non-null current_fact,
-  probability_evidence, material_effect, reversal_evidence, risk_materiality,
-  and a 0-12 month risk_time_horizon. If any causal link is generic,
-  conditional, unsupported, or longer-term, use LOW.
+  probability_basis records the evidence category and must be one of:
+  - COMPANY_REPORTED_CHANGE: comparable company-reported operations deteriorated
+  - OBSERVABLE_MARKET_CHANGE: measurable operating-market data changed adversely
+  - REGULATORY_OR_CONTRACT_ACTION: a current binding action changes operations
+  - EXTERNAL_EXPECTATION_ONLY: evidence is limited to an outside expectation
+  - NONE: no current probability evidence exists
+
+  MODERATE or higher requires one of the first three probability_basis values.
+  EXTERNAL_EXPECTATION_ONLY and NONE normally require LOW. The sole exception is
+  the cautious temporary-dependence floor below. Classify the basis from the
+  evidence itself, not the desired risk.
+
+  CAUTIOUS TEMPORARY-DEPENDENCE FLOOR
+  Use MODERATE even without a current normalization-probability indicator when
+  all of the following are established:
+  - a specific material temporary operating condition currently supports results
+  - risk_basis is TEMPORARY_DRIVER_NORMALIZATION
+  - catalyst_dependence is MODERATE or HIGH
+  - losing the driver would materially weaken a normalized recurring metric
+    within 0-12 months
+
+  For this exposure-floor form of MODERATE, use HYPOTHETICAL,
+  NOT_ESTABLISHED, CONTINUATION_MORE_LIKELY, probability_indicator_type NONE,
+  and probability_basis NONE. current_fact and probability_evidence may be null,
+  but material_effect and a 0-12 month risk_time_horizon are required. Ordinary
+  cyclicality, volatility, or a difficult comparison does not qualify.
+
+  RISK MAPPING
+  Derive reversal_risk last from the completed fields:
+  - MINIMAL: mechanism NONE, no material temporary dependence, and unusually
+    strong continuation evidence
+  - LOW: mechanism NONE or HYPOTHETICAL, or probability_indicator_type NONE,
+    unless the cautious temporary-dependence floor applies
+  - MODERATE: mechanism ACTIVE or UNUSUALLY_PROBABLE, a valid current probability
+    indicator, qualifying probability_basis, material 0-12 month effect, and
+    CONTINUATION_MORE_LIKELY; or the cautious temporary-dependence floor
+  - ELEVATED: all MODERATE requirements plus AT_LEAST_AS_LIKELY and
+    REVERSAL_AT_LEAST_AS_LIKELY
+  - SEVERE: current recurring evidence shows the continuation thesis is broken
+
+  Outside the cautious temporary-dependence floor, a higher potential loss
+  cannot override missing probability. Never raise the classification to match
+  an unsupported narrative; derive it from the evidence fields.
+
+  EARNINGS COMPOSITION
+  For companies whose earnings or book-value growth materially depends on
+  financial, commodity, or digital-asset holdings, distinguish recurring customer
+  operations from mark-to-market gains and asset appreciation. Do not describe
+  asset appreciation or financing proceeds as durable operating drivers. Disclose
+  asset-price and dilution dependence even when current reversal probability is
+  not established.
+
+  CRYPTO DEPENDENCE
+  crypto_dependence records how much the business depends on cryptocurrency,
+  digital tokens, blockchain-network economics, or crypto-related assets:
+  - NONE: no meaningful crypto connection
+  - INCIDENTAL: peripheral and immaterial to assets, revenue, or strategy
+  - MATERIAL: materially affects assets, revenue, earnings, or strategy
+  - PRIMARY: holding, staking, mining, trading, lending, or servicing crypto is
+    the principal business model
+  Base this field on the business and balance-sheet evidence, not current token
+  direction or the desired portfolio outcome.
 
   TEMPORARY AND NONRECURRING ITEMS
   temporary_drivers contains only material temporary operating conditions that
   currently support normalized recurring results. If normalization_probability
   is NOT_APPLICABLE, temporary_drivers must be [].
 
-  Refunds, gains, settlements, credits, recoveries, and asset sales are
-  nonrecurring comparisons, not temporary operating drivers. Remove them from
-  both periods before testing recurring operations. If no separate recurring
-  deterioration remains, use risk_basis NONRECURRING_COMPARISON_ONLY,
-  mechanism NONE or HYPOTHETICAL, and LOW.
+  Nonrecurring refunds, gains, settlements, credits, recoveries, or asset sales
+  are comparison adjustments, never temporary operating drivers. Remove them
+  before evaluating recurring operations. Their disappearance cannot produce
+  MODERATE or higher unless a separately sourced normalized recurring metric is
+  already deteriorating; otherwise use NONRECURRING_COMPARISON_ONLY and LOW.
 
   risk_basis:
   - NONE
@@ -278,17 +340,14 @@ prompt_stock_batch: |
   - risk_materiality is always LOW, MODERATE, or HIGH, never null
   - reversal_mechanism is a concise string; for no qualifying mechanism write
     "No qualifying current reversal mechanism established"
-  - normalization_effect is a concise string; when no normalization is probable
-    write "No probable normalization effect established"
   - temporary_drivers is [] when no material temporary operating driver exists
   - LOW/MINIMAL normally use current_fact, probability_evidence,
-    material_effect, and reversal_evidence as null unless needed to describe a
-    hypothetical exposure
+    and material_effect as null unless needed to describe a hypothetical exposure
   - business_description is a factual 8-20 word plain-English description of
     the principal products, services, and operating market
   - industry_context is a current 12-25 word operating-industry condition, not
     broad stock-sector performance
-  - explanation is a viewer-ready company-specific passage of 35-55 words
+  - explanation is a viewer-ready company-specific passage of 30-45 words
     covering current operating evidence, a durable driver, and the
     continuation/reversal balance; business_description separately supplies
     the introductory company overview
@@ -308,11 +367,21 @@ prompt_stock_batch: |
   the operating transmission mechanism, such as CRUDE_TANKER_SPOT_RATES or
   REFINING_CRACK_SPREADS, whenever primary_risk_event_id is non-null.
 
+  COMPARABLE-COMPANY EVENT CONSISTENCY
+  When comparable candidates operate through the same material market exposure,
+  assess documented current shared events consistently. Use the same
+  risk_exposure_group for the same operating transmission mechanism even when
+  company exposure differs. If another comparable candidate is materially
+  supported by a shared event, do not assign LOW while omitting that event unless
+  current sources establish a company-specific difference such as contract
+  coverage, geography, business mix, sensitivity, costs, or operating market.
+
   FIELD LIMITS
   - industry_group: concise UPPER_SNAKE_CASE label
   - business_description: 8-20 words
   - industry_context: 12-25 words
   - risk_exposure_group: concise UPPER_SNAKE_CASE label or null
+  - crypto_dependence: NONE, INCIDENTAL, MATERIAL, or PRIMARY
   - research_incomplete_reason: at most 25 words or null
   - current_operating_evidence: at most 25 words
   - durable_drivers: 1-2 items, at most 18 words each
@@ -321,13 +390,18 @@ prompt_stock_batch: |
   - current_fact: at most 20 words or null
   - probability_evidence: at most 25 words or null
   - material_effect: at most 25 words or null
-  - reversal_evidence: at most 35 words or null
-  - normalization_effect: at most 25 words
   - company_difference: at most 25 words or null
-  - explanation: 35-55 words or null only for INCOMPLETE
+  - explanation: 30-45 words or null only for INCOMPLETE
   - sources: 1-5 distinct materially used sources
 
-  OUTPUT
+  OUTPUT COVERAGE IS MANDATORY
+  Emit one closed result block for every CANDIDATES entry. If evidence is
+  insufficient, emit INCOMPLETE. Never omit a searched candidate. Shorten field
+  values if needed to preserve complete coverage.
+  After emitting END_STOCK_RESULT for a symbol, never emit that symbol again.
+  Do not repeat, revise, or self-correct an earlier completed result block.
+
+  OUTPUT FORMAT
   Return one independently parseable JSON object per candidate, in input order.
   Do not use an enclosing array/object, Markdown, commentary, commas, or list
   delimiters between blocks. Complete each block before starting the next:
@@ -338,15 +412,13 @@ prompt_stock_batch: |
 
   Use exactly these keys:
   {
-    "qvm_rank": 1,
     "symbol": "SYMBOL",
     "research_status": "COMPLETE | INCOMPLETE",
     "research_incomplete_reason": null,
-    "eligible": true,
-    "eligibility_reason": null,
     "industry_group": "OPERATING_MARKET",
     "business_description": "Plain-English principal business description",
     "industry_context": "Current company-specific operating-industry condition",
+    "crypto_dependence": "NONE | INCIDENTAL | MATERIAL | PRIMARY",
     "current_operating_evidence": "Concrete current operating fact",
     "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE | null only when INCOMPLETE",
     "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | null only when INCOMPLETE",
@@ -360,17 +432,16 @@ prompt_stock_batch: |
     "current_fact": null,
     "probability_evidence": null,
     "probability_indicator_type": "NONE | GUIDANCE_REDUCTION | ORDER_CONTRACTION | UTILIZATION_DECLINE | PRICE_OR_MARGIN_COMPRESSION | CAPACITY_INCREASE | CONTRACT_EXPIRY | INVENTORY_CHANGE | REGULATORY_ACTION | FORWARD_MARKET_CHANGE | OTHER_CURRENT_INDICATOR",
+    "probability_basis": "COMPANY_REPORTED_CHANGE | OBSERVABLE_MARKET_CHANGE | REGULATORY_OR_CONTRACT_ACTION | EXTERNAL_EXPECTATION_ONLY | NONE",
     "material_effect": null,
-    "reversal_evidence": null,
     "risk_time_horizon": "0_3_MONTHS | 3_6_MONTHS | 6_12_MONTHS | LONGER | null",
     "risk_materiality": "LOW | MODERATE | HIGH | null only when INCOMPLETE",
-    "normalization_effect": "...",
     "company_difference": null,
     "primary_risk_event_id": null,
     "risk_exposure_group": null,
     "explanation": "...",
     "sources": [
-      {"title": "...", "date": "YYYY-MM-DD", "url": "https://...", "supports": ["CURRENT_OPERATIONS", "DURABLE_DRIVER"]}
+      {"title": "...", "date": "YYYY-MM-DD", "url": "https://..."}
     ]
   }
 

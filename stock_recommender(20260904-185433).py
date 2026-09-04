@@ -591,6 +591,47 @@ def preview_selectable_symbols(
     return preview_selected
 
 
+def partition_ranked_research_candidates(
+        ranked_pool,
+        sector_counts,
+        sector_limit,
+        batch_limit,
+        candidates_per_open_slot):
+    """Bound same-sector research while carrying every excess candidate."""
+    research_candidates = []
+    selection_batch = []
+    carried_candidates = []
+    queued_by_sector = {}
+
+    for candidate in ranked_pool:
+        sector = candidate["Sector"]
+        open_sector_slots = max(
+            0, sector_limit - sector_counts.get(sector, 0)
+        )
+        if open_sector_slots == 0:
+            selection_batch.append(candidate)
+            continue
+        sector_research_limit = (
+            open_sector_slots * candidates_per_open_slot
+        )
+        if (
+            queued_by_sector.get(sector, 0) >= sector_research_limit
+            or len(research_candidates) >= batch_limit
+        ):
+            carried_candidates.append(candidate)
+            continue
+        research_candidates.append(candidate)
+        selection_batch.append(candidate)
+        queued_by_sector[sector] = queued_by_sector.get(sector, 0) + 1
+
+    return (
+        selection_batch,
+        research_candidates,
+        carried_candidates,
+        queued_by_sector,
+    )
+
+
 def validation_error_requires_fresh_research(message):
     """Return True only when another search can materially repair the result."""
     error = str(message).lower()
@@ -3115,6 +3156,10 @@ transient_backoff_jitter_seconds = float(
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
 gemini_batch_size = int(config.get("gemini_batch_size", 5))
+max_research_candidates_per_open_sector_slot = max(
+    1,
+    int(config.get("max_research_candidates_per_open_sector_slot", 3)),
+)
 max_candidates = int(config.get("max_candidates", 50))
 target_selected_stocks = int(config.get("target_selected_stocks", 10))
 max_stocks_per_sector = int(config.get("max_stocks_per_sector", 2))
@@ -3177,6 +3222,8 @@ print(f"Stock config loaded from: {Path('stock_config.yml').resolve()}")
 print(
     "Effective Gemini settings: "
     f"batch_size={gemini_batch_size}, "
+    f"research_candidates_per_open_sector_slot="
+    f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
@@ -3390,10 +3437,19 @@ print("\nValidated market context:")
 print(json.dumps(market_context, indent=2, ensure_ascii=False))
 
 market_context_hash = stable_json_hash(market_context)
+# Output-transport wording does not change researched facts or classifications,
+# so it should not invalidate otherwise valid stock research. This preserves
+# the prior prompt hash while still applying the no-duplicate instruction to
+# every new Gemini request.
+stock_prompt_cache_text = config["prompt_stock_batch"].replace(
+    "After emitting END_STOCK_RESULT for a symbol, never emit that symbol again.\n"
+    "Do not repeat, revise, or self-correct an earlier completed result block.\n",
+    "",
+)
 stock_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
     "model": model_primary,
-    "prompt": config["prompt_stock_batch"],
+    "prompt": stock_prompt_cache_text,
 })
 stock_research_cache = load_json_object(stock_research_cache_file)
 if stock_research_cache.get("version") != cache_version:
@@ -3523,20 +3579,49 @@ def per_run_attempt_limit(symbol, needs_research):
         return max_research_attempts_per_stock
     return max_structural_repairs_per_stock
 
-for batch_start in range(0, len(candidate_records), gemini_batch_size):
+batch_start = 0
+carried_ranked_candidates = []
+while batch_start < len(candidate_records) or carried_ranked_candidates:
     if len(selected) >= target_selected_stocks:
         break
 
-    ranked_batch = candidate_records[
+    new_ranked_candidates = candidate_records[
         batch_start:batch_start + gemini_batch_size
     ]
+    batch_start += gemini_batch_size
+    ranked_pool = sorted(
+        carried_ranked_candidates + new_ranked_candidates,
+        key=lambda candidate: int(candidate["QVM Rank"]),
+    )
+    carried_ranked_candidates = []
 
-    # Stocks from sectors already full before this batch do not need research.
-    research_candidates = [
-        candidate
-        for candidate in ranked_batch
-        if sector_counts.get(candidate["Sector"], 0) < max_stocks_per_sector
-    ]
+    # A batch needs alternatives because research can exclude candidates, but
+    # sending six same-sector names for one remaining slot wastes searches.
+    # Keep the highest-QVM alternatives within the configured per-slot limit
+    # and carry excess candidates forward. They are reconsidered after the
+    # current results update sector capacity, so they are never mislabeled as
+    # invalid or permanently skipped.
+    (
+        ranked_batch,
+        research_candidates,
+        carried_ranked_candidates,
+        queued_by_sector,
+    ) = partition_ranked_research_candidates(
+        ranked_pool,
+        sector_counts,
+        max_stocks_per_sector,
+        gemini_batch_size,
+        max_research_candidates_per_open_sector_slot,
+    )
+
+    if carried_ranked_candidates:
+        print(
+            "Deferred excess same-sector research candidates: "
+            + ", ".join(
+                str(candidate["Symbol"]).upper()
+                for candidate in carried_ranked_candidates
+            )
+        )
 
     research_by_symbol = {}
     uncached_candidates = []
@@ -3582,7 +3667,7 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             str(candidate["Symbol"]).upper()
             for candidate in uncached_candidates
         }
-        future_start = batch_start + gemini_batch_size
+        future_start = batch_start
         for future_candidate in candidate_records[future_start:]:
             if len(uncached_candidates) >= desired_research_count:
                 break
@@ -3592,6 +3677,16 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             if sector_counts.get(future_candidate["Sector"], 0) >= (
                 max_stocks_per_sector
             ):
+                continue
+            future_sector = future_candidate["Sector"]
+            future_open_slots = (
+                max_stocks_per_sector - sector_counts.get(future_sector, 0)
+            )
+            future_sector_limit = (
+                future_open_slots
+                * max_research_candidates_per_open_sector_slot
+            )
+            if queued_by_sector.get(future_sector, 0) >= future_sector_limit:
                 continue
 
             future_cache_key = stable_json_hash({
@@ -3611,6 +3706,9 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             cache_keys_by_symbol[future_symbol] = future_cache_key
             uncached_candidates.append(future_candidate)
             queued_symbols.add(future_symbol)
+            queued_by_sector[future_sector] = (
+                queued_by_sector.get(future_sector, 0) + 1
+            )
 
         if len(uncached_candidates) > ordinary_uncached_count:
             print(
@@ -3986,6 +4084,12 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 str(candidate["Symbol"]).upper()
                 for candidate in next_pending
             }
+            retry_queued_by_sector = {}
+            for retry_candidate in next_pending:
+                retry_sector = retry_candidate["Sector"]
+                retry_queued_by_sector[retry_sector] = (
+                    retry_queued_by_sector.get(retry_sector, 0) + 1
+                )
             for future_candidate in candidate_records:
                 if len(next_pending) >= gemini_batch_size:
                     break
@@ -4000,6 +4104,20 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     continue
                 if sector_counts.get(future_candidate["Sector"], 0) >= (
                         max_stocks_per_sector
+                ):
+                    continue
+                future_sector = future_candidate["Sector"]
+                future_open_slots = (
+                    max_stocks_per_sector
+                    - sector_counts.get(future_sector, 0)
+                )
+                future_sector_limit = (
+                    future_open_slots
+                    * max_research_candidates_per_open_sector_slot
+                )
+                if (
+                    retry_queued_by_sector.get(future_sector, 0)
+                    >= future_sector_limit
                 ):
                     continue
 
@@ -4044,6 +4162,9 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 next_pending.append(future_candidate)
                 cache_keys_by_symbol[future_symbol] = future_cache_key
                 batched_symbols.add(future_symbol)
+                retry_queued_by_sector[future_sector] = (
+                    retry_queued_by_sector.get(future_sector, 0) + 1
+                )
 
             added_symbols = [
                 str(candidate["Symbol"]).upper()

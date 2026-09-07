@@ -14,6 +14,44 @@ from html import escape
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
+STOCK_RUN_DIAGNOSTICS_FILE = CACHE_DIR / "stock_run_diagnostics.json"
+
+gemini_call_diagnostics = []
+duplicate_result_diagnostics = []
+runtime_reconciliation_diagnostics = []
+
+DECISION_DIAGNOSTIC_FIELDS = (
+    "research_status",
+    "crypto_dependence",
+    "reversal_risk",
+    "risk_basis",
+    "catalyst_dependence",
+    "mechanism_status",
+    "normalization_probability",
+    "continuation_outlook",
+    "probability_indicator_type",
+    "probability_basis",
+    "risk_time_horizon",
+    "risk_materiality",
+    "primary_risk_event_id",
+    "risk_exposure_group",
+)
+EVIDENCE_DIAGNOSTIC_FIELDS = (
+    "current_operating_evidence",
+    "durable_drivers",
+    "temporary_drivers",
+    "reversal_mechanism",
+    "current_fact",
+    "probability_evidence",
+    "material_effect",
+    "company_difference",
+    "sources",
+)
+PRESENTATION_DIAGNOSTIC_FIELDS = (
+    "business_description",
+    "industry_context",
+    "explanation",
+)
 
 def cache_file_path(filename):
     """Route every relative cache filename through the caches directory."""
@@ -454,6 +492,17 @@ def extract_gemini_metadata(response):
 
 
 def print_gemini_metadata(stage, metadata):
+    gemini_call_diagnostics.append({
+        "stage": stage,
+        "prompt_tokens": metadata["prompt_tokens"],
+        "tool_tokens": metadata["tool_tokens"],
+        "cached_tokens": metadata["cached_tokens"],
+        "thinking_tokens": metadata["thinking_tokens"],
+        "output_tokens": metadata["output_tokens"],
+        "total_tokens": metadata["total_tokens"],
+        "searches_exposed": len(metadata["search_queries"]),
+        "grounding_chunks_exposed": len(metadata["grounding_chunks"]),
+    })
     print(
         f"Gemini usage [{stage}]:",
         f"prompt_tokens={metadata['prompt_tokens']},",
@@ -591,6 +640,47 @@ def preview_selectable_symbols(
     return preview_selected
 
 
+def partition_ranked_research_candidates(
+        ranked_pool,
+        sector_counts,
+        sector_limit,
+        batch_limit,
+        candidates_per_open_slot):
+    """Bound same-sector research while carrying every excess candidate."""
+    research_candidates = []
+    selection_batch = []
+    carried_candidates = []
+    queued_by_sector = {}
+
+    for candidate in ranked_pool:
+        sector = candidate["Sector"]
+        open_sector_slots = max(
+            0, sector_limit - sector_counts.get(sector, 0)
+        )
+        if open_sector_slots == 0:
+            selection_batch.append(candidate)
+            continue
+        sector_research_limit = (
+            open_sector_slots * candidates_per_open_slot
+        )
+        if (
+            queued_by_sector.get(sector, 0) >= sector_research_limit
+            or len(research_candidates) >= batch_limit
+        ):
+            carried_candidates.append(candidate)
+            continue
+        research_candidates.append(candidate)
+        selection_batch.append(candidate)
+        queued_by_sector[sector] = queued_by_sector.get(sector, 0) + 1
+
+    return (
+        selection_batch,
+        research_candidates,
+        carried_candidates,
+        queued_by_sector,
+    )
+
+
 def validation_error_requires_fresh_research(message):
     """Return True only when another search can materially repair the result."""
     error = str(message).lower()
@@ -605,8 +695,42 @@ def validation_error_requires_fresh_research(message):
         "source without a valid url",
         "source without a title",
         "documented shared event",
+        "issuer identity conflict",
     )
     return any(marker in error for marker in research_markers)
+
+
+def incomplete_identity_conflicts_with_current_market_data(reason, candidate):
+    """Detect a stale issuer-history claim contradicted by screened market data."""
+    identity_markers = (
+        "was acquired",
+        "no standalone",
+        "no longer standalone",
+        "no longer publicly traded",
+        "not publicly traded",
+        "was delisted",
+        "has been delisted",
+        "ticker is inactive",
+        "inactive ticker",
+        "company no longer exists",
+        "ceased operating",
+    )
+    normalized_reason = " ".join(str(reason).lower().split())
+    if not any(marker in normalized_reason for marker in identity_markers):
+        return False
+
+    positive_current_fields = 0
+    for field in ("Price", "Avg Vol (3M)", "Market Cap", "HistoryDays"):
+        try:
+            value = float(candidate.get(field))
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(value) and value > 0:
+            positive_current_fields += 1
+
+    # Multiple current fields avoid treating one stale quote as proof that an
+    # issuer is active.
+    return positive_current_fields >= 2
 
 
 def parse_json_response(text):
@@ -719,7 +843,52 @@ def extract_delimited_stock_results(text):
     return results
 
 
-def deduplicate_stock_results(results, expected_candidates):
+def compact_diagnostic_value(value, maximum=120):
+    rendered = json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+    return rendered if len(rendered) <= maximum else rendered[:maximum - 3] + "..."
+
+
+def stock_result_field_differences(first, repeated):
+    """Classify duplicate-block differences without changing either result."""
+    changed_fields = sorted(
+        field
+        for field in set(first).union(repeated)
+        if field != "symbol" and first.get(field) != repeated.get(field)
+    )
+    decision_fields = [
+        field for field in changed_fields
+        if field in DECISION_DIAGNOSTIC_FIELDS
+    ]
+    evidence_fields = [
+        field for field in changed_fields
+        if field in EVIDENCE_DIAGNOSTIC_FIELDS
+    ]
+    presentation_fields = [
+        field for field in changed_fields
+        if field in PRESENTATION_DIAGNOSTIC_FIELDS
+    ]
+    categorized = set(
+        decision_fields + evidence_fields + presentation_fields
+    )
+    return {
+        "changed_fields": changed_fields,
+        "decision_fields": decision_fields,
+        "evidence_fields": evidence_fields,
+        "presentation_fields": presentation_fields,
+        "other_fields": [
+            field for field in changed_fields if field not in categorized
+        ],
+        "decision_changes": {
+            field: {
+                "retained": first.get(field),
+                "repeated": repeated.get(field),
+            }
+            for field in decision_fields
+        },
+    }
+
+
+def deduplicate_stock_results(results, expected_candidates, stage=None):
     """Keep one recovered object per symbol in authoritative input order."""
     expected_order = [
         str(candidate["Symbol"]).strip().upper()
@@ -729,6 +898,8 @@ def deduplicate_stock_results(results, expected_candidates):
     unsymbolized = []
     duplicate_symbols = []
     conflicting_symbols = []
+    duplicate_counts = {}
+    field_differences_by_symbol = {}
 
     for result in results:
         symbol = str(result.get("symbol", "")).strip().upper()
@@ -742,8 +913,26 @@ def deduplicate_stock_results(results, expected_candidates):
             continue
 
         duplicate_symbols.append(symbol)
+        duplicate_counts[symbol] = duplicate_counts.get(symbol, 0) + 1
         if result != first_by_symbol[symbol]:
             conflicting_symbols.append(symbol)
+            differences = stock_result_field_differences(
+                first_by_symbol[symbol], result
+            )
+            existing = field_differences_by_symbol.get(symbol)
+            if existing is None:
+                field_differences_by_symbol[symbol] = differences
+            else:
+                for category in (
+                    "changed_fields", "decision_fields", "evidence_fields",
+                    "presentation_fields", "other_fields",
+                ):
+                    existing[category] = sorted(set(
+                        existing[category] + differences[category]
+                    ))
+                existing["decision_changes"].update(
+                    differences["decision_changes"]
+                )
 
     if duplicate_symbols:
         print(
@@ -756,6 +945,40 @@ def deduplicate_stock_results(results, expected_candidates):
             "the first complete block: "
             + ", ".join(dict.fromkeys(conflicting_symbols))
         )
+        for symbol in dict.fromkeys(conflicting_symbols):
+            differences = field_differences_by_symbol[symbol]
+            print(f"Duplicate result differences [{symbol}]:")
+            for category, label in (
+                ("decision_fields", "decision-critical"),
+                ("evidence_fields", "evidence"),
+                ("presentation_fields", "presentation-only"),
+                ("other_fields", "other"),
+            ):
+                fields = differences[category]
+                if fields:
+                    print(f"  {label}: {', '.join(fields)}")
+            for field, values in differences["decision_changes"].items():
+                print(
+                    f"    {field}: retained "
+                    f"{compact_diagnostic_value(values['retained'])} -> "
+                    f"repeated {compact_diagnostic_value(values['repeated'])}"
+                )
+
+    for symbol in dict.fromkeys(duplicate_symbols):
+        differences = field_differences_by_symbol.get(symbol, {
+            "changed_fields": [],
+            "decision_fields": [],
+            "evidence_fields": [],
+            "presentation_fields": [],
+            "other_fields": [],
+            "decision_changes": {},
+        })
+        duplicate_result_diagnostics.append({
+            "stage": stage,
+            "symbol": symbol,
+            "extra_blocks": duplicate_counts.get(symbol, 0),
+            **differences,
+        })
 
     ordered = [
         first_by_symbol.pop(symbol)
@@ -1021,6 +1244,13 @@ def downgrade_unproven_material_risk(result, symbol, reason):
         f"Reconciled {symbol} {prior_risk} to LOW without another Gemini call: "
         f"{reason}."
     )
+    runtime_reconciliation_diagnostics.append({
+        "symbol": symbol,
+        "type": "risk_downgrade",
+        "from": prior_risk,
+        "to": "LOW",
+        "reason": reason,
+    })
 
 
 def validate_stock_batch(data, expected_candidates, minimum_sources=2):
@@ -1058,6 +1288,16 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                 result.get("research_incomplete_reason")
                 or "required current evidence was not established"
             ).strip()
+            if incomplete_identity_conflicts_with_current_market_data(
+                reason,
+                expected,
+            ):
+                reason = (
+                    "issuer identity conflict: Python has current market data "
+                    "for this security; verify its current issuer status, "
+                    "including any spin-off, relisting, or reorganization, "
+                    "using an official current source"
+                )
             raise ValueError(f"{symbol} research incomplete: {reason}")
 
         reversal_risk = str(result.get("reversal_risk", "")).upper()
@@ -1143,6 +1383,13 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                 f"{raw_continuation_outlook!r} -> "
                 "'CONTINUATION_MORE_LIKELY'."
             )
+            runtime_reconciliation_diagnostics.append({
+                "symbol": symbol,
+                "type": "enum_alias_normalization",
+                "field": "continuation_outlook",
+                "from": raw_continuation_outlook,
+                "to": "CONTINUATION_MORE_LIKELY",
+            })
             continuation_outlook = "CONTINUATION_MORE_LIKELY"
 
         if continuation_outlook not in allowed_continuation_outlooks:
@@ -1374,6 +1621,19 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             "NO_CURRENT_EVIDENCE": "NONE",
         }.get(probability_basis, probability_basis)
         if (
+                probability_basis == "NONRECURRING_COMPARISON_ONLY"
+                and reversal_risk in {"MINIMAL", "LOW"}
+        ):
+            # This is a risk_basis value, not probability evidence. For an
+            # already LOW/MINIMAL result it unambiguously means no qualifying
+            # probability basis was established, so repair the misplaced enum
+            # locally instead of spending a Gemini structural-repair call.
+            probability_basis = "NONE"
+            print(
+                f"Normalized misplaced nonrecurring probability_basis to "
+                f"NONE for {symbol}."
+            )
+        if (
                 not probability_basis
                 and probability_indicator_type == "NONE"
                 and reversal_risk in {"MINIMAL", "LOW"}
@@ -1436,6 +1696,12 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
                 f"Applied cautious temporary-dependence floor to {symbol}: "
                 f"{prior_risk}->MODERATE without another Gemini call."
             )
+            runtime_reconciliation_diagnostics.append({
+                "symbol": symbol,
+                "type": "cautious_temporary_dependence_floor",
+                "from": prior_risk,
+                "to": "MODERATE",
+            })
 
         reconciliation_reason = None
         if reversal_risk in evidence_required_risks and not exposure_floor:
@@ -1710,11 +1976,32 @@ def validate_shared_event_consistency(result, comparison_results):
             str(result.get("company_difference") or "").strip()
             or str(other.get("company_difference") or "").strip()
         ):
-            raise ValueError(
-                f"{result.get('symbol')} differs from {other.get('symbol')} on "
-                f"shared event {event_id} ({', '.join(differences)}) without "
-                "a sourced company_difference."
+            decision_fields = (
+                "reversal_risk", "risk_basis", "catalyst_dependence"
             )
+            decision_differences = [
+                field for field in decision_fields
+                if other.get(field) != result.get(field)
+            ]
+            if decision_differences:
+                raise ValueError(
+                    f"{result.get('symbol')} differs from "
+                    f"{other.get('symbol')} on shared event {event_id} "
+                    f"({', '.join(differences + decision_differences)}) "
+                    "without a sourced company_difference."
+                )
+            print(
+                f"Accepted non-decision shared-event label difference for "
+                f"{result.get('symbol')} versus {other.get('symbol')} on "
+                f"{event_id}: {', '.join(differences)}."
+            )
+            runtime_reconciliation_diagnostics.append({
+                "symbol": result.get("symbol"),
+                "type": "accepted_nondecision_shared_event_difference",
+                "compared_with": other.get("symbol"),
+                "event_id": event_id,
+                "fields": differences,
+            })
 
 
 def call_gemini_json(
@@ -1828,6 +2115,7 @@ def call_gemini_json(
                     delimited_results = deduplicate_stock_results(
                         delimited_results,
                         required_search_candidates or [],
+                        stage=stage,
                     )
                     data = {"results": delimited_results}
                     print(
@@ -2009,7 +2297,9 @@ def save_cache(cache):
 # the existing JSON caches.
 TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
-TOP_QVM_CACHE_VERSION = 1
+# Increment when QVM inputs or scoring semantics change so a prior cached
+# ranking cannot bypass the updated calculation.
+TOP_QVM_CACHE_VERSION = 2
 
 
 def load_top_qvm_cache():
@@ -2128,7 +2418,14 @@ def append_qvm_data_yfinance(
                 data_map[symbol] = {}
                 continue
 
-            ret_1y = ((close.iloc[-1] / close.iloc[0]) - 1) * 100
+            # Do not label a recent listing's first-available-price return as
+            # a one-year return. Approximately 230 sessions tolerates ordinary
+            # exchange holidays and isolated missing observations while still
+            # requiring close to a full trading year of history.
+            ret_1y = (
+                ((close.iloc[-1] / close.iloc[0]) - 1) * 100
+                if len(close) >= 230 else None
+            )
             ret_9m = ((close.iloc[-1] / close.iloc[-189]) - 1) * 100 if len(close) > 189 else None
             ret_6m = ((close.iloc[-1] / close.iloc[-126]) - 1) * 100 if len(close) > 126 else None
             ret_3m = ((close.iloc[-1] / close.iloc[-63]) - 1) * 100 if len(close) > 63 else None
@@ -2141,6 +2438,7 @@ def append_qvm_data_yfinance(
 
             data_map[symbol] = {
                 "Price": latest_price,                  # ← Added
+                "HistoryDays": len(close),
                 "1M Return": ret_1m,
                 "3M Return": ret_3m,
                 "6M Return": ret_6m,
@@ -2220,6 +2518,7 @@ def append_qvm_data_yfinance(
         "Sector", "Price", "ROE", "ROA", "ProfitMargin", "GrossMargin",
         "DebtToEquity", "CurrentRatio", "InterestCoverage",
         "PE", "PriceToBook", "PEG", "EV_EBITDA", "EV_Revenue",
+        "HistoryDays",
         "1M Return", "3M Return", "6M Return", "9M Return", "1Y Return"
     ]
 
@@ -2249,10 +2548,8 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
       3. Reasonable valuation relative to the universe.
       4. Manageable balance-sheet risk.
 
-    Default weights:
-      Quality  = 45%
-      Value    = 15%
-      Momentum = 40%
+    Function defaults are approximately balanced. The production caller
+    explicitly uses Quality 45%, Value 10%, and Momentum 45%.
     """
 
     df = df.copy()
@@ -2351,6 +2648,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         )
 
         valid_quality_count = q.notna().sum(axis=1)
+        df['QualityMetricCount'] = valid_quality_count.astype(int)
 
         # Mean only across available metrics.
         quality = q_rank.mean(
@@ -2423,6 +2721,15 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     else:
         df['QualityScore'] = 50
+        df['QualityMetricCount'] = 0
+
+    # Debt is used as a penalty rather than a positively ranked quality
+    # metric. Expose its availability so missing leverage data is visible in
+    # diagnostics without changing the established scoring behavior.
+    df['DebtDataAvailable'] = (
+        df['DebtToEquity'].notna()
+        if 'DebtToEquity' in df.columns else False
+    )
 
     # Minimum quality filter.
     if min_quality > 0:
@@ -2484,6 +2791,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         valid_value_count = (
             value_df.notna().sum(axis=1)
         )
+        df['ValueMetricCount'] = valid_value_count.astype(int)
 
         # Lower multiple = better.
         value_rank = value_df.apply(
@@ -2534,6 +2842,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     else:
         df['ValueScore'] = 50
+        df['ValueMetricCount'] = 0
 
     # =========================================================
     # 3. MOMENTUM SCORE
@@ -2594,6 +2903,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         valid_momentum_count = (
             m.notna().sum(axis=1)
         )
+        df['MomentumMetricCount'] = valid_momentum_count.astype(int)
 
         trend_alignment = (
                                   positive_windows /
@@ -2727,6 +3037,21 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
                 0.10 * recent_rank
         )
 
+        # Established listings normally provide all five windows. Pull sparse
+        # histories gently toward neutral so a recent listing cannot receive a
+        # top persistence score from only one or two cumulative returns.
+        momentum_confidence = np.select(
+            [
+                valid_momentum_count >= 4,
+                valid_momentum_count == 3,
+                valid_momentum_count == 2,
+                valid_momentum_count == 1,
+            ],
+            [1.00, 0.90, 0.75, 0.60],
+            default=0.50,
+        )
+        momentum = 50 + (momentum - 50) * momentum_confidence
+
         df['MomentumScore'] = (
             momentum
             .fillna(50)
@@ -2735,6 +3060,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     else:
         df['MomentumScore'] = 50
+        df['MomentumMetricCount'] = 0
 
     # =========================================================
     # 4. ADDITIONAL MOMENTUM PENALTIES
@@ -2875,6 +3201,100 @@ def build_context_review(decision_ledger):
             decision["explanation"],
         ])
     return "CONTEXT REVIEW\n\n" + pd.DataFrame(rows, columns=headers).to_markdown(index=False)
+
+
+def build_classification_snapshots(candidate_records, research_by_symbol):
+    candidates = {
+        str(candidate["Symbol"]).upper(): candidate
+        for candidate in candidate_records
+    }
+    snapshots = {}
+    for symbol, research in research_by_symbol.items():
+        candidate = candidates.get(symbol, {})
+        snapshots[symbol] = {
+            "qvm_rank": candidate.get("QVM Rank"),
+            "qvm_score": candidate.get("QVMScore"),
+            **{
+                field: research.get(field)
+                for field in DECISION_DIAGNOSTIC_FIELDS
+            },
+            "source_count": len(research.get("sources") or []),
+        }
+    return snapshots
+
+
+def compare_classification_snapshots(previous, current):
+    drift = []
+    comparable_fields = ("qvm_rank", "qvm_score") + DECISION_DIAGNOSTIC_FIELDS
+    for symbol in sorted(set(previous).intersection(current)):
+        changes = {
+            field: {
+                "previous": previous[symbol].get(field),
+                "current": current[symbol].get(field),
+            }
+            for field in comparable_fields
+            if previous[symbol].get(field) != current[symbol].get(field)
+        }
+        if changes:
+            drift.append({
+                "symbol": symbol,
+                "changed_fields": sorted(changes),
+                "changes": changes,
+            })
+    return drift
+
+
+def build_decision_snapshots(decision_ledger):
+    return {
+        decision["symbol"]: {
+            "qvm_rank": decision["qvm_rank"],
+            "sector_group": decision["sector_group"],
+            "status": decision["status"],
+        }
+        for decision in decision_ledger
+    }
+
+
+def build_portfolio_changes(
+        previous_selected, current_selected, previous_decisions,
+        current_decisions, classification_drift):
+    drift_by_symbol = {
+        item["symbol"]: item["changed_fields"]
+        for item in classification_drift
+    }
+    added = []
+    removed = []
+    previous_set = set(previous_selected)
+    current_set = set(current_selected)
+    for symbol in current_selected:
+        if symbol not in previous_set:
+            added.append({
+                "symbol": symbol,
+                "previous_status": previous_decisions.get(symbol, {}).get(
+                    "status", "not present"
+                ),
+                "current_status": current_decisions.get(symbol, {}).get(
+                    "status", "not present"
+                ),
+                "classification_fields_changed": drift_by_symbol.get(
+                    symbol, []
+                ),
+            })
+    for symbol in previous_selected:
+        if symbol not in current_set:
+            removed.append({
+                "symbol": symbol,
+                "previous_status": previous_decisions.get(symbol, {}).get(
+                    "status", "not present"
+                ),
+                "current_status": current_decisions.get(symbol, {}).get(
+                    "status", "not present"
+                ),
+                "classification_fields_changed": drift_by_symbol.get(
+                    symbol, []
+                ),
+            })
+    return {"added": added, "removed": removed}
 
 
 def format_number(value):
@@ -3092,6 +3512,7 @@ start_time = time.perf_counter()
 
 with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
+previous_run_diagnostics = load_json_object(STOCK_RUN_DIAGNOSTICS_FILE)
 url = config["url"]
 min_52_week_change = config["min_52_week_change"]
 max_retries = config["max_retries"]
@@ -3115,6 +3536,10 @@ transient_backoff_jitter_seconds = float(
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
 gemini_batch_size = int(config.get("gemini_batch_size", 5))
+max_research_candidates_per_open_sector_slot = max(
+    1,
+    int(config.get("max_research_candidates_per_open_sector_slot", 3)),
+)
 max_candidates = int(config.get("max_candidates", 50))
 target_selected_stocks = int(config.get("target_selected_stocks", 10))
 max_stocks_per_sector = int(config.get("max_stocks_per_sector", 2))
@@ -3177,6 +3602,8 @@ print(f"Stock config loaded from: {Path('stock_config.yml').resolve()}")
 print(
     "Effective Gemini settings: "
     f"batch_size={gemini_batch_size}, "
+    f"research_candidates_per_open_sector_slot="
+    f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
@@ -3246,10 +3673,15 @@ cols_for_eval = [
     'Symbol',
     'QVMScore',
     'QualityScore',
+    'QualityMetricCount',
     'ValueScore',
+    'ValueMetricCount',
     'MomentumScore',
+    'MomentumMetricCount',
+    'HistoryDays',
     'ROE',
     'DebtToEquity',
+    'DebtDataAvailable',
     'EV_EBITDA',
     'PEG',
     '3M Return',
@@ -3266,8 +3698,8 @@ essential_columns_for_gemini = [
     # Identity
     "Symbol", "Name", "Sector",
 
-    # Size / context
-    "Market Cap",
+    # Current trading identity / size context
+    "Price", "Avg Vol (3M)", "Market Cap", "HistoryDays",
 
     # Core QVM output (most important)
     "QVMScore",
@@ -3390,10 +3822,19 @@ print("\nValidated market context:")
 print(json.dumps(market_context, indent=2, ensure_ascii=False))
 
 market_context_hash = stable_json_hash(market_context)
+# Output-transport wording does not change researched facts or classifications,
+# so it should not invalidate otherwise valid stock research. This preserves
+# the prior prompt hash while still applying the no-duplicate instruction to
+# every new Gemini request.
+stock_prompt_cache_text = config["prompt_stock_batch"].replace(
+    "After emitting END_STOCK_RESULT for a symbol, never emit that symbol again.\n"
+    "Do not repeat, revise, or self-correct an earlier completed result block.\n",
+    "",
+)
 stock_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
     "model": model_primary,
-    "prompt": config["prompt_stock_batch"],
+    "prompt": stock_prompt_cache_text,
 })
 stock_research_cache = load_json_object(stock_research_cache_file)
 if stock_research_cache.get("version") != cache_version:
@@ -3481,6 +3922,8 @@ for symbol, cached_result in list(validated_cached_research.items()):
 if cache_consistency_changed:
     save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
+initial_validated_cache_symbols = set(validated_cached_research)
+
 cached_preview_symbols = preview_selectable_symbols(
     candidate_records,
     validated_cached_research,
@@ -3513,6 +3956,9 @@ prior_invalid_results_by_symbol = {}
 research_attempts_by_symbol = {}
 repair_attempts_by_symbol = {}
 deferred_symbols_this_run = set()
+unsearched_missing_refunds_this_run = set()
+batch_research_diagnostics = []
+normalization_diagnostics_by_symbol = {}
 
 
 def per_run_attempt_limit(symbol, needs_research):
@@ -3523,20 +3969,49 @@ def per_run_attempt_limit(symbol, needs_research):
         return max_research_attempts_per_stock
     return max_structural_repairs_per_stock
 
-for batch_start in range(0, len(candidate_records), gemini_batch_size):
+batch_start = 0
+carried_ranked_candidates = []
+while batch_start < len(candidate_records) or carried_ranked_candidates:
     if len(selected) >= target_selected_stocks:
         break
 
-    ranked_batch = candidate_records[
+    new_ranked_candidates = candidate_records[
         batch_start:batch_start + gemini_batch_size
     ]
+    batch_start += gemini_batch_size
+    ranked_pool = sorted(
+        carried_ranked_candidates + new_ranked_candidates,
+        key=lambda candidate: int(candidate["QVM Rank"]),
+    )
+    carried_ranked_candidates = []
 
-    # Stocks from sectors already full before this batch do not need research.
-    research_candidates = [
-        candidate
-        for candidate in ranked_batch
-        if sector_counts.get(candidate["Sector"], 0) < max_stocks_per_sector
-    ]
+    # A batch needs alternatives because research can exclude candidates, but
+    # sending six same-sector names for one remaining slot wastes searches.
+    # Keep the highest-QVM alternatives within the configured per-slot limit
+    # and carry excess candidates forward. They are reconsidered after the
+    # current results update sector capacity, so they are never mislabeled as
+    # invalid or permanently skipped.
+    (
+        ranked_batch,
+        research_candidates,
+        carried_ranked_candidates,
+        queued_by_sector,
+    ) = partition_ranked_research_candidates(
+        ranked_pool,
+        sector_counts,
+        max_stocks_per_sector,
+        gemini_batch_size,
+        max_research_candidates_per_open_sector_slot,
+    )
+
+    if carried_ranked_candidates:
+        print(
+            "Deferred excess same-sector research candidates: "
+            + ", ".join(
+                str(candidate["Symbol"]).upper()
+                for candidate in carried_ranked_candidates
+            )
+        )
 
     research_by_symbol = {}
     uncached_candidates = []
@@ -3582,7 +4057,7 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             str(candidate["Symbol"]).upper()
             for candidate in uncached_candidates
         }
-        future_start = batch_start + gemini_batch_size
+        future_start = batch_start
         for future_candidate in candidate_records[future_start:]:
             if len(uncached_candidates) >= desired_research_count:
                 break
@@ -3592,6 +4067,16 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             if sector_counts.get(future_candidate["Sector"], 0) >= (
                 max_stocks_per_sector
             ):
+                continue
+            future_sector = future_candidate["Sector"]
+            future_open_slots = (
+                max_stocks_per_sector - sector_counts.get(future_sector, 0)
+            )
+            future_sector_limit = (
+                future_open_slots
+                * max_research_candidates_per_open_sector_slot
+            )
+            if queued_by_sector.get(future_sector, 0) >= future_sector_limit:
                 continue
 
             future_cache_key = stable_json_hash({
@@ -3611,6 +4096,9 @@ for batch_start in range(0, len(candidate_records), gemini_batch_size):
             cache_keys_by_symbol[future_symbol] = future_cache_key
             uncached_candidates.append(future_candidate)
             queued_symbols.add(future_symbol)
+            queued_by_sector[future_sector] = (
+                queued_by_sector.get(future_sector, 0) + 1
+            )
 
         if len(uncached_candidates) > ordinary_uncached_count:
             print(
@@ -3758,6 +4246,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             stock_prompt = (
                 config["prompt_stock_batch"]
                 + retry_correction
+                + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
                 + "\n\nMARKET_CONTEXT:\n"
                 + json.dumps(market_context, ensure_ascii=False)
                 + "\n\nPRIOR_RESEARCH_DECISIONS:\n"
@@ -3766,7 +4255,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 + json.dumps(pending_candidates, ensure_ascii=False)
             )
             stage = (
-                f"stock batch ranks {pending_candidates[0]['QVM Rank']}-"
+                f"stock batch containing {len(pending_candidates)} stocks, "
+                f"spanning QVM ranks {pending_candidates[0]['QVM Rank']}-"
                 f"{pending_candidates[-1]['QVM Rank']}"
             )
             if research_round > 1:
@@ -3829,6 +4319,21 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             next_pending = []
             next_errors = {}
             exhausted_errors = {}
+            batch_stats = {
+                "stage": stage,
+                "candidates_sent": len(pending_candidates),
+                "fresh_research_requested": len(requested_research_symbols),
+                "company_searches_exposed": len(
+                    batch_metadata["search_queries"]
+                ),
+                "results_returned": len(results_by_symbol),
+                "validated": 0,
+                "missing": len(missing_response_symbols),
+                "incomplete": 0,
+                "structural_repairs_needed": 0,
+                "genuine_repeated_searches": repeated_searches,
+                "missing_unsearched_attempts_refunded": 0,
+            }
 
             for candidate in pending_candidates:
                 symbol = str(candidate["Symbol"]).upper()
@@ -3836,6 +4341,28 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 if result is None:
                     error_message = "result was missing from the response"
                     research_failures_by_symbol[symbol] = error_message
+                    if (
+                        symbol not in unsearched_missing_refunds_this_run
+                        and candidate_search_count(
+                            batch_metadata["search_queries"], candidate
+                        ) == 0
+                    ):
+                        research_attempts_by_symbol[symbol] = max(
+                            0,
+                            research_attempts_by_symbol.get(symbol, 0) - 1,
+                        )
+                        unsearched_missing_refunds_this_run.add(symbol)
+                        researched_symbols_this_run.discard(symbol)
+                        stock_search_attempts_this_run = max(
+                            0, stock_search_attempts_this_run - 1
+                        )
+                        batch_stats[
+                            "missing_unsearched_attempts_refunded"
+                        ] += 1
+                        print(
+                            f"Did not charge {symbol} a research attempt: "
+                            "no result or company-specific search was exposed."
+                        )
                     attempt_limit = per_run_attempt_limit(symbol, True)
                     can_retry = (
                         research_round < max_validation_rounds
@@ -3849,6 +4376,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         exhausted_errors[symbol] = error_message
                     continue
 
+                raw_result = json.loads(json.dumps(result, default=str))
                 minimum_sources = minimum_sources_for_candidate(
                     batch_metadata["search_queries"], candidate
                 )
@@ -3869,6 +4397,10 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     prior_invalid_results_by_symbol[symbol] = result
                     research_failures_by_symbol[symbol] = str(exc)
                     needs_research = validation_error_requires_fresh_research(exc)
+                    if "research incomplete" in str(exc).lower():
+                        batch_stats["incomplete"] += 1
+                    if not needs_research:
+                        batch_stats["structural_repairs_needed"] += 1
                     attempts_used = (
                         research_attempts_by_symbol.get(symbol, 0)
                         if needs_research
@@ -3916,6 +4448,22 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         )
                     continue
 
+                batch_stats["validated"] += 1
+                normalized_fields = {
+                    field: {
+                        "raw": raw_result.get(field),
+                        "final": result.get(field),
+                    }
+                    for field in DECISION_DIAGNOSTIC_FIELDS
+                    if raw_result.get(field) != result.get(field)
+                }
+                if normalized_fields:
+                    normalization_diagnostics_by_symbol[symbol] = {
+                        "symbol": symbol,
+                        "changed_fields": sorted(normalized_fields),
+                        "changes": normalized_fields,
+                    }
+
                 prior_invalid_results_by_symbol.pop(symbol, None)
                 stock_research_cache["deferred_entries"].pop(
                     cache_keys_by_symbol[symbol], None
@@ -3936,6 +4484,23 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         "tool_tokens": batch_metadata["tool_tokens"],
                     },
                 }
+
+            batch_research_diagnostics.append(batch_stats)
+            print("Batch research summary:")
+            for field, label in (
+                ("candidates_sent", "candidates sent"),
+                ("company_searches_exposed", "company searches exposed"),
+                ("results_returned", "results returned"),
+                ("validated", "results validated"),
+                ("incomplete", "incomplete research"),
+                ("structural_repairs_needed", "structural repairs needed"),
+                ("genuine_repeated_searches", "genuine repeated searches"),
+                (
+                    "missing_unsearched_attempts_refunded",
+                    "missing/unsearched attempts refunded",
+                ),
+            ):
+                print(f"  {label}: {batch_stats[field]}")
 
             save_json_object_atomic(
                 stock_research_cache_file, stock_research_cache
@@ -3986,6 +4551,12 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 str(candidate["Symbol"]).upper()
                 for candidate in next_pending
             }
+            retry_queued_by_sector = {}
+            for retry_candidate in next_pending:
+                retry_sector = retry_candidate["Sector"]
+                retry_queued_by_sector[retry_sector] = (
+                    retry_queued_by_sector.get(retry_sector, 0) + 1
+                )
             for future_candidate in candidate_records:
                 if len(next_pending) >= gemini_batch_size:
                     break
@@ -4000,6 +4571,20 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     continue
                 if sector_counts.get(future_candidate["Sector"], 0) >= (
                         max_stocks_per_sector
+                ):
+                    continue
+                future_sector = future_candidate["Sector"]
+                future_open_slots = (
+                    max_stocks_per_sector
+                    - sector_counts.get(future_sector, 0)
+                )
+                future_sector_limit = (
+                    future_open_slots
+                    * max_research_candidates_per_open_sector_slot
+                )
+                if (
+                    retry_queued_by_sector.get(future_sector, 0)
+                    >= future_sector_limit
                 ):
                     continue
 
@@ -4044,6 +4629,9 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 next_pending.append(future_candidate)
                 cache_keys_by_symbol[future_symbol] = future_cache_key
                 batched_symbols.add(future_symbol)
+                retry_queued_by_sector[future_sector] = (
+                    retry_queued_by_sector.get(future_sector, 0) + 1
+                )
 
             added_symbols = [
                 str(candidate["Symbol"]).upper()
@@ -4238,6 +4826,79 @@ print(
 context_review = build_context_review(decision_ledger)
 print("\n" + context_review + "\n")
 
+current_classifications = build_classification_snapshots(
+    candidate_records, validated_cached_research
+)
+previous_classifications = previous_run_diagnostics.get(
+    "classifications", {}
+)
+classification_drift = compare_classification_snapshots(
+    previous_classifications, current_classifications
+)
+print("CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN")
+if classification_drift:
+    for item in classification_drift:
+        symbol = item["symbol"]
+        print(f"  {symbol}: {', '.join(item['changed_fields'])}")
+        for field, values in item["changes"].items():
+            if field in DECISION_DIAGNOSTIC_FIELDS:
+                print(
+                    f"    {field}: "
+                    f"{compact_diagnostic_value(values['previous'])} -> "
+                    f"{compact_diagnostic_value(values['current'])}"
+                )
+else:
+    print("  No comparable classification fields changed.")
+
+current_selected_symbols = [
+    str(item["candidate"]["Symbol"]).upper() for item in selected
+]
+previous_selected_symbols = previous_run_diagnostics.get(
+    "selected_symbols", []
+)
+current_decisions = build_decision_snapshots(decision_ledger)
+previous_decisions = previous_run_diagnostics.get("decisions", {})
+portfolio_changes = build_portfolio_changes(
+    previous_selected_symbols,
+    current_selected_symbols,
+    previous_decisions,
+    current_decisions,
+    classification_drift,
+)
+print("PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN")
+if not previous_run_diagnostics:
+    print("  No prior diagnostics snapshot is available; baseline created.")
+elif portfolio_changes["added"] or portfolio_changes["removed"]:
+    for item in portfolio_changes["added"]:
+        changed = item["classification_fields_changed"]
+        detail = f"; changed fields: {', '.join(changed)}" if changed else ""
+        print(
+            f"  Added {item['symbol']}: {item['previous_status']} -> "
+            f"{item['current_status']}{detail}"
+        )
+    for item in portfolio_changes["removed"]:
+        changed = item["classification_fields_changed"]
+        detail = f"; changed fields: {', '.join(changed)}" if changed else ""
+        print(
+            f"  Removed {item['symbol']}: {item['previous_status']} -> "
+            f"{item['current_status']}{detail}"
+        )
+else:
+    print("  No selected symbols changed.")
+
+reconciliation_counts = {}
+for item in runtime_reconciliation_diagnostics:
+    item_type = item["type"]
+    reconciliation_counts[item_type] = (
+        reconciliation_counts.get(item_type, 0) + 1
+    )
+print("NO-CALL NORMALIZATION SUMMARY")
+if reconciliation_counts:
+    for item_type, count in sorted(reconciliation_counts.items()):
+        print(f"  {item_type}: {count}")
+else:
+    print("  No Python label reconciliations were needed.")
+
 if len(selected) != target_selected_stocks:
     raise RuntimeError(
         f"Only {len(selected)} stocks satisfied all rules after evaluating "
@@ -4339,11 +5000,107 @@ update_html_page(
     "index.html",
     model_used,
 )
+
+end_time = time.perf_counter()
+stock_call_diagnostics = [
+    item for item in gemini_call_diagnostics
+    if str(item.get("stage", "")).startswith("stock batch")
+]
+
+def summed_call_metric(field):
+    return sum(
+        int(item[field])
+        for item in gemini_call_diagnostics
+        if isinstance(item.get(field), (int, float))
+    )
+
+
+total_duplicate_blocks = sum(
+    int(item.get("extra_blocks", 0))
+    for item in duplicate_result_diagnostics
+)
+newly_validated_symbols = sorted(
+    researched_symbols_this_run.intersection(current_classifications)
+)
+source_counts = {
+    symbol: snapshot["source_count"]
+    for symbol, snapshot in current_classifications.items()
+}
+run_diagnostics = {
+    "schema_version": 1,
+    "created_at": datetime.now(UTC).isoformat(),
+    "model_used": model_used,
+    "qvm_candidate_hash": stable_json_hash(candidate_records),
+    "request_budget": {
+        "used": request_budget.used,
+        "maximum": request_budget.maximum,
+        "stock_used": request_budget.stock_used,
+        "stock_maximum": request_budget.stock_maximum,
+    },
+    "gemini_calls": gemini_call_diagnostics,
+    "token_totals": {
+        field: summed_call_metric(field)
+        for field in (
+            "prompt_tokens", "tool_tokens", "cached_tokens",
+            "thinking_tokens", "output_tokens", "total_tokens",
+        )
+    },
+    "research": {
+        "unique_symbols_requested": len(researched_symbols_this_run),
+        "charged_search_attempts": stock_search_attempts_this_run,
+        "newly_validated_symbols": newly_validated_symbols,
+        "initial_validated_cache_symbols": sorted(
+            initial_validated_cache_symbols
+        ),
+        "source_counts": source_counts,
+        "batches": batch_research_diagnostics,
+    },
+    "duplicate_results": duplicate_result_diagnostics,
+    "duplicate_extra_block_count": total_duplicate_blocks,
+    "raw_to_final_normalizations": sorted(
+        normalization_diagnostics_by_symbol.values(),
+        key=lambda item: item["symbol"],
+    ),
+    "runtime_reconciliations": runtime_reconciliation_diagnostics,
+    "reconciliation_counts": reconciliation_counts,
+    "classifications": current_classifications,
+    "classification_drift": classification_drift,
+    "decisions": current_decisions,
+    "selected_symbols": current_selected_symbols,
+    "portfolio_changes": portfolio_changes,
+    "elapsed_seconds": round(end_time - start_time),
+}
+save_json_object_atomic(STOCK_RUN_DIAGNOSTICS_FILE, run_diagnostics)
+
+print("GEMINI EFFICIENCY SUMMARY")
+print(f"  requests used: {request_budget.used}/{request_budget.maximum}")
+print(
+    f"  stock research calls: {request_budget.stock_used}/"
+    f"{request_budget.stock_maximum}"
+)
+print(f"  newly validated stocks: {len(newly_validated_symbols)}")
+if stock_call_diagnostics:
+    print(
+        "  newly validated stocks per stock call: "
+        f"{len(newly_validated_symbols) / len(stock_call_diagnostics):.2f}"
+    )
+print(
+    f"  exposed searches per newly validated stock: "
+    f"{(sum(item['searches_exposed'] for item in stock_call_diagnostics) / len(newly_validated_symbols)) if newly_validated_symbols else 0:.2f}"
+)
+print(f"  duplicate extra result blocks: {total_duplicate_blocks}")
+print(
+    f"  tokens: prompt={run_diagnostics['token_totals']['prompt_tokens']}, "
+    f"tool={run_diagnostics['token_totals']['tool_tokens']}, "
+    f"thinking={run_diagnostics['token_totals']['thinking_tokens']}, "
+    f"output={run_diagnostics['token_totals']['output_tokens']}, "
+    f"total={run_diagnostics['token_totals']['total_tokens']}"
+)
+print(f"Saved run diagnostics: {STOCK_RUN_DIAGNOSTICS_FILE}")
 print(f"Generated research with model(s): {model_used}")
 print("Selected symbols: " + ", ".join(
     item["candidate"]["Symbol"] for item in selected
 ))
 
 # print elapsed time
-end_time = time.perf_counter()
 print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")

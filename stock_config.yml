@@ -130,6 +130,12 @@ prompt_stock_batch: |
   - MARKET_CONTEXT is current background, not company-specific evidence.
   - PRIOR_RESEARCH_DECISIONS are consistency references, never evidence.
   - CANDIDATES are in authoritative QVM order.
+  - A candidate's symbol, name, and Python-supplied current market data identify
+    a security currently found by the market-data screen. If historical sources
+    say it was acquired, delisted, renamed, or no longer standalone, verify
+    whether it subsequently returned through a spin-off, relisting,
+    reorganization, or name reuse. Prefer current official investor-relations,
+    SEC, and exchange sources over older historical sources.
   - Python owns ranking, portfolio selection, and sector limits.
   Return every candidate exactly once and never select or omit stocks.
 
@@ -149,6 +155,8 @@ prompt_stock_batch: |
   requiring fresh research, using exactly one focused query for the missing
   evidence. Prefer this pattern when current company facts or sources are absent:
   "[Company Name] [Symbol] investor relations latest results guidance"
+  When the validation error reports an issuer identity conflict, instead use:
+  "[Company Name] [Symbol] investor relations latest earnings current company spin-off"
   For every other retry, repair the supplied prior JSON without another search
   and preserve its valid facts and sources.
 
@@ -185,6 +193,11 @@ prompt_stock_batch: |
   fields that truly cannot be established. For COMPLETE,
   research_incomplete_reason is null and all required COMPLETE fields below must
   be populated.
+
+  Do not return INCOMPLETE solely because an older source says a company was
+  acquired, delisted, renamed, or ceased operating. First test that statement
+  against current official issuer information and the supplied current market
+  data, including possible spin-offs, relistings, and reorganizations.
 
   REVERSAL STANDARD
   reversal_risk concerns normalized revenue, recurring demand, adjusted
@@ -261,6 +274,10 @@ prompt_stock_batch: |
   - REGULATORY_OR_CONTRACT_ACTION: a current binding action changes operations
   - EXTERNAL_EXPECTATION_ONLY: evidence is limited to an outside expectation
   - NONE: no current probability evidence exists
+
+  NONRECURRING_COMPARISON_ONLY belongs exclusively to risk_basis. Never use it
+  as probability_basis. When a nonrecurring comparison establishes no current
+  adverse probability evidence, use probability_basis NONE.
 
   MODERATE or higher requires one of the first three probability_basis values.
   EXTERNAL_EXPECTATION_ONLY and NONE normally require LOW. The sole exception is

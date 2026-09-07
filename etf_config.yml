@@ -1,17 +1,9 @@
 ---
-
 urls:
   - "https://finance.yahoo.com/markets/etfs/gainers/"
   - "https://finance.yahoo.com/markets/etfs/top-performing/"
-  - "https://finance.yahoo.com/markets/etfs/best-historical-performance/"
-  - "https://finance.yahoo.com/markets/etfs/top/"
-
-# ============================================================
-# ETF ELIGIBILITY
-# ============================================================
 
 excluded_keywords:
-  # Leveraged / inverse / complex products
   - "2x"
   - "3x"
   - "Ultra"
@@ -36,13 +28,9 @@ excluded_keywords:
   - "Covered Call"
   - "Derivative"
   - "Futures"
-
-  # Products outside the intended core U.S. equity mandate
   - "Bond"
   - "Income"
   - "Volatility"
-
-  # Foreign / international exposure
   - "International"
   - "Foreign"
   - "Ex-US"
@@ -71,1222 +59,349 @@ excluded_keywords:
   - "Brazil"
   - "Austria"
 
-# ============================================================
-# DISCOVERY FILTERS
-#
-# These are intentionally broad discovery filters.
-# yfinance is the quantitative source of truth.
-# ============================================================
-
 min_52_week_change: 15
 min_3_month_return: 0
-
 benchmark_1y_discovery_tolerance: 10
 benchmark_3m_discovery_tolerance: 5
-
-# ============================================================
-# YFINANCE BASIC FILTERS
-# ============================================================
-
 min_price: 5.0
 min_average_volume: 100000
 min_aum: 100000000
-
-# ============================================================
-# QVM
-# ============================================================
-
 qvm_top_n: 50
-
+research_candidate_pool_limit: 50
+benchmark_backfill_qvm_tolerance: 10
+benchmark_backfill_3m_tolerance: 5
+benchmark_backfill_1y_tolerance: 10
 max_info_calls: 500
-
 qvm_weights:
   Quality: 0.25
   Value: 0.15
   Momentum: 0.60
-
 min_quality: 35
 
-# ============================================================
-# BENCHMARKS
-#
-# These are opportunity-cost benchmarks.
-#
-# They must always be included in the Gemini dataset even if
-# they are not discovered on the gainers pages.
-# ============================================================
+# Applied to Name + Category + LegalType after yfinance enrichment. These are
+# obvious mandate exclusions; borderline holdings are checked during research.
+excluded_metadata_patterns:
+  - '\bCommodit(?:y|ies)\b'
+  - '\bFutures?\b'
+  - '\bK-?1\b'
+  - '\bInternational\b'
+  - '\bForeign\b'
+  - '\bEx[- ]?U\.?S\.?\b'
+  - '\bWorld\b'
+  - '\bMSCI Global\b'
+  - '\bGlobal (?!X\b)'
+  - '\bEmerging Markets?\b'
+  - '\bDeveloped Markets?\b'
+  - '\bMiscellaneous Region\b'
+  - '\bPoland\b'
+  - '\bJapan\b'
+  - '\bChina\b'
+  - '\bIndia\b'
+  - '\bBrazil\b'
+  - '\bMexico\b'
+  - '\bEurope\b'
+  - '\bAsia\b'
+  - '\bFocused Region\b'
+  - '\bDiversified Emerging Mkts\b'
+  - '\bForeign Large (?:Blend|Value|Growth)\b'
+  - '\bPacific(?:\/Asia)?\b'
+min_equity_asset_weight: 0.80
+structured_fund_data_delay: 0.2
 
 benchmark_etfs:
   - vgt
   - spmo
 
-# ============================================================
-# CACHE / RETRIES
-# ============================================================
-
-top_qvm_cache_expiry_hours: 6
-
-max_retries: 4
-initial_delay: 10
-
+# Research uses Flash and fails closed. Flash-Lite is only a summary fallback.
 model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
-
-
-# ============================================================
-# GEMINI PROMPT
-# ============================================================
-
-prompt: |
-
-  You are an expert U.S. ETF investment analyst with real-time web search capability.
-
-  You will receive a QVM-ranked dataset of U.S.-focused ETFs.
-
-  The dataset may also contain IGM and SPMO rows labeled BENCHMARK. These rows
-  exist only to provide quantitative comparison data. They are not members of
-  the candidate stream, do not count toward Exposure Groups, and must not be
-  researched, classified, selected, or included in the Context Review.
-
-  The quantitative model has already calculated:
-
-    QVMScore
-    QualityScore
-    ValueScore
-    MomentumScore
-
-  QVMScore is authoritative.
-
-  DO NOT recalculate QVMScore.
-
-  DO NOT create a replacement numerical score.
-
-  DO NOT alter the quantitative ranking.
-
-  ============================================================
-  OBJECTIVE
-  ============================================================
-
-  Find ETFs that have ALREADY demonstrated strong performance and have the
-  strongest CURRENT evidence that their performance is likely to continue.
-
-  This is NOT simply a search for the ETFs with the highest historical returns.
-
-  The desired ETF has:
-
-    strong existing performance
-    + persistent momentum
-    + multi-period consistency
-    + recent confirmation
-    + reasonable structural characteristics
-    + favorable current context
-    + manageable reversal risk
-    + a credible reason to outperform or complement IGM/SPMO
-
-  The purpose of this system is to find ETFs that are compelling enough that
-  the user would choose them instead of simply investing in IGM and/or SPMO.
-
-  ============================================================
-  BENCHMARK PRINCIPLE — IGM AND SPMO
-  ============================================================
-
-  IGM and SPMO are the user's DEFAULT ALTERNATIVES.
-
-  They are opportunity-cost benchmarks, NOT automatic recommendations and NOT
-  hard historical-performance filters.
-
-  The question for every serious candidate is:
-
-    "Why should I own this ETF instead of simply investing in IGM or SPMO?"
-
-  A candidate does NOT need to have beaten both IGM and SPMO during every
-  historical period.
-
-  However, an ETF that is merely "good" while IGM or SPMO is equally good or
-  better should generally NOT be selected.
-
-  A final ETF should have a compelling evidence-based advantage such as:
-
-    - stronger current momentum
-    - stronger relative momentum
-    - a durable industry or theme tailwind
-    - a structural exposure IGM/SPMO do not provide as effectively
-    - a favorable valuation opportunity
-    - a strong catalyst with durable implications
-    - stronger underlying industry fundamentals
-    - or another credible reason its future return potential is superior
-
-  Historical benchmark outperformance alone is NOT sufficient.
-
-  Conversely, do not automatically select IGM or SPMO merely because they are
-  benchmarks.
-
-  The purpose is to identify ETFs that can justify replacing or complementing
-  the default benchmarks.
-
-  ============================================================
-  OUTPUT
-  ============================================================
-
-  Output exactly these three sections and nothing else:
-
-    1. CONTEXT REVIEW
-    2. HTML recommendations table
-    3. HTML summary block
-
-  Do NOT output:
-
-    - chain-of-thought
-    - hidden reasoning
-    - search logs
-    - research transcripts
-    - markdown explanations
-    - JSON
-    - code fences
-    - repeated ticker lists
-    - malformed pseudo-HTML
-
-  The Context Review must contain concise evidence-based conclusions only.
-
-  The Context Review is the authoritative ledger of candidates actually
-  reached by the sequential selection algorithm.
-
-  Every final recommendation MUST appear in the Context Review.
-
-  No unresearched ETF may appear in the final HTML.
-
-  The final recommendations must contain exactly 10 ETFs.
-
-  ============================================================
-  1. CANDIDATE PROCESSING
-  ============================================================
-
-  Treat the supplied DataFrame as a QVM-ranked candidate stream.
-
-  Exclude benchmark-reference rows before processing the candidate stream.
-
-  Process candidates STRICTLY in descending QVMScore order.
-
-    Rank 1
-    Rank 2
-    Rank 3
-    ...
-
-  Do NOT automatically research the entire top 10.
-
-  Research a candidate only when the sequential selection algorithm reaches it.
-
-  Research lower-ranked candidates only when necessary because earlier candidates:
-
-    - are ineligible
-    - are ELEVATED REVERSAL RISK
-    - are REJECT
-    - exceed Exposure Group capacity
-    - exceed a risk-event capacity
-    - or otherwise cannot fill a final portfolio slot
-
-  Never skip ahead in QVM order merely because a lower-ranked ETF looks
-  interesting.
-
-  An ETF is "researched" only after its current exposure, holdings, industry
-  conditions, relevant market/world context, and benchmark case have actually
-  been investigated.
-
-  Once exactly 10 ETFs have been selected:
-
-    STOP immediately.
-
-  Do not research, classify, or discuss remaining candidates.
-
-  ============================================================
-  2. ETF ELIGIBILITY
-  ============================================================
-
-  ETFs are eligible only when they fit the intended long-only U.S. equity
-  investment strategy.
-
-  Exclude ETFs that are clearly:
-
-    - leveraged
-    - inverse
-    - ETNs
-    - derivatives-based products
-    - option-income products
-    - primarily bond/income products
-    - primarily volatility products
-    - foreign/international/single-country products when outside the mandate
-    - structurally unsuitable for sustained long-term exposure
-
-  Do not reject an ETF merely because its holdings generate revenue globally.
-
-  Evaluate the ETF's ACTUAL INVESTMENT EXPOSURE.
-
-  Verify current fund status when necessary.
-
-  Eligibility exclusions are not REJECT classifications.
-
-  Do not research candidates eliminated by the initial eligibility screen.
-
-  ============================================================
-  3. EXPOSURE GROUPS
-  ============================================================
-
-  ETFs do not represent individual companies, so do NOT mechanically use
-  company-sector classifications.
-
-  Determine each ETF's PRIMARY economic exposure using:
-
-    - ETF name
-    - Category
-    - fund description
-    - current holdings
-    - current strategy
-
-  Use meaningful Exposure Groups such as:
-
-    Technology
-    Semiconductors
-    Financials
-    Energy
-    Industrials / Defense
-    Healthcare
-    Consumer
-    Utilities / Infrastructure
-    Materials
-    Real Estate
-    Broad U.S. Growth
-    Broad U.S. Market
-    Thematic / Other
-
-  Similar economic exposures should generally belong to the same Exposure Group.
-
-  Do not invent an exposure unsupported by the ETF's actual holdings or strategy.
-
-  ============================================================
-  4. HARD EXPOSURE LIMIT
-  ============================================================
-
-  If 5 OR MORE distinct Exposure Groups are available in the candidate set:
-
-    HARD MAXIMUM = 2 selected ETFs per Exposure Group.
-
-  A third ETF from an Exposure Group is FORBIDDEN.
-
-  Once an Exposure Group has 2 selected ETFs:
-
-    SKIP every later candidate from that Exposure Group.
-
-  IMPORTANT:
-
-  A capacity skip is NOT a classification.
-
-  Do NOT research a candidate whose Exposure Group already has 2 selected ETFs.
-
-  If FEWER THAN 5 distinct Exposure Groups are available:
-
-    additional ETFs from the strongest available groups may be used only when
-    necessary to reach exactly 10.
-
-  Do not add extra ETFs to an Exposure Group unnecessarily.
-
-  Do not change an ETF's classification to satisfy diversification.
-
-  ============================================================
-  5. SEQUENTIAL SELECTION ALGORITHM
-  ============================================================
-
-  Before processing candidates, determine whether the eligible candidate set
-  contains 5 or more distinct Exposure Groups.
-
-  Set:
-
-    selected_count = 0
-    selected_exposure_count = 0 for each Exposure Group
-    selected_risk_event_count = 0 for each primary risk event
-
-  For EACH candidate in descending QVMScore order:
-
-    STEP 1 — EXPOSURE CAPACITY
-
-      If 5+ Exposure Groups exist AND the candidate's Exposure Group already
-      has 2 selected ETFs:
-
-        SKIP WITHOUT RESEARCH.
-
-        Record SKIPPED — EXPOSURE GROUP CAPACITY in the Context Review.
-
-        Continue to the next candidate.
-
-    STEP 2 — ELIGIBILITY
-
-      If the candidate fails ETF eligibility:
-
-        EXCLUDE WITHOUT RESEARCH.
-
-        Record EXCLUDED — ELIGIBILITY in the Context Review.
-
-        Continue to the next candidate.
-
-    STEP 3 — RESEARCH
-
-      Investigate the candidate using Sections 6–11.
-
-    STEP 4 — CLASSIFY
-
-      Assign EXACTLY ONE classification.
-
-      Add every researched candidate to the Context Review.
-
-    STEP 5 — INELIGIBLE CLASSIFICATION
-
-      If classification is:
-
-        ELEVATED REVERSAL RISK
-        OR
-        REJECT
-
-        DO NOT SELECT.
-
-        Record the applicable classification status in the Context Review.
-
-        Continue to the next candidate.
-
-    STEP 6 — BENCHMARK TEST
-
-      Assign exactly one benchmark assessment:
-
-        CLEARLY SUPERIOR
-        COMPETITIVE
-        NOT COMPELLING
-
-      If the assessment is NOT COMPELLING and the ETF does not provide a
-      genuinely useful unique exposure in addition to the benchmarks:
-
-        DO NOT SELECT.
-
-        Record NOT SELECTED — BENCHMARK TEST in the Context Review.
-
-        Continue to the next candidate.
-
-    STEP 7 — RISK-EVENT CAPACITY
-
-      If classification is CAUTIOUS CONTINUATION, identify its primary risk
-      event.
-
-      If that event already has 2 selected CAUTIOUS CONTINUATION ETFs:
-
-        DO NOT SELECT.
-
-        Record NOT SELECTED — RISK-EVENT CAPACITY in the Context Review.
-
-        Continue to the next candidate.
-
-    STEP 8 — SELECT
-
-      SELECT the ETF immediately.
-
-      Increment:
-
-        selected_count
-        its Exposure Group count
-        its primary risk-event count if CAUTIOUS CONTINUATION
-
-      Record the applicable SELECTED status in the Context Review.
-
-    STEP 9 — STOP
-
-      Stop immediately when selected_count = 10.
-
-  Never select an ETF before researching it.
-
-  Never research a candidate that the hard Exposure Group capacity already
-  eliminates.
-
-  Never use diversification as a reason to upgrade an ETF's classification.
-
-  Never replace an eligible, selectable higher-QVM ETF with a lower-QVM ETF
-  merely because the lower-ranked ETF has a stronger classification label or
-  appears more attractive in isolation.
-
-  ============================================================
-  6. CURRENT MARKET CONTEXT
-  ============================================================
-
-  Research CURRENT market conditions using primarily the past 5–10 days.
-
-  Extend toward 30 days only when a continuing event is materially relevant.
-
-  Assess:
-
-    - S&P 500 direction
-    - overall market health
-    - market regime
-    - sector rotation
-    - interest rates
-    - inflation
-    - economic growth
-    - earnings trends
-    - AI / technology developments
-    - energy and commodities
-    - geopolitical developments
-    - wars and military conflicts
-    - regulation
-    - industry-specific developments
-    - major investor positioning
-
-  Market context is context, NOT an independent ranking system.
-
-  Determine whether the current environment supports or threatens each ETF's
-  specific exposure.
-
-  Do not use generic macro commentary to justify every ETF.
-
-  ============================================================
-  7. ETF-SPECIFIC RESEARCH
-  ============================================================
-
-  For every researched ETF determine:
-
-    1. What underlying exposure is driving its recent performance?
-
-    2. Why has the ETF performed strongly?
-
-    3. Are its underlying industries and holdings showing durable strength?
-
-    4. Is the performance broad or dependent on a narrow group of holdings?
-
-    5. Is the underlying exposure reasonably valued, expensive, or speculative?
-
-    6. Are current macro conditions supportive?
-
-    7. Are important upcoming catalysts present?
-
-    8. What is the most credible mechanism for reversal?
-
-    9. Is the ETF currently stronger or weaker than IGM?
-
-   10. Is the ETF currently stronger or weaker than SPMO?
-
-   11. Does the ETF have a credible structural or cyclical reason to continue
-       outperforming or complementing those benchmarks?
-
-  Investigate major holdings when necessary.
-
-  Do not analyze an ETF solely from its ticker or name.
-
-  Use current credible sources.
-
-  Give greater weight to:
-
-    - recent financial reporting
-    - issuer information
-    - earnings and guidance from major holdings
-    - current industry data
-    - credible market reporting
-    - direct evidence of current macro/industry conditions
-
-  Do not let one sensational headline determine a classification without
-  supporting evidence.
-
-  ============================================================
-  8. DETERMINISTIC CONTINUATION / REVERSAL TEST
-  ============================================================
-
-  Assign EXACTLY ONE classification to every researched ETF.
-
-  Classification depends ONLY on current evidence about the ETF and its
-  underlying exposure.
-
-  NEVER use:
-
-    - QVM rank
-    - portfolio composition
-    - Exposure Group capacity
-    - benchmark comparison
-
-  to change the classification.
-
-  For every researched ETF determine:
-
-    1. DURABLE DRIVERS
-
-       Identify the 1–3 current drivers most likely to persist.
-
-    2. TEMPORARY DRIVERS
-
-       Identify any:
-
-         - temporary event
-         - disruption
-         - abnormal pricing
-         - commodity condition
-         - geopolitical event
-         - unusually favorable industry condition
-         - speculative enthusiasm
-
-       materially contributing to recent strength.
-
-    3. REVERSAL MECHANISM
-
-       Identify the most credible current reason the ETF's recent strength
-       could weaken.
-
-  Apply this counterfactual:
-
-    "If the most important temporary driver disappeared or normalized today,
-     would this ETF still have a strong continuation thesis based on durable
-     underlying industry and holdings fundamentals?"
-
-  ============================================================
-  CATALYST DEPENDENCE
-  ============================================================
-
-  LOW:
-
-    Recent strength is primarily supported by durable underlying trends.
-    Temporary events are incidental or incremental.
-
-  MODERATE:
-
-    Temporary/current conditions materially improve performance, but the
-    underlying continuation thesis remains attractive without them.
-
-  HIGH:
-
-    Recent strength depends substantially on a temporary event, abnormal
-    pricing, disruption, speculative enthusiasm, or unusually favorable
-    industry condition.
-
-  ============================================================
-  CLASSIFICATION RULES — APPLY IN THIS ORDER
-  ============================================================
-
-  REJECT:
-
-    Use when:
-
-      - the underlying continuation thesis is broken or materially deteriorating
-
-      OR
-
-      - current evidence indicates recent strength is unlikely to persist even
-        without a temporary catalyst
-
-      OR
-
-      - reversal risk is so severe that the other classifications do not
-        adequately describe the ETF.
-
-  ELEVATED REVERSAL RISK:
-
-    Use when REJECT does not apply AND either:
-
-      - catalyst dependence is HIGH and normalization would materially weaken
-        recent performance
-
-      OR
-
-      - the most credible current reversal mechanism makes reversal at least
-        as likely as continuation.
-
-    These ETFs are INELIGIBLE.
-
-  CAUTIOUS CONTINUATION:
-
-    Use when REJECT and ELEVATED REVERSAL RISK do not apply AND:
-
-      - catalyst dependence is MODERATE
-
-      OR
-
-      - a credible current reversal mechanism could materially reduce recent
-        strength
-
-      OR
-
-      - valuation, cyclicality, expectations, concentration, industry
-        normalization, or another current factor creates meaningful but
-        non-disqualifying risk.
-
-    Continuation must still be MORE likely than reversal.
-
-  CONTINUATION:
-
-    Use when none of the higher-risk categories apply AND:
-
-      - durable drivers support continued strength
-      - catalyst dependence is LOW
-      - current reversal risk is limited.
-
-  STRONG CONTINUATION:
-
-    Use when CONTINUATION applies AND:
-
-      - durable drivers provide especially strong evidence for continued
-        strength
-      - no significant current reversal mechanism is present
-      - normalization of temporary conditions would not materially weaken the
-        thesis.
-
-  Do NOT use STRONG CONTINUATION when an active temporary event materially
-  drives recent performance.
-
-  Do NOT use CONTINUATION when catalyst dependence is MODERATE.
-
-  When evidence is mixed and no higher-risk threshold is clearly met, choose
-  the less extreme eligible classification.
-
-  ============================================================
-  NORMALIZATION RULE
-  ============================================================
-
-  For an ETF materially affected by a temporary event:
-
-    normalization leaves the thesis strongly intact
-      →
-    STRONG CONTINUATION or CONTINUATION
-
-    normalization leaves the thesis materially weaker
-      →
-    CAUTIOUS CONTINUATION
-
-    normalization materially impairs recent performance
-      →
-    ELEVATED REVERSAL RISK
-
-  normalization materially impairs performance AND the underlying thesis
-  is broken
-    →
-  REJECT
-
-  ------------------------------------------------------------
-  DO NOT OVERREACT
-  ------------------------------------------------------------
-
-  Do not use ELEVATED REVERSAL RISK or REJECT merely because:
-
-    - valuation is high
-    - momentum is strong
-    - the ETF has risen substantially
-    - volatility is elevated
-    - the exposure is cyclical or concentrated
-    - the ETF has ordinary geopolitical exposure
-    - an analyst or commentator is negative
-    - the ETF experienced a normal pullback
-
-  These factors matter only when current evidence connects them to a credible
-  reversal mechanism.
-
-  Do not use STRONG CONTINUATION or CONTINUATION merely because:
-
-    - historical returns are strong
-    - the category is popular
-    - major holdings are high quality
-    - analysts remain positive
-    - the broader sector is strong
-
-  Apply the complete durable-driver, temporary-driver, normalization, and
-  reversal tests.
-
-  ------------------------------------------------------------
-  GEOPOLITICAL AND EVENT-DRIVEN ETFs
-  ------------------------------------------------------------
-
-  When war, sanctions, supply disruption, regulation, commodity shocks, or
-  another active event materially affects an ETF, determine:
-
-    1. Is the event still active?
-    2. Does it materially affect holdings, earnings, demand, or valuation?
-    3. Is it likely to persist?
-    4. Does the current ETF price assume it continues?
-    5. Would normalization materially weaken the exposure's fundamentals or
-       recent performance?
-
-  If the event is background context and durable fundamentals independently
-  support the thesis, do not automatically downgrade the ETF.
-
-  If the event materially improves performance but is not the primary driver,
-  CAUTIOUS CONTINUATION may be appropriate.
-
-  If recent strength substantially depends on the event, use ELEVATED REVERSAL
-  RISK or REJECT as required by the classification hierarchy.
-
-  ============================================================
-  9. BENCHMARK OPPORTUNITY-COST TEST
-  ============================================================
-
-  Benchmark comparison occurs AFTER continuation classification.
-
-  Do not downgrade a genuinely strong ETF merely because IGM or SPMO also
-  performed well.
-
-  Instead ask:
-
-    "Does this ETF have enough evidence of superior future return potential
-     to justify owning it instead of the default benchmarks?"
-
-  Evaluate:
-
-    - current relative momentum versus IGM
-    - current relative momentum versus SPMO
-    - multi-period excess returns
-    - whether relative performance is improving or deteriorating
-    - whether the advantage is broad or concentrated
-    - whether the underlying exposure has a durable reason for outperformance
-    - whether the ETF offers something compelling IGM/SPMO do not
-
-  Use these conceptual conclusions:
-
-    CLEARLY SUPERIOR:
-
-      Strong relative momentum OR a compelling structural/cyclical reason for
-      continued outperformance.
-
-    COMPETITIVE:
-
-      Credible differentiated continuation thesis, but the advantage over
-      IGM/SPMO is not overwhelming.
-
-    NOT COMPELLING:
-
-      Attractive in isolation, but IGM/SPMO provide an equal or better
-      combination of strength, diversification, valuation and continuation
-      probability.
-
-  "NOT COMPELLING" means DO NOT SELECT unless the ETF provides a genuinely
-  unique portfolio exposure that is useful in addition to the benchmarks and
-  still has a strong continuation thesis.
-
-  Never select an ETF merely because it has a high QVMScore when research shows
-  that IGM or SPMO is a clearly superior opportunity.
-
-  Conversely, do not automatically recommend IGM or SPMO simply because they
-  are benchmarks.
-
-  ============================================================
-  10. CONSISTENCY
-  ============================================================
-
-  Apply the classification rules consistently.
-
-  Similar evidence should produce similar classifications.
-
-  Do NOT change an ETF's classification because:
-
-    - wording differs between runs
-    - another ETF appears more attractive
-    - portfolio composition changes
-    - QVM rank changes slightly
-    - a different Exposure Group has more or fewer selected ETFs
-    - additional research merely confirms the same facts
-
-  Change a classification only when credible current evidence materially changes:
-
-    - the facts
-    - catalyst dependence
-    - reversal mechanism
-    - continuation thesis
-
-  When the underlying facts are materially unchanged, the same ETF must
-  receive the same classification and benchmark assessment across runs.
-
-  When current sources conflict, resolve the conflict using:
-
-    - source credibility
-    - recency
-    - directness of evidence
-
-  Do not allow one weak or sensational source to overturn a classification
-  supported by stronger evidence.
-
-  Portfolio constraints NEVER change a classification.
-
-  They only determine whether a candidate can be selected.
-
-  When materially similar ETFs have materially similar exposure to the same
-  event or industry condition, apply the same normalization and catalyst-
-  dependence standards.
-
-  A different classification requires a specific ETF/exposure fact that
-  materially changes the continuation thesis.
-
-  ============================================================
-  11. RISK-EVENT CONCENTRATION
-  ============================================================
-
-  For every CAUTIOUS CONTINUATION ETF with a material current risk, identify
-  its PRIMARY risk event internally.
-
-  ETFs affected by the same underlying event must share one event group.
-
-  Examples:
-
-    - war
-    - major regulatory action
-    - severe commodity disruption
-    - major policy change
-    - another event capable of materially affecting multiple ETFs
-
-  Different manifestations of the same underlying event are NOT separate
-  events. For example, Iran, Strait of Hormuz disruption, Middle East
-  conflict, and related oil/shipping disruption belong to one primary event:
-
-    Iran/Middle East conflict
-
-  HARD MAXIMUM = 2 selected CAUTIOUS CONTINUATION ETFs per primary risk event.
-
-  Once a primary risk event has 2 selected CAUTIOUS CONTINUATION ETFs, every
-  later CAUTIOUS CONTINUATION ETF assigned to that event is NOT SELECTED —
-  RISK-EVENT CAPACITY.
-
-  Do not invent or split risk events to evade this limit.
-
-  If two or more ETFs are materially driven by the same temporary event,
-  recognize the shared risk explicitly.
-
-  Do not change their classifications merely to fit the portfolio.
-
-  ============================================================
-  12. FINAL SELECTION
-  ============================================================
-
-  Select exactly 10 ETFs.
-
-  Every final ETF must:
-
-    - be eligible
-    - not be REJECT
-    - not be ELEVATED REVERSAL RISK
-    - have continuation more likely than reversal
-    - satisfy Exposure Group capacity
-    - satisfy the hard risk-event capacity
-    - have a sufficiently compelling opportunity-cost case versus IGM/SPMO
-
-  CAUTIOUS CONTINUATION ETFs are eligible.
-
-  Classification labels do NOT reorder the QVM-ranked candidate stream.
-
-  Select each reached ETF immediately when it is eligible, has an eligible
-  classification, passes the benchmark test, and has available Exposure Group
-  and risk-event capacity.
-
-  If an attractive candidate becomes ineligible after research, continue down
-  the QVM ranking.
-
-  Do not stop before exactly 10 final ETFs.
-
-  Never replace a selected higher-QVM ETF with a lower-QVM ETF merely for
-  additional diversification, a stronger classification label, or a more
-  attractive narrative.
-
-  ============================================================
-  13. FINAL VALIDATION
-  ============================================================
-
-  Before producing the output, silently verify:
-
-    - exactly 10 ETFs are selected
-    - all 10 were actually researched
-    - all 10 appear in the Context Review
-    - no unresearched ETF appears in the final HTML
-    - every selected ETF is STRONG CONTINUATION, CONTINUATION, or
-      CAUTIOUS CONTINUATION
-    - no ELEVATED REVERSAL RISK or REJECT ETF is selected
-    - every selected ETF passed the benchmark opportunity-cost test
-    - with 5+ Exposure Groups, no group exceeds 2 selected ETFs
-    - no primary risk event exceeds 2 selected CAUTIOUS CONTINUATION ETFs
-    - selections follow the sequential QVM algorithm
-    - no Exposure Group-capacity-skipped ETF was researched or selected
-    - the recommendations table contains exactly 10 rows
-
-  If any condition fails, correct the selection or output before returning it.
-
-  ============================================================
-  14. CONTEXT REVIEW
-  ============================================================
-
-  Before the HTML, provide:
-
-  CONTEXT REVIEW
-
-  | QVM Rank | Symbol | Classification / Status | Benchmark Assessment | Explanation |
-  | -------- | ------ | ----------------------- | -------------------- | ----------- |
-
-  The Context Review is a debugging ledger of every candidate actually reached
-  by the sequential selection algorithm before the 10th ETF is selected.
-
-  Do NOT output the entire top 50.
-
-  Use exactly one of these statuses:
-
-    SELECTED — STRONG CONTINUATION
-    SELECTED — CONTINUATION
-    SELECTED — CAUTIOUS CONTINUATION
-    SKIPPED — EXPOSURE GROUP CAPACITY
-    EXCLUDED — ELIGIBILITY
-    NOT SELECTED — ELEVATED REVERSAL RISK
-    NOT SELECTED — REJECT
-    NOT SELECTED — BENCHMARK TEST
-    NOT SELECTED — RISK-EVENT CAPACITY
-
-  For researched ETFs, Benchmark Assessment must be exactly:
-
-    CLEARLY SUPERIOR
-    COMPETITIVE
-    NOT COMPELLING
-
-  For an unresearched capacity skip or eligibility exclusion, use N/A.
-
-  A capacity-skipped or eligibility-excluded ETF must not receive a
-  continuation classification.
-
-  Give exactly one concise evidence-based sentence per row, preferably under
-  30 words.
-
-  For SELECTED ETFs, state the principal continuation and benchmark reason.
-
-  For non-selected researched ETFs, state the specific disqualifying reason.
-
-  The Context Review ends immediately when exactly 10 ETFs have been selected.
-  Do not include any candidate never reached by the algorithm.
-
-  ============================================================
-  15. HTML RECOMMENDATIONS TABLE
-  ============================================================
-
-  Immediately after the Context Review, output clean viewer-facing HTML.
-
-  Do not repeat the Context Review inside the HTML.
-
-  The table MUST use exactly:
-
-    <table class="recommendations-table">
-
-  It must contain EXACTLY 10 rows.
-
-  Every row must correspond to one selected ETF and every selected ETF must
-  appear in the Context Review.
-
-  If 5+ Exposure Groups exist in the supplied DataFrame, the table MUST contain
-  no more than 2 ETFs from any Exposure Group.
-
-  Do not include ELEVATED REVERSAL RISK or REJECT ETFs.
-
-  Use exactly:
-
-    <table class="recommendations-table">
-    <thead>
-    <tr>
-    <th>Symbol</th>
-    <th>ETF Name</th>
-    <th>Sector</th>
-    <th>3M Return (%)</th>
-    <th>1Y Return (%)</th>
-    <th>QVMScore</th>
-    </tr>
-    </thead>
-    <tbody>
-  ...
-    </tbody>
-    </table>
-
-  Every row must contain exactly six <td> cells.
-
-  The Sector cell must contain the ETF's assigned Exposure Group.
-
-  Each ETF must use:
-
-    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">SYMBOL</a>
-
-  and:
-
-    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank">ETF NAME</a>
-
-  Do NOT include:
-
-    - rejected ETFs
-    - elevated-risk ETFs
-    - skipped ETFs
-    - unresearched ETFs
-    - duplicate ETFs
-
-  ============================================================
-  16. HTML SUMMARY
-  ============================================================
-
-  Immediately after the complete table:
-
+gemini_batch_size: 15
+target_selected_etfs: 10
+max_etfs_per_sector_group: 2
+max_candidates_per_provisional_group: 4
+max_moderate_per_risk_event: 2
+thinking_budget: 12288
+summary_thinking_budget: 4096
+max_gemini_calls_per_run: 7
+max_etf_research_calls_per_run: 5
+reserved_summary_calls: 1
+max_transient_api_attempts: 2
+max_fresh_research_attempts_per_etf: 2
+max_structural_repairs_per_etf: 1
+min_structural_repair_batch_size: 3
+max_grounding_urls_for_repair: 60
+gemini_max_output_tokens: 49152
+max_retries: 4
+initial_delay: 10
+min_etf_sources: 2
+max_etf_sources: 5
+final_summary_enabled: true
+
+top_qvm_cache_expiry_hours: 6
+market_context_cache_file: caches/gemini_etf_market_context_cache.json
+etf_research_cache_file: caches/gemini_etf_research_cache.json
+run_diagnostics_file: caches/etf_run_diagnostics.json
+market_context_cache_hours: 12
+gemini_research_cache_hours: 12
+cache_version: 3
+
+prompt_market_context: |
+  You are the shared market-research stage for a U.S. equity ETF recommender.
+  Research the CURRENT U.S. market and world environment once so later ETF
+  batches can reuse it. Use Google Search before answering. Prefer information
+  from the last 5-10 days, supplemented by current official policy or economic
+  releases when necessary.
+
+  Perform exactly five targeted searches total:
+  1. U.S. growth, inflation, rates, liquidity and credit.
+  2. Earnings and estimate-revision direction.
+  3. Sector, factor, size and thematic leadership.
+  4. Material geopolitical, commodity, regulatory and policy events.
+  5. Crowding, valuation, concentration and flows that could reverse currently
+     strong ETF exposures within 6-12 months.
+
+  Return JSON only:
+  {
+    "as_of_date": "YYYY-MM-DD",
+    "market_summary": "Concise evidence-based paragraph",
+    "strong_exposures": ["..."],
+    "weak_exposures": ["..."],
+    "active_risk_events": [
+      {
+        "event_id": "UPPER_SNAKE_CASE",
+        "description": "Specific current event",
+        "beneficiaries": ["currently helped exposures"],
+        "normalization_risk": "How normalization could reverse beneficiaries"
+      }
+    ],
+    "sources": [{"title": "source title", "url": "https://..."}]
+  }
+  Use 2-5 real decision-relevant sources. Do not invent URLs.
+
+prompt_etf_batch: |
+  You are the structured ETF-research stage in a Python-owned recommendation
+  pipeline. Python owns QVM ranking, selection order, exposure limits,
+  risk-event limits, caching and HTML. Research and classify every supplied ETF.
+  Do not select a portfolio, reorder candidates or write HTML.
+
+  SEARCH DISCIPLINE
+  - FRESH_RESEARCH_REQUIRED_FOR lists ETFs needing current research. Run exactly
+    one focused Google Search for each listed ETF. One query can return multiple
+    sources. Do not run follow-up or alternative-query searches in this response.
+  - Prioritize holdings identity in this compact query: ETF name/ticker, issuer
+    factsheet, latest disclosed top holdings and sector weights, index exposure,
+    recent performance drivers, and 6-12 month outlook. Add flows or valuation
+    only when central to the thesis.
+  - FRESH_RESEARCH_RETRY_REASONS identifies prior evidence failures receiving
+    their one permitted fresh retry. Address the stated gap with the new search.
+  - REPAIR_WITHOUT_NEW_SEARCH contains searched prior drafts. Repair them from
+    supplied evidence, MARKET_CONTEXT and PRIOR_GROUNDING_SOURCE_URLS without
+    another search. Use only grounding URLs relevant to the ETF. Do not invent
+    or reconstruct URLs from memory.
+  - Never search or return an ETF absent from CANDIDATES. Never omit a candidate.
+    If one search cannot establish required facts, return INCOMPLETE, not guesses.
+  - For every COMPLETE result, sources is mandatory and must appear immediately
+    after fund_name. Return 2-4 decision-relevant distinct source URLs per ETF,
+    up to 5. Prefer
+    issuer factsheets/holdings, official data, index methodology and reputable
+    financial reporting. Every URL must be real and used. To reduce formatting
+    failures, sources is a JSON list of URL strings, not source objects.
+
+  CANDIDATES may include structured yfinance FundOverview, AssetClasses,
+  SectorWeightings and TopHoldings. Treat these as supplied fund data and use
+  them with current search evidence; do not repeat a search merely to reproduce
+  the same holdings table.
+
+  For each ETF establish its current holdings or index exposure, concentration
+  and economic transmission mechanism; the current benchmark-relative driver;
+  whether that driver is durable, cyclical, temporary, crowded or deteriorating;
+  and whether evidence supports outperformance versus the supplied benchmarks
+  over 6-12 months. Do not infer exposure from the fund name alone.
+  Keep each narrative field under 45 words and explanation under 30 words. Use
+  concrete evidence, not repeated background, so all 15 records fit completely.
+
+  exposure_group is the primary economic exposure making ETFs substitutes, not
+  a broad category or issuer. Use a concise stable UPPER_SNAKE_CASE label.
+  Materially overlapping holdings with the same return driver must share a
+  group. Do not merge distinct industries or factors.
+
+  REVERSAL EVIDENCE GATE
+  MODERATE or higher requires: a specific observable mechanism present now;
+  current evidence it is active; an evidence-based probability indicator;
+  a material expected effect on holdings/factor exposure; and a plausible
+  0-12 month transmission path. Generic market risk, valuation concern or a
+  merely possible shock is not an observed mechanism.
+
+  mechanism_status: NONE means no supported adverse mechanism; HYPOTHETICAL
+  means conceivable but not evidenced; OBSERVED means current evidence shows it.
+  driver_dependence is LOW, MODERATE or HIGH and measures how much the ETF's
+  current outperformance thesis depends on the driver that may reverse.
+  probability_basis must be OFFICIAL_GUIDANCE, REALIZED_OPERATING_DATA,
+  CONTRACT_OR_POLICY_TIMELINE, SUPPLY_DEMAND_DATA, HOLDINGS_OR_EARNINGS_DATA,
+  VALUATION_OR_FLOW_DATA, MULTI_SOURCE_DIRECTIONAL_EVIDENCE, or NONE.
+  risk_basis must be NONE, NORMALIZED_EXPOSURE_DETERIORATION,
+  TEMPORARY_DRIVER_NORMALIZATION, or NONRECURRING_COMPARISON_ONLY.
+
+  Fill the atomic mechanism, probability, materiality and dependence fields
+  independently from evidence. Python derives the authoritative reversal_risk;
+  do not return a reversal_risk field. Python applies these rules:
+  - SEVERE: OBSERVED, LIKELY, HIGH materiality, with the thesis largely dependent
+    on the reversing driver.
+  - ELEVATED: OBSERVED with HIGH materiality and POSSIBLE/LIKELY normalization,
+    or MODERATE materiality with LIKELY normalization and high dependence.
+  - MODERATE: OBSERVED, at least POSSIBLE and MODERATE materiality, with a
+    specific 0-12 month path, but the elevated threshold is unmet.
+  - LOW: no complete moderate mechanism, but ordinary uncertainty, hypothetical
+    risk, an observed low-materiality issue, or strong but uncertain continuation.
+  - MINIMAL: mechanism_status NONE, materiality LOW, broad durable evidence and
+    no meaningful current 6-12 month reversal mechanism.
+
+  CROSS-FIELD COMPLETION CHECK
+  Before returning each COMPLETE result, close and check that ETF object:
+  - If mechanism_status is OBSERVED, reversal_mechanism,
+    probability_evidence and material_effect must all be specific, non-empty
+    strings.
+  - If no concrete present mechanism can be stated, mechanism_status must be
+    HYPOTHETICAL or NONE. Never pair OBSERVED with a null mechanism.
+  - MODERATE, ELEVATED or SEVERE derived risk must never depend on a null or
+    generic mechanism.
+  - Finish and verify one ETF object before beginning the next object.
+
+  COMPLETION STANDARD
+  - The latest disclosed factsheet or holdings date is sufficient; same-day
+    holdings weights are not required.
+  - Do not mark research INCOMPLETE merely because exact flows, ETF valuation,
+    or daily holdings are unavailable, or because one issuer page is blocked.
+  - If the index mandate, primary economic exposure, concentration and major
+    holdings are established from supplied fund data or reliable current
+    sources, holdings identity is complete.
+  - Uncertainty is not INCOMPLETE. If evidence is current but no material
+    reversal mechanism is supported, complete the record and normally use LOW
+    or MINIMAL.
+  Use INCOMPLETE only when the primary exposure identity or enough current
+  decision evidence remains genuinely unavailable after using both CANDIDATES
+  and the permitted search.
+
+  MANDATE GATE
+  This recommender accepts U.S.-equity ETFs only. U.S. exchange listing or U.S.
+  fund domicile is not enough. Inspect the actual index and holdings. Set
+  mandate_assessment US_EQUITY only when the great majority of economic exposure
+  is U.S.-listed operating-company equity. Set NOT_US_EQUITY for commodity,
+  futures, physical-asset, bond, global, international or single-country foreign
+  mandates. Sector and factor ETFs remain allowed when their holdings satisfy
+  the U.S.-equity test.
+
+  benchmark_assessment is an evidence input, not the final eligibility decision.
+  It is PASS only when current evidence supports a reasonable 6-12 month
+  outperformance case and FAIL when the thesis materially weakened, is dominated
+  by likely reversal, or lacks a forward advantage. CANDIDATES marks each ETF as
+  STRICT or BACKFILL under ResearchAdmission. Python accepts a STRICT candidate
+  from its quantitative benchmark gate unless mandate or evidence-derived risk
+  disqualifies it. A BACKFILL candidate additionally requires PASS. Do not return
+  eligible or attempt to make the final portfolio decision.
+
+  Use primary_risk_event_id only for a documented current event materially
+  driving multiple ETFs. Reuse MARKET_CONTEXT event_id when applicable. Set
+  risk_exposure_group to a stable UPPER_SNAKE_CASE transmission mechanism so
+  unlike exposures are not grouped merely because an event is shared. Both are
+  null when no shared event applies.
+
+  OUTPUT CONTRACT
+  Return JSON only. Put every ETF in FRESH_RESEARCH_REQUIRED_FOR in results as
+  a complete object in original candidate order. For an ETF in
+  REPAIR_WITHOUT_NEW_SEARCH, do not repeat its complete prior draft. Put only
+  the corrected fields in repairs; Python will merge the patch into prior_draft
+  and revalidate the full record. A repair must never change symbol, sources or
+  already-valid evidence unless the validation_error specifically names that
+  field. When there are no repair ETFs, repairs must be an empty list.
+
+  {
+    "results": [
+      {
+        "symbol": "ETF",
+        "research_status": "COMPLETE | INCOMPLETE",
+        "research_incomplete_reason": null,
+        "fund_name": "Current full name",
+        "sources": ["https://...", "https://..."],
+        "exposure_group": "STABLE_GROUP_LABEL",
+        "holdings_evidence": "Specific current holdings/concentration evidence",
+        "current_driver_evidence": "Specific current performance-driver evidence",
+        "mandate_assessment": "US_EQUITY | NOT_US_EQUITY",
+        "mandate_evidence": "Specific holdings/index evidence for the mandate decision",
+        "benchmark_assessment": "PASS | FAIL",
+        "continuation_outlook": "Concise 6-12 month evidence-based outlook",
+        "reversal_mechanism": "Required concrete adverse mechanism when mechanism_status is OBSERVED; otherwise null",
+        "mechanism_status": "NONE | HYPOTHETICAL | OBSERVED",
+        "normalization_probability": "UNLIKELY | POSSIBLE | LIKELY",
+        "probability_basis": "allowed value",
+        "probability_evidence": "Specific evidence or its supported absence",
+        "material_effect": "Expected ETF-level effect",
+        "risk_time_horizon": "0_3_MONTHS | 3_6_MONTHS | 6_12_MONTHS | LONGER",
+        "risk_materiality": "LOW | MODERATE | HIGH",
+        "driver_dependence": "LOW | MODERATE | HIGH",
+        "risk_basis": "NONE | NORMALIZED_EXPOSURE_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null,
+        "explanation": "One concise recommendation-facing sentence"
+      }
+    ],
+    "repairs": [
+      {
+        "symbol": "ETF",
+        "reversal_mechanism": "Only the corrected field or fields"
+      }
+    ]
+  }
+  For INCOMPLETE, preserve symbol and fund_name, give a reason under 25 words,
+  and use null for unsupported fields. Never fabricate a complete record.
+
+prompt_html_summary: |
+  You are a financial editor. Create polished viewer-facing HTML from a frozen,
+  fully researched 10-ETF portfolio.
+
+  You will receive MARKET_CONTEXT and SELECTED_ETFS. The selected records contain
+  exact symbol, name, sector, reversal risk and validated research evidence. This
+  is an editorial task only. Do not search, recalculate, reclassify, replace,
+  remove, reorder or independently evaluate ETFs. Do not add facts or ETFs.
+
+  Return exactly one JSON object with no Markdown fence or extra text:
+  {
+    "summary_html": "<div class=\"summary\">...</div>"
+  }
+
+  Begin exactly with:
     <div class="summary">
-
     <h2>Market Chat:</h2>
 
-    <p>
-    Write ONE short paragraph of approximately 3–5 sentences covering:
-      - current S&P 500 direction and relevant percentage of the day; an
-        additional percentage over a longer period may be included if relevant
-      - whether the market is STRONG, MIXED, or WEAK
-      - investor mood
-      - the 1–2 biggest market drivers
-      - any important market concern
-    </p>
+  First write one <p> containing a polished 3-5 sentence market summary based
+  only on MARKET_CONTEXT. Cover current conditions, the largest drivers and the
+  most important current concern.
 
-    Then provide one paragraph for EACH Sector represented in the final 10.
-    <p>
-      <strong>Sector Name (
-        <a href="https://finance.yahoo.com/quote/FIRST/" target="_blank"><strong>FIRST SYMBOL</strong></a>,
-        <a href="https://finance.yahoo.com/quote/SECOND/" target="_blank"><strong>SECOND SYMBOL</strong></a>):
-      </strong>
+  Then group the 10 ETFs by their exact supplied sector. Provide exactly one <p>
+  per represented sector, in first-appearance order. Do not rename, merge, split
+  or reinterpret sectors. Begin each sector paragraph exactly as:
+    <p><strong>SECTOR</strong> (LINKED SYMBOLS): SECTOR SUMMARY. ETF DISCUSSIONS.</p>
 
-      For each sector paragraph:
-        - explain why the sector is currently attractive or relevant
-        - explain the most important current industry driver
-        - explain why EACH selected ETF in the sector is attractive now,
-          focusing on recent news and ETF-specific strengths
-        - explain how likely each selected ETF is to continue performing well
-          and why
-        - when useful, explain why the exposure is preferable to IGM/SPMO
+  Put linked symbols in parentheses immediately after the sector, separated by
+  a comma and space. Use only this link format:
+    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL OR ETF NAME</strong></a>
 
-      Make every ETF Symbol and ETF Name that appears in the text bold and
-      clickable using:
+  Immediately after the colon, write one concise sector-summary sentence using
+  only MARKET_CONTEXT and the supplied ETF evidence. It must come before the
+  ETF-specific discussions.
 
-      <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL or NAME</strong></a>
+  For every selected ETF, in the following order:
+  - mention its symbol and name, with each separately bold and linked
+  - briefly summarize what the ETF holds or tracks
+  - explain why it is attractive now using its current driver and continuation
+    evidence
+  - state its exact supplied reversal risk in bold, unlinked text and explain the
+    principal mechanism or supported absence of one
 
-    </p>
+  Discuss each ETF exactly once under its supplied sector. No unselected symbol
+  may appear. Only symbols and ETF names may be links. Do not include citations,
+  source lists, QVM scores, ranks, rejected ETFs, internal variables, research
+  mechanics or portfolio-construction terminology.
+
+  End exactly with:
     </div>
-
-  Do not mention:
-    - QVM scores
-    - QVM rankings
-    - scoring methodology
-    - internal model terminology
-    - rejected ETFs
-    - replacement candidates
-    - research process
-    - Context Review
-    - portfolio-construction rules
-
-  The HTML summary is viewer-facing editorial content.
-
-  ============================================================
-  17. FINAL RESPONSE — OUTPUT ONLY
-  ============================================================
-
-  Output ONLY:
-
-    CONTEXT REVIEW
-
-    followed by
-
-    HTML table
-
-    followed by
-
-    HTML summary block
-
-  Do not output:
-
-    - markdown code fences
-    - JSON
-    - search logs
-    - internal reasoning
-    - chain-of-thought
-    - repeated candidate lists
-    - malformed ticker lists
-    - malformed pseudo-HTML
-
-  Do NOT output citation artifacts or placeholders such as:
-
-    [1]
-    [2]
-    【...】
-    turn0search0
-    source IDs
-    reference IDs
-
-  Do not output URLs except the required Yahoo Finance links inside the HTML.
-
-  Never output things like:
-
-    (PARR), 11 (PARR), 17 (PARR), 18 (PARR)
-
-  Every ticker must be a real symbol from the supplied dataset.
-
-  Ensure exactly 10 final recommendations.
-
-  Ensure no ETF appears twice.
-
-  Ensure no Exposure Group exceeds its hard maximum when 5+ groups exist.
-
-  Ensure every selected ETF was actually researched.
-
-  Ensure every selected ETF has a defensible continuation thesis.
-
-  Ensure every selected ETF has a defensible opportunity-cost case versus
-  IGM/SPMO.
-
-  ============================================================
-  EXACT OUTPUT BOUNDARY
-  ============================================================
-
-  The response must begin exactly with:
-
-    CONTEXT REVIEW
-
-  The response must end exactly with:
-
-    </div>
-
-  After </div>, output nothing else.
-
-  Before returning, silently verify:
-
-    1. Context Review exists.
-    2. Every reached ETF is represented exactly once in the Context Review.
-    3. Every final recommendation is in the Context Review.
-    4. Exactly 10 final recommendations exist.
-    5. Every final recommendation was researched.
-    6. No ELEVATED REVERSAL RISK or REJECT ETF is selected.
-    7. With 5+ Exposure Groups, no group exceeds 2 selected ETFs.
-    8. No risk event exceeds 2 CAUTIOUS CONTINUATION ETFs.
-    9. The final 10 follow the sequential QVM selection algorithm.
-   10. No Exposure Group-capacity-skipped ETF was researched or selected.
-   11. The table contains exactly 10 rows and six cells per row.
-   12. The exact opening table tag is:
-         <table class="recommendations-table">
-   13. The table appears before the summary block.
-   14. The summary discusses every selected ETF.
-   15. No citation artifacts appear.
-   16. No internal research, hidden reasoning, or portfolio-construction
-       terminology appears outside the Context Review.
-
-  If any check fails, fix the response silently before returning it.
-
-  ============================================================
-  FINAL PRINCIPLE
-  ============================================================
-
-  Do not chase returns simply because they are high.
-
-  Prefer:
-
-    strong existing performance
-    +
-    persistent momentum
-    +
-    multi-period consistency
-    +
-    recent confirmation
-    +
-    reasonable structural characteristics
-    +
-    favorable current context
-    +
-    manageable reversal risk
-    +
-    evidence of relative advantage versus IGM/SPMO
-
-  The goal is NOT to predict the market with certainty.
-
-  The goal is to identify the ETFs with the strongest CURRENT evidence that
-  their existing strength is likely to continue and that owning them is
-  justified relative to simply owning IGM and/or SPMO.

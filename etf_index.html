@@ -9,33 +9,205 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
     <style>
+        :root {
+            --bg-deep: #000000;
+            --bg-soft: #070908;
+            --glass: rgba(28, 31, 29, 0.58);
+            --glass-strong: rgba(20, 23, 21, 0.78);
+            --glass-subtle: rgba(255, 255, 255, 0.055);
+            --border: rgba(255, 255, 255, 0.095);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: rgba(255, 255, 255, 0.94);
+            --text-secondary: rgba(255, 255, 255, 0.60);
+            --text-muted: rgba(255, 255, 255, 0.38);
+            --green: #30D158;
+            --green-hover: #63E881;
+            --orange: #FF9F0A;
+            --orange-hover: #FFB340;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            color-scheme: dark;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0;
             padding: 0;
-            background-color: #000;  /* black background */
-            color: #fff;             /* white text */
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 12% -8%, rgba(48, 209, 88, 0.16), transparent 30%),
+                radial-gradient(circle at 88% 10%, rgba(255, 159, 10, 0.075), transparent 26%),
+                linear-gradient(180deg, var(--bg-soft) 0%, #020302 45%, var(--bg-deep) 100%);
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            background:
+                linear-gradient(120deg, rgba(255,255,255,0.018), transparent 30%, rgba(255,255,255,0.01) 70%, transparent),
+                radial-gradient(circle at 50% 120%, rgba(48, 209, 88, 0.045), transparent 34%);
+        }
+
+        .page-shell {
+            width: min(1500px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 16px 0 48px;
         }
 
         h1, h2, p, em {
-            color: #fff;
+            color: var(--text);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.7rem, 4vw, 2.35rem);
+            font-weight: 680;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+        }
+
+        h2 {
+            margin: 38px 0 14px;
+            font-size: 1.2rem;
+            font-weight: 620;
+            letter-spacing: -0.018em;
+        }
+
+        p {
+            line-height: 1.55;
         }
 
         a {
-            color: #32CD32;          /* Money green for normal links */
-            text-decoration: none;    /* optional, removes underline */
+            color: var(--green);
+            text-decoration: none;
+            transition: color 160ms ease, opacity 160ms ease, text-shadow 160ms ease, background 160ms ease, transform 160ms ease;
         }
 
         a:hover {
-            color: #FFD700;          /* Gold on hover */
-            text-decoration: underline;
+            color: var(--green-hover);
+            text-decoration: none;
+            text-shadow: 0 0 14px rgba(48, 209, 88, 0.25);
         }
 
         a:visited {
-            color: #FFA500;          /* Orange for visited links */
+            color: var(--orange);
         }
 
-        .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+        a:visited:hover {
+            color: var(--orange-hover);
+            text-shadow: 0 0 14px rgba(255, 159, 10, 0.20);
+        }
+
+        .glass-header {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 16px 14px 18px;
+            background: var(--glass);
+            -webkit-backdrop-filter: blur(28px) saturate(145%);
+            backdrop-filter: blur(28px) saturate(145%);
+            border: 1px solid var(--border-strong);
+            border-radius: 22px;
+            box-shadow:
+                0 14px 42px rgba(0, 0, 0, 0.30),
+                inset 0 1px 0 rgba(255, 255, 255, 0.10);
+            overflow: hidden;
+        }
+
+        .glass-header::before,
+        .table-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.10), transparent 24%, transparent 72%, rgba(255,255,255,0.025));
+        }
+
+        .brand-block,
+        .header-meta {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-subtitle {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .glass-nav-button {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.065);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.075);
+            -webkit-backdrop-filter: blur(16px) saturate(130%);
+            backdrop-filter: blur(16px) saturate(130%);
+            font-size: 0.86rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .glass-nav-button:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .table-container {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            padding: 8px;
+            background: rgba(22, 25, 23, 0.70);
+            -webkit-backdrop-filter: blur(24px) saturate(125%);
+            backdrop-filter: blur(24px) saturate(125%);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow:
+                0 16px 40px rgba(0, 0, 0, 0.24),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .table-container > * {
+            position: relative;
+            z-index: 1;
+        }
 
         .recommendations-table td {
             max-width: 300px;
@@ -44,224 +216,291 @@
         }
 
         table {
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             width: 100%;
             min-width: 300px;
-            background-color: #111;   /* dark table background */
-            color: #fff;              /* white text */
+            background: rgba(8, 10, 9, 0.80);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.055);
+            border-radius: 16px;
+            overflow: hidden;
         }
 
         th, td {
-            border: 1px solid #555;   /* lighter border for visibility */
-            padding: 8px;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+            padding: 11px 12px;
             text-align: left;
             white-space: nowrap;
         }
 
         th {
-            background-color: #222;   /* dark gray header */
-            color: #fff;
+            background: rgba(255, 255, 255, 0.052);
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem;
+            font-weight: 650;
+            letter-spacing: 0.015em;
         }
 
-        /* DataTables overrides to match dark mode */
+        tbody tr {
+            transition: background 140ms ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.042);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* DataTables controls */
+        .dataTables_wrapper {
+            color: var(--text);
+        }
+
         .dataTables_wrapper .dataTables_filter label,
         .dataTables_wrapper .dataTables_length label,
         .dataTables_wrapper .dataTables_info {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin: 4px 0 10px;
+        }
+
+        .dataTables_wrapper input[type="search"],
+        .dataTables_wrapper select {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.065);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 999px;
+            padding: 8px 12px;
+            outline: none;
+            -webkit-backdrop-filter: blur(14px) saturate(125%);
+            backdrop-filter: blur(14px) saturate(125%);
+            transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .dataTables_wrapper select {
+            padding-right: 28px;
+        }
+
+        .dataTables_wrapper input[type="search"]:focus,
+        .dataTables_wrapper select:focus {
+            border-color: rgba(48, 209, 88, 0.52);
+            background: rgba(255, 255, 255, 0.085);
+            box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.09);
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            padding-top: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: rgba(255, 255, 255, 0.72) !important;
+            background: rgba(255, 255, 255, 0.052) !important;
+            border: 1px solid rgba(255, 255, 255, 0.075) !important;
+            border-radius: 999px !important;
+            margin: 0 2px;
+            transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.095) !important;
+            border-color: rgba(255, 255, 255, 0.13) !important;
+            transform: translateY(-1px);
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #061108 !important;
+            background: rgba(48, 209, 88, 0.92) !important;
+            border-color: rgba(48, 209, 88, 0.92) !important;
+            box-shadow: 0 0 18px rgba(48, 209, 88, 0.13);
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            color: rgba(255, 255, 255, 0.24) !important;
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none;
+        }
+
+        .model-used {
+            color: var(--text-secondary);
+            font-size: 0.83rem;
+            margin: 8px 4px 0;
+        }
+
+        /* Generated summary styling hooks. These apply gracefully even if the inserted HTML is simple. */
+        .recommendations-summary,
+        .summary-card,
+        .market-summary,
+        .sector-summary {
+            background: rgba(30, 34, 31, 0.46);
+            -webkit-backdrop-filter: blur(22px) saturate(130%);
+            backdrop-filter: blur(22px) saturate(130%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.065),
+                0 10px 30px rgba(0,0,0,0.18);
+        }
+
+        .summary-card,
+        .market-summary,
+        .sector-summary {
+            padding: 18px 20px;
+            margin: 14px 0;
+        }
+
+        .selection-card {
+            position: relative;
+            margin: 0 0 2rem;
+            padding: 18px 20px;
+            overflow: hidden;
+            background: rgba(30, 34, 31, 0.46);
+            -webkit-backdrop-filter: blur(22px) saturate(130%);
+            backdrop-filter: blur(22px) saturate(130%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.065),
+                0 10px 30px rgba(0,0,0,0.18);
+        }
+
+        .selection-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 24%, transparent 72%, rgba(255,255,255,0.02));
+        }
+
+        .selection-card p {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .disclaimer {
+            margin: 30px 4px 8px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        ::selection {
+            background: rgba(48, 209, 88, 0.28);
             color: #fff;
         }
 
-        .dataTables_wrapper .dataTables_paginate a {
-            color: #1E90FF !important; /* make pagination links match table link color */
+        @media (max-width: 700px) {
+            .page-shell {
+                width: min(100% - 20px, 1500px);
+                padding-top: 10px;
+            }
+
+            .glass-header {
+                top: 10px;
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+                border-radius: 20px;
+            }
+
+            .header-meta {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            h1 {
+                font-size: 1.55rem;
+            }
+
+            h2 {
+                margin-top: 30px;
+                font-size: 1.1rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px 9px;
+            }
+
+            .table-container {
+                padding: 6px;
+                border-radius: 18px;
+            }
+
+            table {
+                border-radius: 13px;
+            }
+
+            .dataTables_wrapper .dataTables_filter,
+            .dataTables_wrapper .dataTables_length {
+                float: none;
+                text-align: left;
+            }
         }
 
-        @media (max-width: 600px) {
-            body { margin: 10px; }
-            h1 { font-size: 1.4rem; }
-            h2 { font-size: 1.2rem; }
-            p { font-size: 0.9rem; }
-            th, td { padding: 6px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+                animation: none !important;
+            }
         }
 
-        /* Small gray disclaimer text */
-        .disclaimer {
-            font-size: 12px;
-            color: #bbb;
-            margin-top: 10px;
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .glass-header,
+            .table-container,
+            .summary-card,
+            .market-summary,
+            .sector-summary,
+            .selection-card {
+                background: rgba(20, 23, 21, 0.96);
+            }
         }
     </style>
 </head>
 <body>
-<h1>Clairvoyant: AI ETF Recommender</h1>
-<p>Last updated: 2026-09-03 11:00:19</p>
-<p><a href="https://nguyendan1337.github.io/clairvoyant/index.html">Stock Recommender</a></p>
+<div class="page-shell">
+    <header class="glass-header">
+        <div class="brand-block">
+            <h1>Clairvoyant</h1>
+            <span class="brand-subtitle">AI ETF Recommender</span>
+        </div>
 
-<h2>Top ETF Picks</h2>
-<div class="table-container">
-    <table class="recommendations-table">
-<thead>
-<tr>
-<th>Symbol</th>
-<th>ETF Name</th>
-<th>Sector</th>
-<th>3M Return (%)</th>
-<th>1Y Return (%)</th>
-<th>QVMScore</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/XLE/" target="_blank">XLE</a></td>
-<td><a href="https://finance.yahoo.com/quote/XLE/" target="_blank">State Street Energy Select Sector SPDR ETF</a></td>
-<td>Energy</td>
-<td>13.488169</td>
-<td>50.437236</td>
-<td>88.457923</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">VFLO</a></td>
-<td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">Victoryshares Free Cash Flow ETF</a></td>
-<td>Broad U.S. Growth</td>
-<td>22.267041</td>
-<td>51.796113</td>
-<td>84.603346</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">DIVB</a></td>
-<td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">iShares Core Dividend ETF</a></td>
-<td>Broad U.S. Market</td>
-<td>14.444695</td>
-<td>37.739152</td>
-<td>84.307627</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">FENY</a></td>
-<td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">Fidelity MSCI Energy Index ETF</a></td>
-<td>Energy</td>
-<td>11.124034</td>
-<td>51.397311</td>
-<td>83.667375</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">VLUE</a></td>
-<td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">iShares MSCI USA Value Factor ETF</a></td>
-<td>Broad U.S. Market</td>
-<td>1.670635</td>
-<td>74.199885</td>
-<td>82.749651</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">XBI</a></td>
-<td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">State Street SPDR S&P Biotech ETF</a></td>
-<td>Healthcare</td>
-<td>27.800787</td>
-<td>76.561338</td>
-<td>82.566252</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">XLK</a></td>
-<td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">State Street Technology Select Sector SPDR ETF</a></td>
-<td>Technology</td>
-<td>3.128926</td>
-<td>42.167712</td>
-<td>79.278156</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">IBB</a></td>
-<td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">iShares Biotechnology ETF</a></td>
-<td>Healthcare</td>
-<td>24.388966</td>
-<td>52.288845</td>
-<td>75.885331</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/RSPT/" target="_blank">RSPT</a></td>
-<td><a href="https://finance.yahoo.com/quote/RSPT/" target="_blank">Invesco S&P 500 Equal Weight Technology ETF</a></td>
-<td>Technology</td>
-<td>4.043385</td>
-<td>53.883157</td>
-<td>74.143634</td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/IGE/" target="_blank">IGE</a></td>
-<td><a href="https://finance.yahoo.com/quote/IGE/" target="_blank">iShares North American Natural Resources ETF</a></td>
-<td>Materials</td>
-<td>12.467295</td>
-<td>43.134849</td>
-<td>71.359222</td>
-</tr>
-</tbody>
-</table>
-</div>
+        <div class="header-meta">
+            <p class="last-updated">Last updated: 2026-09-06 21:31:49</p>
+            <a class="glass-nav-button" href="https://nguyendan1337.github.io/clairvoyant/index.html">Stock Recommender</a>
+        </div>
+    </header>
 
-<div class="summary">
-<h2>Market Chat:</h2>
+    <h2>Top ETF Picks</h2>
+    <div class="table-container">
+        <table class="recommendations-table"><thead><tr><th>Symbol</th><th>ETF Name</th><th>Exposure Group</th><th>Reversal Risk</th><th>QVM Score</th><th>Explanation</th></tr></thead><tbody><tr><td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">VLUE</a></td><td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">iShares MSCI USA Value Factor ETF</a></td><td>US_LARGE_MID_CAP_VALUE_EQUITY</td><td>LOW</td><td>85.62</td><td>VLUE offers diversified US large-cap value exposure, with a unique sector-relative approach that may benefit from a rotation into undervalued names.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">DIVB</a></td><td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">iShares Core Dividend ETF</a></td><td>US_DIVIDEND_GROWTH_EQUITY</td><td>LOW</td><td>84.87</td><td>DIVB offers diversified US dividend equity exposure, benefiting from tech exposure and quality screens in the current AI-driven market.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">VFLO</a></td><td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">Victoryshares Free Cash Flow ETF</a></td><td>US_LARGE_CAP_FREE_CASH_FLOW</td><td>LOW</td><td>84.81</td><td>VFLO&#x27;s focus on free cash flow is a durable driver, but its tech exposure could face headwinds if concentrated AI/tech leadership reverses.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/AVLV/" target="_blank">AVLV</a></td><td><a href="https://finance.yahoo.com/quote/AVLV/" target="_blank">Avantis US Large Cap Value ETF</a></td><td>US_LARGE_CAP_VALUE_EQUITY</td><td>LOW</td><td>82.24</td><td>AVLV is an actively managed US large-cap value ETF, outperforming by focusing on profitable companies and benefiting from value rotation.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/VONV/" target="_blank">VONV</a></td><td><a href="https://finance.yahoo.com/quote/VONV/" target="_blank">Vanguard Russell 1000 Value Index Fund ETF Shares</a></td><td>US_LARGE_CAP_VALUE_EQUITY</td><td>LOW</td><td>82.00</td><td>VONV offers diversified US large-cap value exposure, benefiting from value rotation, but may underperform in strong growth markets.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">XBI</a></td><td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">State Street SPDR S&amp;P Biotech ETF</a></td><td>US_BIOTECHNOLOGY</td><td>MINIMAL</td><td>81.90</td><td>XBI offers diversified exposure to the US biotech sector, driven by innovation, with no clear reversal mechanism identified.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/KBWB/" target="_blank">KBWB</a></td><td><a href="https://finance.yahoo.com/quote/KBWB/" target="_blank">Invesco KBW Bank ETF</a></td><td>US_BANKING_SECTOR</td><td>MODERATE</td><td>80.72</td><td>KBWB benefits from a strong US economy, but persistent inflation and a hawkish Fed pose a moderate risk to bank profitability.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/SEIV/" target="_blank">SEIV</a></td><td><a href="https://finance.yahoo.com/quote/SEIV/" target="_blank">SEI QiM U.S. Large Cap Value Active ETF</a></td><td>US_LARGE_CAP_VALUE_ACTIVE_EQUITY</td><td>LOW</td><td>80.14</td><td>SEIV is an actively managed US large-cap value ETF, using a quantitative model to select undervalued stocks.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/DFLV/" target="_blank">DFLV</a></td><td><a href="https://finance.yahoo.com/quote/DFLV/" target="_blank">Dimensional US Large Cap Value ETF</a></td><td>US_LARGE_CAP_VALUE_ACTIVE_EQUITY</td><td>LOW</td><td>79.01</td><td>DFLV is an actively managed US large-cap value ETF, outperforming by focusing on strong sectors and benefiting from value rotation.</td></tr><tr><td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">IBB</a></td><td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">iShares Biotechnology ETF</a></td><td>US_BIOTECHNOLOGY</td><td>MINIMAL</td><td>76.01</td><td>IBB provides focused exposure to the US biotechnology sector, driven by innovation, with no clear reversal mechanism identified.</td></tr></tbody></table>
+    </div>
 
-<p>
-The S&P 500 has exhibited mixed movements recently, showing a slight upward trend over the past week but with notable volatility. The overall market health is somewhat cautious, as investors balance robust earnings from select sectors with ongoing concerns about inflation and the trajectory of interest rates. The dominant market drivers include persistent advancements in artificial intelligence and the lingering effects of geopolitical tensions, particularly in the Middle East, which continue to influence energy prices. A key market concern remains the potential for a deeper economic slowdown later in the year.
-</p>
+    <div class="summary"><p>As of September 6, 2026, the U.S. economy exhibits resilient growth, fueled by robust consumer spending and significant AI-related business investment, leading to exceptionally strong corporate earnings. While the labor market remains healthy, persistent elevated inflation, driven by global supply shocks from Middle East geopolitical tensions, maintains a hawkish Federal Reserve stance with expectations for sustained high interest rates. Equity market leadership is highly concentrated in Information Technology and Communication Services, benefiting mega-cap AI players and momentum. However, this concentration, high valuations, and crowding present a vulnerability to reversal, especially as rising Treasury yields enhance fixed income's appeal.</p><p>The US Large/Mid Cap Value Equity group, represented by <b>iShares MSCI USA Value Factor ETF (VLUE)</b>, <b>Avantis US Large Cap Value ETF (AVLV)</b>, and <b>Vanguard Russell 1000 Value Index Fund ETF Shares (VONV)</b>, offers diversified exposure to undervalued US companies. VLUE's sector-relative approach, AVLV's focus on profitability and trending sectors, and VONV's broad value exposure are currently appealing as they benefit from a rotation into value-oriented equities. This positive outlook is supported by the potential for continued capture of undervalued opportunities and the historical long-term outperformance of value. However, a sustained resurgence of growth stocks or a prolonged period where the value factor remains out of favor could lead to underperformance, consistent with their low reversal risk.</p><p><b>iShares Core Dividend ETF (DIVB)</b> provides diversified US dividend equity exposure, appealing due to its unique inclusion of technology and focus on high-quality dividend payers, aligning with current AI-driven growth cycles while reducing volatility. Its positive outlook is supported by its tech exposure and quality screens, which should continue to support AI-driven growth. The main reversal risk, rated as low, would be a significant rotation away from technology or a broad market downturn, though its quality screen offers some mitigation.</p><p><b>Victoryshares Free Cash Flow ETF (VFLO)</b> focuses on companies with strong free cash flow generation, appealing to investors seeking sustainable business models and quality factors. Its strong fundamentals and free cash flow generation are expected to continue driving performance, particularly in a market seeking quality. However, the low reversal risk stems from the current AI concentration and crowding, where a rotation out of concentrated tech/AI names could impact its free cash flow-focused tech holdings.</p><p>The US Biotechnology sector, represented by <b>State Street SPDR S&P Biotech ETF (XBI)</b> and <b>iShares Biotechnology ETF (IBB)</b>, offers focused exposure to innovative companies engaged in R&D of therapeutic treatments. Both ETFs benefit from technological breakthroughs and increased investment in medical advancements, with continued innovation expected to drive growth over the next 6-12 months. No clear reversal mechanism or material effect has been identified for these ETFs, consistent with their minimal reversal risk.</p><p><b>Invesco KBW Bank ETF (KBWB)</b> benefits from the resilient US economic growth and a healthy labor market, which mitigate near-term recession concerns and support the banking sector. This positive outlook is expected to continue over the next 6-12 months. However, the moderate reversal risk arises from persistent elevated inflation and a hawkish Federal Reserve policy, which could lead to higher interest rates, potentially impacting loan demand or increasing credit risk and thereby affecting bank profitability.</p><p>The US Large Cap Value Active Equity group, including <b>SEI QiM U.S. Large Cap Value Active ETF (SEIV)</b> and <b>Dimensional US Large Cap Value ETF (DFLV)</b>, employs active management to select undervalued stocks. SEIV uses a quantitative model based on earnings, cash flow, sales, and asset-based valuations, while DFLV focuses on fundamentally sound sectors like financials, energy, and industrials, benefiting from value rotation. Both have a positive outlook due to their active strategies and diversified portfolios, which seek to identify mispriced value and extend price momentum. Their low reversal risk is tied to potential underperformance if their quantitative models prove incorrect, if the value factor remains out of favor, or if growth stocks experience a strong resurgence.</p></div>
 
-<p>
-<strong>Energy (
-<a href="https://finance.yahoo.com/quote/XLE/" target="_blank"><strong>XLE</strong></a>,
-<a href="https://finance.yahoo.com/quote/FENY/" target="_blank"><strong>FENY</strong></a>):
-</strong>
-The energy sector remains highly attractive due to elevated crude oil and natural gas prices, driven by strong global demand and ongoing geopolitical supply concerns. This environment fosters robust earnings and significant free cash flow generation for energy companies. Both
-<a href="https://finance.yahoo.com/quote/XLE/" target="_blank"><strong>State Street Energy Select Sector SPDR ETF</strong></a> and
-<a href="https://finance.yahoo.com/quote/FENY/" target="_blank"><strong>Fidelity MSCI Energy Index ETF</strong></a> are well-positioned to benefit from these dynamics, offering a valuable hedge against inflation and diversification from growth-oriented sectors. Their performance is likely to continue strongly as long as demand remains firm and supply remains constrained, with geopolitical events providing a significant near-term tailwind.
-</p>
+    <p class="model-used"><em>Generated by model: gemini-2.5-flash</em></p>
 
-<p>
-<strong>Broad U.S. Growth (
-<a href="https://finance.yahoo.com/quote/VFLO/" target="_blank"><strong>VFLO</strong></a>):
-</strong>
-This sector is compelling as investors increasingly prioritize companies with strong fundamental quality and robust cash flow generation. The most important current industry driver is the market's preference for financially sound companies that can self-fund growth and return capital in a higher interest rate environment. The
-<a href="https://finance.yahoo.com/quote/VFLO/" target="_blank"><strong>Victoryshares Free Cash Flow ETF</strong></a> is attractive now because its focus on mid-cap companies with strong free cash flow aligns perfectly with this trend, providing resilience and potential for consistent outperformance. Its emphasis on quality fundamentals makes its continuation thesis strong and durable, offering a differentiated exposure to growth that benchmarks like IGM or SPMO do not capture as effectively.
-</p>
-
-<p>
-<strong>Broad U.S. Market (
-<a href="https://finance.yahoo.com/quote/DIVB/" target="_blank"><strong>DIVB</strong></a>,
-<a href="https://finance.yahoo.com/quote/VLUE/" target="_blank"><strong>VLUE</strong></a>):
-</strong>
-The broad U.S. market, particularly its value and dividend-paying segments, is attractive as investors seek stability, income, and potentially undervalued opportunities. The shift towards value in a higher rate environment is a key driver.
-<a href="https://finance.yahoo.com/quote/DIVB/" target="_blank"><strong>iShares Core Dividend ETF</strong></a> is attractive due to its focus on high-quality dividend payers, providing income and defensive characteristics. Meanwhile,
-<a href="https://finance.yahoo.com/quote/VLUE/" target="_blank"><strong>iShares MSCI USA Value Factor ETF</strong></a> capitalizes on the market's rotation into fundamentally undervalued companies. Both are likely to continue performing well as long as current market themes of value preference and income generation persist, offering a more stable and potentially less volatile return profile than broad market or pure growth indices.
-</p>
-
-<p>
-<strong>Healthcare (
-<a href="https://finance.yahoo.com/quote/XBI/" target="_blank"><strong>XBI</strong></a>,
-<a href="https://finance.yahoo.com/quote/IBB/" target="_blank"><strong>IBB</strong></a>):
-</strong>
-The biotechnology sector within healthcare is experiencing strong momentum driven by significant scientific innovation, promising drug pipelines, and an active mergers and acquisitions landscape. The aging global population and continuous demand for novel therapies are powerful long-term drivers.
-<a href="https://finance.yahoo.com/quote/XBI/" target="_blank"><strong>State Street SPDR S&P Biotech ETF</strong></a>, with its equal-weighted approach, captures broad sector strength, while
-<a href="https://finance.yahoo.com/quote/IBB/" target="_blank"><strong>iShares Biotechnology ETF</strong></a> provides exposure to a mix of larger, more established biotech firms. Both are poised for continued success due to ongoing breakthroughs and M&A activity, though they face inherent risks related to clinical trial outcomes and regulatory hurdles, which are common for this innovative sector.
-</p>
-
-<p>
-<strong>Technology (
-<a href="https://finance.yahoo.com/quote/XLK/" target="_blank"><strong>XLK</strong></a>,
-<a href="https://finance.yahoo.com/quote/RSPT/" target="_blank"><strong>RSPT</strong></a>):
-</strong>
-The technology sector remains a powerhouse, primarily fueled by relentless innovation in artificial intelligence and ongoing digital transformation across industries. The current market is heavily driven by the potential and adoption of AI technologies.
-<a href="https://finance.yahoo.com/quote/XLK/" target="_blank"><strong>State Street Technology Select Sector SPDR ETF</strong></a> provides concentrated exposure to mega-cap tech leaders benefiting significantly from AI investments. In contrast,
-<a href="https://finance.yahoo.com/quote/RSPT/" target="_blank"><strong>Invesco S&P 500 Equal Weight Technology ETF</strong></a> offers a diversified approach by giving smaller tech companies more influence, potentially capturing broader sector rallies and mitigating concentration risk. Both are likely to continue performing well due to the long-term secular growth of technology, with RSPT offering a compelling alternative to IGM for those seeking diversified tech exposure.
-</p>
-
-<p>
-<strong>Materials (
-<a href="https://finance.yahoo.com/quote/IGE/" target="_blank"><strong>IGE</strong></a>):
-</strong>
-The materials sector is currently attractive due to strong global demand for natural resources, supportive commodity prices, and significant investment in infrastructure and energy transition. The most important current industry driver is the dual tailwind of inflation hedging and increasing industrial demand. The
-<a href="https://finance.yahoo.com/quote/IGE/" target="_blank"><strong>iShares North American Natural Resources ETF</strong></a> offers broad exposure to companies involved in metals, mining, and energy resources. Its holdings are likely to continue performing well as long as global economic activity sustains demand and inflationary pressures remain, making it a robust diversifier and inflation hedge compared to benchmarks.
-</p>
-</div>
-
-<p><em>Generated by model: gemini-2.5-flash</em></p>
-
-<h2>Full List of ETF Picks</h2>
-<div class="table-container">
-    <table class="dataframe recommendations-table">
+    <h2>Full List of ETF Picks</h2>
+    <div class="table-container">
+        <table class="dataframe recommendations-table">
   <thead>
     <tr style="text-align: right;">
       <th>Symbol</th>
@@ -277,269 +516,233 @@ The materials sector is currently attractive due to strong global demand for nat
       <td><a href="https://finance.yahoo.com/quote/XLE/" target="_blank">XLE</a></td>
       <td><a href="https://finance.yahoo.com/quote/XLE/" target="_blank">State Street Energy Select Sector SPDR ETF</a></td>
       <td>Equity Energy</td>
-      <td>13.488169</td>
-      <td>50.437236</td>
-      <td>88.457923</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">VFLO</a></td>
-      <td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">Victoryshares Free Cash Flow ETF</a></td>
-      <td>Mid-Cap Value</td>
-      <td>22.267041</td>
-      <td>51.796113</td>
-      <td>84.603346</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">DIVB</a></td>
-      <td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">iShares Core Dividend ETF</a></td>
-      <td>Large Value</td>
-      <td>14.444695</td>
-      <td>37.739152</td>
-      <td>84.307627</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">FENY</a></td>
-      <td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">Fidelity MSCI Energy Index ETF</a></td>
-      <td>Equity Energy</td>
-      <td>11.124034</td>
-      <td>51.397311</td>
-      <td>83.667375</td>
+      <td>10.615435</td>
+      <td>51.227279</td>
+      <td>89.214767</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">VLUE</a></td>
       <td><a href="https://finance.yahoo.com/quote/VLUE/" target="_blank">iShares MSCI USA Value Factor ETF</a></td>
       <td>Large Value</td>
-      <td>1.670635</td>
-      <td>74.199885</td>
-      <td>82.749651</td>
+      <td>5.453081</td>
+      <td>73.975580</td>
+      <td>85.618522</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">FENY</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FENY/" target="_blank">Fidelity MSCI Energy Index ETF</a></td>
+      <td>Equity Energy</td>
+      <td>10.660313</td>
+      <td>51.171373</td>
+      <td>84.985381</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">DIVB</a></td>
+      <td><a href="https://finance.yahoo.com/quote/DIVB/" target="_blank">iShares Core Dividend ETF</a></td>
+      <td>Large Value</td>
+      <td>13.128783</td>
+      <td>36.830968</td>
+      <td>84.865611</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">VFLO</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VFLO/" target="_blank">Victoryshares Free Cash Flow ETF</a></td>
+      <td>Mid-Cap Value</td>
+      <td>20.069567</td>
+      <td>49.073849</td>
+      <td>84.814135</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/AVLV/" target="_blank">AVLV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/AVLV/" target="_blank">Avantis US Large Cap Value ETF</a></td>
+      <td>Large Value</td>
+      <td>5.344558</td>
+      <td>33.484734</td>
+      <td>82.242986</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/SCHD/" target="_blank">SCHD</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SCHD/" target="_blank">Schwab U.S. Dividend Equity ETF</a></td>
+      <td>Large Value</td>
+      <td>8.631636</td>
+      <td>30.528177</td>
+      <td>82.042062</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/VONV/" target="_blank">VONV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VONV/" target="_blank">Vanguard Russell 1000 Value Index Fund ETF Shares</a></td>
+      <td>Large Value</td>
+      <td>8.950172</td>
+      <td>30.122846</td>
+      <td>82.004012</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">XBI</a></td>
       <td><a href="https://finance.yahoo.com/quote/XBI/" target="_blank">State Street SPDR S&P Biotech ETF</a></td>
       <td>Health</td>
-      <td>27.800787</td>
-      <td>76.561338</td>
-      <td>82.566252</td>
+      <td>27.673290</td>
+      <td>72.368010</td>
+      <td>81.902647</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/VDE/" target="_blank">VDE</a></td>
-      <td><a href="https://finance.yahoo.com/quote/VDE/" target="_blank">Vanguard Energy Index Fund ETF Shares</a></td>
-      <td>Equity Energy</td>
-      <td>13.481942</td>
-      <td>50.247112</td>
-      <td>80.892460</td>
+      <td><a href="https://finance.yahoo.com/quote/KBWB/" target="_blank">KBWB</a></td>
+      <td><a href="https://finance.yahoo.com/quote/KBWB/" target="_blank">Invesco KBW Bank ETF</a></td>
+      <td>Financial</td>
+      <td>9.739648</td>
+      <td>30.453520</td>
+      <td>80.721882</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/XOP/" target="_blank">XOP</a></td>
       <td><a href="https://finance.yahoo.com/quote/XOP/" target="_blank">State Street SPDR S&P Oil & Gas Exploration & Production ETF</a></td>
       <td>Equity Energy</td>
-      <td>13.085184</td>
-      <td>50.509494</td>
-      <td>80.652158</td>
+      <td>13.810045</td>
+      <td>50.525384</td>
+      <td>80.177658</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">XLK</a></td>
-      <td><a href="https://finance.yahoo.com/quote/XLK/" target="_blank">State Street Technology Select Sector SPDR ETF</a></td>
-      <td>Technology</td>
-      <td>3.128926</td>
-      <td>42.167712</td>
-      <td>79.278156</td>
+      <td><a href="https://finance.yahoo.com/quote/SEIV/" target="_blank">SEIV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/SEIV/" target="_blank">SEI QiM U.S. Large Cap Value Active ETF</a></td>
+      <td>Large Value</td>
+      <td>7.539931</td>
+      <td>36.194502</td>
+      <td>80.143935</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/VDE/" target="_blank">VDE</a></td>
+      <td><a href="https://finance.yahoo.com/quote/VDE/" target="_blank">Vanguard Energy Index Fund ETF Shares</a></td>
+      <td>Equity Energy</td>
+      <td>10.559446</td>
+      <td>51.063852</td>
+      <td>79.558212</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/IWD/" target="_blank">IWD</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IWD/" target="_blank">iShares Russell 1000 Value ETF</a></td>
+      <td>Large Value</td>
+      <td>8.923282</td>
+      <td>29.889380</td>
+      <td>79.171268</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/DFLV/" target="_blank">DFLV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/DFLV/" target="_blank">Dimensional US Large Cap Value ETF</a></td>
+      <td>Large Value</td>
+      <td>7.522782</td>
+      <td>31.713219</td>
+      <td>79.011692</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/CRAK/" target="_blank">CRAK</a></td>
       <td><a href="https://finance.yahoo.com/quote/CRAK/" target="_blank">VanEck Oil Refiners ETF</a></td>
       <td>Equity Energy</td>
-      <td>29.738086</td>
-      <td>81.037163</td>
-      <td>78.518887</td>
+      <td>30.709143</td>
+      <td>81.468586</td>
+      <td>78.933301</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/DFUV/" target="_blank">DFUV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/DFUV/" target="_blank">Dimensional US Marketwide Value ETF</a></td>
+      <td>Large Value</td>
+      <td>7.232319</td>
+      <td>31.975621</td>
+      <td>78.570072</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/FNDX/" target="_blank">FNDX</a></td>
+      <td><a href="https://finance.yahoo.com/quote/FNDX/" target="_blank">Schwab Fundamental U.S. Large Company ETF</a></td>
+      <td>Large Value</td>
+      <td>6.310185</td>
+      <td>28.366759</td>
+      <td>78.342260</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/AVUV/" target="_blank">AVUV</a></td>
+      <td><a href="https://finance.yahoo.com/quote/AVUV/" target="_blank">Avantis US Small Cap Value ETF</a></td>
+      <td>Small Value</td>
+      <td>5.364952</td>
+      <td>27.575939</td>
+      <td>77.486027</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/VPL/" target="_blank">VPL</a></td>
       <td><a href="https://finance.yahoo.com/quote/VPL/" target="_blank">Vanguard FTSE Pacific Index Fund ETF Shares</a></td>
       <td>Focused Region</td>
-      <td>6.999361</td>
-      <td>40.484032</td>
-      <td>78.506520</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/EPOL/" target="_blank">EPOL</a></td>
-      <td><a href="https://finance.yahoo.com/quote/EPOL/" target="_blank">iShares MSCI Poland ETF</a></td>
-      <td>Focused Region</td>
-      <td>11.089339</td>
-      <td>47.032884</td>
-      <td>77.562710</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/IYE/" target="_blank">IYE</a></td>
-      <td><a href="https://finance.yahoo.com/quote/IYE/" target="_blank">iShares U.S. Energy ETF</a></td>
-      <td>Equity Energy</td>
-      <td>13.062590</td>
-      <td>48.612727</td>
-      <td>77.123026</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/IXC/" target="_blank">IXC</a></td>
-      <td><a href="https://finance.yahoo.com/quote/IXC/" target="_blank">iShares Global Energy ETF</a></td>
-      <td>Equity Energy</td>
-      <td>10.546885</td>
-      <td>47.973681</td>
-      <td>76.755017</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">COPX</a></td>
-      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">Global X Copper Miners ETF</a></td>
-      <td>Natural Resources</td>
-      <td>13.585338</td>
-      <td>86.962292</td>
-      <td>76.497628</td>
+      <td>6.111111</td>
+      <td>41.109761</td>
+      <td>77.416622</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">IBB</a></td>
       <td><a href="https://finance.yahoo.com/quote/IBB/" target="_blank">iShares Biotechnology ETF</a></td>
       <td>Health</td>
-      <td>24.388966</td>
-      <td>52.288845</td>
-      <td>75.885331</td>
+      <td>26.976875</td>
+      <td>48.448422</td>
+      <td>76.005179</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/BCI/" target="_blank">BCI</a></td>
-      <td><a href="https://finance.yahoo.com/quote/BCI/" target="_blank">abrdn Bloomberg All Commodity Strategy K-1 Free ETF</a></td>
-      <td>Commodities Broad Basket</td>
-      <td>6.515528</td>
-      <td>43.468117</td>
-      <td>75.616297</td>
+      <td><a href="https://finance.yahoo.com/quote/IYE/" target="_blank">IYE</a></td>
+      <td><a href="https://finance.yahoo.com/quote/IYE/" target="_blank">iShares U.S. Energy ETF</a></td>
+      <td>Equity Energy</td>
+      <td>10.224902</td>
+      <td>49.240714</td>
+      <td>75.470403</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/GSG/" target="_blank">GSG</a></td>
-      <td><a href="https://finance.yahoo.com/quote/GSG/" target="_blank">iShares S&P GSCI Commodity-Indexed Trust</a></td>
-      <td>Commodities Broad Basket</td>
-      <td>7.872798</td>
-      <td>52.709790</td>
-      <td>74.602485</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/IXN/" target="_blank">IXN</a></td>
-      <td><a href="https://finance.yahoo.com/quote/IXN/" target="_blank">iShares Global Tech ETF</a></td>
-      <td>Technology</td>
-      <td>4.411870</td>
-      <td>49.003992</td>
-      <td>74.415303</td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">COPX</a></td>
+      <td><a href="https://finance.yahoo.com/quote/COPX/" target="_blank">Global X Copper Miners ETF</a></td>
+      <td>Natural Resources</td>
+      <td>11.905630</td>
+      <td>82.336594</td>
+      <td>74.558614</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/FXN/" target="_blank">FXN</a></td>
       <td><a href="https://finance.yahoo.com/quote/FXN/" target="_blank">First Trust Energy AlphaDEX Fund</a></td>
       <td>Equity Energy</td>
-      <td>12.693639</td>
-      <td>49.995519</td>
-      <td>74.302667</td>
+      <td>9.835556</td>
+      <td>50.635315</td>
+      <td>74.229687</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/RSPT/" target="_blank">RSPT</a></td>
-      <td><a href="https://finance.yahoo.com/quote/RSPT/" target="_blank">Invesco S&P 500 Equal Weight Technology ETF</a></td>
-      <td>Technology</td>
-      <td>4.043385</td>
-      <td>53.883157</td>
-      <td>74.143634</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/HGER/" target="_blank">HGER</a></td>
-      <td><a href="https://finance.yahoo.com/quote/HGER/" target="_blank">Harbor Commodity All-Weather Strategy ETF</a></td>
-      <td>Commodities Broad Basket</td>
-      <td>15.703147</td>
-      <td>51.399626</td>
-      <td>74.115191</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/IHE/" target="_blank">IHE</a></td>
-      <td><a href="https://finance.yahoo.com/quote/IHE/" target="_blank">iShares U.S. Pharmaceuticals ETF</a></td>
-      <td>Health</td>
-      <td>14.320598</td>
-      <td>50.449838</td>
-      <td>74.001433</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/RSPG/" target="_blank">RSPG</a></td>
-      <td><a href="https://finance.yahoo.com/quote/RSPG/" target="_blank">Invesco S&P 500 Equal Weight Energy ETF</a></td>
-      <td>Equity Energy</td>
-      <td>12.859923</td>
-      <td>52.642525</td>
-      <td>73.849564</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/GVAL/" target="_blank">GVAL</a></td>
-      <td><a href="https://finance.yahoo.com/quote/GVAL/" target="_blank">Cambria Global Value ETF</a></td>
-      <td>Foreign Large Value</td>
-      <td>12.294564</td>
-      <td>39.391758</td>
-      <td>73.180230</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/PDBC/" target="_blank">PDBC</a></td>
-      <td><a href="https://finance.yahoo.com/quote/PDBC/" target="_blank">Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF</a></td>
-      <td>Commodities Broad Basket</td>
-      <td>9.249724</td>
-      <td>49.664180</td>
-      <td>73.160153</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/PICK/" target="_blank">PICK</a></td>
-      <td><a href="https://finance.yahoo.com/quote/PICK/" target="_blank">iShares MSCI Global Metals & Mining Producers ETF</a></td>
-      <td>Natural Resources</td>
-      <td>6.797492</td>
-      <td>62.484720</td>
-      <td>72.665386</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/FTXN/" target="_blank">FTXN</a></td>
-      <td><a href="https://finance.yahoo.com/quote/FTXN/" target="_blank">First Trust Nasdaq Oil & Gas ETF</a></td>
-      <td>Equity Energy</td>
-      <td>11.582474</td>
-      <td>48.018864</td>
-      <td>72.354076</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/SDCI/" target="_blank">SDCI</a></td>
-      <td><a href="https://finance.yahoo.com/quote/SDCI/" target="_blank">USCF SummerHaven Dynamic Commodity Strategy No K-1 Fund</a></td>
-      <td>Commodities Broad Basket</td>
-      <td>11.454944</td>
-      <td>41.438099</td>
-      <td>72.052537</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/IGE/" target="_blank">IGE</a></td>
-      <td><a href="https://finance.yahoo.com/quote/IGE/" target="_blank">iShares North American Natural Resources ETF</a></td>
-      <td>Natural Resources</td>
-      <td>12.467295</td>
-      <td>43.134849</td>
-      <td>71.359222</td>
+      <td><a href="https://finance.yahoo.com/quote/GDX/" target="_blank">GDX</a></td>
+      <td><a href="https://finance.yahoo.com/quote/GDX/" target="_blank">VanEck Gold Miners ETF</a></td>
+      <td>Equity Precious Metals</td>
+      <td>26.172625</td>
+      <td>50.709831</td>
+      <td>73.674977</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/VGT/" target="_blank">VGT</a></td>
       <td><a href="https://finance.yahoo.com/quote/VGT/" target="_blank">Vanguard Information Technology Index Fund ETF Shares</a></td>
       <td>Technology</td>
-      <td>-1.580590</td>
-      <td>40.010872</td>
-      <td>70.983414</td>
+      <td>3.551686</td>
+      <td>39.445939</td>
+      <td>73.214509</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/SPMO/" target="_blank">SPMO</a></td>
       <td><a href="https://finance.yahoo.com/quote/SPMO/" target="_blank">Invesco S&P 500 Momentum ETF</a></td>
       <td>Large Blend</td>
-      <td>-3.634731</td>
-      <td>28.285897</td>
-      <td>61.574081</td>
+      <td>1.399611</td>
+      <td>28.986515</td>
+      <td>70.595542</td>
     </tr>
   </tbody>
 </table>
-</div>
+    </div>
 
-<h2>How ETFs Were Selected</h2>
-<p>
-    The initial universe of ETFs was compiled from multiple Yahoo Finance top performance lists. ETFs containing leveraged, inverse, foreign, or otherwise high-risk characteristics were filtered out using a set of exclusion keywords. From the remaining ETFs, only those showing strong performance—defined as a 52-week change above 25%, a 3-month return above 6%, and trading above both their 50-day and 200-day moving averages—were retained. These criteria capture short-, mid-, and long-term momentum and growth trends. The resulting list was then sorted by 52-week change to highlight the strongest performers. Finally, this refined list was analyzed using Google Gemini, which conducted focused searches for each ETF, incorporating recent news, macroeconomic context, and real-world developments to produce the final selection of up to 10 recommended ETFs.
-</p>
 
-<div class="disclaimer">
-    This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
+    <h2>How ETFs Were Selected</h2>
+    <section class="selection-card">
+        <p>
+            The initial universe of ETFs was compiled from multiple Yahoo Finance top performance lists. ETFs containing leveraged, inverse, foreign, or otherwise high-risk characteristics were filtered out using a set of exclusion keywords. From the remaining ETFs, only those showing strong performance—defined as a 52-week change above 25%, a 3-month return above 6%, and trading above both their 50-day and 200-day moving averages—were retained. These criteria capture short-, mid-, and long-term momentum and growth trends. The resulting list was then sorted by 52-week change to highlight the strongest performers. Finally, this refined list was analyzed using Google Gemini, which conducted focused searches for each ETF, incorporating recent news, macroeconomic context, and real-world developments to produce the final selection of up to 10 recommended ETFs.
+        </p>
+    </section>
+
+    <div class="disclaimer">
+        This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
+    </div>
 </div>
 
 <!-- jQuery -->
@@ -548,17 +751,25 @@ The materials sector is currently attractive due to strong global demand for nat
 <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('.recommendations-table').DataTable({
-            paging: true,
-            searching: true,
-            info: false,
-            order: [[3, 'desc']]
+        $('.recommendations-table').each(function() {
+            if (!$.fn.DataTable.isDataTable(this)) {
+                $(this).DataTable({
+                    paging: true,
+                    searching: true,
+                    info: false,
+                    order: [[3, 'desc']]
+                });
+            }
         });
 
-        $('.data-table').DataTable({
-            paging: true,
-            searching: true,
-            info: false
+        $('.data-table').each(function() {
+            if (!$.fn.DataTable.isDataTable(this)) {
+                $(this).DataTable({
+                    paging: true,
+                    searching: true,
+                    info: false
+                });
+            }
         });
     });
 </script>

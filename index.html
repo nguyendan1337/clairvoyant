@@ -9,33 +9,205 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
     <style>
+        :root {
+            --bg-deep: #000000;
+            --bg-soft: #070908;
+            --glass: rgba(28, 31, 29, 0.58);
+            --glass-strong: rgba(20, 23, 21, 0.78);
+            --glass-subtle: rgba(255, 255, 255, 0.055);
+            --border: rgba(255, 255, 255, 0.095);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: rgba(255, 255, 255, 0.94);
+            --text-secondary: rgba(255, 255, 255, 0.60);
+            --text-muted: rgba(255, 255, 255, 0.38);
+            --green: #30D158;
+            --green-hover: #63E881;
+            --orange: #FF9F0A;
+            --orange-hover: #FFB340;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            color-scheme: dark;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0;
             padding: 0;
-            background-color: #000;  /* black background */
-            color: #fff;             /* white text */
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 12% -8%, rgba(48, 209, 88, 0.16), transparent 30%),
+                radial-gradient(circle at 88% 10%, rgba(255, 159, 10, 0.075), transparent 26%),
+                linear-gradient(180deg, var(--bg-soft) 0%, #020302 45%, var(--bg-deep) 100%);
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            background:
+                linear-gradient(120deg, rgba(255,255,255,0.018), transparent 30%, rgba(255,255,255,0.01) 70%, transparent),
+                radial-gradient(circle at 50% 120%, rgba(48, 209, 88, 0.045), transparent 34%);
+        }
+
+        .page-shell {
+            width: min(1500px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 16px 0 48px;
         }
 
         h1, h2, p, em {
-            color: #fff;
+            color: var(--text);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.7rem, 4vw, 2.35rem);
+            font-weight: 680;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+        }
+
+        h2 {
+            margin: 38px 0 14px;
+            font-size: 1.2rem;
+            font-weight: 620;
+            letter-spacing: -0.018em;
+        }
+
+        p {
+            line-height: 1.55;
         }
 
         a {
-            color: #32CD32;          /* Money green for normal links */
-            text-decoration: none;    /* optional, removes underline */
+            color: var(--green);
+            text-decoration: none;
+            transition: color 160ms ease, opacity 160ms ease, text-shadow 160ms ease, background 160ms ease, transform 160ms ease;
         }
 
         a:hover {
-            color: #FFD700;          /* Gold on hover */
-            text-decoration: underline;
+            color: var(--green-hover);
+            text-decoration: none;
+            text-shadow: 0 0 14px rgba(48, 209, 88, 0.25);
         }
 
         a:visited {
-            color: #FFA500;          /* Orange for visited links */
+            color: var(--orange);
         }
 
-        .table-container { width: 100%; overflow-x: auto; margin-bottom: 2rem; }
+        a:visited:hover {
+            color: var(--orange-hover);
+            text-shadow: 0 0 14px rgba(255, 159, 10, 0.20);
+        }
+
+        .glass-header {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 16px 14px 18px;
+            background: var(--glass);
+            -webkit-backdrop-filter: blur(28px) saturate(145%);
+            backdrop-filter: blur(28px) saturate(145%);
+            border: 1px solid var(--border-strong);
+            border-radius: 22px;
+            box-shadow:
+                0 14px 42px rgba(0, 0, 0, 0.30),
+                inset 0 1px 0 rgba(255, 255, 255, 0.10);
+            overflow: hidden;
+        }
+
+        .glass-header::before,
+        .table-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.10), transparent 24%, transparent 72%, rgba(255,255,255,0.025));
+        }
+
+        .brand-block,
+        .header-meta {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-subtitle {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .glass-nav-button {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.065);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.075);
+            -webkit-backdrop-filter: blur(16px) saturate(130%);
+            backdrop-filter: blur(16px) saturate(130%);
+            font-size: 0.86rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .glass-nav-button:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .table-container {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            padding: 8px;
+            background: rgba(22, 25, 23, 0.70);
+            -webkit-backdrop-filter: blur(24px) saturate(125%);
+            backdrop-filter: blur(24px) saturate(125%);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow:
+                0 16px 40px rgba(0, 0, 0, 0.24),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        .table-container > * {
+            position: relative;
+            z-index: 1;
+        }
 
         .recommendations-table td {
             max-width: 300px;
@@ -44,60 +216,250 @@
         }
 
         table {
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             width: 100%;
             min-width: 300px;
-            background-color: #111;   /* dark table background */
-            color: #fff;              /* white text */
+            background: rgba(8, 10, 9, 0.80);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.055);
+            border-radius: 16px;
+            overflow: hidden;
         }
 
         th, td {
-            border: 1px solid #555;   /* lighter border for visibility */
-            padding: 8px;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+            padding: 11px 12px;
             text-align: left;
             white-space: nowrap;
         }
 
         th {
-            background-color: #222;   /* dark gray header */
-            color: #fff;
+            background: rgba(255, 255, 255, 0.052);
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem;
+            font-weight: 650;
+            letter-spacing: 0.015em;
         }
 
-        /* DataTables overrides to match dark mode */
+        tbody tr {
+            transition: background 140ms ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.042);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* DataTables controls */
+        .dataTables_wrapper {
+            color: var(--text);
+        }
+
         .dataTables_wrapper .dataTables_filter label,
         .dataTables_wrapper .dataTables_length label,
         .dataTables_wrapper .dataTables_info {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin: 4px 0 10px;
+        }
+
+        .dataTables_wrapper input[type="search"],
+        .dataTables_wrapper select {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.065);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 999px;
+            padding: 8px 12px;
+            outline: none;
+            -webkit-backdrop-filter: blur(14px) saturate(125%);
+            backdrop-filter: blur(14px) saturate(125%);
+            transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .dataTables_wrapper select {
+            padding-right: 28px;
+        }
+
+        .dataTables_wrapper input[type="search"]:focus,
+        .dataTables_wrapper select:focus {
+            border-color: rgba(48, 209, 88, 0.52);
+            background: rgba(255, 255, 255, 0.085);
+            box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.09);
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            padding-top: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: rgba(255, 255, 255, 0.72) !important;
+            background: rgba(255, 255, 255, 0.052) !important;
+            border: 1px solid rgba(255, 255, 255, 0.075) !important;
+            border-radius: 999px !important;
+            margin: 0 2px;
+            transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.095) !important;
+            border-color: rgba(255, 255, 255, 0.13) !important;
+            transform: translateY(-1px);
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #061108 !important;
+            background: rgba(48, 209, 88, 0.92) !important;
+            border-color: rgba(48, 209, 88, 0.92) !important;
+            box-shadow: 0 0 18px rgba(48, 209, 88, 0.13);
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            color: rgba(255, 255, 255, 0.24) !important;
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none;
+        }
+
+        .model-used {
+            color: var(--text-secondary);
+            font-size: 0.83rem;
+            margin: 8px 4px 0;
+        }
+
+        /* Generated summary styling hooks. These apply gracefully even if the inserted HTML is simple. */
+        .recommendations-summary,
+        .summary-card,
+        .market-summary,
+        .sector-summary {
+            background: rgba(30, 34, 31, 0.46);
+            -webkit-backdrop-filter: blur(22px) saturate(130%);
+            backdrop-filter: blur(22px) saturate(130%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.065),
+                0 10px 30px rgba(0,0,0,0.18);
+        }
+
+        .summary-card,
+        .market-summary,
+        .sector-summary {
+            padding: 18px 20px;
+            margin: 14px 0;
+        }
+
+        .disclaimer {
+            margin: 30px 4px 8px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        ::selection {
+            background: rgba(48, 209, 88, 0.28);
             color: #fff;
         }
 
-        .dataTables_wrapper .dataTables_paginate a {
-            color: #1E90FF !important; /* make pagination links match table link color */
+        @media (max-width: 700px) {
+            .page-shell {
+                width: min(100% - 20px, 1500px);
+                padding-top: 10px;
+            }
+
+            .glass-header {
+                top: 10px;
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+                border-radius: 20px;
+            }
+
+            .header-meta {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            h1 {
+                font-size: 1.55rem;
+            }
+
+            h2 {
+                margin-top: 30px;
+                font-size: 1.1rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px 9px;
+            }
+
+            .table-container {
+                padding: 6px;
+                border-radius: 18px;
+            }
+
+            table {
+                border-radius: 13px;
+            }
+
+            .dataTables_wrapper .dataTables_filter,
+            .dataTables_wrapper .dataTables_length {
+                float: none;
+                text-align: left;
+            }
         }
 
-        @media (max-width: 600px) {
-            body { margin: 10px; }
-            h1 { font-size: 1.4rem; }
-            h2 { font-size: 1.2rem; }
-            p { font-size: 0.9rem; }
-            th, td { padding: 6px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+                animation: none !important;
+            }
         }
 
-        /* Small gray disclaimer text */
-        .disclaimer {
-            font-size: 12px;
-            color: #bbb;
-            margin-top: 10px;
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .glass-header,
+            .table-container,
+            .summary-card,
+            .market-summary,
+            .sector-summary {
+                background: rgba(20, 23, 21, 0.96);
+            }
         }
     </style>
 </head>
 <body>
-<h1>Clairvoyant: AI Stock Recommender</h1>
-<p>Last updated: 2026-09-04 11:34:42</p>
-<p><a href="https://nguyendan1337.github.io/clairvoyant/etf_index.html">ETF Recommender</a></p>
+<div class="page-shell">
+    <header class="glass-header">
+        <div class="brand-block">
+            <h1>Clairvoyant</h1>
+            <span class="brand-subtitle">AI Stock Recommender</span>
+        </div>
 
-<h2>Top Stock Picks</h2>
-<div class="table-container">
-    <table class="recommendations-table">
+        <div class="header-meta">
+            <p class="last-updated">Last updated: 2026-09-06 09:39:25</p>
+            <a class="glass-nav-button" href="https://nguyendan1337.github.io/clairvoyant/etf_index.html">ETF Recommender</a>
+        </div>
+    </header>
+
+    <h2>Top Stock Picks</h2>
+    <div class="table-container">
+        <table class="recommendations-table">
 <thead>
 <tr>
 <th>Symbol</th>
@@ -114,119 +476,119 @@
 <td><a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>SLDE</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>Slide Insurance Holdings, Inc.</strong></a></td>
 <td>Financial Services</td>
-<td>80.38</td>
-<td>50.06</td>
-<td>85.12</td>
-<td><strong>LOW</strong></td>
+<td>74.35</td>
+<td>50.00</td>
+<td>85.17</td>
+<td><strong>MODERATE</strong></td>
 </tr>
 <tr>
 <td><a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>DAVE</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>Dave Inc.</strong></a></td>
 <td>Technology</td>
-<td>100.80</td>
-<td>43.88</td>
-<td>84.01</td>
-<td><strong>LOW</strong></td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>MU</strong></a></td>
-<td><a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>Micron Technology, Inc.</strong></a></td>
-<td>Technology</td>
-<td>629.36</td>
-<td>5.61</td>
-<td>83.11</td>
+<td>100.24</td>
+<td>40.85</td>
+<td>83.77</td>
 <td><strong>LOW</strong></td>
 </tr>
 <tr>
 <td><a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>CGAU</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>Centerra Gold Inc.</strong></a></td>
 <td>Basic Materials</td>
-<td>166.67</td>
-<td>47.39</td>
+<td>159.17</td>
+<td>47.55</td>
+<td>82.66</td>
+<td><strong>MODERATE</strong></td>
+</tr>
+<tr>
+<td><a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>DAC</strong></a></td>
+<td><a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>Danaos Corporation</strong></a></td>
+<td>Industrials</td>
+<td>62.12</td>
+<td>20.88</td>
 <td>82.55</td>
-<td><strong>LOW</strong></td>
+<td><strong>MODERATE</strong></td>
 </tr>
 <tr>
 <td><a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TGTX</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TG Therapeutics, Inc.</strong></a></td>
 <td>Healthcare</td>
-<td>76.06</td>
-<td>37.44</td>
-<td>81.81</td>
+<td>75.14</td>
+<td>36.72</td>
+<td>81.85</td>
 <td><strong>LOW</strong></td>
 </tr>
 <tr>
 <td><a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>AYA</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>Aya Gold &amp; Silver Inc.</strong></a></td>
 <td>Basic Materials</td>
-<td>176.37</td>
-<td>66.08</td>
-<td>80.36</td>
-<td><strong>LOW</strong></td>
+<td>172.33</td>
+<td>65.11</td>
+<td>80.61</td>
+<td><strong>MODERATE</strong></td>
 </tr>
 <tr>
 <td><a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>EXEL</strong></a></td>
 <td><a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>Exelixis, Inc.</strong></a></td>
 <td>Healthcare</td>
-<td>56.10</td>
-<td>14.37</td>
-<td>79.24</td>
-<td><strong>LOW</strong></td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>ANF</strong></a></td>
-<td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>Abercrombie &amp; Fitch Co.</strong></a></td>
-<td>Consumer Cyclical</td>
-<td>50.51</td>
-<td>85.93</td>
-<td>77.42</td>
-<td><strong>LOW</strong></td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>VCTR</strong></a></td>
-<td><a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>Victory Capital Holdings, Inc.</strong></a></td>
-<td>Financial Services</td>
-<td>58.80</td>
-<td>30.63</td>
-<td>77.19</td>
-<td><strong>LOW</strong></td>
-</tr>
-<tr>
-<td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>CMBT</strong></a></td>
-<td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>Cmb.Tech NV</strong></a></td>
-<td>Energy</td>
-<td>105.27</td>
-<td>34.84</td>
-<td>74.05</td>
+<td>56.89</td>
+<td>14.05</td>
+<td>79.31</td>
 <td><strong>MODERATE</strong></td>
+</tr>
+<tr>
+<td><a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>RELY</strong></a></td>
+<td><a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>Remitly Global, Inc.</strong></a></td>
+<td>Technology</td>
+<td>31.31</td>
+<td>41.84</td>
+<td>76.61</td>
+<td><strong>LOW</strong></td>
+</tr>
+<tr>
+<td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEIC</strong></a></td>
+<td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEI Investments Company</strong></a></td>
+<td>Financial Services</td>
+<td>27.48</td>
+<td>25.10</td>
+<td>76.19</td>
+<td><strong>LOW</strong></td>
+</tr>
+<tr>
+<td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA</strong></a></td>
+<td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA Corporation</strong></a></td>
+<td>Energy</td>
+<td>92.14</td>
+<td>14.37</td>
+<td>75.52</td>
+<td><strong>LOW</strong></td>
 </tr>
 </tbody>
 </table>
-</div>
+    </div>
 
-<div class="summary">
+    <div class="summary">
   <h2>Market Chat:</h2>
 
-  <p>The U.S. stock market is currently mixed, with the S&P 500 posting a 2.7% gain in August, contributing to a 13.1% year-to-date increase, despite a rocky start to September. Investor sentiment remains cautious amid persistent inflation, rising interest rates, and escalating geopolitical tensions in the Middle East. The AI buildout boom continues to be a significant driver for corporate earnings and technology sector performance. However, overall market undervaluation is heavily concentrated in a few mega-cap tech stocks, and the potential for a September Fed rate hike adds to uncertainty.</p>
+  <p>The U.S. stock market is currently experiencing a **MIXED** environment, with the S&P 500 advancing 2.62% in August and approximately 12.3% year-to-date, yet showing signs of deteriorating market breadth. Investor sentiment is cautious, reflecting a narrow rally primarily driven by the ongoing surge in artificial intelligence (AI) investment and strong corporate earnings. However, persistent inflation, rising interest rate expectations from the Federal Reserve, and escalating geopolitical tensions in the Middle East remain significant concerns for investors.</p>
 
-  <p><strong>Financial Services</strong> (<a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>SLDE</strong></a>, <a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>VCTR</strong></a>): The Financial Services sector has seen a rise of about 7% quarter-to-date, benefiting from the broader market's resilience despite rising interest rates, with asset management experiencing growth in client assets and property and casualty insurance seeing growth in catastrophe-exposed regions. <a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>Slide Insurance Holdings, Inc.</strong></a> provides property and casualty insurance, focusing on catastrophe-exposed markets. The company reported strong Q2 2026 results with significant net income growth and improved combined ratio, driven by AI-driven underwriting and expansion into new catastrophe-exposed markets. Its <b>LOW</b> Reversal Risk is supported by current strength, though increased catastrophic events could impact profitability. <a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>Victory Capital Holdings, Inc.</strong></a> is a diversified global asset management firm offering specialized investment strategies. The firm reported record Q2 2026 revenue and significant growth in total client assets, driven by positive market action and net inflows, further bolstered by its diversified offerings and the First Eagle Investments acquisition. Its <b>LOW</b> Reversal Risk is supported by strong client asset growth and no current adverse indicators.</p>
+  <p><strong>Financial Services</strong> (<a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>SLDE</strong></a>, <a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEIC</strong></a>): The sector is experiencing upward earnings revisions due to a steeper yield curve and solid net interest income, alongside improved capital markets activity, though central bank policy uncertainty could weigh on performance. <a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>Slide Insurance Holdings, Inc.</strong></a> provides homeowners insurance, growing through voluntary policies and acquired Citizens policies. The company reported strong Q2 2026 net income and revenue, driven by policy growth and an improved combined ratio. Management's conservative outlook cites Florida concentration and reinsurance risks, making its **MODERATE** Reversal Risk important to note, as increased losses or adverse reinsurance changes could impact profitability. <a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEI Investments Company</strong></a> provides investment processing, investment management, and investment operations solutions. The company reported strong Q2 2026 results with 15% revenue growth and a 38% adjusted EPS increase, driven by strategic changes and client demand. Its scalable operating model and focus on competitive advantage support continued positive performance, with **LOW** Reversal Risk indicating no probable material reversal.</p>
 
-  <p><strong>Technology</strong> (<a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>DAVE</strong></a>, <a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>MU</strong></a>): The Technology sector continues to be a primary market driver, fueled by the AI buildout boom and strong demand for AI computing, with fintech experiencing growth from AI-powered solutions and semiconductors seeing explosive demand for AI-driven memory. <a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>Dave Inc.</strong></a> is a neobank providing financial services like cash advances and budgeting through a mobile app. It demonstrated strong Q2 2026 revenue growth and improved credit performance, driven by its AI-powered underwriting system and expanding services. With <b>LOW</b> Reversal Risk, Dave Inc. appears well-positioned, though increased credit losses or regulatory changes could impact its lending models. <a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>Micron Technology, Inc.</strong></a> manufactures and markets memory and storage solutions, including DRAM and NAND products. The company delivered record Q3 fiscal 2026 results with substantial revenue and margin growth, fueled by strong AI memory demand and strategic customer agreements. Its <b>LOW</b> Reversal Risk is supported by current strength, though industry overcapacity or a slowdown in AI demand could impact pricing.</p>
+  <p><strong>Technology</strong> (<a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>DAVE</strong></a>, <a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>RELY</strong></a>): Benefiting from the massive AI investment boom and strong corporate earnings, this sector faces concerns over lofty valuations, high AI spending, and deteriorating market breadth. <a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>Dave Inc.</strong></a> is a neobank offering cash advances, budgeting tools, and digital checking accounts to underbanked consumers. The company reported strong Q2 2026 revenue growth and improved credit performance, driven by AI underwriting, and raised full-year guidance. While lending to underbanked consumers carries inherent credit risk, current metrics show strength, and its **LOW** Reversal Risk suggests no material reversal is probable. <a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>Remitly Global, Inc.</strong></a> is a trusted provider of cross-border digital financial services, enabling international money transfers. The company's Q2 2026 revenue grew 20% to $495.2M, with active customers surpassing 10M, leading to raised full-year guidance. This reflects strong growth and AI-driven efficiencies, with **LOW** Reversal Risk indicating no probable material reversal mechanism is established.</p>
 
-  <p><strong>Basic Materials</strong> (<a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>CGAU</strong></a>, <a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>AYA</strong></a>): The Basic Materials sector faces elevated input price inflation, driven by US tariffs and higher fuel prices, while the gold and copper mining industry is influenced by commodity prices and operational performance. <a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>Centerra Gold Inc.</strong></a> operates gold and copper mines in North America and Türkiye. The company delivered strong Q2 2026 operational and financial results, increasing gold production guidance for Öksüt, supported by its diversified asset base and self-funded growth strategy. With <b>LOW</b> Reversal Risk, Centerra Gold appears well-positioned, though significant declines in commodity prices or operational issues could pose challenges. <a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>Aya Gold & Silver Inc.</strong></a> is a precious metals producer with operating mines and development projects in Morocco. The company delivered strong Q2 2026 results with surging net income and production, driven by operational improvements and high-grade silver output from its Zgounder mine. Its <b>LOW</b> Reversal Risk is supported by confirmed full-year guidance, though declining silver prices or operational challenges remain potential risks.</p>
+  <p><strong>Basic Materials</strong> (<a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>CGAU</strong></a>, <a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>AYA</strong></a>): This sector is supported by increased capital spending in areas like energy and AI infrastructure, but has recently experienced pressure on metal prices. <a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>Centerra Gold Inc.</strong></a> is a mining company focused on the operation, development, and exploration of gold and copper properties. It reported strong Q2 2026 results, with revenue surging 54% due to higher gold and copper prices. However, performance is dependent on volatile commodity prices, and a material decline in gold or copper prices could impact revenue and earnings within 6-12 months, reflecting its **MODERATE** Reversal Risk. <a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>Aya Gold & Silver Inc.</strong></a> is a mining company focused on the exploration, development, and production of gold and silver. It reported strong Q2 2026 production, but revenue and EPS missed forecasts due to lower silver prices and sales timing. Analysts forecast future earnings declines, and a material decline in gold/silver prices or persistent sales timing issues could impact revenue and earnings, indicating **MODERATE** Reversal Risk.</p>
 
-  <p><strong>Healthcare</strong> (<a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TGTX</strong></a>, <a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>EXEL</strong></a>): The Healthcare sector has risen approximately 7% quarter-to-date, indicating robust performance, with the biopharmaceutical industry driven by successful drug development, commercialization, and innovation in oncology. <a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TG Therapeutics, Inc.</strong></a> is a biopharmaceutical company focused on developing and commercializing treatments for B-cell mediated diseases. The company reported strong Q2 2026 revenue driven by BRIUMVI sales and raised its full-year guidance, indicating continued commercial momentum and pipeline advancements. Its <b>LOW</b> Reversal Risk is supported by this growth trajectory, though safety issues or competitive pressures could impact BRIUMVI sales. <a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>Exelixis, Inc.</strong></a> is an oncology company focused on discovering, developing, and commercializing cancer therapies. The company reported strong Q2 2026 revenue growth, primarily from its CABOMETYX franchise, supported by a robust R&D pipeline with potential new drug approvals. With <b>LOW</b> Reversal Risk and no current adverse indicators, Exelixis appears to be on a continued growth path in oncology.</p>
+  <p><strong>Industrials</strong> (<a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>DAC</strong></a>): Supported by increased capital spending in key growth areas such as electricity capacity, AI infrastructure buildout, defense, and energy, the sector has nevertheless seen recent declines. <a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>Danaos Corporation</strong></a> is a large independent owner of container vessels and also operates in the drybulk shipping sector. It reported strong Q2 2026 results with a $4.6B contracted revenue backlog. However, container TCE per day declined, and drybulk utilization fell. Normalization of supply chain disruptions could lead to lower freight rates and impact future contract renewals within 6-12 months, reflecting its **MODERATE** Reversal Risk.</p>
 
-  <p><strong>Consumer Cyclical</strong> (<a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>ANF</strong></a>): The Consumer Cyclical sector faces mixed consumer spending, with value-driven purchases and shifting fashion trends, as consumers increasingly evaluate purchases based on long-term value. <a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>Abercrombie & Fitch Co.</strong></a> is a global specialty retailer of apparel and accessories. The company reported Q2 fiscal 2026 net sales up 5% year-over-year, marking 15 consecutive quarters of growth, driven by strong brand momentum and omnichannel execution across its brands. With <b>LOW</b> Reversal Risk and no established material adverse indicators, continuation remains more likely despite potential exposure to consumer spending shifts.</p>
+  <p><strong>Healthcare</strong> (<a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TGTX</strong></a>, <a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>EXEL</strong></a>): The sector is benefiting from technological advances and improving operational efficiencies, with strong demand for biotechnology and drug-development stocks. <a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TG Therapeutics, Inc.</strong></a> is a biopharmaceutical company developing and commercializing treatments for cancers and autoimmune disorders. It reported Q2 2026 total revenue of $240.34 million, with U.S. BRIUMVI sales up 64% year-over-year, driven by growing commercialization for relapsing multiple sclerosis. Despite potential reversal exposure, its **LOW** Reversal Risk indicates no measurable adverse indicator making a material business reversal probable within 6-12 months. <a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>Exelixis, Inc.</strong></a> is a biotechnology company focused on developing and commercializing cancer therapies. Q2 2026 total revenues were $628.7M, driven by the cabozantinib franchise. However, the company lowered its full-year 2026 revenue guidance by $50M due to a slower ramp in a business segment, indicating an active reversal mechanism and **MODERATE** Reversal Risk.</p>
 
-  <p><strong>Energy</strong> (<a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>CMBT</strong></a>): The Energy sector is influenced by elevated oil prices, with Brent crude above $90 per barrel due to geopolitical tensions, while shipping markets are strong, particularly tanker rates, but face warnings of potential oversupply. <a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>Cmb.Tech NV</strong></a> operates a diverse fleet of dry bulk, tanker, and offshore vessels, focusing on sustainable shipping solutions. The company reported strong Q2 2026 net profit, boosted by high tanker rates and significant asset sales. However, the CEO warned of a potential tanker oversupply in 2027-2028, indicating a <b>MODERATE</b> Reversal Risk from future market pressure on freight rates and margins.</p>
+  <p><strong>Energy</strong> (<a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA</strong></a>): Sector earnings have significantly increased, primarily driven by higher oil prices stemming from ongoing geopolitical tensions and supply constraints. <a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA Corporation</strong></a> is an independent energy company that explores for, develops, and produces oil and natural gas. It delivered strong Q2 2026 operational results, exceeding production guidance and raising its full-year U.S. oil production outlook while increasing cost savings targets. Despite a revenue miss, the company's efficiency gains and strong free cash flow support continued performance. Analyst forecasts expect revenue to decline, potentially underperforming the industry, contributing to its **LOW** Reversal Risk.</p>
 </div>
 
-<p><em>Generated by model: gemini-2.5-flash</em></p>
+    <p class="model-used"><em>Generated by model: gemini-2.5-flash</em></p>
 
-<h2>Full List of Stock Picks</h2>
-<div class="table-container">
-    <table class="dataframe recommendations-table">
+    <h2>Full List of Stock Picks</h2>
+    <div class="table-container">
+        <table class="dataframe recommendations-table">
   <thead>
     <tr style="text-align: right;">
       <th>Symbol</th>
@@ -243,407 +605,408 @@
       <td><a href="https://finance.yahoo.com/quote/PURR/" target="_blank"><strong>Hyperliquid Strategies Inc.</strong></a></td>
       <td>Financial Services</td>
       <td>227.44</td>
-      <td>36.647982</td>
-      <td>92.701279</td>
+      <td>36.547087</td>
+      <td>92.032639</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/INSW/" target="_blank"><strong>INSW</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/INSW/" target="_blank"><strong>International Seaways, Inc.</strong></a></td>
       <td>Energy</td>
-      <td>118.51</td>
-      <td>34.350965</td>
-      <td>89.740532</td>
+      <td>119.08</td>
+      <td>35.832776</td>
+      <td>89.946320</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/LPG/" target="_blank"><strong>LPG</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/LPG/" target="_blank"><strong>Dorian LPG Ltd.</strong></a></td>
       <td>Energy</td>
-      <td>72.31</td>
-      <td>28.861899</td>
-      <td>86.654512</td>
+      <td>68.83</td>
+      <td>30.660858</td>
+      <td>87.017870</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/DHT/" target="_blank"><strong>DHT</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/DHT/" target="_blank"><strong>DHT Holdings, Inc.</strong></a></td>
       <td>Energy</td>
-      <td>62.04</td>
-      <td>34.339007</td>
-      <td>85.774561</td>
+      <td>59.86</td>
+      <td>35.409572</td>
+      <td>86.271348</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/TNK/" target="_blank"><strong>TNK</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/TNK/" target="_blank"><strong>Teekay Tankers Ltd.</strong></a></td>
       <td>Energy</td>
-      <td>76.32</td>
-      <td>29.332863</td>
-      <td>85.209508</td>
+      <td>75.51</td>
+      <td>30.718879</td>
+      <td>85.823774</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>SLDE</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/SLDE/" target="_blank"><strong>Slide Insurance Holdings, Inc.</strong></a></td>
       <td>Financial Services</td>
-      <td>80.38</td>
-      <td>50.062301</td>
-      <td>85.115025</td>
+      <td>74.35</td>
+      <td>50.001496</td>
+      <td>85.172076</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>DAVE</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/DAVE/" target="_blank"><strong>Dave Inc.</strong></a></td>
       <td>Technology</td>
-      <td>100.80</td>
-      <td>43.875094</td>
-      <td>84.008812</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/FRO/" target="_blank"><strong>FRO</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/FRO/" target="_blank"><strong>Frontline plc</strong></a></td>
-      <td>Energy</td>
-      <td>105.06</td>
-      <td>38.187998</td>
-      <td>83.240656</td>
+      <td>100.24</td>
+      <td>40.845015</td>
+      <td>83.765163</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>MU</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/MU/" target="_blank"><strong>Micron Technology, Inc.</strong></a></td>
       <td>Technology</td>
-      <td>629.36</td>
-      <td>5.606789</td>
-      <td>83.108202</td>
+      <td>673.31</td>
+      <td>7.107109</td>
+      <td>83.377266</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/FRO/" target="_blank"><strong>FRO</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/FRO/" target="_blank"><strong>Frontline plc</strong></a></td>
+      <td>Energy</td>
+      <td>101.22</td>
+      <td>37.472611</td>
+      <td>83.214686</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>CGAU</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/CGAU/" target="_blank"><strong>Centerra Gold Inc.</strong></a></td>
       <td>Basic Materials</td>
-      <td>166.67</td>
-      <td>47.391924</td>
-      <td>82.552297</td>
+      <td>159.17</td>
+      <td>47.552865</td>
+      <td>82.659337</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>DAC</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/DAC/" target="_blank"><strong>Danaos Corporation</strong></a></td>
+      <td>Industrials</td>
+      <td>62.12</td>
+      <td>20.882402</td>
+      <td>82.548432</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TGTX</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/TGTX/" target="_blank"><strong>TG Therapeutics, Inc.</strong></a></td>
       <td>Healthcare</td>
-      <td>76.06</td>
-      <td>37.435892</td>
-      <td>81.809932</td>
+      <td>75.14</td>
+      <td>36.715506</td>
+      <td>81.846781</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/TRMD/" target="_blank"><strong>TRMD</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/TRMD/" target="_blank"><strong>TORM plc</strong></a></td>
       <td>Energy</td>
-      <td>48.48</td>
-      <td>23.082608</td>
-      <td>81.620301</td>
+      <td>50.34</td>
+      <td>22.621121</td>
+      <td>81.573207</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/PARR/" target="_blank"><strong>PARR</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/PARR/" target="_blank"><strong>Par Pacific Holdings, Inc.</strong></a></td>
       <td>Energy</td>
-      <td>141.97</td>
-      <td>42.788369</td>
-      <td>81.015703</td>
+      <td>142.60</td>
+      <td>42.342024</td>
+      <td>81.154920</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>AYA</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/AYA/" target="_blank"><strong>Aya Gold &amp; Silver Inc.</strong></a></td>
       <td>Basic Materials</td>
-      <td>176.37</td>
-      <td>66.076525</td>
-      <td>80.355095</td>
+      <td>172.33</td>
+      <td>65.105651</td>
+      <td>80.609130</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/SNDK/" target="_blank"><strong>SNDK</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/SNDK/" target="_blank"><strong>Sandisk Corporation</strong></a></td>
       <td>Technology</td>
-      <td>2168.40</td>
-      <td>3.518272</td>
-      <td>79.885357</td>
+      <td>2105.82</td>
+      <td>5.968331</td>
+      <td>80.370566</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/SSRM/" target="_blank"><strong>SSRM</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/SSRM/" target="_blank"><strong>SSR Mining Inc.</strong></a></td>
       <td>Basic Materials</td>
-      <td>84.31</td>
-      <td>42.279907</td>
-      <td>79.768346</td>
+      <td>73.68</td>
+      <td>39.740877</td>
+      <td>79.513588</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/CF/" target="_blank"><strong>CF</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/CF/" target="_blank"><strong>CF Industries Holdings, Inc.</strong></a></td>
       <td>Basic Materials</td>
-      <td>63.13</td>
-      <td>23.772879</td>
-      <td>79.420988</td>
+      <td>57.81</td>
+      <td>22.464218</td>
+      <td>79.454566</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>EXEL</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/EXEL/" target="_blank"><strong>Exelixis, Inc.</strong></a></td>
       <td>Healthcare</td>
-      <td>56.10</td>
-      <td>14.369921</td>
-      <td>79.240986</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/FSM/" target="_blank"><strong>FSM</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/FSM/" target="_blank"><strong>Fortuna Mining Corp.</strong></a></td>
-      <td>Basic Materials</td>
-      <td>65.06</td>
-      <td>41.505122</td>
-      <td>78.973954</td>
+      <td>56.89</td>
+      <td>14.051017</td>
+      <td>79.305389</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/KRYS/" target="_blank"><strong>KRYS</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/KRYS/" target="_blank"><strong>Krystal Biotech, Inc.</strong></a></td>
       <td>Healthcare</td>
-      <td>147.20</td>
-      <td>19.126125</td>
-      <td>78.781529</td>
+      <td>146.72</td>
+      <td>18.716854</td>
+      <td>79.041446</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/HAFN/" target="_blank"><strong>HAFN</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/HAFN/" target="_blank"><strong>Hafnia Limited</strong></a></td>
-      <td>Industrials</td>
-      <td>47.85</td>
-      <td>26.648352</td>
-      <td>78.486985</td>
+      <td><a href="https://finance.yahoo.com/quote/FSM/" target="_blank"><strong>FSM</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/FSM/" target="_blank"><strong>Fortuna Mining Corp.</strong></a></td>
+      <td>Basic Materials</td>
+      <td>57.02</td>
+      <td>40.364878</td>
+      <td>78.665792</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/CDNA/" target="_blank"><strong>CDNA</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/CDNA/" target="_blank"><strong>CareDx, Inc.</strong></a></td>
       <td>Healthcare</td>
-      <td>260.78</td>
-      <td>127.608188</td>
-      <td>78.055600</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>ANF</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>Abercrombie &amp; Fitch Co.</strong></a></td>
-      <td>Consumer Cyclical</td>
-      <td>50.51</td>
-      <td>85.934359</td>
-      <td>77.418479</td>
+      <td>281.41</td>
+      <td>131.799541</td>
+      <td>78.270560</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>VCTR</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/VCTR/" target="_blank"><strong>Victory Capital Holdings, Inc.</strong></a></td>
       <td>Financial Services</td>
-      <td>58.80</td>
-      <td>30.629907</td>
-      <td>77.188770</td>
+      <td>59.40</td>
+      <td>30.860037</td>
+      <td>77.721065</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/INCY/" target="_blank"><strong>INCY</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/INCY/" target="_blank"><strong>Incyte Corporation</strong></a></td>
-      <td>Healthcare</td>
-      <td>47.74</td>
-      <td>26.753779</td>
-      <td>76.872324</td>
+      <td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>ANF</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/ANF/" target="_blank"><strong>Abercrombie &amp; Fitch Co.</strong></a></td>
+      <td>Consumer Cyclical</td>
+      <td>56.90</td>
+      <td>88.216806</td>
+      <td>77.552702</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/AU/" target="_blank"><strong>AU</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/AU/" target="_blank"><strong>AngloGold Ashanti plc</strong></a></td>
       <td>Basic Materials</td>
-      <td>86.83</td>
-      <td>29.434939</td>
-      <td>76.506407</td>
+      <td>79.56</td>
+      <td>29.935283</td>
+      <td>76.973311</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/NMM/" target="_blank"><strong>NMM</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/NMM/" target="_blank"><strong>Navios Maritime Partners L.P.</strong></a></td>
       <td>Industrials</td>
-      <td>90.17</td>
-      <td>30.319938</td>
-      <td>76.489217</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/ILMN/" target="_blank"><strong>ILMN</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/ILMN/" target="_blank"><strong>Illumina, Inc.</strong></a></td>
-      <td>Healthcare</td>
-      <td>124.06</td>
-      <td>38.233995</td>
-      <td>76.476646</td>
+      <td>85.69</td>
+      <td>30.065914</td>
+      <td>76.672292</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>RELY</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/RELY/" target="_blank"><strong>Remitly Global, Inc.</strong></a></td>
       <td>Technology</td>
-      <td>38.12</td>
-      <td>43.495931</td>
-      <td>76.467255</td>
+      <td>31.31</td>
+      <td>41.842813</td>
+      <td>76.614490</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA Corporation</strong></a></td>
-      <td>Energy</td>
-      <td>94.20</td>
-      <td>16.453845</td>
-      <td>76.084618</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/NEM/" target="_blank"><strong>NEM</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/NEM/" target="_blank"><strong>Newmont Corporation</strong></a></td>
-      <td>Basic Materials</td>
-      <td>71.24</td>
-      <td>29.787755</td>
-      <td>76.043957</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/PTGX/" target="_blank"><strong>PTGX</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/PTGX/" target="_blank"><strong>Protagonist Therapeutics, Inc.</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/INCY/" target="_blank"><strong>INCY</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/INCY/" target="_blank"><strong>Incyte Corporation</strong></a></td>
       <td>Healthcare</td>
-      <td>145.83</td>
-      <td>48.811595</td>
-      <td>75.831122</td>
+      <td>46.43</td>
+      <td>25.943959</td>
+      <td>76.536622</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEIC</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEI Investments Company</strong></a></td>
-      <td>Financial Services</td>
-      <td>27.87</td>
-      <td>25.373980</td>
-      <td>75.755150</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/SCCO/" target="_blank"><strong>SCCO</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/SCCO/" target="_blank"><strong>Southern Copper Corporation</strong></a></td>
-      <td>Basic Materials</td>
-      <td>101.22</td>
-      <td>15.811994</td>
-      <td>75.725112</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/DINO/" target="_blank"><strong>DINO</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/DINO/" target="_blank"><strong>HF Sinclair Corporation</strong></a></td>
-      <td>Energy</td>
-      <td>107.73</td>
-      <td>47.920523</td>
-      <td>75.211954</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/HNGE/" target="_blank"><strong>HNGE</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/HNGE/" target="_blank"><strong>Hinge Health, Inc.</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/ILMN/" target="_blank"><strong>ILMN</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/ILMN/" target="_blank"><strong>Illumina, Inc.</strong></a></td>
       <td>Healthcare</td>
-      <td>64.81</td>
-      <td>46.754692</td>
-      <td>74.997392</td>
+      <td>122.27</td>
+      <td>38.078974</td>
+      <td>76.506204</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/STNG/" target="_blank"><strong>STNG</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/STNG/" target="_blank"><strong>Scorpio Tankers Inc.</strong></a></td>
       <td>Energy</td>
-      <td>51.01</td>
-      <td>6.541741</td>
-      <td>74.907064</td>
+      <td>40.31</td>
+      <td>8.800995</td>
+      <td>76.322696</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEIC</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/SEIC/" target="_blank"><strong>SEI Investments Company</strong></a></td>
+      <td>Financial Services</td>
+      <td>27.48</td>
+      <td>25.101997</td>
+      <td>76.190068</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/HAFN/" target="_blank"><strong>HAFN</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/HAFN/" target="_blank"><strong>Hafnia Limited</strong></a></td>
+      <td>Industrials</td>
+      <td>41.52</td>
+      <td>26.648352</td>
+      <td>76.189828</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/NEM/" target="_blank"><strong>NEM</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/NEM/" target="_blank"><strong>Newmont Corporation</strong></a></td>
+      <td>Basic Materials</td>
+      <td>69.10</td>
+      <td>29.666268</td>
+      <td>76.150767</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/SCCO/" target="_blank"><strong>SCCO</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/SCCO/" target="_blank"><strong>Southern Copper Corporation</strong></a></td>
+      <td>Basic Materials</td>
+      <td>99.65</td>
+      <td>18.639706</td>
+      <td>76.033369</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/APA/" target="_blank"><strong>APA Corporation</strong></a></td>
+      <td>Energy</td>
+      <td>92.14</td>
+      <td>14.368107</td>
+      <td>75.524766</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/HNGE/" target="_blank"><strong>HNGE</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/HNGE/" target="_blank"><strong>Hinge Health, Inc.</strong></a></td>
+      <td>Healthcare</td>
+      <td>59.31</td>
+      <td>46.945596</td>
+      <td>75.299091</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/DINO/" target="_blank"><strong>DINO</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/DINO/" target="_blank"><strong>HF Sinclair Corporation</strong></a></td>
+      <td>Energy</td>
+      <td>107.81</td>
+      <td>46.516662</td>
+      <td>75.292671</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/AUGO/" target="_blank"><strong>AUGO</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/AUGO/" target="_blank"><strong>Aura Minerals Inc.</strong></a></td>
       <td>Basic Materials</td>
-      <td>176.03</td>
-      <td>46.709625</td>
-      <td>74.469810</td>
+      <td>168.28</td>
+      <td>46.038856</td>
+      <td>74.491469</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/ERO/" target="_blank"><strong>ERO</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/ERO/" target="_blank"><strong>Ero Copper Corp.</strong></a></td>
       <td>Basic Materials</td>
-      <td>135.94</td>
-      <td>30.483268</td>
-      <td>74.346681</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/LQDA/" target="_blank"><strong>LQDA</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/LQDA/" target="_blank"><strong>Liquidia Corporation</strong></a></td>
-      <td>Healthcare</td>
-      <td>137.89</td>
-      <td>7.965565</td>
-      <td>74.210608</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/ARIS/" target="_blank"><strong>ARIS</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/ARIS/" target="_blank"><strong>Aris Mining Corporation</strong></a></td>
-      <td>Basic Materials</td>
-      <td>123.86</td>
-      <td>29.225811</td>
-      <td>74.165291</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>CMBT</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>Cmb.Tech NV</strong></a></td>
-      <td>Energy</td>
-      <td>105.27</td>
-      <td>34.836922</td>
-      <td>74.050722</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/KNSA/" target="_blank"><strong>KNSA</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/KNSA/" target="_blank"><strong>Kiniksa Pharmaceuticals International, plc</strong></a></td>
-      <td>Healthcare</td>
-      <td>125.34</td>
-      <td>61.159257</td>
-      <td>73.967496</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/ANET/" target="_blank"><strong>ANET</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/ANET/" target="_blank"><strong>Arista Networks, Inc.</strong></a></td>
-      <td>Technology</td>
-      <td>34.01</td>
-      <td>23.842717</td>
-      <td>73.930945</td>
+      <td>127.51</td>
+      <td>29.739784</td>
+      <td>74.415866</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/NVDA/" target="_blank"><strong>NVDA</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/NVDA/" target="_blank"><strong>NVIDIA Corporation</strong></a></td>
       <td>Technology</td>
-      <td>36.78</td>
-      <td>10.768307</td>
-      <td>73.922594</td>
+      <td>36.87</td>
+      <td>10.410277</td>
+      <td>74.414056</td>
     </tr>
     <tr>
-      <td><a href="https://finance.yahoo.com/quote/VLO/" target="_blank"><strong>VLO</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/VLO/" target="_blank"><strong>Valero Energy Corporation</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/LQDA/" target="_blank"><strong>LQDA</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/LQDA/" target="_blank"><strong>Liquidia Corporation</strong></a></td>
+      <td>Healthcare</td>
+      <td>145.28</td>
+      <td>7.449142</td>
+      <td>74.291152</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/ARIS/" target="_blank"><strong>ARIS</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/ARIS/" target="_blank"><strong>Aris Mining Corporation</strong></a></td>
+      <td>Basic Materials</td>
+      <td>117.46</td>
+      <td>29.354834</td>
+      <td>74.289142</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/KNSA/" target="_blank"><strong>KNSA</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/KNSA/" target="_blank"><strong>Kiniksa Pharmaceuticals International, plc</strong></a></td>
+      <td>Healthcare</td>
+      <td>120.04</td>
+      <td>58.870314</td>
+      <td>74.141325</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>CMBT</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/CMBT/" target="_blank"><strong>Cmb.Tech NV</strong></a></td>
       <td>Energy</td>
-      <td>136.45</td>
-      <td>43.992533</td>
-      <td>73.665308</td>
+      <td>96.84</td>
+      <td>35.253296</td>
+      <td>74.078189</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/ANET/" target="_blank"><strong>ANET</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/ANET/" target="_blank"><strong>Arista Networks, Inc.</strong></a></td>
+      <td>Technology</td>
+      <td>38.40</td>
+      <td>23.900260</td>
+      <td>74.056952</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/BWLP/" target="_blank"><strong>BWLP</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/BWLP/" target="_blank"><strong>BW LPG Limited</strong></a></td>
       <td>Energy</td>
-      <td>61.17</td>
-      <td>22.934247</td>
-      <td>73.662951</td>
+      <td>59.36</td>
+      <td>23.380920</td>
+      <td>73.993403</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/SBLK/" target="_blank"><strong>SBLK</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/SBLK/" target="_blank"><strong>Star Bulk Carriers Corp.</strong></a></td>
       <td>Industrials</td>
-      <td>65.04</td>
-      <td>27.738267</td>
-      <td>73.366186</td>
+      <td>63.86</td>
+      <td>27.423818</td>
+      <td>73.750845</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/VLO/" target="_blank"><strong>VLO</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/VLO/" target="_blank"><strong>Valero Energy Corporation</strong></a></td>
+      <td>Energy</td>
+      <td>135.57</td>
+      <td>44.027498</td>
+      <td>73.723349</td>
+    </tr>
+    <tr>
+      <td><a href="https://finance.yahoo.com/quote/SEZL/" target="_blank"><strong>SEZL</strong></a></td>
+      <td><a href="https://finance.yahoo.com/quote/SEZL/" target="_blank"><strong>Sezzle Inc.</strong></a></td>
+      <td>Financial Services</td>
+      <td>39.73</td>
+      <td>-0.478707</td>
+      <td>73.648322</td>
     </tr>
     <tr>
       <td><a href="https://finance.yahoo.com/quote/TSM/" target="_blank"><strong>TSM</strong></a></td>
       <td><a href="https://finance.yahoo.com/quote/TSM/" target="_blank"><strong>Taiwan Semiconductor Manufacturing Company Limited</strong></a></td>
       <td>Technology</td>
-      <td>71.32</td>
-      <td>0.090929</td>
-      <td>73.183209</td>
-    </tr>
-    <tr>
-      <td><a href="https://finance.yahoo.com/quote/RNG/" target="_blank"><strong>RNG</strong></a></td>
-      <td><a href="https://finance.yahoo.com/quote/RNG/" target="_blank"><strong>RingCentral, Inc.</strong></a></td>
-      <td>Technology</td>
-      <td>139.07</td>
-      <td>82.386975</td>
-      <td>73.105193</td>
+      <td>73.51</td>
+      <td>0.729722</td>
+      <td>73.512223</td>
     </tr>
   </tbody>
 </table>
-</div>
+    </div>
 
-<div class="disclaimer">
-    This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
+    <div class="disclaimer">
+        This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
+    </div>
 </div>
 
 <!-- jQuery -->

@@ -16,12 +16,10 @@ git checkout -b feature-branch
 # Tell Git to ignore local changes to index.html on this branch
 git update-index --assume-unchanged index.html
 
-Features to add:
-- add caching for df before sending to gemini
-- upgrade gemini prompt for more CONSISTENT results
-    - max 2 stocks per sector, 2 stocks per risk event
-    - this should be taken into account DURING research
-    - only add an additional stock per sector if there are less than 5 sector groups in the initial top 50 qvm dataframe
-- upgrade etfs to have the same data pipeline as stocks
+git push origin main --force
+
+Features to add/Improvements to make:
+- remove web scraping and replace with yfinance, filter some here too
+- improve caching and github storage efficiency
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

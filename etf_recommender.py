@@ -417,6 +417,71 @@ def update_html_page(
         f.write(html_output)
 
 
+
+def existing_page_matches_etf_content(
+    display_page,
+    final_recommendations,
+    df_html_table,
+):
+    """Return True when the existing page already contains current ETF content.
+
+    Ignore volatile presentation metadata such as the rendered timestamp and model
+    label. This allows a fully cached run to preserve etf_index.html byte-for-byte
+    when its recommendation table, validated summary, and full data table are
+    unchanged.
+    """
+    if not os.path.exists(display_page):
+        return False
+    try:
+        with open(display_page, 'r', encoding='utf-8') as handle:
+            existing_page = handle.read().replace('\r\n', '\n')
+    except Exception as exc:
+        print(f'Could not read existing {display_page} for no-op check: {exc}')
+        return False
+
+    table_match = re.search(
+        r'(<table.*?</table>)',
+        final_recommendations,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    summary_match = re.search(
+        r'(<div[^>]*class=["\']summary["\'][^>]*>.*?</div>)',
+        final_recommendations,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    recommendation_table = (
+        table_match.group(1).strip() if table_match else ''
+    )
+    summary_html = summary_match.group(1).strip() if summary_match else ''
+
+    required_fragments = [
+        fragment.replace('\r\n', '\n').strip()
+        for fragment in (recommendation_table, summary_html, df_html_table)
+        if str(fragment or '').strip()
+    ]
+    if len(required_fragments) < 3:
+        return False
+    return all(fragment in existing_page for fragment in required_fragments)
+
+
+def extract_existing_summary_html(display_page):
+    """Return the existing rendered summary div from a prior published page."""
+    if not os.path.exists(display_page):
+        return None
+    try:
+        with open(display_page, 'r', encoding='utf-8') as handle:
+            page_html = handle.read()
+    except Exception as exc:
+        print(f'Could not read existing {display_page} for summary reuse: {exc}')
+        return None
+    match = re.search(
+        r'(<div[^>]*class=["\\\']summary["\\\'][^>]*>.*?</div>)',
+        page_html,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    return match.group(1).strip() if match else None
+
+
 def extract_number_with_suffix(value):
     if value is None or pd.isna(value):
         return None
@@ -3464,6 +3529,24 @@ if research_cache.get('version') != research_cache_version:
 research_cache.setdefault('entries', {})
 research_cache.setdefault('deferred_entries', {})
 
+# Compact the persistent research cache before reuse/save. GitHub Actions Cache
+# restores the previous runtime cache as an opaque directory, while Python
+# remains authoritative for TTL freshness. Removing expired entries here keeps
+# successive Actions cache generations small without changing reuse semantics.
+research_cache['entries'] = {
+    key: entry
+    for key, entry in research_cache['entries'].items()
+    if isinstance(entry, dict)
+    and cache_entry_is_fresh(entry, research_cache_hours)
+}
+research_cache['deferred_entries'] = {
+    key: entry
+    for key, entry in research_cache['deferred_entries'].items()
+    if isinstance(entry, dict)
+    and cache_entry_is_fresh(entry, research_cache_hours)
+}
+save_json_object_atomic(research_cache_file, research_cache)
+
 candidate_by_symbol = {
     str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
 }
@@ -4310,50 +4393,132 @@ print('\n' + context_review + '\n')
 
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
-if config.get('final_summary_enabled', True) and request_budget.total_used < request_budget.total:
+summary_source = 'PYTHON_FALLBACK'
+summary_input_hash = None
+run_diagnostics_file = config.get(
+    'run_diagnostics_file', 'caches/etf_run_diagnostics.json'
+)
+previous_diagnostics = load_json_object(run_diagnostics_file)
+
+if config.get('final_summary_enabled', True):
     selected_summary_input = build_summary_input(selected)
-    summary_prompt = (
-        config['prompt_html_summary'].rstrip()
-        + '\n\nMARKET_CONTEXT:\n'
-        + json.dumps(market_context, ensure_ascii=False)
-        + '\n\nSELECTED_ETFS:\n'
-        + json.dumps(selected_summary_input, ensure_ascii=False)
+    summary_prompt_text = config['prompt_html_summary'].rstrip()
+    summary_input_hash = stable_json_hash({
+        'prompt': summary_prompt_text,
+        'market_context': market_context,
+        'selected_etfs': selected_summary_input,
+    })
+    previous_summary_cache = previous_diagnostics.get('summary_cache', {})
+    existing_summary_html = extract_existing_summary_html('etf_index.html')
+    has_matching_summary_signature = (
+        isinstance(previous_summary_cache, dict)
+        and bool(previous_summary_cache.get('reusable_gemini_summary'))
+        and previous_summary_cache.get('input_hash') == summary_input_hash
     )
-    summary_data = None
-    for summary_model in [model_primary, model_fallback]:
-        if request_budget.total_used >= request_budget.total:
-            break
+    # Migration/bootstrap path: older successful runs predate summary_cache
+    # metadata. If this execution has needed zero Gemini calls so far, the
+    # existing page validates against the exact current selected portfolio, and
+    # the previous successful diagnostics reference the same selected symbols,
+    # adopt that existing Gemini summary as the baseline instead of spending a
+    # one-time editorial call solely to seed the new hash. The current run then
+    # writes summary_cache metadata, so subsequent reuse uses the strict hash.
+    current_selected_symbols = [
+        str(item['candidate']['Symbol']).upper() for item in selected
+    ]
+    previous_selected_symbols = [
+        str(symbol).upper()
+        for symbol in (
+            previous_diagnostics.get('research', {}).get('selected_symbols', [])
+            if isinstance(previous_diagnostics.get('research'), dict)
+            else []
+        )
+    ]
+    can_bootstrap_existing_summary = (
+        not has_matching_summary_signature
+        and not previous_summary_cache
+        and bool(previous_diagnostics)
+        and request_budget.total_used == 0
+        and previous_selected_symbols == current_selected_symbols
+        and bool(existing_summary_html)
+    )
+    can_reuse_existing_summary = (
+        bool(existing_summary_html)
+        and (has_matching_summary_signature or can_bootstrap_existing_summary)
+    )
+    if can_reuse_existing_summary:
         try:
-            summary_data, used_model, metadata = call_gemini_json(
-                client,
-                summary_model,
-                summary_prompt,
-                build_gemini_config(
-                    summary_thinking_budget,
-                    enable_search=False,
-                    max_output_tokens=gemini_max_output_tokens,
-                ),
-                'ETF HTML summary',
-                request_budget,
-                'summary',
-                1,
-                initial_delay,
-                max_transient_delay,
+            summary_html = validate_summary_response(
+                {'summary_html': existing_summary_html}, selected
             )
-            models_used.append(used_model)
-            call_diagnostics.append({'stage': 'HTML summary', **metadata})
-            break
+            summary_source = 'REUSED_GEMINI'
+            if can_bootstrap_existing_summary:
+                print(
+                    'Bootstrapping ETF HTML summary cache from the existing '
+                    'validated etf_index.html; portfolio is unchanged and this '
+                    'run required no market-context or ETF-research Gemini calls.'
+                )
+            else:
+                print(
+                    'Reusing validated Gemini ETF HTML summary from existing '
+                    'etf_index.html; summary inputs are unchanged.'
+                )
         except Exception as exc:
-            print(f'ETF summary unavailable from {summary_model}: {exc}')
-    if isinstance(summary_data, dict):
-        try:
-            summary_html = validate_summary_response(summary_data, selected)
-            print('Using Gemini-written ETF HTML summary.')
-        except Exception as exc:
+            reason = (
+                'bootstrap candidate' if can_bootstrap_existing_summary
+                else 'prior input hash match'
+            )
             print(
-                'Gemini summary was invalid; using deterministic fallback summary: '
-                f'{exc}'
+                f'Existing ETF HTML summary ({reason}) no longer validates; '
+                f'regenerating it: {exc}'
             )
+
+    if (
+        summary_source != 'REUSED_GEMINI'
+        and request_budget.total_used < request_budget.total
+    ):
+        summary_prompt = (
+            summary_prompt_text
+            + '\n\nMARKET_CONTEXT:\n'
+            + json.dumps(market_context, ensure_ascii=False)
+            + '\n\nSELECTED_ETFS:\n'
+            + json.dumps(selected_summary_input, ensure_ascii=False)
+        )
+        summary_data = None
+        for summary_model in [model_primary, model_fallback]:
+            if request_budget.total_used >= request_budget.total:
+                break
+            try:
+                summary_data, used_model, metadata = call_gemini_json(
+                    client,
+                    summary_model,
+                    summary_prompt,
+                    build_gemini_config(
+                        summary_thinking_budget,
+                        enable_search=False,
+                        max_output_tokens=gemini_max_output_tokens,
+                    ),
+                    'ETF HTML summary',
+                    request_budget,
+                    'summary',
+                    1,
+                    initial_delay,
+                    max_transient_delay,
+                )
+                models_used.append(used_model)
+                call_diagnostics.append({'stage': 'HTML summary', **metadata})
+                break
+            except Exception as exc:
+                print(f'ETF summary unavailable from {summary_model}: {exc}')
+        if isinstance(summary_data, dict):
+            try:
+                summary_html = validate_summary_response(summary_data, selected)
+                summary_source = 'GEMINI'
+                print('Using Gemini-written ETF HTML summary.')
+            except Exception as exc:
+                print(
+                    'Gemini summary was invalid; using deterministic fallback summary: '
+                    f'{exc}'
+                )
 
 final_recommendations = recommendations_table + summary_html
 model_used = ', '.join(dict.fromkeys(models_used)) or 'validated cache + Python'
@@ -4398,16 +4563,27 @@ df_html_table = df_html.to_html(
     classes='recommendations-table',
     border=0,
 )
-update_html_page(
-    final_recommendations,
-    df_html_table,
-    'etf_page_template.html',
-    'etf_index.html',
-    model_used,
+page_reused_without_write = bool(
+    summary_source == 'REUSED_GEMINI'
+    and existing_page_matches_etf_content(
+        'etf_index.html',
+        final_recommendations,
+        df_html_table,
+    )
 )
-previous_diagnostics = load_json_object(
-    config.get('run_diagnostics_file', 'caches/etf_run_diagnostics.json')
-)
+if page_reused_without_write:
+    print(
+        'ETF page content is unchanged; preserving existing etf_index.html '
+        'without rewriting its timestamp or model metadata.'
+    )
+else:
+    update_html_page(
+        final_recommendations,
+        df_html_table,
+        'etf_page_template.html',
+        'etf_index.html',
+        model_used,
+    )
 current_classifications = {
     symbol: {
         'portfolio_group': candidate_sector_group(candidate_by_symbol[symbol]),
@@ -4508,6 +4684,14 @@ diagnostics = {
     'research_disposition': research_disposition,
     'decision_ledger': decision_ledger,
     'context_review': context_review,
+    'summary_cache': {
+        'input_hash': summary_input_hash,
+        'summary_html_hash': stable_json_hash(summary_html),
+        'source': summary_source,
+        'reusable_gemini_summary': summary_source in {
+            'GEMINI', 'REUSED_GEMINI'
+        },
+    },
     'calls': call_diagnostics,
 }
 save_json_object_atomic(

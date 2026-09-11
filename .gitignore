@@ -15,9 +15,71 @@ __pycache__/
 
 api_keys
 
+# Generated local stock page
 index.html
 
 # Ignore build output
 dist/
 build/
 
+# Clairvoyant runtime caches
+caches/yf_cache.json
+caches/etf_yf_cache.json
+caches/stock_pages_cache.json
+caches/etf_pages_cache.json
+
+caches/top_qvm_stocks_cache.pkl
+caches/top_qvm_etfs_cache.pkl
+
+caches/gemini_market_context_cache.json
+caches/gemini_stock_research_cache.json
+caches/gemini_etf_research_cache.json
+
+# Prior-run diagnostics/state
+caches/stock_run_diagnostics.json
+caches/etf_run_diagnostics.json
+
+# Generated inspection files
+caches/top_qvm_stocks.md
+caches/top_qvm_etfs.md
+
+# Temporary atomic cache writes
+caches/*.tmp
+
+# Obsolete root-level cache/output files
+yf_cache.json
+etf_yf_cache.json
+stock_pages_cache.json
+etf_pages_cache.json
+top_qvm_stocks_cache.pkl
+top_qvm_etfs_cache.pkl
+gemini_market_context_cache.json
+gemini_stock_research_cache.json
+gemini_etf_research_cache.json
+top_qvm_stocks.md
+top_qvm_etfs.md
+
+
+#.idea/
+#*.iml
+#
+## Ignore macOS system files
+#.DS_Store
+#
+## Ignore node dependencies
+#node_modules/
+#
+## Ignore Python cache
+#__pycache__/
+#
+## Ignore environment variables
+#.env
+#
+#api_keys
+#
+#index.html
+#
+## Ignore build output
+#dist/
+#build/
+#

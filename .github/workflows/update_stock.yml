@@ -2,7 +2,7 @@ name: Run Stock Recommender
 
 on:
   schedule:
-    - cron: '17 21 * * *' # 1:17 PM PST, 2:17 PM PDT
+    - cron: '17 9 * * *' # 1:17 AM PST, 2:17 AM PDT
   workflow_dispatch:
 
 permissions:

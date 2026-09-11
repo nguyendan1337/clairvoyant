@@ -1,159 +1,293 @@
 {
   "version": 4,
-  "created_at": "2026-09-06T16:31:56.160952+00:00",
-  "prompt_hash": "3da327d4f584aeaf8f1038171f8a8d856336c04a25866132717c69a79ea63afa",
+  "schema_version": 1,
+  "prompt_version": 1,
+  "prompt_hash": "4eb57f2236006a539392a27afe05a60b36895a2f47283244c64f540e22494234",
   "model": "gemini-2.5-flash",
-  "market_context": {
-    "as_of_date": "2026-09-06",
+  "created_at": "2026-09-11T16:21:43.052940+00:00",
+  "timestamp": "2026-09-11T16:21:43.052940+00:00",
+  "data": {
+    "as_of_date": "2026-09-11",
     "market_status": "MIXED",
-    "market_intro": "The U.S. stock market is currently experiencing a mixed environment, with the S&P 500 advancing 2.62% in August and approximately 12.3% year-to-date, yet showing signs of deteriorating market breadth. Investor sentiment is cautious, reflecting a narrow rally primarily driven by the ongoing surge in artificial intelligence (AI) investment and strong corporate earnings. However, persistent inflation, rising interest rate expectations from the Federal Reserve, and escalating geopolitical tensions in the Middle East remain significant concerns for investors.",
-    "market_direction": "The S&P 500 has shown positive performance recently, but underlying market breadth is weakening, indicating a concentrated advance rather than broad market strength.",
+    "market_summary": "The U.S. market is currently experiencing a mixed environment, with the S&P 500 declining by 2.04% over the last five days as of September 11, 2026. Market breadth has significantly deteriorated, with the 10-day advance/decline line reaching its weakest reading since March, indicating cautious investor mood. This weakness comes amid renewed concerns about persistent inflation and the Federal Reserve's hawkish stance, with expectations for further rate hikes. Despite these headwinds, underlying economic growth remains resilient, and corporate earnings have shown solid performance. Geopolitical tensions also continue to contribute to market uncertainty, particularly impacting energy prices.",
+    "market_intro": "The U.S. market is currently experiencing a mixed environment, with the S&P 500 declining by 2.04% over the last five days as of September 11, 2026. Market breadth has significantly deteriorated, with the 10-day advance/decline line reaching its weakest reading since March, indicating cautious investor mood. This weakness comes amid renewed concerns about persistent inflation and the Federal Reserve's hawkish stance, with expectations for further rate hikes. Despite these headwinds, underlying economic growth remains resilient, and corporate earnings have shown solid performance. Geopolitical tensions also continue to contribute to market uncertainty, particularly impacting energy prices.",
+    "market_direction": "Weakening short-term, with underlying resilient growth but increasing caution due to inflation and Fed expectations.",
     "major_drivers": [
-      "Continued surge in Artificial Intelligence (AI) investment, particularly in mega-cap technology stocks.",
-      "Strong corporate earnings reports, especially from the technology sector.",
-      "Resilient U.S. economic conditions, including robust job growth."
+      "Persistent inflation and Federal Reserve rate hike expectations",
+      "Deteriorating market breadth and investor sentiment",
+      "Geopolitical concerns (Russia-Ukraine, US-Iran conflicts, energy/food prices)",
+      "Resilient economic growth and strong corporate earnings",
+      "AI-related investment enthusiasm"
     ],
     "macro_conditions": [
-      "Inflation remains elevated above the Federal Reserve's 2% target, with July CPI at 3.4% year-over-year and PCE at 3.7% year-over-year.",
-      "The Federal Reserve is widely expected to consider an interest rate hike at its September meeting, with market probabilities around 50-50, contingent on upcoming inflation data.",
-      "U.S. job growth was strong in August, adding 162,000 jobs, and the unemployment rate held at 4.1%.",
-      "Long-term Treasury yields are elevated, with the 10-year yield near 4.8% and the 30-year above 5.2%, reflecting inflation concerns and increased government debt.",
-      "Crude oil prices are climbing, with Brent crude around $95 per barrel, up significantly over the past month and year, driven by geopolitical tensions."
+      "U.S. Growth: Real GDP increased at an annual rate of 1.5% in Q2 2026, moderating from 2.1% in Q1, supported by consumer spending and technology investment.",
+      "Inflation: U.S. inflation remained stubbornly high in August, with the Consumer Price Index (CPI) climbing 0.1% from July and 8.3% from a year earlier. Core CPI is also rising. Medium-term inflation expectations ticked down, while short- and longer-term expectations remained unchanged.",
+      "Interest Rates/Federal Reserve: The Federal Reserve held its target rate at 3.50% to 3.75% in July. Market pricing reflects expectations for another 75-basis point rate hike in September, with a one-in-five chance of a full percentage point increase, potentially reaching 4%-4.25% by year-end. Economists expect gradual cuts through 2027, but markets see a risk of renewed hikes due to resilient growth and persistent inflation.",
+      "Liquidity/Credit: Credit conditions tightened in 2025, with rising bankruptcy rates and downgrades outpacing upgrades, particularly for smaller, more leveraged companies. The liquidity environment has become more disciplined.",
+      "Earnings/Estimate Revisions: Corporate earnings growth remains solid, and 2026 S&P 500 earnings estimates were revised upwards to $341 per share as of June 30, 2026."
     ],
     "strong_sectors": [
-      "Energy",
-      "Information Technology",
-      "Healthcare",
-      "Materials",
-      "Financial Services"
+      "Communication Services (rose 0.4% on Sep 10, +1.81% 1-day, +2.34% 1-month, +3.93% 6-month)",
+      "Energy (rose 0.18% on Sep 10, +5.41% 1-month, +11.21% 6-month)",
+      "Consumer Staples (edged up 0.1% on Sep 10, +0.14% 1-day)",
+      "Technology (though down on Sep 10, it has strong 6-month performance +31.18% and AI enthusiasm)"
     ],
     "weak_sectors": [
-      "Consumer Cyclical",
-      "Industrials",
-      "Utilities",
-      "Consumer Staples"
+      "Materials (fell 1.2% on Sep 10, -3.60% 1-day, -0.4% 1-month)",
+      "Technology (led downside on Sep 10, falling 1.3%)",
+      "Industrials (fell 0.8% on Sep 10, worst performing S&P 500 sector over last week, declining over 4%)",
+      "Real Estate (slipped 0.8% on Sep 10, -2.85% 1-month)",
+      "Healthcare (ended lower by 0.5% on Sep 10, -4.65% 1-week)",
+      "Utilities (fell 0.7% on Sep 10, -3.57% 1-month, -8.76% 6-month)",
+      "Consumer Discretionary (declined 0.6% on Sep 10, -3.98% 1-month)",
+      "Financials (down 0.4% on Sep 10, -2.16% 1-week)"
+    ],
+    "strong_exposures": [
+      "Growth (long-term performance, AI-driven)",
+      "Large Cap (historically less risky during geopolitical events)"
+    ],
+    "weak_exposures": [
+      "Small Cap (historically more volatile during geopolitical events)",
+      "Quality (weak quarter, potentially sign of speculative market)"
     ],
     "sector_context": {
-      "Financial Services": "The sector is experiencing upward earnings revisions due to a steeper yield curve and solid net interest income, alongside improved capital markets activity, though central bank policy uncertainty could weigh on performance.",
-      "Energy": "Sector earnings have significantly increased, primarily driven by higher oil prices stemming from ongoing geopolitical tensions and supply constraints.",
-      "Technology": "Benefiting from the massive AI investment boom and strong corporate earnings, this sector faces concerns over lofty valuations, high AI spending, and deteriorating market breadth.",
-      "Basic Materials": "This sector is supported by increased capital spending in areas like energy and AI infrastructure, but has recently experienced pressure on metal prices.",
-      "Industrials": "Supported by increased capital spending in key growth areas such as electricity capacity, AI infrastructure buildout, defense, and energy, the sector has nevertheless seen recent declines.",
-      "Healthcare": "The sector is benefiting from technological advances and improving operational efficiencies, with strong demand for biotechnology and drug-development stocks.",
-      "Consumer Cyclical": "Fundamentals have weakened with softer revenue and free cash flow, and low consumer confidence is likely to continue impacting this group, making it the worst-performing sector year-to-date."
+      "Technology": "Led downside on September 10, but maintains strong long-term performance driven by AI enthusiasm and upward earnings revisions.",
+      "Healthcare": "Ended lower on September 10, part of defensive sectors.",
+      "Financials": "Declined on September 10, typically tied to economic growth and credit conditions.",
+      "Consumer Cyclical": "Declined on September 10, sensitive to consumer confidence and economic growth.",
+      "Consumer Defensive": "Edged up on September 10, less sensitive to the business cycle.",
+      "Energy": "Rose on September 10, influenced by commodity demand and geopolitical events.",
+      "Industrials": "Fell significantly on September 10 and over the last week, indicating broad-based weakness.",
+      "Basic Materials": "Fell on September 10, tied to economic growth and commodity prices.",
+      "Communication Services": "Rose on September 10, part of sensitive sectors.",
+      "Utilities": "Fell on September 10, typically defensive but showing weakness.",
+      "Real Estate": "Slipped on September 10, tied to economic growth and credit conditions, with the housing sector weighed by higher rates."
+    },
+    "factor_and_theme_context": {
+      "Value": "Maintains a cushion of elevated valuation, suggesting comfort in maintaining exposure.",
+      "Growth": "Momentum factor leadership has shifted to memory chip makers and AI capital expenditure beneficiaries.",
+      "Momentum": "Leadership has shifted towards AI-related hardware, moving away from software firms.",
+      "Quality": "Posted another weak quarter, continuing its worst stretch since the post-COVID-19 speculative bubble, potentially signaling a more speculative market environment.",
+      "Dividends": "High dividend yield indices have shown negative performance over short to medium terms.",
+      "Large/Mid/Small Caps": "Large-cap stocks are generally considered less risky during geopolitical events, while small and mid-caps have shown weaker performance over short to medium terms."
     },
     "active_risk_events": [
       {
-        "event_id": "MIDDLE_EAST_GEOPOLITICAL_TENSIONS",
-        "description": "Ongoing US-Iran conflict and instability in the Strait of Hormuz are driving oil and energy prices higher and creating broader market uncertainty.",
+        "event_id": "PERSISTENT_INFLATION_FED_HAWKS",
+        "description": "Resilient U.S. economic growth and persistent inflation are leading to expectations of further Federal Reserve interest rate hikes, with markets pricing in a 75-basis point hike in September. This contrasts with earlier expectations of rate cuts and creates uncertainty regarding future monetary policy.",
         "affected_industries": [
-          "Energy",
-          "Transportation",
-          "Basic Materials"
+          "Interest-rate sensitive sectors (e.g., Real Estate, Financials)",
+          "Growth stocks with high valuations",
+          "Companies with high debt loads"
         ],
-        "normalization_risk": "De-escalation or resolution of the conflict would likely lead to a decline in oil and gas prices, reversing recent gains in the energy sector and reducing transportation costs."
+        "beneficiaries": [
+          "Banks (potentially from higher net interest margins)",
+          "Value stocks (relative outperformance)",
+          "Commodities (as inflation hedge)"
+        ],
+        "normalization_risk": "If inflation eases more rapidly than expected or economic growth slows significantly, the Fed might reverse course to rate cuts, which could favor growth stocks and sectors sensitive to lower rates, reversing the current beneficiaries."
       },
       {
-        "event_id": "AI_INVESTMENT_VALUATION_CONCERNS",
-        "description": "The massive surge in AI investment is driving significant gains and high valuations in a narrow band of mega-cap technology stocks, with emerging concerns about vendor financing and credit risk.",
+        "event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+        "description": "Ongoing geopolitical conflicts, particularly involving Russia-Ukraine and the U.S.-Iran, are contributing to elevated energy and food prices, increasing inflation concerns and supply chain disruptions. The Strait of Hormuz remains a key risk for oil and natural gas shipping.",
         "affected_industries": [
-          "Technology",
-          "Semiconductors",
-          "Software",
-          "Data Centers",
-          "Industrials"
-        ],
-        "normalization_risk": "A slowdown in AI investment, market saturation, or a correction in overvalued AI stocks could lead to a significant reversal of gains in the technology sector and related industries."
-      },
-      {
-        "event_id": "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS",
-        "description": "Weather-driven port congestion, low water levels in key canals (Panama, Rhine/Danube), and carrier capacity management are keeping ocean and truck freight rates elevated.",
-        "affected_industries": [
-          "Transportation",
-          "Retail",
-          "Manufacturing",
+          "Energy-intensive industries",
+          "Transportation/Freight",
+          "Consumer Discretionary (due to reduced consumer spending power)",
           "Basic Materials"
         ],
-        "normalization_risk": "Resolution of congestion, improved canal conditions, and increased shipping capacity would likely lead to lower freight costs, potentially benefiting consumer-facing sectors and manufacturers while impacting logistics providers."
+        "beneficiaries": [
+          "Energy sector (oil & gas producers)",
+          "Defense contractors (outside the U.S. potentially)"
+        ],
+        "normalization_risk": "De-escalation of conflicts and stabilization of supply chains could lead to a decline in commodity prices, reducing inflationary pressures and potentially hurting the energy sector while benefiting consumer-facing industries and those reliant on lower input costs."
+      },
+      {
+        "event_id": "MARKET_BREADTH_DETERIORATION",
+        "description": "Market breadth has significantly deteriorated, with the S&P 500's 10-day advance/decline line at its weakest since March and the cumulative A/D line rolling over. This indicates that fewer stocks are participating in market advances, suggesting underlying weakness despite headline index levels.",
+        "affected_industries": [
+          "Broad market indices (S&P 500, Equal-Weight S&P 500)",
+          "Small-cap stocks",
+          "Companies with weaker fundamentals"
+        ],
+        "beneficiaries": [
+          "Large-cap, high-quality stocks (flight to quality)",
+          "Defensive sectors"
+        ],
+        "normalization_risk": "A broadening of market participation, where a wider range of stocks and sectors begin to advance, would signal improved market health and could lead to outperformance of small-cap and cyclical stocks, reversing the current preference for large-cap and defensive names."
       }
     ],
     "sources": [
       {
-        "title": "September Stock Market Outlook: How to Position Your Portfolio During a Risky Stage",
-        "date": "2026-09-03",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFbWUji_40G6ISAp4zOlUAWGZxLdpsFqikW-bErtUVSKE8kV-F0XdPxrNYphVxwt8Kvg_6NsEKSni78-lK-3OVRyNQYurb7TsA-sF25jr4_qhWg5E1_sGaXQhGmDwTMfDeNL5i0y4-fhx7lZh3-I2VF2JOcclLmMO16gOzaAFDIODQ-J-VDUFgwQBPyhFyF2Yo505N4j_VVLbFlU7hwUJXU8wu5l8q-w4ypxno="
+        "title": "U.S. Sector & Industry Performance - StreetStats",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFy9jCxxtIB28wpVVtySnYFVIIV-ggw8qMEyDRiOiIWVWmcSkWHq37bi15h8FDz-XjhEEcfs-0tLAIKK3deePsDMWGKyNOO21G54dn90KLmuZqLLikkb80ApWIyNwiCX5mya-LhDTK2S93TGEIubRokkQ=="
       },
       {
-        "title": "Fed Interest Rate Forecast: Will Strong Jobs Trigger a September Hike? | FXEmpire",
-        "date": "2026-09-06",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGmS8npl5t5F0osomMAx2T_l9vUhTBMCFOIgoJLfZ9Jb7ai5D_xNGXHKbKBaLCYCfvp-ZHdZzpVilGRbA5m37glIWjqSoKx9-L04UpVTKBx6PVHiS0F7_mOrDXtRIjdJcI8QZY6foWG2GOEPmG4T7XkgnrAUtwo2GsCZ6YeM7C1ctKZQrgKT6JdHpW8nHc-UJA0Xcn0wVb1ckwj7QOmRvlwDB9NNM4FDaiSrvKMs7yA7lvW"
+        "title": "Morning Lineup | Bespoke Investment Group",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHBlzEVXK2WFGWuE_F7LfYRg0JV7z8HF5rJhTT-32rrSVjjtjSntyswnvMBPKr4KD7ZAdt3k2EGWEshO4Sclzs_9t2pALgBExdazXaYFFcmGgBdmHFgZmgxDl-m-dqljJA-4WvFoRh1u-EuUt0iWM8ajRA=="
       },
       {
-        "title": "FOMC Meeting Sept. 2026: Date, Schedule, Expectations, How To Watch? - CoinGape",
-        "date": "2026-09-05",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEQv9cE0gNER0LnPwB32NEb-Z3EVOeaw9-aYyxQs0W7ybGT-BpfVQwUYMu8hfANgn6AD7WnibP5dcAHGD47Ciqte7n8qW82IpYbgPSnzMDM-DgB-m2M5P4q6zyVXITMwQ4KahSZ9blTV_Aynm0TFZmDb2rhXuGjvhZpgzG7_ET_qjhFoy-5UWN8uuSsK7FeDWpVlTU="
+        "title": "The Fed's next move is no longer obvious - DWS",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF0xT9fy-QJkdEye1b09_y3XeoR8Lw5MKoBsDuvoNus2LtlcfrmtxLClKj54vFskj3lQmn7skTbf1Hh7QTnYw3TshuBiiIjnksv5jU4e1BBgAwEjSKUoJbqvETkIa5R-D7jyR_su-tJEfFTwQwvyFA5vz3rvrWlbP4j2ljCqo0nqZlqhhwsGtV0LzSkyJ8lkV1atLYE1dCs3nJw52C4WD9HB23ZoxbmLg=="
       },
       {
-        "title": "Stock Market Breadth & Momentum - S&P 500 - StreetStats",
-        "date": "2026-09-04",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGYQ3YjxHntXh7FaZc6Gtiniuud_oNB2vjtWkLgGo_umreF3D4uTdapBFAffihgmpp8BvnlgpnQcXXRn4krrNWyChL1B9Px0Bsicxm7z0TBZn-aFecUUEGcgioCuwZt9JVFsd_XKQ11nHELVd2HCmjfefxmyUU="
+        "title": "U.S. inflation stayed stubbornly high in August. Investors believe the Federal Reserve is very likely to raise rates at its meeting next week. Follow live updates. - Facebook",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFEgsWhnv_IYWHy3uHhDC_toUizWQQyj8wlybNbm1wuT1t4gkDjdvdueDjA9fw0QOHWnLVupgiBoWq0w_PyxivEn9NtjLo6Xvcb4naihYSV0ZII7oVtcpPdpU8Ajwocqfq6urk7sAH8v7rD2u3CiqMGPyEt_95vxXcy_cqnDNDoRT07YBGg-9zGm3OyyUSiB-JVXidFczLlulHEoN5WCitE6dMpLhxBo-um3DXINWcwMZjaGUwptTc9pcdTlXHg2MIg0R4FhQ=="
       },
       {
-        "title": "September 2026 Freight Market Update",
-        "date": "2026-08-31",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGkPBqVLYmIKAoSX6OtYpzxxp59_xfK-7X1BlhqFjBd_sx0g81sI6_OofIzDmxwunGbdkkGKZEe_tqx_RHCw_h-n9u2QQbTGU7rpVl9-6uTV_qX17KSbvSOWJ61FGIzseVM5tkUvlwckNoaUAagNNvjyVwoPy-QcssoAD1a5-ZyOL4UhQ=="
+        "title": "Group Screener - Sector, Industry, Country, Capitalization - Finviz",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQY-29jDK4FAj8Qg7wxGxn92pW7pd9gFZ1ohaJFygQR37W1Q2UqViKQSk9SykpaUaccDfZH67dsHvlsBf7Jqs4GhvXTFoXzlNXIOaxMY4cbPQ3QBc="
+      }
+    ]
+  },
+  "market_context": {
+    "as_of_date": "2026-09-11",
+    "market_status": "MIXED",
+    "market_summary": "The U.S. market is currently experiencing a mixed environment, with the S&P 500 declining by 2.04% over the last five days as of September 11, 2026. Market breadth has significantly deteriorated, with the 10-day advance/decline line reaching its weakest reading since March, indicating cautious investor mood. This weakness comes amid renewed concerns about persistent inflation and the Federal Reserve's hawkish stance, with expectations for further rate hikes. Despite these headwinds, underlying economic growth remains resilient, and corporate earnings have shown solid performance. Geopolitical tensions also continue to contribute to market uncertainty, particularly impacting energy prices.",
+    "market_intro": "The U.S. market is currently experiencing a mixed environment, with the S&P 500 declining by 2.04% over the last five days as of September 11, 2026. Market breadth has significantly deteriorated, with the 10-day advance/decline line reaching its weakest reading since March, indicating cautious investor mood. This weakness comes amid renewed concerns about persistent inflation and the Federal Reserve's hawkish stance, with expectations for further rate hikes. Despite these headwinds, underlying economic growth remains resilient, and corporate earnings have shown solid performance. Geopolitical tensions also continue to contribute to market uncertainty, particularly impacting energy prices.",
+    "market_direction": "Weakening short-term, with underlying resilient growth but increasing caution due to inflation and Fed expectations.",
+    "major_drivers": [
+      "Persistent inflation and Federal Reserve rate hike expectations",
+      "Deteriorating market breadth and investor sentiment",
+      "Geopolitical concerns (Russia-Ukraine, US-Iran conflicts, energy/food prices)",
+      "Resilient economic growth and strong corporate earnings",
+      "AI-related investment enthusiasm"
+    ],
+    "macro_conditions": [
+      "U.S. Growth: Real GDP increased at an annual rate of 1.5% in Q2 2026, moderating from 2.1% in Q1, supported by consumer spending and technology investment.",
+      "Inflation: U.S. inflation remained stubbornly high in August, with the Consumer Price Index (CPI) climbing 0.1% from July and 8.3% from a year earlier. Core CPI is also rising. Medium-term inflation expectations ticked down, while short- and longer-term expectations remained unchanged.",
+      "Interest Rates/Federal Reserve: The Federal Reserve held its target rate at 3.50% to 3.75% in July. Market pricing reflects expectations for another 75-basis point rate hike in September, with a one-in-five chance of a full percentage point increase, potentially reaching 4%-4.25% by year-end. Economists expect gradual cuts through 2027, but markets see a risk of renewed hikes due to resilient growth and persistent inflation.",
+      "Liquidity/Credit: Credit conditions tightened in 2025, with rising bankruptcy rates and downgrades outpacing upgrades, particularly for smaller, more leveraged companies. The liquidity environment has become more disciplined.",
+      "Earnings/Estimate Revisions: Corporate earnings growth remains solid, and 2026 S&P 500 earnings estimates were revised upwards to $341 per share as of June 30, 2026."
+    ],
+    "strong_sectors": [
+      "Communication Services (rose 0.4% on Sep 10, +1.81% 1-day, +2.34% 1-month, +3.93% 6-month)",
+      "Energy (rose 0.18% on Sep 10, +5.41% 1-month, +11.21% 6-month)",
+      "Consumer Staples (edged up 0.1% on Sep 10, +0.14% 1-day)",
+      "Technology (though down on Sep 10, it has strong 6-month performance +31.18% and AI enthusiasm)"
+    ],
+    "weak_sectors": [
+      "Materials (fell 1.2% on Sep 10, -3.60% 1-day, -0.4% 1-month)",
+      "Technology (led downside on Sep 10, falling 1.3%)",
+      "Industrials (fell 0.8% on Sep 10, worst performing S&P 500 sector over last week, declining over 4%)",
+      "Real Estate (slipped 0.8% on Sep 10, -2.85% 1-month)",
+      "Healthcare (ended lower by 0.5% on Sep 10, -4.65% 1-week)",
+      "Utilities (fell 0.7% on Sep 10, -3.57% 1-month, -8.76% 6-month)",
+      "Consumer Discretionary (declined 0.6% on Sep 10, -3.98% 1-month)",
+      "Financials (down 0.4% on Sep 10, -2.16% 1-week)"
+    ],
+    "strong_exposures": [
+      "Growth (long-term performance, AI-driven)",
+      "Large Cap (historically less risky during geopolitical events)"
+    ],
+    "weak_exposures": [
+      "Small Cap (historically more volatile during geopolitical events)",
+      "Quality (weak quarter, potentially sign of speculative market)"
+    ],
+    "sector_context": {
+      "Technology": "Led downside on September 10, but maintains strong long-term performance driven by AI enthusiasm and upward earnings revisions.",
+      "Healthcare": "Ended lower on September 10, part of defensive sectors.",
+      "Financials": "Declined on September 10, typically tied to economic growth and credit conditions.",
+      "Consumer Cyclical": "Declined on September 10, sensitive to consumer confidence and economic growth.",
+      "Consumer Defensive": "Edged up on September 10, less sensitive to the business cycle.",
+      "Energy": "Rose on September 10, influenced by commodity demand and geopolitical events.",
+      "Industrials": "Fell significantly on September 10 and over the last week, indicating broad-based weakness.",
+      "Basic Materials": "Fell on September 10, tied to economic growth and commodity prices.",
+      "Communication Services": "Rose on September 10, part of sensitive sectors.",
+      "Utilities": "Fell on September 10, typically defensive but showing weakness.",
+      "Real Estate": "Slipped on September 10, tied to economic growth and credit conditions, with the housing sector weighed by higher rates."
+    },
+    "factor_and_theme_context": {
+      "Value": "Maintains a cushion of elevated valuation, suggesting comfort in maintaining exposure.",
+      "Growth": "Momentum factor leadership has shifted to memory chip makers and AI capital expenditure beneficiaries.",
+      "Momentum": "Leadership has shifted towards AI-related hardware, moving away from software firms.",
+      "Quality": "Posted another weak quarter, continuing its worst stretch since the post-COVID-19 speculative bubble, potentially signaling a more speculative market environment.",
+      "Dividends": "High dividend yield indices have shown negative performance over short to medium terms.",
+      "Large/Mid/Small Caps": "Large-cap stocks are generally considered less risky during geopolitical events, while small and mid-caps have shown weaker performance over short to medium terms."
+    },
+    "active_risk_events": [
+      {
+        "event_id": "PERSISTENT_INFLATION_FED_HAWKS",
+        "description": "Resilient U.S. economic growth and persistent inflation are leading to expectations of further Federal Reserve interest rate hikes, with markets pricing in a 75-basis point hike in September. This contrasts with earlier expectations of rate cuts and creates uncertainty regarding future monetary policy.",
+        "affected_industries": [
+          "Interest-rate sensitive sectors (e.g., Real Estate, Financials)",
+          "Growth stocks with high valuations",
+          "Companies with high debt loads"
+        ],
+        "beneficiaries": [
+          "Banks (potentially from higher net interest margins)",
+          "Value stocks (relative outperformance)",
+          "Commodities (as inflation hedge)"
+        ],
+        "normalization_risk": "If inflation eases more rapidly than expected or economic growth slows significantly, the Fed might reverse course to rate cuts, which could favor growth stocks and sectors sensitive to lower rates, reversing the current beneficiaries."
       },
       {
-        "title": "September 2026 Market Insights | CommunityAmerica Credit Union",
-        "date": "2026-09-04",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGrH_EluPJ32rE7Ohc6oOIBhnvBkHCJPiqeME8VLwhOgLo-hnoA3N-H6qy145MBB3BiMYdyMWGbeLNOPQ5pO1xst3KGMRIkY4u_UNz-eRYyLNeo9cdwOxffjXIbuhBTp85wpTvoI7rOZto7bGYJEKI8vmHktEAXz6T7gbmJ_AZKo1Oc1Z8="
+        "event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+        "description": "Ongoing geopolitical conflicts, particularly involving Russia-Ukraine and the U.S.-Iran, are contributing to elevated energy and food prices, increasing inflation concerns and supply chain disruptions. The Strait of Hormuz remains a key risk for oil and natural gas shipping.",
+        "affected_industries": [
+          "Energy-intensive industries",
+          "Transportation/Freight",
+          "Consumer Discretionary (due to reduced consumer spending power)",
+          "Basic Materials"
+        ],
+        "beneficiaries": [
+          "Energy sector (oil & gas producers)",
+          "Defense contractors (outside the U.S. potentially)"
+        ],
+        "normalization_risk": "De-escalation of conflicts and stabilization of supply chains could lead to a decline in commodity prices, reducing inflationary pressures and potentially hurting the energy sector while benefiting consumer-facing industries and those reliant on lower input costs."
       },
       {
-        "title": "September Market Weakness: The Setup Has Teeth | Seeking Alpha",
-        "date": "2026-09-06",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG5FjG91GEbJKxFM7_sp213gtq8XHV3_T4vKX-jge_BZqevfT6BpOWIq3upjwsJkfaaEbOmSJExAb0pu-SJLfdgVZFjOrYf5iouEISaO_c1O5W6trqhNUfGfdqpcjAfypZub37IgfqP6Y6HIJBAs7x-MLrW6uGPazc3FYHXCqEnMyDfmmfewq_UXpNpREQ="
+        "event_id": "MARKET_BREADTH_DETERIORATION",
+        "description": "Market breadth has significantly deteriorated, with the S&P 500's 10-day advance/decline line at its weakest since March and the cumulative A/D line rolling over. This indicates that fewer stocks are participating in market advances, suggesting underlying weakness despite headline index levels.",
+        "affected_industries": [
+          "Broad market indices (S&P 500, Equal-Weight S&P 500)",
+          "Small-cap stocks",
+          "Companies with weaker fundamentals"
+        ],
+        "beneficiaries": [
+          "Large-cap, high-quality stocks (flight to quality)",
+          "Defensive sectors"
+        ],
+        "normalization_risk": "A broadening of market participation, where a wider range of stocks and sectors begin to advance, would signal improved market health and could lead to outperformance of small-cap and cyclical stocks, reversing the current preference for large-cap and defensive names."
+      }
+    ],
+    "sources": [
+      {
+        "title": "U.S. Sector & Industry Performance - StreetStats",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFy9jCxxtIB28wpVVtySnYFVIIV-ggw8qMEyDRiOiIWVWmcSkWHq37bi15h8FDz-XjhEEcfs-0tLAIKK3deePsDMWGKyNOO21G54dn90KLmuZqLLikkb80ApWIyNwiCX5mya-LhDTK2S93TGEIubRokkQ=="
       },
       {
-        "title": "September 2026 Market Outlook | MRA Advisory Group",
-        "date": "2026-09-02",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQElt4CqgWmYISi160yeHXR5Y27PrurHa7VZ6Uc-olXsurbeqdQMMyzqcUWTltydWBv7DZjQjk2jyIOKnbf1jdz-2AmtrKJ0fGq8VHle5Gv9xyCRfdX-jaRmlu885HMRej3xR4qBJ2fefSl3OGLXcJ-aSA0JGKDXM8_LHtVDpWiv"
+        "title": "Morning Lineup | Bespoke Investment Group",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHBlzEVXK2WFGWuE_F7LfYRg0JV7z8HF5rJhTT-32rrSVjjtjSntyswnvMBPKr4KD7ZAdt3k2EGWEshO4Sclzs_9t2pALgBExdazXaYFFcmGgBdmHFgZmgxDl-m-dqljJA-4WvFoRh1u-EuUt0iWM8ajRA=="
       },
       {
-        "title": "Oil Surged, Then Slumped, Year to Date in 2026. Here's My Prediction for What's Ahead.",
-        "date": "2026-09-06",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHCKZPH7HWnEVBWwDHUu8UV7uWBg4gnOWFFfMoXeByfCpy6uzaydZw_mfi92Rxc2zkO9rGIKIOsumpxY8dfP3sftuzPf2rEDZfBMWA4rRHXaZ5-Gm4SRnE-SYCcwkataqz0RMCLblSuNy4GmqO7gHlbNfaGCgMOG5cAKHLUsPvt0Y2XwHhbDNS9nmvNeOVf0akOyinbgr0pow=="
+        "title": "The Fed's next move is no longer obvious - DWS",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF0xT9fy-QJkdEye1b09_y3XeoR8Lw5MKoBsDuvoNus2LtlcfrmtxLClKj54vFskj3lQmn7skTbf1Hh7QTnYw3TshuBiiIjnksv5jU4e1BBgAwEjSKUoJbqvETkIa5R-D7jyR_su-tJEfFTwQwvyFA5vz3rvrWlbP4j2ljCqo0nqZlqhhwsGtV0LzSkyJ8lkV1atLYE1dCs3nJw52C4WD9HB23ZoxbmLg=="
       },
       {
-        "title": "Sector Views: Monthly Stock Sector Outlook - Charles Schwab",
-        "date": "2026-09-04",
-        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFspKje_IUIi-0zzGvMhBYHXwid82yaRvOHwJlx2J3dg7JLOV7v0Q_KVbR7ZJvNXXS04L0IJOkuGA60l8NLTro_OoLl-ulCvKFd-InJ3no8aOovZm9u0HEgu-61sLtFQUtgX9YpnlWLVWwNiwoFxdhJgLw="
+        "title": "U.S. inflation stayed stubbornly high in August. Investors believe the Federal Reserve is very likely to raise rates at its meeting next week. Follow live updates. - Facebook",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFEgsWhnv_IYWHy3uHhDC_toUizWQQyj8wlybNbm1wuT1t4gkDjdvdueDjA9fw0QOHWnLVupgiBoWq0w_PyxivEn9NtjLo6Xvcb4naihYSV0ZII7oVtcpPdpU8Ajwocqfq6urk7sAH8v7rD2u3CiqMGPyEt_95vxXcy_cqnDNDoRT07YBGg-9zGm3OyyUSiB-JVXidFczLlulHEoN5WCitE6dMpLhxBo-um3DXINWcwMZjaGUwptTc9pcdTlXHg2MIg0R4FhQ=="
+      },
+      {
+        "title": "Group Screener - Sector, Industry, Country, Capitalization - Finviz",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQY-29jDK4FAj8Qg7wxGxn92pW7pd9gFZ1ohaJFygQR37W1Q2UqViKQSk9SykpaUaccDfZH67dsHvlsBf7Jqs4GhvXTFoXzlNXIOaxMY4cbPQ3QBc="
       }
     ]
   },
   "research_metadata": {
     "search_queries": [
-      "S&P 500 performance last 10 days September 2026",
-      "S&P 500 market breadth September 2026",
-      "US stock market health September 2026",
-      "US investor sentiment September 2026",
-      "largest market drivers US September 2026",
-      "US inflation data August September 2026",
-      "Federal Reserve interest rate expectations September 2026",
-      "US economic data recent September 2026",
-      "US earnings season trends Q3 2026",
-      "major US regulatory developments September 2026",
-      "current geopolitical risks September 2026 stock market",
-      "major world events impacting markets September 2026",
-      "energy prices September 2026",
-      "commodity prices trends September 2026",
-      "global supply chain status September 2026",
-      "freight costs September 2026",
-      "strong US stock sectors September 2026",
-      "weak US stock sectors September 2026",
-      "US stock market sector performance last month",
-      "temporary market disruptions September 2026",
-      "events impacting market winners September 2026"
+      "S&P 500 performance last 10 days investor sentiment market breadth",
+      "US stock market health indicators current",
+      "US economic growth inflation interest rates Federal Reserve expectations current",
+      "US corporate earnings revisions liquidity credit conditions",
+      "US sector performance last 10 days Technology Healthcare Financials Consumer Cyclical Defensive Energy Industrials Basic Materials Communication Services Utilities Real Estate",
+      "Current operating conditions major US economic sectors",
+      "US factor leadership current value growth momentum quality dividends",
+      "US market cap performance large mid small cap last 10 days",
+      "Geopolitical risks market impact next 6-12 months",
+      "Commodity prices freight costs regulatory changes market concentration valuation risks",
+      "Market crowding and flow conditions potential reversals"
     ],
-    "tool_tokens": 2072
+    "tool_tokens": 1415
   }
 }

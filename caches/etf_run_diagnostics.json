@@ -1,1216 +1,2188 @@
 {
-  "generated_at": "2026-09-07T04:56:14.998576+00:00",
-  "status": "FAILED_INSUFFICIENT_SELECTIONS",
-  "failure_reason": "Only 5 of 10 ETFs passed validated research and portfolio rules.",
+  "generated_at": "2026-09-11T17:20:32.103843+00:00",
+  "status": "SUCCESS",
+  "selection_target": 10,
+  "selection_count": 10,
+  "selection_shortfall": 0,
+  "models_used": [
+    "gemini-2.5-flash"
+  ],
   "budget": {
     "total_used": 3,
     "total_limit": 7,
-    "research_used": 3,
-    "research_limit": 5
+    "research_used": 2,
+    "research_limit": 6,
+    "summary_used": 1,
+    "api_attempts": 3,
+    "research_api_attempts": 2,
+    "summary_api_attempts": 1,
+    "context_api_attempts": 0,
+    "summary_reservation_releasable_on_shortfall": true
   },
-  "fresh_research_attempts_by_symbol": {
-    "XLE": 1,
-    "VLUE": 1,
-    "DIVB": 2,
-    "VFLO": 2,
-    "AVLV": 1,
-    "KBWB": 1,
-    "XOP": 1,
-    "VPL": 2,
-    "ESGE": 2,
-    "EWS": 1,
-    "IYE": 1,
-    "DFAE": 2,
-    "COPX": 1,
-    "FXN": 1,
-    "XLK": 1,
-    "RPV": 1,
-    "FTXN": 1,
-    "IWN": 1,
-    "IGE": 1,
-    "GARP": 2,
-    "AVUS": 1,
-    "FTEC": 1,
-    "AMLP": 1,
-    "AVUV": 1,
-    "DFSV": 1,
-    "COWZ": 1,
-    "BSVO": 1
-  },
-  "structural_repairs_by_symbol": {
-    "DIVB": 1,
-    "VFLO": 1,
-    "RPV": 1,
-    "FTXN": 1,
-    "IWN": 1,
-    "IGE": 1,
-    "AVUS": 1,
-    "FTEC": 1,
-    "AMLP": 1,
-    "AVUV": 1,
-    "DFSV": 1
-  },
-  "sector_capacity_skipped_symbols": [
-    "DFLV",
-    "DFUV",
-    "FNDB",
-    "FNDX",
-    "HDV",
-    "IHE",
-    "IWD",
-    "IWX",
-    "MGV",
-    "PRF",
-    "PVAL",
-    "PWV",
-    "RDVY",
-    "SCHD",
-    "SEIV",
-    "VONV",
-    "VTV"
-  ],
-  "batch_research_diagnostics": [
-    {
-      "stage": "ETF batch ranks 1-33",
-      "batch_size": 15,
-      "fresh_research_requested": 15,
-      "fresh_retry_requested": 0,
-      "repair_only_requested": 0,
-      "searches_exposed": 15,
-      "validated": 10,
-      "deferred": 5,
-      "validated_symbols": [
-        "AVLV",
-        "COPX",
-        "EWS",
-        "FXN",
-        "IYE",
-        "KBWB",
-        "VLUE",
-        "XLE",
-        "XLK",
-        "XOP"
-      ],
-      "deferred_symbols": [
-        "DFAE",
-        "DIVB",
-        "ESGE",
-        "VFLO",
-        "VPL"
-      ],
-      "raw_result_shapes": {
-        "XLE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "VLUE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "HYPOTHETICAL",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "DIVB": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "VFLO": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "AVLV": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "HYPOTHETICAL",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "KBWB": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "LIKELY",
-          "risk_materiality": "MODERATE"
-        },
-        "XOP": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "VPL": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "ESGE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "EWS": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "NOT_US_EQUITY",
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "IYE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "DFAE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "COPX": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "NOT_US_EQUITY",
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "FXN": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "XLK": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[5]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "LIKELY",
-          "risk_materiality": "HIGH"
-        }
-      },
-      "grounding_url_count": 38
+  "research": {
+    "unique_etfs_requested": 25,
+    "requested_searches": 25,
+    "charged_search_attempts": 25,
+    "repeated_searches": 0,
+    "fresh_research_attempts_by_symbol": {
+      "XLE": 1,
+      "VFLO": 1,
+      "FENY": 1,
+      "VLUE": 1,
+      "CRAK": 1,
+      "DIVB": 1,
+      "XOP": 1,
+      "VDE": 1,
+      "XBI": 1,
+      "XLK": 1,
+      "GDX": 1,
+      "FTEC": 1,
+      "IYE": 1,
+      "VONV": 1,
+      "SEIV": 1,
+      "COPX": 1,
+      "IBB": 1,
+      "KBWB": 1,
+      "IYW": 1,
+      "SIL": 1,
+      "RSPT": 1,
+      "DYNF": 1,
+      "CIBR": 1,
+      "GARP": 1,
+      "BHYP": 1
     },
-    {
-      "stage": "ETF batch ranks 4-50",
-      "batch_size": 15,
-      "fresh_research_requested": 15,
-      "fresh_retry_requested": 5,
-      "repair_only_requested": 0,
-      "searches_exposed": 15,
-      "validated": 0,
-      "deferred": 15,
-      "validated_symbols": [],
-      "deferred_symbols": [
-        "AMLP",
-        "AVUS",
-        "AVUV",
-        "DFAE",
-        "DFSV",
-        "DIVB",
-        "ESGE",
-        "FTEC",
-        "FTXN",
-        "GARP",
-        "IGE",
-        "IWN",
-        "RPV",
-        "VFLO",
-        "VPL"
-      ],
-      "raw_result_shapes": {
-        "DIVB": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "VFLO": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "VPL": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "ESGE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "DFAE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "RPV": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "FTXN": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "IWN": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "IGE": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "NOT_US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "GARP": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[0]",
-          "benchmark_assessment": null,
-          "mandate_assessment": null,
-          "mechanism_status": "NONE",
-          "normalization_probability": "UNLIKELY",
-          "risk_materiality": "LOW"
-        },
-        "AVUS": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "FTEC": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "LIKELY",
-          "risk_materiality": "HIGH"
-        },
-        "AMLP": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "PASS",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "HIGH"
-        },
-        "AVUV": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        },
-        "DFSV": {
-          "present": true,
-          "field_count": 25,
-          "sources_shape": "list[4]",
-          "benchmark_assessment": "FAIL",
-          "mandate_assessment": "US_EQUITY",
-          "mechanism_status": "OBSERVED",
-          "normalization_probability": "POSSIBLE",
-          "risk_materiality": "MODERATE"
-        }
-      },
-      "grounding_url_count": 35
+    "structural_repairs_by_symbol": {
+      "VFLO": 1,
+      "VLUE": 1,
+      "DIVB": 1,
+      "FTEC": 1,
+      "SEIV": 1
     },
-    {
-      "stage": "ETF batch ranks 4-50",
-      "batch_size": 14,
-      "fresh_research_requested": 3,
-      "fresh_retry_requested": 1,
-      "repair_only_requested": 11,
-      "validated": 0,
-      "deferred": 14,
-      "error": "Gemini ETF batch ranks 4-50 failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\\nPlease retry in 45.021081077s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '45s'}]}}"
-    }
-  ],
+    "sector_capacity_skipped_symbols": [
+      "FTXN",
+      "FXN",
+      "IGE"
+    ],
+    "validated_symbols": [
+      "BHYP",
+      "CIBR",
+      "COPX",
+      "CRAK",
+      "DIVB",
+      "DYNF",
+      "FENY",
+      "FTEC",
+      "GARP",
+      "GDX",
+      "IBB",
+      "IYE",
+      "IYW",
+      "KBWB",
+      "RSPT",
+      "SEIV",
+      "SIL",
+      "VDE",
+      "VFLO",
+      "VLUE",
+      "VONV",
+      "XBI",
+      "XLE",
+      "XLK",
+      "XOP"
+    ],
+    "selected_symbols": [
+      "XLE",
+      "VFLO",
+      "FENY",
+      "VLUE",
+      "DIVB",
+      "XBI",
+      "XLK",
+      "FTEC",
+      "VONV",
+      "IBB"
+    ],
+    "batches": [
+      {
+        "stage": "ETF batch ranks 1-15",
+        "batch_size": 15,
+        "fresh_research_requested": 15,
+        "fresh_retry_requested": 0,
+        "repair_only_requested": 0,
+        "searches_exposed": 15,
+        "search_overrun": 0,
+        "validated": 10,
+        "deferred": 5,
+        "validated_symbols": [
+          "CRAK",
+          "FENY",
+          "GDX",
+          "IYE",
+          "VDE",
+          "VONV",
+          "XBI",
+          "XLE",
+          "XLK",
+          "XOP"
+        ],
+        "deferred_symbols": [
+          "DIVB",
+          "FTEC",
+          "SEIV",
+          "VFLO",
+          "VLUE"
+        ],
+        "raw_result_shapes": {
+          "XLE": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 208
+          },
+          "VFLO": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[0]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 162
+          },
+          "FENY": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 99,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 185
+          },
+          "VLUE": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[0]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 182
+          },
+          "CRAK": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "FAIL",
+            "mandate_assessment": "NOT_US_EQUITY",
+            "us_equity_weight_estimate": 70,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "NONE",
+            "evidence_scope": "NONE",
+            "adverse_change_observed": false,
+            "normalization_probability": "UNLIKELY",
+            "risk_materiality": "LOW",
+            "reversal_mechanism_chars": 0
+          },
+          "DIVB": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[0]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 159
+          },
+          "XOP": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 95,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 170
+          },
+          "VDE": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 99,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 172
+          },
+          "XBI": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 97,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 170
+          },
+          "XLK": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 188
+          },
+          "GDX": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "FAIL",
+            "mandate_assessment": "NOT_US_EQUITY",
+            "us_equity_weight_estimate": 22,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "NONE",
+            "evidence_scope": "NONE",
+            "adverse_change_observed": false,
+            "normalization_probability": "UNLIKELY",
+            "risk_materiality": "LOW",
+            "reversal_mechanism_chars": 0
+          },
+          "FTEC": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[0]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 192
+          },
+          "IYE": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 166
+          },
+          "VONV": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 194
+          },
+          "SEIV": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[0]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 195
+          }
+        },
+        "grounding_url_count": 35,
+        "applied_repair_patches": {}
+      },
+      {
+        "stage": "ETF batch ranks 2-41",
+        "batch_size": 15,
+        "fresh_research_requested": 10,
+        "fresh_retry_requested": 0,
+        "repair_only_requested": 5,
+        "searches_exposed": 10,
+        "search_overrun": 0,
+        "validated": 15,
+        "deferred": 0,
+        "validated_symbols": [
+          "BHYP",
+          "CIBR",
+          "COPX",
+          "DIVB",
+          "DYNF",
+          "FTEC",
+          "GARP",
+          "IBB",
+          "IYW",
+          "KBWB",
+          "RSPT",
+          "SEIV",
+          "SIL",
+          "VFLO",
+          "VLUE"
+        ],
+        "deferred_symbols": [],
+        "raw_result_shapes": {
+          "VFLO": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 162
+          },
+          "VLUE": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 182
+          },
+          "DIVB": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 159
+          },
+          "FTEC": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 192
+          },
+          "SEIV": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 195
+          },
+          "COPX": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "NOT_US_EQUITY",
+            "us_equity_weight_estimate": 0,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 217
+          },
+          "IBB": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 99,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 188
+          },
+          "KBWB": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 192
+          },
+          "IYW": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 99.7,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 191
+          },
+          "SIL": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "NOT_US_EQUITY",
+            "us_equity_weight_estimate": 0,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 176
+          },
+          "RSPT": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 183
+          },
+          "DYNF": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 194
+          },
+          "CIBR": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 99.99,
+            "mandate_basis": "HOLDINGS_WEIGHT",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 189
+          },
+          "GARP": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[3]",
+            "benchmark_assessment": "PASS",
+            "mandate_assessment": "US_EQUITY",
+            "us_equity_weight_estimate": 100,
+            "mandate_basis": "INDEX_MANDATE",
+            "mechanism_status": "HYPOTHETICAL",
+            "evidence_scope": "MARKET_ONLY",
+            "adverse_change_observed": false,
+            "normalization_probability": "POSSIBLE",
+            "risk_materiality": "MODERATE",
+            "reversal_mechanism_chars": 202
+          },
+          "BHYP": {
+            "present": true,
+            "field_count": 32,
+            "sources_shape": "list[4]",
+            "benchmark_assessment": "FAIL",
+            "mandate_assessment": "NOT_US_EQUITY",
+            "us_equity_weight_estimate": 0,
+            "mandate_basis": "OTHER",
+            "mechanism_status": "OBSERVED",
+            "evidence_scope": "EXPOSURE_SPECIFIC",
+            "adverse_change_observed": true,
+            "normalization_probability": "LIKELY",
+            "risk_materiality": "HIGH",
+            "reversal_mechanism_chars": 192
+          }
+        },
+        "grounding_url_count": 31,
+        "applied_repair_patches": {
+          "VFLO": [
+            "sources"
+          ],
+          "VLUE": [
+            "sources"
+          ],
+          "DIVB": [
+            "sources"
+          ],
+          "FTEC": [
+            "sources"
+          ],
+          "SEIV": [
+            "sources"
+          ]
+        }
+      }
+    ],
+    "provisional_exposure_deferred_symbols": [
+      "AVLV",
+      "DFLV",
+      "DFUV",
+      "FNDX",
+      "HDV",
+      "IWD",
+      "IWX",
+      "PRF",
+      "PVAL",
+      "PWV",
+      "SCHD",
+      "SMH",
+      "VTV"
+    ],
+    "transport_failed_symbols": []
+  },
   "classifications": {
-    "FENY": {
-      "sector_group": "Equity Energy",
+    "XLE": {
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
       "research_admission": "STRICT",
-      "model_eligible": false,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "ENERGY_SECTOR_US"
-    },
-    "XBI": {
-      "sector_group": "Health",
-      "research_admission": "STRICT",
-      "model_eligible": true,
       "python_eligible": true,
       "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "MINIMAL",
-      "exposure_group": "US_BIOTECHNOLOGY"
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_ENERGY_LARGE_CAP",
+      "primary_risk_event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
+      "evidence_warnings": []
     },
-    "VDE": {
-      "sector_group": "Equity Energy",
+    "FENY": {
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
       "research_admission": "STRICT",
-      "model_eligible": false,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "US_BROAD_ENERGY_EQUITY"
+      "us_equity_weight_estimate": 99.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_ENERGY_MULTI_CAP",
+      "primary_risk_event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
+      "evidence_warnings": []
     },
     "CRAK": {
-      "sector_group": "Equity Energy",
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
       "research_admission": "STRICT",
-      "model_eligible": false,
       "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. Tracks MVIS Global Oil Refiners Index, with 63.8% of its portfolio invested in foreign issues.",
-      "benchmark_assessment": "FAIL",
-      "mandate_assessment": "NOT_US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "GLOBAL_OIL_REFINING"
-    },
-    "IBB": {
-      "sector_group": "Health",
-      "research_admission": "STRICT",
-      "model_eligible": true,
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
+      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. CRAK tracks a global index and includes significant non-US companies in its top holdings, such as Reliance Industries Ltd GDR and Orlen SA.",
       "reversal_risk": "MINIMAL",
-      "exposure_group": "US_BIOTECHNOLOGY"
-    },
-    "GDX": {
-      "sector_group": "Equity Precious Metals",
-      "research_admission": "STRICT",
-      "model_eligible": false,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. Tracks MarketVector Global Gold Miners Index, which includes global companies. Top holdings include companies listed on XTSE, XASX, XLON.",
+      "risk_basis": "NONE",
+      "mechanism_status": "NONE",
+      "normalization_probability": "UNLIKELY",
       "benchmark_assessment": "FAIL",
       "mandate_assessment": "NOT_US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "GLOBAL_GOLD_MINING_EQUITY"
-    },
-    "XLE": {
-      "sector_group": "Equity Energy",
-      "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "US_LARGE_CAP_ENERGY"
-    },
-    "VLUE": {
-      "sector_group": "Large Value",
-      "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "LOW",
-      "exposure_group": "US_LARGE_MID_CAP_VALUE"
-    },
-    "AVLV": {
-      "sector_group": "Large Value",
-      "research_admission": "BACKFILL",
-      "model_eligible": null,
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "LOW",
-      "exposure_group": "US_LARGE_CAP_VALUE"
-    },
-    "KBWB": {
-      "sector_group": "Financial",
-      "research_admission": "BACKFILL",
-      "model_eligible": null,
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "MODERATE",
-      "exposure_group": "US_BANKS"
+      "us_equity_weight_estimate": 70.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "GLOBAL_OIL_REFINERS",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
     },
     "XOP": {
-      "sector_group": "Equity Energy",
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
       "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "MODERATE",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "US_OIL_GAS_EXPLORATION_PRODUCTION"
+      "us_equity_weight_estimate": 95.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_OIL_GAS_EXPLORATION_PRODUCTION",
+      "primary_risk_event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
+      "evidence_warnings": []
     },
-    "EWS": {
-      "sector_group": "Focused Region",
+    "VDE": {
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
       "research_admission": "BACKFILL",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests in Singaporean equities, tracking an index of Singaporean firms.",
-      "benchmark_assessment": "FAIL",
-      "mandate_assessment": "NOT_US_EQUITY",
-      "reversal_risk": "MINIMAL",
-      "exposure_group": "SINGAPORE_EQUITY"
-    },
-    "IYE": {
-      "sector_group": "Equity Energy",
-      "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "MODERATE",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "US_BROAD_ENERGY"
+      "us_equity_weight_estimate": 99.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_ENERGY_MULTI_CAP",
+      "primary_risk_event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
+      "evidence_warnings": []
     },
-    "COPX": {
-      "sector_group": "Natural Resources",
-      "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks an index of global copper mining companies, with top holdings including Canadian, Australian, and UK-listed firms.",
-      "benchmark_assessment": "FAIL",
-      "mandate_assessment": "NOT_US_EQUITY",
-      "reversal_risk": "MINIMAL",
-      "exposure_group": "GLOBAL_COPPER_MINERS"
-    },
-    "FXN": {
-      "sector_group": "Equity Energy",
-      "research_admission": "STRICT",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is ELEVATED.",
+    "XBI": {
+      "portfolio_group": "Healthcare",
+      "canonical_sector": "Healthcare",
+      "style_category": "Health",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
-      "reversal_risk": "ELEVATED",
-      "exposure_group": "US_ENERGY_ALPHADEX"
+      "us_equity_weight_estimate": 97.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_BIOTECHNOLOGY_EQUAL_WEIGHT",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
     },
     "XLK": {
-      "sector_group": "Technology",
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Technology",
       "research_admission": "BACKFILL",
-      "model_eligible": null,
-      "python_eligible": false,
-      "eligibility_reason": "Excluded by Python because the evidence-derived reversal risk is SEVERE.",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
       "benchmark_assessment": "PASS",
       "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_MEGA_CAP_TECHNOLOGY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "MEGA_CAP_TECH_DE_RATING",
+      "evidence_warnings": []
+    },
+    "GDX": {
+      "portfolio_group": "Basic Materials",
+      "canonical_sector": "Basic Materials",
+      "style_category": "Equity Precious Metals",
+      "research_admission": "BACKFILL",
+      "python_eligible": false,
+      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The index is global, and top holdings include non-US companies like Agnico Eagle Mines Ltd (Canada) and Barrick Mining Corp (Canada). Only 22.07% of holdings are from the United States.",
+      "reversal_risk": "MINIMAL",
+      "risk_basis": "NONE",
+      "mechanism_status": "NONE",
+      "normalization_probability": "UNLIKELY",
+      "benchmark_assessment": "FAIL",
+      "mandate_assessment": "NOT_US_EQUITY",
+      "us_equity_weight_estimate": 22.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "GLOBAL_GOLD_SILVER_MINERS",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "IYE": {
+      "portfolio_group": "Energy",
+      "canonical_sector": "Energy",
+      "style_category": "Equity Energy",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "MODERATE",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_ENERGY_LARGE_CAP",
+      "primary_risk_event_id": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
+      "evidence_warnings": []
+    },
+    "VONV": {
+      "portfolio_group": "Large Value",
+      "canonical_sector": null,
+      "style_category": "Large Value",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_LARGE_CAP_VALUE",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "VFLO": {
+      "portfolio_group": "Free Cash Flow",
+      "canonical_sector": null,
+      "style_category": "Free Cash Flow",
+      "research_admission": "STRICT",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_FREE_CASH_FLOW_MULTI_SECTOR",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "VLUE": {
+      "portfolio_group": "Large Value",
+      "canonical_sector": null,
+      "style_category": "Large Value",
+      "research_admission": "STRICT",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_LARGE_CAP_VALUE_FACTOR",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "DIVB": {
+      "portfolio_group": "Dividend",
+      "canonical_sector": null,
+      "style_category": "Dividend",
+      "research_admission": "STRICT",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and strict quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_CORE_DIVIDEND_MULTI_SECTOR",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "FTEC": {
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Technology",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_MEGA_CAP_TECHNOLOGY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "MEGA_CAP_TECH_DE_RATING",
+      "evidence_warnings": []
+    },
+    "SEIV": {
+      "portfolio_group": "Large Value",
+      "canonical_sector": null,
+      "style_category": "Large Value",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_LARGE_CAP_VALUE_ACTIVE",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "COPX": {
+      "portfolio_group": "Basic Materials",
+      "canonical_sector": "Basic Materials",
+      "style_category": "Natural Resources",
+      "research_admission": "BACKFILL",
+      "python_eligible": false,
+      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a market-cap-weighted index of global copper mining companies. Top holdings include companies listed on XTSE, XASX, XWAR, and XLON.",
+      "reversal_risk": "LOW",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "NOT_US_EQUITY",
+      "us_equity_weight_estimate": 0.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "GLOBAL_COPPER_MINERS",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "GLOBAL_COMMODITY_DEMAND_SHOCK",
+      "evidence_warnings": []
+    },
+    "IBB": {
+      "portfolio_group": "Healthcare",
+      "canonical_sector": "Healthcare",
+      "style_category": "Health",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 99.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_BIOTECHNOLOGY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "BIOTECH_REGULATORY_OR_CLINICAL_RISK",
+      "evidence_warnings": []
+    },
+    "KBWB": {
+      "portfolio_group": "Financials",
+      "canonical_sector": "Financials",
+      "style_category": "Financial",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_BANKS",
+      "primary_risk_event_id": "PERSISTENT_INFLATION_FED_HAWKS",
+      "risk_exposure_group": "INTEREST_RATE_SENSITIVITY",
+      "evidence_warnings": []
+    },
+    "IYW": {
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Technology",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 99.7,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_MEGA_CAP_TECHNOLOGY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "MEGA_CAP_TECH_DE_RATING",
+      "evidence_warnings": []
+    },
+    "SIL": {
+      "portfolio_group": "Basic Materials",
+      "canonical_sector": "Basic Materials",
+      "style_category": "Equity Precious Metals",
+      "research_admission": "BACKFILL",
+      "python_eligible": false,
+      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. Tracks a market-cap-weighted index of global silver mining companies. Top holdings include companies listed on XTSE, XMEX, and XLON.",
+      "reversal_risk": "LOW",
+      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "NOT_US_EQUITY",
+      "us_equity_weight_estimate": 0.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "GLOBAL_SILVER_MINERS",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "GLOBAL_COMMODITY_DEMAND_SHOCK",
+      "evidence_warnings": []
+    },
+    "RSPT": {
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Equal Weight",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_EQUAL_WEIGHT_TECHNOLOGY",
+      "primary_risk_event_id": "MARKET_BREADTH_DETERIORATION",
+      "risk_exposure_group": "MEGA_CAP_LEADERSHIP_CONTINUATION",
+      "evidence_warnings": []
+    },
+    "DYNF": {
+      "portfolio_group": "Large Blend",
+      "canonical_sector": null,
+      "style_category": "Large Blend",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_ACTIVE_FACTOR_ROTATION",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "ACTIVE_MANAGEMENT_UNDERPERFORMANCE",
+      "evidence_warnings": []
+    },
+    "CIBR": {
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Technology",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 99.99,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_CYBERSECURITY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "CYBERSECURITY_SPENDING_SLOWDOWN",
+      "evidence_warnings": []
+    },
+    "GARP": {
+      "portfolio_group": "Quality GARP",
+      "canonical_sector": null,
+      "style_category": "Quality GARP",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "LOW",
+      "risk_basis": "NONE",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 100.0,
+      "mandate_basis": "INDEX_MANDATE",
+      "evidence_scope": "NONE",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "exposure_group": "US_QUALITY_GARP",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "evidence_warnings": []
+    },
+    "BHYP": {
+      "portfolio_group": "Other",
+      "canonical_sector": null,
+      "style_category": "Other",
+      "research_admission": "BACKFILL",
+      "python_eligible": false,
+      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund provides exposure to Hyperliquid (HYPE), a digital asset, and is structured as a grantor trust. It is not an investment company registered under the 1940 Act.",
       "reversal_risk": "SEVERE",
-      "exposure_group": "US_LARGE_CAP_TECHNOLOGY"
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "OBSERVED",
+      "normalization_probability": "LIKELY",
+      "benchmark_assessment": "FAIL",
+      "mandate_assessment": "NOT_US_EQUITY",
+      "us_equity_weight_estimate": 0.0,
+      "mandate_basis": "OTHER",
+      "evidence_scope": "EXPOSURE_SPECIFIC",
+      "adverse_change_observed": true,
+      "adverse_change_date": "2026-09-11",
+      "adverse_change_indicator": "High volatility and regulatory uncertainty in the digital asset market, as well as the inherent speculative nature of single-asset crypto exposure, indicate an active adverse mechanism.",
+      "mechanism_evidence_source": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGZmsfLYaphts-eKFi306u71yc0jGybrxp-gXQu7MY9JXKn0JPGlQRMG-qf3KdN2umtmBF1cRx8SlIfLGPZHu0Q0T3N3NEWFMIXXk11TVbT",
+      "exposure_group": "DIGITAL_ASSETS_HYPERLIQUID",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "DIGITAL_ASSET_PRICE_VOLATILITY",
+      "evidence_warnings": []
     }
+  },
+  "classification_changes": [
+    {
+      "symbol": "CIBR",
+      "changes": {
+        "us_equity_weight_estimate": {
+          "previous": 95.0,
+          "current": 99.99
+        },
+        "exposure_group": {
+          "previous": "US_CYBERSECURITY_TECHNOLOGY",
+          "current": "US_CYBERSECURITY"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "HIGH_VALUATION_GROWTH_DE_RATING",
+          "current": "CYBERSECURITY_SPENDING_SLOWDOWN"
+        }
+      }
+    },
+    {
+      "symbol": "COPX",
+      "changes": {
+        "us_equity_weight_estimate": {
+          "previous": 40.0,
+          "current": 0.0
+        },
+        "mandate_basis": {
+          "previous": "HOLDINGS_WEIGHT",
+          "current": "INDEX_MANDATE"
+        },
+        "risk_exposure_group": {
+          "previous": "GLOBAL_COMMODITY_PRICE_VOLATILITY",
+          "current": "GLOBAL_COMMODITY_DEMAND_SHOCK"
+        }
+      }
+    },
+    {
+      "symbol": "CRAK",
+      "changes": {
+        "reversal_risk": {
+          "previous": "LOW",
+          "current": "MINIMAL"
+        },
+        "risk_basis": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "NONE"
+        },
+        "mechanism_status": {
+          "previous": "HYPOTHETICAL",
+          "current": "NONE"
+        },
+        "normalization_probability": {
+          "previous": "POSSIBLE",
+          "current": "UNLIKELY"
+        },
+        "us_equity_weight_estimate": {
+          "previous": 50.0,
+          "current": 70.0
+        },
+        "mandate_basis": {
+          "previous": "HOLDINGS_WEIGHT",
+          "current": "INDEX_MANDATE"
+        },
+        "primary_risk_event_id": {
+          "previous": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "REFINING_MARGIN_COMPRESSION",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "DIVB",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "us_equity_weight_estimate": {
+          "previous": 99.0,
+          "current": 100.0
+        },
+        "exposure_group": {
+          "previous": "US_DIVIDEND_AND_BUYBACK_EQUITY",
+          "current": "US_CORE_DIVIDEND_MULTI_SECTOR"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "INTEREST_RATE_SENSITIVITY",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "FENY",
+      "changes": {
+        "us_equity_weight_estimate": {
+          "previous": 100.0,
+          "current": 99.0
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "US_LARGE_CAP_ENERGY",
+          "current": "US_ENERGY_MULTI_CAP"
+        },
+        "risk_exposure_group": {
+          "previous": "ENERGY_COMMODITY_PRICE_VOLATILITY",
+          "current": "ENERGY_PRICE_NORMALIZATION"
+        }
+      }
+    },
+    {
+      "symbol": "FTEC",
+      "changes": {
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "US_BROAD_TECHNOLOGY",
+          "current": "US_MEGA_CAP_TECHNOLOGY"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "TECH_GROWTH_VALUATION_COMPRESSION",
+          "current": "MEGA_CAP_TECH_DE_RATING"
+        }
+      }
+    },
+    {
+      "symbol": "GARP",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "FACTOR_ROTATION_UNDERPERFORMANCE",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "GDX",
+      "changes": {
+        "reversal_risk": {
+          "previous": "MODERATE",
+          "current": "MINIMAL"
+        },
+        "risk_basis": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "NONE"
+        },
+        "mechanism_status": {
+          "previous": "HYPOTHETICAL",
+          "current": "NONE"
+        },
+        "normalization_probability": {
+          "previous": "POSSIBLE",
+          "current": "UNLIKELY"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "GOLD_PRICE_DECLINE",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "IBB",
+      "changes": {
+        "us_equity_weight_estimate": {
+          "previous": 100.0,
+          "current": 99.0
+        },
+        "risk_exposure_group": {
+          "previous": "BIOTECHNOLOGY_SECTOR_SPECIFIC_RISKS",
+          "current": "BIOTECH_REGULATORY_OR_CLINICAL_RISK"
+        }
+      }
+    },
+    {
+      "symbol": "IYW",
+      "changes": {
+        "us_equity_weight_estimate": {
+          "previous": 100.0,
+          "current": 99.7
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "US_LARGE_CAP_TECHNOLOGY",
+          "current": "US_MEGA_CAP_TECHNOLOGY"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "MEGA_CAP_GROWTH_DE_RATING",
+          "current": "MEGA_CAP_TECH_DE_RATING"
+        }
+      }
+    },
+    {
+      "symbol": "KBWB",
+      "changes": {
+        "exposure_group": {
+          "previous": "US_BROAD_BANKING",
+          "current": "US_BANKS"
+        },
+        "risk_exposure_group": {
+          "previous": "INTEREST_RATE_SENSITIVITY_FINANCIALS",
+          "current": "INTEREST_RATE_SENSITIVITY"
+        }
+      }
+    },
+    {
+      "symbol": "RSPT",
+      "changes": {
+        "risk_exposure_group": {
+          "previous": "EQUAL_WEIGHT_UNDERPERFORMANCE",
+          "current": "MEGA_CAP_LEADERSHIP_CONTINUATION"
+        }
+      }
+    },
+    {
+      "symbol": "SEIV",
+      "changes": {
+        "risk_basis": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "NONE"
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "LARGE_CAP_VALUE_EQUITY",
+          "current": "US_LARGE_CAP_VALUE_ACTIVE"
+        },
+        "primary_risk_event_id": {
+          "previous": "MARKET_BREADTH_DETERIORATION",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "MEGA_CAP_CONCENTRATION_RISK",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "SIL",
+      "changes": {
+        "reversal_risk": {
+          "previous": "MODERATE",
+          "current": "LOW"
+        },
+        "us_equity_weight_estimate": {
+          "previous": 40.0,
+          "current": 0.0
+        },
+        "mandate_basis": {
+          "previous": "HOLDINGS_WEIGHT",
+          "current": "INDEX_MANDATE"
+        },
+        "primary_risk_event_id": {
+          "previous": "GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "GLOBAL_COMMODITY_PRICE_VOLATILITY",
+          "current": "GLOBAL_COMMODITY_DEMAND_SHOCK"
+        }
+      }
+    },
+    {
+      "symbol": "VDE",
+      "changes": {
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "US_BROAD_ENERGY",
+          "current": "US_ENERGY_MULTI_CAP"
+        },
+        "risk_exposure_group": {
+          "previous": "ENERGY_COMMODITY_PRICE_VOLATILITY",
+          "current": "ENERGY_PRICE_NORMALIZATION"
+        }
+      }
+    },
+    {
+      "symbol": "VFLO",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "us_equity_weight_estimate": {
+          "previous": 87.0,
+          "current": 100.0
+        },
+        "exposure_group": {
+          "previous": "US_LARGE_CAP_FREE_CASH_FLOW",
+          "current": "US_FREE_CASH_FLOW_MULTI_SECTOR"
+        }
+      }
+    },
+    {
+      "symbol": "VLUE",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "LARGE_CAP_VALUE_EQUITY",
+          "current": "US_LARGE_CAP_VALUE_FACTOR"
+        },
+        "risk_exposure_group": {
+          "previous": "SINGLE_STOCK_CONCENTRATION",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "VONV",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "primary_risk_event_id": {
+          "previous": "PERSISTENT_INFLATION_FED_HAWKS",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "VALUE_FACTOR_UNDERPERFORMANCE",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "XBI",
+      "changes": {
+        "risk_basis": {
+          "previous": "NORMALIZED_EXPOSURE_DETERIORATION",
+          "current": "NONE"
+        },
+        "exposure_group": {
+          "previous": "US_BIOTECHNOLOGY",
+          "current": "US_BIOTECHNOLOGY_EQUAL_WEIGHT"
+        },
+        "risk_exposure_group": {
+          "previous": "BIOTECH_REGULATORY_CLINICAL_RISK",
+          "current": null
+        }
+      }
+    },
+    {
+      "symbol": "XLE",
+      "changes": {
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "US_LARGE_CAP_ENERGY",
+          "current": "US_ENERGY_LARGE_CAP"
+        },
+        "risk_exposure_group": {
+          "previous": "ENERGY_COMMODITY_PRICE_VOLATILITY",
+          "current": "ENERGY_PRICE_NORMALIZATION"
+        }
+      }
+    },
+    {
+      "symbol": "XLK",
+      "changes": {
+        "risk_basis": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "NORMALIZED_EXPOSURE_DETERIORATION"
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "exposure_group": {
+          "previous": "LARGE_CAP_US_TECHNOLOGY",
+          "current": "US_MEGA_CAP_TECHNOLOGY"
+        },
+        "primary_risk_event_id": {
+          "previous": "MARKET_BREADTH_DETERIORATION",
+          "current": null
+        },
+        "risk_exposure_group": {
+          "previous": "MEGA_CAP_CONCENTRATION_RISK",
+          "current": "MEGA_CAP_TECH_DE_RATING"
+        }
+      }
+    },
+    {
+      "symbol": "XOP",
+      "changes": {
+        "reversal_risk": {
+          "previous": "LOW",
+          "current": "MODERATE"
+        },
+        "mandate_basis": {
+          "previous": "INDEX_MANDATE",
+          "current": "HOLDINGS_WEIGHT"
+        },
+        "risk_exposure_group": {
+          "previous": "ENERGY_COMMODITY_PRICE_VOLATILITY",
+          "current": "ENERGY_PRICE_NORMALIZATION"
+        }
+      }
+    }
+  ],
+  "consistency_warnings": [
+    "XLE: normalized Equity Energy to Energy.",
+    "FENY: normalized Equity Energy to Energy.",
+    "CRAK: normalized Equity Energy to Energy.",
+    "XOP: normalized Equity Energy to Energy.",
+    "VDE: normalized Equity Energy to Energy.",
+    "XBI: normalized Health to Healthcare.",
+    "GDX: normalized Equity Precious Metals to Basic Materials.",
+    "IYE: normalized Equity Energy to Energy.",
+    "VFLO: normalized Mid-Cap Value to Free Cash Flow.",
+    "DIVB: normalized Large Value to Dividend.",
+    "COPX: normalized Natural Resources to Basic Materials.",
+    "IBB: normalized Health to Healthcare.",
+    "KBWB: normalized Financial to Financials.",
+    "SIL: normalized Equity Precious Metals to Basic Materials."
+  ],
+  "research_disposition": {
+    "IWD": "PROVISIONAL_GROUP_CAP",
+    "AVLV": "PROVISIONAL_GROUP_CAP",
+    "SCHD": "PROVISIONAL_GROUP_CAP",
+    "FXN": "SECTOR_CAPACITY",
+    "FNDX": "PROVISIONAL_GROUP_CAP",
+    "IWX": "PROVISIONAL_GROUP_CAP",
+    "DFLV": "PROVISIONAL_GROUP_CAP",
+    "FTXN": "SECTOR_CAPACITY",
+    "DFUV": "PROVISIONAL_GROUP_CAP",
+    "PWV": "PROVISIONAL_GROUP_CAP",
+    "IGE": "SECTOR_CAPACITY",
+    "PRF": "PROVISIONAL_GROUP_CAP",
+    "HDV": "PROVISIONAL_GROUP_CAP",
+    "PVAL": "PROVISIONAL_GROUP_CAP",
+    "VTV": "PROVISIONAL_GROUP_CAP",
+    "SMH": "PROVISIONAL_GROUP_CAP",
+    "FCG": "NOT_NEEDED",
+    "FNDB": "NOT_NEEDED",
+    "MGV": "NOT_NEEDED",
+    "WTV": "NOT_NEEDED",
+    "IHE": "NOT_NEEDED",
+    "IGM": "NOT_NEEDED",
+    "IGPT": "NOT_NEEDED",
+    "AVUV": "NOT_NEEDED",
+    "JQUA": "NOT_NEEDED",
+    "HACK": "NOT_NEEDED",
+    "RPV": "NOT_NEEDED",
+    "AVUS": "NOT_NEEDED",
+    "SPYG": "NOT_NEEDED",
+    "COWZ": "NOT_NEEDED",
+    "IWN": "NOT_NEEDED",
+    "VOO": "NOT_NEEDED",
+    "VOOG": "NOT_NEEDED",
+    "IUSG": "NOT_NEEDED",
+    "DFSV": "NOT_NEEDED",
+    "IVV": "NOT_NEEDED",
+    "RWL": "NOT_NEEDED",
+    "VOE": "NOT_NEEDED",
+    "JMOM": "NOT_NEEDED",
+    "OIH": "NOT_NEEDED",
+    "RDVY": "NOT_NEEDED",
+    "DFAC": "NOT_NEEDED",
+    "IVW": "NOT_NEEDED",
+    "SPY": "NOT_NEEDED",
+    "SPYM": "NOT_NEEDED",
+    "AIQ": "NOT_NEEDED",
+    "SCHV": "NOT_NEEDED",
+    "SPHB": "NOT_NEEDED",
+    "FDL": "NOT_NEEDED",
+    "SKYY": "NOT_NEEDED",
+    "SCHB": "NOT_NEEDED",
+    "ONEQ": "NOT_NEEDED",
+    "SNPE": "NOT_NEEDED",
+    "VTI": "NOT_NEEDED",
+    "QQQM": "NOT_NEEDED",
+    "OEF": "NOT_NEEDED",
+    "QTUM": "NOT_NEEDED",
+    "VV": "NOT_NEEDED",
+    "SPTM": "NOT_NEEDED",
+    "PBUS": "NOT_NEEDED",
+    "DFAU": "NOT_NEEDED",
+    "IWS": "NOT_NEEDED",
+    "DFUS": "NOT_NEEDED",
+    "JAVA": "NOT_NEEDED",
+    "QQQ": "NOT_NEEDED",
+    "ITOT": "NOT_NEEDED",
+    "SCHK": "NOT_NEEDED",
+    "SPUS": "NOT_NEEDED",
+    "IYZ": "NOT_NEEDED",
+    "BBUS": "NOT_NEEDED",
+    "DGRO": "NOT_NEEDED",
+    "ESGU": "NOT_NEEDED",
+    "QQQJ": "NOT_NEEDED"
   },
   "decision_ledger": [
     {
       "qvm_rank": 1,
       "symbol": "XLE",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 0,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
-    },
-    {
-      "qvm_rank": 2,
-      "symbol": "VLUE",
-      "sector_group": "Large Value",
+      "sector_group": "Energy",
       "status": "SELECTED — LOW",
       "sector_selected_after": 1,
       "total_selected_after": 1,
-      "explanation": "VLUE's value strategy could underperform if the current concentrated growth leadership persists or intensifies."
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "explanation": "XLE benefits from elevated energy prices driven by geopolitical tensions, but a hypothetical normalization could significantly reverse its performance."
+    },
+    {
+      "qvm_rank": 2,
+      "symbol": "VFLO",
+      "sector_group": "Free Cash Flow",
+      "status": "SELECTED — LOW",
+      "sector_selected_after": 1,
+      "total_selected_after": 2,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE",
+      "explanation": "VFLO's focus on free cash flow provides resilience, but a broad market downturn or shift in factor preference could pose a hypothetical risk."
     },
     {
       "qvm_rank": 3,
       "symbol": "FENY",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 1,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
+      "sector_group": "Energy",
+      "status": "SELECTED — LOW",
+      "sector_selected_after": 2,
+      "total_selected_after": 3,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "explanation": "FENY is well-positioned in the strong energy sector, but its performance is highly dependent on the continuation of elevated energy prices."
     },
     {
       "qvm_rank": 4,
-      "symbol": "DIVB",
+      "symbol": "VLUE",
       "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 1,
-      "total_selected_after": 1,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 4,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE",
+      "explanation": "VLUE offers exposure to value stocks, which could perform well, but a shift back to growth leadership is a hypothetical risk."
     },
     {
       "qvm_rank": 5,
-      "symbol": "VFLO",
-      "sector_group": "Mid-Cap Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 1,
-      "explanation": "No validated current ETF research was available."
+      "symbol": "CRAK",
+      "sector_group": "Energy",
+      "status": "NOT SELECTED — INELIGIBLE",
+      "sector_selected_after": 2,
+      "total_selected_after": 4,
+      "risk_derivation": "mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE",
+      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. CRAK tracks a global index and includes significant non-US companies in its top holdings, such as Reliance Industries Ltd GDR and Orlen SA."
     },
     {
       "qvm_rank": 6,
-      "symbol": "AVLV",
-      "sector_group": "Large Value",
+      "symbol": "DIVB",
+      "sector_group": "Dividend",
       "status": "SELECTED — LOW",
-      "sector_selected_after": 2,
-      "total_selected_after": 2,
-      "explanation": "AVLV's value focus may face headwinds if the current strong growth and AI-driven market leadership persists."
+      "sector_selected_after": 1,
+      "total_selected_after": 5,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE",
+      "explanation": "DIVB offers a diversified dividend strategy, but a broad economic downturn or a shift to growth leadership could hypothetically impact its performance."
     },
     {
       "qvm_rank": 7,
-      "symbol": "SCHD",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "symbol": "XOP",
+      "sector_group": "Energy",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "sector_selected_after": 2,
-      "total_selected_after": 2,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 5,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "explanation": "2 selected ETFs already use the Energy sector/category."
     },
     {
       "qvm_rank": 8,
-      "symbol": "VONV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "symbol": "VDE",
+      "sector_group": "Energy",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "sector_selected_after": 2,
-      "total_selected_after": 2,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 5,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "explanation": "2 selected ETFs already use the Energy sector/category."
     },
     {
       "qvm_rank": 9,
       "symbol": "XBI",
-      "sector_group": "Health",
-      "status": "SELECTED — MINIMAL",
+      "sector_group": "Healthcare",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 1,
-      "total_selected_after": 3,
-      "explanation": "XBI offers diversified exposure to the US biotech sector, driven by innovation, with no clear reversal mechanism identified."
+      "total_selected_after": 6,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NONE",
+      "explanation": "XBI provides concentrated exposure to the volatile biotech sector, which has performed well, but faces hypothetical risks from regulatory or clinical setbacks."
     },
     {
       "qvm_rank": 10,
-      "symbol": "KBWB",
-      "sector_group": "Financial",
-      "status": "SELECTED — MODERATE",
+      "symbol": "XLK",
+      "sector_group": "Technology",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 1,
-      "total_selected_after": 4,
-      "explanation": "KBWB's performance is sensitive to interest rates; a hawkish Fed could negatively impact bank profitability."
+      "total_selected_after": 7,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
+      "explanation": "XLK benefits from AI enthusiasm and mega-cap tech leadership, but its high concentration poses a hypothetical risk if these drivers reverse."
     },
     {
       "qvm_rank": 11,
-      "symbol": "XOP",
-      "sector_group": "Equity Energy",
+      "symbol": "GDX",
+      "sector_group": "Basic Materials",
       "status": "NOT SELECTED — INELIGIBLE",
       "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
+      "total_selected_after": 7,
+      "risk_derivation": "mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE",
+      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The index is global, and top holdings include non-US companies like Agnico Eagle Mines Ltd (Canada) and Barrick Mining Corp (Canada). Only 22.07% of holdings are from the United States."
     },
     {
       "qvm_rank": 12,
-      "symbol": "SEIV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "symbol": "FTEC",
+      "sector_group": "Technology",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 8,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
+      "explanation": "FTEC is highly concentrated in mega-cap technology, benefiting from AI, but faces hypothetical risk from a de-rating or sector rotation."
     },
     {
       "qvm_rank": 13,
-      "symbol": "VDE",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
+      "symbol": "IYE",
+      "sector_group": "Energy",
+      "status": "SKIPPED — SECTOR CAPACITY",
+      "sector_selected_after": 2,
+      "total_selected_after": 8,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES",
+      "explanation": "2 selected ETFs already use the Energy sector/category."
     },
     {
       "qvm_rank": 14,
-      "symbol": "IWD",
+      "symbol": "VONV",
       "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 9,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE",
+      "explanation": "VONV offers diversified large-cap value exposure, which could be resilient, but a hypothetical shift to growth leadership poses a risk."
     },
     {
       "qvm_rank": 15,
-      "symbol": "DFLV",
+      "symbol": "SEIV",
       "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 9,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE",
+      "explanation": "2 selected ETFs already use the Large Value sector/category."
     },
     {
       "qvm_rank": 16,
-      "symbol": "CRAK",
-      "sector_group": "Equity Energy",
+      "symbol": "COPX",
+      "sector_group": "Basic Materials",
       "status": "NOT SELECTED — INELIGIBLE",
       "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. Tracks MVIS Global Oil Refiners Index, with 63.8% of its portfolio invested in foreign issues."
+      "total_selected_after": 9,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION",
+      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a market-cap-weighted index of global copper mining companies. Top holdings include companies listed on XTSE, XASX, XWAR, and XLON."
     },
     {
       "qvm_rank": 17,
-      "symbol": "DFUV",
+      "symbol": "IWD",
       "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "status": "NOT RESEARCHED — PROVISIONAL GROUP CAP",
       "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 9,
+      "risk_derivation": null,
+      "explanation": "Deferred to avoid over-researching one provisional group."
     },
     {
       "qvm_rank": 18,
-      "symbol": "FNDX",
+      "symbol": "AVLV",
       "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
+      "status": "NOT RESEARCHED — PROVISIONAL GROUP CAP",
       "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 9,
+      "risk_derivation": null,
+      "explanation": "Deferred to avoid over-researching one provisional group."
     },
     {
       "qvm_rank": 19,
-      "symbol": "AVUV",
-      "sector_group": "Small Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "symbol": "SCHD",
+      "sector_group": "Dividend",
+      "status": "NOT RESEARCHED — PROVISIONAL GROUP CAP",
+      "sector_selected_after": 1,
+      "total_selected_after": 9,
+      "risk_derivation": null,
+      "explanation": "Deferred to avoid over-researching one provisional group."
     },
     {
       "qvm_rank": 20,
-      "symbol": "VPL",
-      "sector_group": "Focused Region",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
+      "symbol": "FXN",
+      "sector_group": "Energy",
+      "status": "NOT RESEARCHED — SECTOR CAPACITY",
+      "sector_selected_after": 2,
+      "total_selected_after": 9,
+      "risk_derivation": null,
+      "explanation": "2 higher-ranked ETFs already use Energy."
     },
     {
       "qvm_rank": 21,
-      "symbol": "ESGE",
-      "sector_group": "Diversified Emerging Mkts",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 22,
-      "symbol": "VTV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 23,
-      "symbol": "IWX",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 24,
-      "symbol": "MGV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 4,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 25,
-      "symbol": "EWS",
-      "sector_group": "Focused Region",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 4,
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests in Singaporean equities, tracking an index of Singaporean firms."
-    },
-    {
-      "qvm_rank": 26,
       "symbol": "IBB",
-      "sector_group": "Health",
-      "status": "SELECTED — MINIMAL",
+      "sector_group": "Healthcare",
+      "status": "SELECTED — LOW",
       "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "IBB provides focused exposure to the US biotechnology sector, driven by innovation, with no clear reversal mechanism identified."
-    },
-    {
-      "qvm_rank": 27,
-      "symbol": "IYE",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
-    },
-    {
-      "qvm_rank": 28,
-      "symbol": "HDV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 29,
-      "symbol": "DFSV",
-      "sector_group": "Small Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 30,
-      "symbol": "DFAE",
-      "sector_group": "Diversified Emerging Mkts",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 31,
-      "symbol": "COPX",
-      "sector_group": "Natural Resources",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks an index of global copper mining companies, with top holdings including Canadian, Australian, and UK-listed firms."
-    },
-    {
-      "qvm_rank": 32,
-      "symbol": "FXN",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is ELEVATED."
-    },
-    {
-      "qvm_rank": 33,
-      "symbol": "XLK",
-      "sector_group": "Technology",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "Excluded by Python because the evidence-derived reversal risk is SEVERE."
-    },
-    {
-      "qvm_rank": 34,
-      "symbol": "PRF",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 35,
-      "symbol": "GDX",
-      "sector_group": "Equity Precious Metals",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. Tracks MarketVector Global Gold Miners Index, which includes global companies. Top holdings include companies listed on XTSE, XASX, XLON."
-    },
-    {
-      "qvm_rank": 36,
-      "symbol": "IHE",
-      "sector_group": "Health",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 37,
-      "symbol": "RPV",
-      "sector_group": "Mid-Cap Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 38,
-      "symbol": "FTXN",
-      "sector_group": "Equity Energy",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 39,
-      "symbol": "IWN",
-      "sector_group": "Small Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 40,
-      "symbol": "PWV",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 41,
-      "symbol": "FNDB",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 42,
-      "symbol": "IGE",
-      "sector_group": "Natural Resources",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 43,
-      "symbol": "COWZ",
-      "sector_group": "Mid-Cap Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 44,
-      "symbol": "BSVO",
-      "sector_group": "Small Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 45,
-      "symbol": "RDVY",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 46,
-      "symbol": "GARP",
-      "sector_group": "Other",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 47,
-      "symbol": "AVUS",
-      "sector_group": "Large Blend",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 48,
-      "symbol": "FTEC",
-      "sector_group": "Technology",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 49,
-      "symbol": "PVAL",
-      "sector_group": "Large Value",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 2,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
-    },
-    {
-      "qvm_rank": 50,
-      "symbol": "AMLP",
-      "sector_group": "Energy Limited Partnership",
-      "status": "NOT SELECTED — RESEARCH UNAVAILABLE",
-      "sector_selected_after": 0,
-      "total_selected_after": 5,
-      "explanation": "No validated current ETF research was available."
+      "total_selected_after": 10,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
+      "explanation": "IBB offers targeted exposure to biotechnology, but faces hypothetical risks from regulatory changes, clinical trial failures, or shifts in market sentiment."
     }
   ],
+  "context_review": "CONTEXT REVIEW\n\nResearch summary: 25 ETFs have validated research (25 researched and validated this run, 0 supplied by validated cache); 25 charged ETF search attempts, 5 structural repair attempts, 2 research batches, 0 accepted exclusion-only evidence warnings.\nSelected ETFs: XLE, VFLO, FENY, VLUE, DIVB, XBI, XLK, FTEC, VONV, IBB\n|   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                 |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                  | Explanation                                                                                                                                                                                                                                                         |\n|-----------:|:---------|:----------------|:---------------------------------------|------------------------:|-----------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|          1 | XLE      | Energy          | SELECTED — LOW                         |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES | XLE benefits from elevated energy prices driven by geopolitical tensions, but a hypothetical normalization could significantly reverse its performance.                                                                                                             |\n|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                         |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE                                                              | VFLO's focus on free cash flow provides resilience, but a broad market downturn or shift in factor preference could pose a hypothetical risk.                                                                                                                       |\n|          3 | FENY     | Energy          | SELECTED — LOW                         |                       2 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES | FENY is well-positioned in the strong energy sector, but its performance is highly dependent on the continuation of elevated energy prices.                                                                                                                         |\n|          4 | VLUE     | Large Value     | SELECTED — LOW                         |                       1 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE                                                              | VLUE offers exposure to value stocks, which could perform well, but a shift back to growth leadership is a hypothetical risk.                                                                                                                                       |\n|          5 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE              |                       2 |                      4 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                | Excluded because current holdings do not satisfy the U.S.-equity mandate. CRAK tracks a global index and includes significant non-US companies in its top holdings, such as Reliance Industries Ltd GDR and Orlen SA.                                               |\n|          6 | DIVB     | Dividend        | SELECTED — LOW                         |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE                                                              | DIVB offers a diversified dividend strategy, but a broad economic downturn or a shift to growth leadership could hypothetically impact its performance.                                                                                                             |\n|          7 | XOP      | Energy          | SKIPPED — SECTOR CAPACITY              |                       2 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES | 2 selected ETFs already use the Energy sector/category.                                                                                                                                                                                                             |\n|          8 | VDE      | Energy          | SKIPPED — SECTOR CAPACITY              |                       2 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES | 2 selected ETFs already use the Energy sector/category.                                                                                                                                                                                                             |\n|          9 | XBI      | Healthcare      | SELECTED — LOW                         |                       1 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NONE                                                                      | XBI provides concentrated exposure to the volatile biotech sector, which has performed well, but faces hypothetical risks from regulatory or clinical setbacks.                                                                                                     |\n|         10 | XLK      | Technology      | SELECTED — LOW                         |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | XLK benefits from AI enthusiasm and mega-cap tech leadership, but its high concentration poses a hypothetical risk if these drivers reverse.                                                                                                                        |\n|         11 | GDX      | Basic Materials | NOT SELECTED — INELIGIBLE              |                       0 |                      7 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                | Excluded because current holdings do not satisfy the U.S.-equity mandate. The index is global, and top holdings include non-US companies like Agnico Eagle Mines Ltd (Canada) and Barrick Mining Corp (Canada). Only 22.07% of holdings are from the United States. |\n|         12 | FTEC     | Technology      | SELECTED — LOW                         |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | FTEC is highly concentrated in mega-cap technology, benefiting from AI, but faces hypothetical risk from a de-rating or sector rotation.                                                                                                                            |\n|         13 | IYE      | Energy          | SKIPPED — SECTOR CAPACITY              |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_TENSIONS_ENERGY_PRICES | 2 selected ETFs already use the Energy sector/category.                                                                                                                                                                                                             |\n|         14 | VONV     | Large Value     | SELECTED — LOW                         |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE                                                              | VONV offers diversified large-cap value exposure, which could be resilient, but a hypothetical shift to growth leadership poses a risk.                                                                                                                             |\n|         15 | SEIV     | Large Value     | SKIPPED — SECTOR CAPACITY              |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NONE                                                              | 2 selected ETFs already use the Large Value sector/category.                                                                                                                                                                                                        |\n|         16 | COPX     | Basic Materials | NOT SELECTED — INELIGIBLE              |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                        | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a market-cap-weighted index of global copper mining companies. Top holdings include companies listed on XTSE, XASX, XWAR, and XLON.                                       |\n|         17 | IWD      | Large Value     | NOT RESEARCHED — PROVISIONAL GROUP CAP |                       2 |                      9 |                                                                                                                                                                  | Deferred to avoid over-researching one provisional group.                                                                                                                                                                                                           |\n|         18 | AVLV     | Large Value     | NOT RESEARCHED — PROVISIONAL GROUP CAP |                       2 |                      9 |                                                                                                                                                                  | Deferred to avoid over-researching one provisional group.                                                                                                                                                                                                           |\n|         19 | SCHD     | Dividend        | NOT RESEARCHED — PROVISIONAL GROUP CAP |                       1 |                      9 |                                                                                                                                                                  | Deferred to avoid over-researching one provisional group.                                                                                                                                                                                                           |\n|         20 | FXN      | Energy          | NOT RESEARCHED — SECTOR CAPACITY       |                       2 |                      9 |                                                                                                                                                                  | 2 higher-ranked ETFs already use Energy.                                                                                                                                                                                                                            |\n|         21 | IBB      | Healthcare      | SELECTED — LOW                         |                       2 |                     10 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                     | IBB offers targeted exposure to biotechnology, but faces hypothetical risks from regulatory changes, clinical trial failures, or shifts in market sentiment.                                                                                                        |",
   "calls": [
     {
-      "stage": "ETF batch ranks 1-33",
-      "prompt_tokens": 22170,
-      "tool_tokens": 23394,
-      "cached_tokens": 0,
-      "thinking_tokens": 12669,
-      "output_tokens": 13001,
-      "total_tokens": 71234,
+      "stage": "ETF batch ranks 1-15",
+      "prompt_tokens": 26855,
+      "tool_tokens": 28567,
+      "cached_tokens": 22528,
+      "thinking_tokens": 13623,
+      "output_tokens": 15229,
+      "total_tokens": 84274,
       "search_queries": [
-        "XLE State Street Energy Select Sector SPDR ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "VLUE iShares MSCI USA Value Factor ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "DIVB iShares Core Dividend ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "VFLO Victoryshares Free Cash Flow ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "AVLV Avantis US Large Cap Value ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "KBWB Invesco KBW Bank ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "XOP State Street SPDR S&P Oil & Gas Exploration & Production ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "VPL Vanguard FTSE Pacific Index Fund ETF Shares factsheet top holdings sector weights index exposure performance drivers outlook",
-        "ESGE iShares ESG Aware MSCI EM ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "EWS iShares MSCI Singapore ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "IYE iShares U.S. Energy ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "DFAE Dimensional Emerging Core Equity Market ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "COPX Global X Copper Miners ETF factsheet top holdings sector weights index exposure performance drivers outlook",
-        "FXN First Trust Energy AlphaDEX Fund factsheet top holdings sector weights index exposure performance drivers outlook",
-        "XLK State Street Technology Select Sector SPDR ETF factsheet top holdings sector weights index exposure performance drivers outlook"
+        "State Street Energy Select Sector SPDR ETF XLE factsheet top holdings sector weights index performance outlook",
+        "Victoryshares Free Cash Flow ETF VFLO factsheet top holdings sector weights index performance outlook",
+        "Fidelity MSCI Energy Index ETF FENY factsheet top holdings sector weights index performance outlook",
+        "iShares MSCI USA Value Factor ETF VLUE factsheet top holdings sector weights index performance outlook",
+        "VanEck Oil Refiners ETF CRAK factsheet top holdings sector weights index performance outlook",
+        "iShares Core Dividend ETF DIVB factsheet top holdings sector weights index performance outlook",
+        "State Street SPDR S&P Oil & Gas Exploration & Production ETF XOP factsheet top holdings sector weights index performance outlook",
+        "Vanguard Energy Index Fund ETF Shares VDE factsheet top holdings sector weights index performance outlook",
+        "State Street SPDR S&P Biotech ETF XBI factsheet top holdings sector weights index performance outlook",
+        "State Street Technology Select Sector SPDR ETF XLK factsheet top holdings sector weights index performance outlook",
+        "VanEck Gold Miners ETF GDX factsheet top holdings sector weights index performance outlook",
+        "Fidelity MSCI Information Technology Index ETF FTEC factsheet top holdings sector weights index performance outlook",
+        "iShares U.S. Energy ETF IYE factsheet top holdings sector weights index performance outlook",
+        "Vanguard Russell 1000 Value Index Fund ETF Shares VONV factsheet top holdings sector weights index performance outlook",
+        "SEI QiM U.S. Large Cap Value Active ETF SEIV factsheet top holdings sector weights index performance outlook"
       ],
       "source_urls": [
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF2OXq5j0lkluIqRvVCclzp8KO3vPq9TtUb5PGXL9R6gMW_l8Ll0j_Tbr2SPx-Bj8BFYCh0RT9b8Baq5ZvK-itK-vYGvQCq3HtTjIygy3RyYCKHjNPfDFkU8Ebc1w==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGvBB3MuUyyDC19Nmy5hd_MXURq4ceEG17GzEns1mhy8DQJzHNeEWEFpInJDmYFI9AiiLs3brOwDBrAkdLoInB1-KUq6NMzBS9lDqX2akhTHDD80kE4qHgjDUZArRn5ODYn",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG1BdDwAAMuzOyV_3iqNbJUWfaN2FWnmzC3EwjuFJB82iaooTeQqSM219CpUXyaxzEleFhXjnbJP48fxXu-LqZvBI6zcWzQxkw5Maz0pr9486piXVbVSOUiFomptDkw8sOStrkP4TKelq8_57WoTOwcJC-FG9fhoHKzOAdKR47WdoaDJFxDDkidluKNJDQ_NIVNUS44neX4YtLJXdt53N2o0sCqv3I=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHMZxPdShOcFKVpO_2d7hfEkDlux2St8lBzNQKGtDMNBiQvu-LJtnUnL1s1BvlhFSVP7jNFuYz7bVfJpqAg9S0KYO2N-e7p2bj5TjLjmn3jIPHZY9JjOmNIwqJ9LoxFdgw-R7KQJAf0MRJkvHrNZ-KF5TLzJA4lamWfe8nH2CDYl4o2R9LOb__3EjGBdZab-WufLIKTwZMcXQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHhP9aE_yhsYb_wca5yoTS9CyRRz0xb7LislT2PJm4HWXzNf5f0IfIOmIg296SKMFNkt0lQU_uHof8jp3xdR7JZveFJ8Rff4Q6VnUDmNGkSrfjs3KENpV-lTNK9PdZfWrGNfQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGo8YP1OXShUl3Y0jiKVk_4eQFx3cLNqRRjy2cfpE_ff0iRM_BFJz9LorN7qGvGVcngrYf5nF7Vhvtjtcl59uQj1u9ZeRnMtZx0mpM1Cy5Qlg3Pj33Ynp6-kikHHAcTjOR9qN6ae8KXyVwfFlxjQa2qe_nAnHIF_g==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH01ZdUpjVcyQMQVnfIdBNycEtPaSPOYdiovtSOzZwBGyKak7uNBe44XegHOeSFl8-JQkpkHZeKUe9kXUh0bLJYsZbVXvVamtvtC2OYYPx2FORE",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE9ccPpMiEp378gu8nBjHSTLPUXk0YxKdCbB5zosDQ9RuYNNGjtVeTEskt5usJMH2R7-bviqrmEWEiAnx8TKdq-Og-J8nYGg8-ses0sGRTHwu--yZa4B6HjMCjFBs6w9J7OtQ_WhreU1rY5Dg_bBCA2Y6i7s6Cmx-4CKwTYLov7vqzkP82FlA==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHoseS5M97WnOPNpBrYX0xEzUpg_j7nNC5SqdDkhCO-c-358bGktZoSsM4cEivcR6pRL9MVkGH-nY06yhy8BWjePGSWex4qXkSNy_U81VqJO7up1ErGxTGX8SzbmuRywukkPg==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFc89fFs0MQPPqgLXThI2jMcjE2epfrOeaH7taCnhca3LItY02IXKUvJMgKpyJ7XM5fzx44vmBAy05HnfzvfRHRQZmMGZ_kulZhkAI9pqQMReQvrocsky9K89gs4OZOIroQz5KLG_dw9OUd-KqVs30T4G3gc0TTOA==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFWA2EqQZMLYAojN4Xlu0rUMPT1GYdgT6gw-_NuqUkTIlhK9Mfight8p88CyHFfCeFsG8ihH66EAC1haBoJRsVgm5DKpC04A91ScUN8X27H3-hO",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEeq8tafa3rXlyi6lxTzqQq8o4Ejxy1UYWNIGyIKF9nmnCszE4V_CPj1bWKjZF4zzthZmHn3miVQj10gTTCChiuR4TQIk40JejtZYowSYZdu2zeFvEMmQ0fSHnqb_x6",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFPIRAR9h-z7MqXqPgPxvhfmNR1BUxDLKVwLsA29uQRqZk73JHNGy0DyWc7C9ZSoitG-OiPHq3nEivpQDuEcITKmIKAwfb4KWet44EOz-qjLMuqWU3oLJ_Yim3vXB9xG4Bi2FSiIzOUqDiJYxU5Tzpq7Q==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEMti_WWJGVbajXqsesKox90F3gnbhr2Ip6mtpBu9ufRHeHCCT7BgTaaxqruy0XNERHS241uUfosA5EM4O2sLPNRBXJRH8Sx22k7REC2RpLmQjfxAjPHE3ItCo2tZPHAIrThQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFfRHYNfkyxrBpBUzrUdyNDu1z1uMQclvgqyS4JEfnfIFPXS8Hakclgzftcqjas7PiA9iLqMVnfLkm13SDqjJTyhLS8LI3yS784dur5GuG5lInz",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGCWNrQ0uIXs71TPvlDo4WNmu4Vyv8WKc1lKJWAFVtn23ZUcl6Kl1gR2XUjhVSq2s8HatmMMB-eIScJEx1yo80vmf9MoBhfdXGsfPwgb73IPDlkYOXTb5OiIO7ICLVMBYY6TpmeKI55aGXymTAl9hYntr19mwKmaRLFhphQDrTYMuZv3o2_ZCLqrQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEDkhsTeXETZWv5g5EL_tM-8BIp0mmHr5NmufyH_pcYw49NMyFRIxPjRBNYiu6YAMTUIQ7_-o6dNFfyGSV7KZOANUc6Wj9V69Q03Flw_1GQbI8zDGTgmNjWcJBgvL05kWQ=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFK4-9DuVJla82xDCIFYQjInmuaE6FK3dEuP9RB0rTieqiB4zrj09DNY4mAZcU01cY59kwrM7rMAH_2ldXzy4-i-V_TF7fY_5jMfnO5kkGXabo8ILPHZJqargCKyT5Mzd-sdrGfAF5lTYe7x_voO0k0Tf8SMZP33qTLMx68Ea49sIGDIOC1v9brz4R7tvfSl_9h5H5QuI41Vau-IpJo59PiS-s=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFocloH8FaGW0HyMdyd2vvKjvISxycYYswNgdfEfbVGOfPyySnjCNRcNJtasDwt1VklYAa8H_hrkKooQ7H2v-TbSmSsdHYdIxy67B05RmC-xCg=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFsdUir3aazL4rSC0ttSgt3JBbYbgihINVArckawbG6Xey4c8G-C4uvB-NjjtWp8frD82Pbf2kZA2nuxZg05oix6kA6yiQH5cm8S7BUT6pCghxn0W8_-M8qoneEOUeIkC6yNo85cr9Xjxe_ZahXdY7gM4GaJN1C",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG6F1MG0Rq95ztK5s1PSuRmFbyWSir4YfXWlIPIhQRGsSJYPSoCOZvZiTDXaRPXM7SwN5GX1gPaqog35jbpIbqT2DukrIzfXDhMxW3wCQDMjPbnJvdELFeA3uMTnQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHmDnSnBQ2nf7s_6SkpCBjTldDwAMQUVjT5yz3PiM29V0bJWa5x2dN0RhzTCvgrlffxJmaL1_u9-jjOUCFa_JaS4NjoU5zEgjjywx5gBYMOCrm0C_Pidndqn9-LwK6WJ11w",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHf5VvO1NpdJXiw19EKk8CbG_I2ml_iNhdqANiVGNtJI-ppps5TO2JuEVu3PX4N5xpmGc9WgZSgSdB_XzQBVjBpGkRVYmkKe7Q2rjQxbbNdljtPYt817jEIt3RMWbPq00J-LoF1LBSdvTjf_NIb4q1IvjuGbbIH",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFfTpjVq16TlY5BvEUz6-hvg3Tfc6rcEMgwRvFk5bFPLVhgB7SpMTpPKU_RQwegdY_QerGkxdFJ_wKml4upe1RkRerhzS0SCelLK9ofaDiY7yt9cwdmgcdEYY_-jJQYH1w9-vo_1_bXPJ4I9m7GLgaMdE-xonTVCXpR7zrAQ5hdv6ScAIypZw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE2XtQVDC-BGE4EB0efcOhvG1bqSU8gYwnvgIO1xBHWbcyEwCvlcJiDjw49vXB9j5pTlQWUnG3V69B8WPOry4YZGDeLKrHzN9iRC9ZK_3KMgWp8CvWGn0p5DA_tHoVzbOQMfEQUNUW-3tLwdFolOKyzEbU=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG440Vi9qCAE0aZuZtxWmtkO-PI7EMpyhbVeWMUMmuRs-dIaNG5CMOB93pe8Fc6F9zf4JwGM55YPKOgBvF3CsJcNBvdbJXVMBCPXD8Ir9eEflZpkNGVtCWk50_T_s8Cg9Gn",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFbwdjSxrq95FZ8ylvJVcY0nAibcpIH2pLSUf7Ky0Km5kVjpySp4P0nJql6z91AenngbtZHXi5n2I2c4eCthdb9s9i2ubOYMUXhm0keCSUebb9tOUr_hcfrPLaa5EtxWBlHfZbE7Ir3tUtCeqbE-Ss0r4uTReVg",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHLc-qhy4GyJG-wJf2cvAfu9bnfZYBPY0e_Q-MNTLFx-zTNNh1QAlSdjE8NLH3WQc0zr22H1VClIGIJh7zkRskytPtBgBlbduSuUsiWhxKr_eM21XujFoQfIZtVOet6FyTd6_LeWllsPbxgbmWDBIYBcjw9KJWH6Jru_Q==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH5TsjmC1fVAYSAYGu3x9dmcg94iJTvikwwSU38E8rSuyTBzqOUatxZJiMUcC36Umo5LcSX_r23WCNnq8Ia4geLENJwb61G7X7lgTpsPZ5ytO-HjhKfCwrz9PtIEBVkj1wDoQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFjA_UYbFHJtM5ac_kxPSmMvQVrA-hHyiKlD4a3F4aED8ehAx5CVhqDxG8gJ56X7tdVoc6bIqmUXQa8ba7mwZ-yCj_T59z2zlXyZiu7rgkervYceHD0YsFucYuMwbRETF-oS8yD7oElsy9LFKFR6yY=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEMghmeOLUJznp8k87_MQnhDACCeLiuYcHRRmmuW7pZIU7T4V2rcYdQFgZnQYxqaXsGr1ZlKFkNgJAZ25rn-OPSES86X_u247gsBrz5ndVagaSMRuoNFHM8poYWuN3Z6L0=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFz4tyIU3btzgkMn8VEczzyW4Mx3FO1uOfGmu9y_9wirqX61geLWcZ8Kq3ELN31jXU4b1HDrGBqRpmKNsdVJrghqLq25ybuFGLWNpkZYJrcIxnOuvtIU2fjnTwyaDoQB31m",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF0mlVtf4-96UO6q6a7F_hAm0Nay-lj3MKK9mYYd1oDUK3Ls5isbjNpCDKhU9Ys0AW1Ah3bBeNPDGjCDapIDq7KorqrdBqQMu3XBt9_zf0cQYVBTQypUU2_aqbGiqOepl_Xv7TtXOthL2W48ImmPbFvaiebQGJ8",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGIGVw-eHfGUd2bh7Xt4YnOVhnuGC8_b5W_eJmI_J2ciaJDhbZygvbFL3kem9spTsVVFsRpSl-qpvk3-NP-uIE-fR5oDB8zK1dhVrvr0Fko7aqn4HhuKYv9RrjA70c=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHyTDvnxMNHyyLSwg3ullqm_tTbEsraajZLdTCNre6U8eCUM6hQpq72s66QaakWCkkoNZ6mhC-jpGv05B8JwaQhmCowdFJasPWzBS3UrpMFSr7xOcBWRxF3nY6d34dUaUlR",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEVJNX6Nu9aum2MZaKPVCMnfYU_-kLwPInJdZ6-b1moyAq6QoHTrX2c75KAthIygh2_fiU_ZHBa-6LHOm7_izlq0DtUNKBTIaOdNTOo0KN6mdP6PMxQD991pg7dTK-7BS0k0cJtg0D3F-hLzxv3Aw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG1IFnPD1V72GLw-pHZIOgkylivWA6UhP_2Z5UVlM3rXJrR9E7D3mpMeHf_wgUhpN1mPV7ZtTM3rz2yFrgKkhFRnSz8wIR55eGXYmHuKCAhQeNReLk-NaNAf2G5yw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG8Uf9LyCaT3UpUpXdZ76LN-zye6MuKQiay_Z15EZsa75nQf7EdQLP7uEMEiYP62ZWYpEdsUzZ4UQGE7bY2QdNLzYYcM-tZFwODpEQiWxbGW83LCzNIWFAkleDGKF1Pz4q-_UiUna3vfBf-KiNW96LC9u76KcwUIo4gKqn-7Mp8d7RUi9Rf3wR8U6id6fvKyHCFZKEES_mca20="
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHUo8P36XGWdwqr-e3e8g0dvHRYZYy1GH3HzRE-mrR84OarQS4R0LSl2F8hTkzQ12Y8j2g4ancAqbAw6dje9uyp72OkoU9eLBGbcfmldSO4XWvShHrqlNdnNTBfXQ==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHBpC1Y6d_uW4snRhs2Scf7P3tVr-HZqkCPqNZxRhxaTenOaFjmnJdhRamr4Pes8e2LVVIBSVPhCoerD7fYBGeGcrqBYIvPW3NPdd4oV0syT1i6hkSlveeFiInzIUY_SaOO",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG8FbCpgzT2mUwgDbCu-Q0FjiQK3bsouOSvAwID7tnFkjhLtKcGkqgsV_g4Omzj9mHr40AwEFyTYr1X-six4p_UZa3s6vYLDRR1jptAAwhlXB0SnaCMI6rG_8VQi53-frzBsQHpYV_IzkgWGHDb5aC7yKI1NAeaYNs9mA==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFW0HHHTyw_5Kl_hzdWwYq36DbQqTrFwQUp0aPVXcN2Pw-oJzysb3xIcJeXiNbdvUoWPE-MRmDVHnCR5R2Uvg4f-crbsoM3bmKjwqDosZ-P148EzErxfCwo6vB2E20u9SyRB0sWpX_jWl3ccHWmepqgGRR582pr",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFMh7KrjOWhSGnyToup-CpYRN0MooOEDo4JZ8fox-KjqPaPqN8HqkfI3EHhawYK_gJ-rqn6kfumc7Y9aTlGp1ejSG67luhe5YR4_JdOto6kjMVBF3guS6jUMxGRhQOaXnr9hUFzFRAkUnSNv8vEkcscTFgZQvpBEONN_Rx9-pIKU3LdQeMDLkTyUtXRkVQK6_gzQMmARNi9Tw==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGoototuCCUutep8htLzMdDzfGvAECLQnlXz-SgbhPtOofpxGA0AddAewz7LxCbHa00lRzcd4fxlK9iX-M5ee5o4CldcNtemjhSWVD-qlkvehPUg1e3WPqNJNGlS9Bp-D15wgrL0kdWqzTqx1JJlStQNX7Xzg5",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFh0gchGTsGNxL-8EGQgM5s4h8jXfpktYxKaX4VjLhmG98seOIpMa5CG7jVbMG5TRC3bzurf9B055UM2y3ye_wX4TVdLquwzKxdqA_W6KT3uPONLrMmZUH8_M2P9UNMqS2_h0_eekIJt5novR9i0akg1MIflvqE00sqpVZ2",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGpiN3w8nln8VR0FwcN2c4NWecTSzmUf_YQz3IYTfme2cFWI729EqCHHZWA7TmH7_mIYFhIXQo35DA43G9rHpzX7C2bWX_RlYZy3LSMgXlsbbMHntyr0BixsrXGhJ4fv2nNwZU_-Ve6rzG6IZBDpjCe7B-xxI-OVA==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG6seGaVJ9gDKEmXwLsX5Gq0RRkj78X97Ly1EJ9wgF_JmkstEHpLleklaZtAsX_M-A2T9QjOwcp7EXwbAYuhKVPWb1gmbFi6YkvaDNjoDTSp-cUPtNRl91T4p5jWw==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG4l98D6g4E0E4B132BxaUylguCW1rZzHNwV1i1pZNR1ZYXFBz8op3FU6i7rTR_tIH3CPyXIO_x5CyAh1eyTrKRf0gJFu1t3O9YDO99Q2jh_0Dw0c_5snISxubeQOP1MNgXuBWvtuYd4YWf0_bkDUt0uXAQCr_yh5_IYyXLcyRAkpI-7jr5RMxJSR2549d6tYcgzHk=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE5P-nWB98hurQZZ9oafuDYO04GBCUDBUocNZoAPNAKoZPIGb6p3oop-3u0MqhAa56IBq_rWGBDb-Uvu2L_-sCTrfOtaGoMrLjPF6yGeQgHNgGrHLc-QfYBzW66ykr4FGopgQ==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGAg70_QZkp2OD4dr5RDHYPMyjnmrZHccEVww2WU7GizMOSIp7beKpOPp3Suo598fAg_IehEI_y2S1V6ka2wwgmIUhCXvir6vKCEBYopjGW9s7mRURSv6dBSjmBUlsTUR1xIu6l9V5yv78nHgxCAm3H4u7s",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEH1wZq1Ih6ii3emXsbFSbEhuwpUCrrnXZO07hCq9CyD00PO4q4g1voZEXmnWqmj-0_-JxqYCWNa8uFUDnjs7yTm4SplSiyflpZypbGc_k4cF_5kxI5_oL9gUqc_REiRYXadvpK3yUnc-ssMH0hi3bP86YR3McZ5Jn4",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFHWhr0Ye8-0L9SMIdoceufW2qvxeup2hmE7Dpwz4Bl5RpmjquMpoKQhYTA5bkrQYH9yUZKLclGgR6B-NL13YwTf2PnSNH164tH8pezW41c4qso",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEvvknpPc97AoYmf5mpJ3beqPpAe50phy01-dwEpgGRbzHgRGEaHx2CSu_xV4-dejIz7ri3aEGPnD2nYW2vWMDWLONzcHLwsOtdoi7gaufem_Dfe4kaUFdmY8uQEseeo_qO",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQExrFi456Y69TOPb275KTr_9ybDhX8pqb_Fz8j3dPS5CwRable_vUcA4-gKQTN8AmJpKv6KNrBssJgtAJkDIlHIFkdP4wtydrS9miOMY28INUcXBSk9RSuIrDdZvqVTklXNj0v7WQ==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFeE0q3EG2-OezBDo554Ua9TqrtdHx2gCBJDn94zJaBVVGUKCKQkdS3YcqqlSOQLDROsLvcRLDHiSLx15JF1GSS-Ny5WyXKCcdCWxkSOCEvoYtotKe-_xBxYQ7DAAcGi9MYko1tL-i7YAA8ID3d1SmKbc93pEK0Pg7kTaY3-uGbKbtlaKR_z7P3AEkMPibl1WRHSTeyJhCV7bS09dHOVPbTTeU=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFBR-oSXeba-UIkap-UzcK-x-VOzZX4lFlRtTizqupky4P_e3EtnkXI25rno_cz_tLLIbZHxNbyYCN2teLGe9KQOe9fTk0YvG6kXO0OzGZ4OlqJrU4=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFwlVLM004BGK_Z5G8lUMdFNn0tDh7q40H-pVURNwUJnByvz17V8BIYlalqb9Piay_2TH9l3oob5cwh7ZM36SI-F8GRA2rdSrpScbjkfqaDByw8HXttSiMNxCD7NdvTS_6d",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHlw0DmJQFfB1slQyZ1XM8OKyhRJejj088IePWs_XTxu0gu7SxHuSoqim_NpcgJY2D8cp_1xD3MHEaZ1Vm7sZjBOc54-ApzFTBoFM5gp6vqcILhmaOnTBiV9kKl3gw=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQELWMFuFzTw63Uff6jBRT7IlmzzHu124rF0N28XOi7BrjmR_7N4eJCOmBwi32RxwsS3VJLHOeM6lOcyq8LUp03EGSnCcJAklTJmOxH6RoTCsAmOjEtUhtT9WvgwBtgkNcIcmKVTtGeNSaGlR0GOYvIioA7veyCm10WD1jtawOcN0_trLLk=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGbWeTKWTAibOpAmdpXnd52y7j0UKIPud58RfhQzWw4bcn4XZax90NmYIi7bPWbut6FMJZeUExjwX4HFZx_RV7EKUIgELoWQlsEUuN6sdhC2R9j8Q9waJVuwc279ysQJj7N_zr64Wbk-U8YDgWfiKgQJaU4VDbvnY0EEhVQQDf0D3Q_8t-453MThHa88R8ppXw57A==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFbv5umbiViWY6iMWDToNvf2Ke4k4wzxfimStP9XVrNQe15aNE7Caq7KDYqhn1wDpew-_A02k7z3ptXQCYWRLnAKjpjtR5DV13st9yvZcoOQ2DqBPh4vG9QKhaBYTU=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFfAjYgDQgfNfQWXpt7mIh85W2D3kh2PC4qau_7F1sqEjR0KRzqnhrU3-RS3QAxBqaQyWBRwOVb9Xyz0HR1iD8voj8NgSkpQVds9nYiZl3TuW1M54c=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFZk1qLann4-ho9-T_4FDGTcWrh8M34t3O3lxrZAHKgON1eRJM3E81bB2M5wLwEjDcfQiyFr3nIjLUwLZl-P0qKjmRfUsipc3ipeSPLIB_FLhhAmLM5tETQEBbWC-RlQRhzgAfFybZOQxVL54JdUPj850OVfxj-Mx-zXm88MIbL6vT9UKY2Ge8Dys04jaxqNZxji0ccGZABezg=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEemZSih4yq2OzZ4g5qgYxAqSHjbtB8y1eTUmANLFft1Vz2vBnljOBrl_2uOnvem2bE9PNwiQKBQeX5EVKDLjB7UyAusPl60qy-wvOhyMgbIe1OoE58IgauZMSOkVlDEw4j",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGRp3CxkvNvwBCYuwXy7IsywPF4H2RggsxKkBl7TqU0JO4U52cAQyfjVBO-oHEbNS72CF1sROPOR0ud3XpdLsQbCqTPp2Cob_0qnuEfx04LniyPHKDXhx3z-7v4daN64tvIrVYShp_YZw==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFYohHFCT02KNOQyeX7UVnQnf7y0-PlBOqakm4dnEdvL0YYq-7hBdlQw2AewyB523mXAdr3N9puY4jLCd-EMAE4DnX13XIarRrKoME8Dd29fD0VfDgRqTCl-lmRC5FP-_7Q",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH2kKgpZP_zIC1ra3U1aPSST5Do4Ip_9T6QD6Q7mQSzZcB-Npy73EC2bBXPRIncvIKdgxhlBKA3Jd42Irq34ial_8kII48q3U5eX9zwLmpTipA=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQdC6a2-DwEf4sztoPwF59o0Z1MOcNpwwRc2ERyUvYo4bYVxzRWmShhtmIYll8me4yPrb-r4G3sDm2iwYWQP8FBWHAmzwhlib7AV__m93-1Yusm57wweQ=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGI_AvJD2gYxJTVZlEUnsQK192CjqKgGeEU7q67oV1tuB2zx1aGsGDucNI-7swXIwvp3GmwoVzbQJ9DaY9ZoOSOsiBokMaQ75FILQCHLPwHJH3ZiNcT5IJykwwhAg==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEOm66KuTyUytotuFVDW5au1SBv5cFhJaWhJuc-nAqX3GVrMgMSZi3XOs8BagdgfmiySUEHYEJqMpp6mpH36kDEp6fHP7Xwkq8gt6t-SElQuoKvrKapJ8vqabIvcpthocGm2T9BX09M9phLsBxFv_-0A3F08xWICQOs5PUrcwtuaON83QZq4Hs=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH3gw0n8IksucPqDcFLJHNvo4WTO_MCwujc1EmCjb6rA84sHnS7jCidE1q78FiJby6OPZQbqTqg4GnaPYw_nnPGe3VkE-HJ639smnxqug_tGn9TCBpukJRlQGsFt35tlYiizQA34b97KOiviiK0SCg_9ClbpV63srhIpiSBr4361-dD-qkjfJa8mGZhdsnvvomG",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG0MoVxDb6Mal0c0H73CbUL2XQigy1V-r9mYmaFAU_q7UEXSsy86hsLj7HkGX3WOdKuEqzSS7qXvPyXSDpIfaNegXx6J-27jxCCaVG7kLGDxuMIBYqXYXzBaBx9YJf8nHd1og==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEr0Zq6C8-fzHL4UDkZ8Isk46Bq9Rzv4ILu72taXefmGwT9XVTke5Jb94pwmV4JxcfectRZTUapUXW3QCj_biz3l4Lb2RjdWz1z_7RYMkwGvrXXTqmxkSiVE5BIgVjsZtLV1DszGxwHlj8NWlZe_KALSSlDvcx_qg=="
       ],
       "finish_reasons": [
         "FinishReason.STOP"
       ],
-      "response_text_chars": 35681
+      "response_text_chars": 45559,
+      "api_attempts_used": 1,
+      "logical_request_number": 1
     },
     {
-      "stage": "ETF batch ranks 4-50",
-      "prompt_tokens": 21827,
-      "tool_tokens": 24999,
-      "cached_tokens": 16464,
-      "thinking_tokens": 15007,
-      "output_tokens": 13016,
-      "total_tokens": 74849,
+      "stage": "ETF batch ranks 2-41",
+      "prompt_tokens": 33037,
+      "tool_tokens": 34417,
+      "cached_tokens": 31131,
+      "thinking_tokens": 13361,
+      "output_tokens": 15159,
+      "total_tokens": 95974,
       "search_queries": [
-        "iShares Core Dividend ETF DIVB factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Victoryshares Free Cash Flow ETF VFLO factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Vanguard FTSE Pacific Index Fund ETF Shares VPL factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook mandate",
-        "iShares ESG Aware MSCI EM ETF ESGE factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook mandate",
-        "Dimensional Emerging Core Equity Market ETF DFAE factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook mandate",
-        "Invesco S&P 500 Pure Value ETF RPV factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "First Trust Nasdaq Oil & Gas ETF FTXN factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "iShares Russell 2000 Value ETF IWN factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "iShares North American Natural Resources ETF IGE factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "iShares MSCI USA Quality GARP ETF GARP factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Avantis US Equity ETF AVUS factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Fidelity MSCI Information Technology Index ETF FTEC factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Alerian MLP ETF AMLP factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Avantis US Small Cap Value ETF AVUV factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
-        "Dimensional US Small Cap Value ETF DFSV factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook"
+        "Global X Copper Miners ETF COPX factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "iShares Biotechnology ETF IBB factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "Invesco KBW Bank ETF KBWB factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "iShares U.S. Technology ETF IYW factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "Global X Silver Miners ETF SIL factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "Invesco S&P 500 Equal Weight Technology ETF RSPT factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "iShares U.S. Equity Factor Rotation Active ETF DYNF factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "First Trust NASDAQ Cybersecurity ETF CIBR factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "iShares Trust - iShares MSCI USA Quality GARP ETF GARP factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook",
+        "Bitwise Hyperliquid ETF BHYP factsheet top holdings sector weights index exposure recent performance drivers 6-12 month outlook"
       ],
       "source_urls": [
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGZE5YbWuUb7px72qliwoYIWAmOY82hd17UwHQLHHOtfQAZgakIY8iYmvDZ28h0xiOHGdPe4TYpKQxenMdteGeS6HlMle0dte1k9olpC-fVATilV2d1l28LbLR96ZcUZ8qucg==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGJiPer3ZmS28YcHV-W2XGQ_r8eKI7dcRQaNVkGdDMGvIO1Axulp3-RX3eWjN6k7nUKuhyaAC0Zd7jInJhTSh0w0VPXdYvjwINGs9ZdUppNITsTWjR-ypt19Z6dc-_M9W1aM_HpnA==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGiR9irY2--gtjQpTZ8JyphnL4cKDLHku36aDBA7H3tEV03E7bJtKjZ0IQISjusJwXuISuPsDmKX-oU_g-FI_9M2dD3ASdcS_h4_WzE-gRqK9fM",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFy115eX5WDoX2mu41CJ-RZvAcL3coza52-t-KK6a9Pb-YfIvfAgOUXQ-14ehGXutMmIHlBHasS_40UADxt32eW7njta04wp2-48DpLLOdMNhdouQKeigT5uNGaIQK3t4buK5lbdBhQZl2g",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEd2p7F48rS0VtBt6pXYM-UrgzRN4aB1qTpE_eLxqJpGHhXs0oruZmr67EFZBq7brnHauF15Ioa_10VkNoPf-lWb5yXI4RXVic1Eo6rO9OAQirigO2pOscR",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGQIhU5Rcfg86NtwsHmxNwZRdCYRLzT5kuX_sqrB2RL10-7H3bFk28n-cMjiVJwZigzoO2WggYue59qIKstvcDfQGWBQYg4_q_uprbPQcYaMiYeWc6AwEg3jufln1kydZMGSZBUs4BYy6WrFZDJwW8jOZDuaKsu4A==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGhFZqq8Au-Kd-B_xWQDe1lqXrzj8qTnUReNDJtMldrH93VR34lTkNbKnaVc3vS1ZiAtWfABylg6gB7RBUrYzrBvsAMeYqujwiKADAFeZ92dX0pK22cYOUAJchqNg==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHIoy_0yYvP5Ln8sdr3wBX51dhihgo7WZF_mC0uz_iM2kubH7sh0AYohEXG1hNcnzstZC4s2L0UHgFcxtDEMRegzXbQQW3Uzi7ggvaL4Qm8esf-ezwpr0hvUV4Np56hblbJ",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH82OBOBmG1ImOIvjY_vgbF-mGaJMgbpNAba4zIfoB_qUT34m48jHJr_1fgdaYZvIB0aS7KG3rBpajXf2IylFSQktbZeYjEOq2plQHiRp1UCxRV_VH5pWi80fU=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH3jRTo40NqhjREGvFxLpyCmEuq6s1Z0OgnT6bvIef2JvkprtICkom_bIjkNYzbQZLZucURO8vgc1fFhzoM6Mrp-JT3Nk-FOU-SmT82AMXLJ6kzO74=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFsUqBvXgqbmFpBRcUuHyODW73a_QLRwY_WoqCUhUYpiX0pNy5Wk9RQOKITL1Aq42TBJ-3DBl2L4Ttw0ZlCEuyX7ZTs_PUafFEi6zy1FRl2Y1xhHpTcI7fT69En004=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFg62it5vkAti27YlFZ693tl-hnYC7JWIM8JcAkLlonZh7dAvoxQ0iU4FcNgT4t_aFYonM2U4lGKr9jXX5MS36oWFL6ko_6eYevgOHU1AiaNAYXQEyj3PbUUevYtsJJAGa4LX-_Z_nFVQ22leMxtdcndH8xdhl3M927Yzy9RQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHyAuy6RY3KW-dXzBLrCSC-yXR3Sjjnj36J55gDjCWkjSMNkir3RoSDBU4IF-jfR9oiSrHt90Go1TfdhrK8k4xs-pXrwr1vz5viM68IK2WH4S4HlLPRXsbN2rbcU5geyH8CGg==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGgjXR-8hyMY7rFjfWUy-Gc65mSjlGwiqPC5f39HNLFhWK169c1EPtJAf_uAmYSZhfI9EkCI-V21zB7tF3mIQCUv4UiHoqB33U62S8BVs-rQSDB8L8lFaMI-A8KXhVzya8gQKppieCc2N0bJlYIlo0vb2Qia3Y7KIqPM0VM3lzBqy8JBGtBqYDXMFiKzUPLbfGOg-g2",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGN7QWddWStSna1wNvsNAdwwqgKJzuz66MN_RVxznoxjC8DLuO1QIuNIZULoRIr2OwXPBsZoJR1vU0UChxcCiBSPemxMm85pDWy_qZVyKFF0TUNA8Qfvw95yBitZccj7w3j7wJPfT4DSlPTO-f9e-Ovyh2MW8WqUHhOlM3vTkSkIDTDsA==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH5RI1SEgKNWornhDBGnSfQF7kGqd797BFeCOl4GFt2ykc2i2dXJuQ8kmyMchostFI8TK95GxRW7O9OxdwQIe8MmlFv8_23EA9fxYIfGtOHgWfGD6IDtH03s3UEBNfg-wG4",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHiZhAJIrknB62SApEdB4qrOxyuObT_3tCOnAzt_PwKJ2H1FcP4m4CQXdrUok2UyOOF1bCXfptOBrOKlRR37Mz1n5HECGgV38e8wGb9Tk4YdKr2H8DnAcLsBTLjmZ8hDFqmrDWo3Zixky22agGRkXIylpA8EQwS",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE5yQsKHqYMVdbwWfmHKvqo69QRwsFF9kz0Xqqj2khP-RbvcdOzZqknM1Bk9U8O-TLIDjGxQe6c2tVqHnuy_vCP9HXP_M9JcK1TF-cbGn-NkK8eZlmnfOCRnbMmnxJ-m60=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbyZzKv6mGfBekEFH6q11YQlzytPbU4hJO54lnChk6INvVdtHunMJhcccxgmbWeepnTSAf617drLCC1eSkt0OGKVe2jdrhcGfe-FBxT4SwJJcNRFm8jaHgVoiNNw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFNfHZzI20OGO-kb2_u9mvQvsz9huYeR8iMvpypOALanrbkuNNGSEERakdn4Cvrja7dz-2Exl6FFBfipysvyUhBWBwNSXpWqN1aDk_vcBT4-tyjCc7j27SUcPyOFH3KrikM0YzaDnORMf6itdAkqdjBkk2BlAVRR_TCRExU5UffklWxY1rzGOQvXC1-3dAl6ngA",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGWaYfh6En13BJguBA2dR7yTk45FD7hx8R5naMKjkg9PcvHYkiZ0j0dD6Lt820BP8VjnrBTL7NYSEx4lUzzPlafo6ao6c_PbxA0XGGoQEZOleVTFvdbnHR0wMKcwLHnJla7m265rAcUevI=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEksYYdCe5p1nifpq9MUb6wkuWzOfI42BVUYKibvnNDjWeDEwPIQ-nVQc8s4CLPRFMY2smP3U58NPS2_W1QeaZrmq4VSuSHHYMQzmi73AV7m3vJGNhmbAiRuJENNyh43OvvaRAMMb7GfPcNLrVhgDPoFSThc0pjwQ==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEhuqnuitSbqrzHCeVqvKoN1p5zzQcDRu62_Y6HQzw_g46erLBJZEnb1oUvKXAdVloavWM1h16nNOU-8Xk7KJRSYS9T7Jrco6QYa4z0VN7gOpSHkc51pFsNKFjz9hTOZTe3yg==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHO0cnuclQ0WBDcc0XlRXTc5-Z0uXKBI2fFIIM3qHYHHWZmAqgOeriFrxgRz8Tym4DkwrA2OkJxTwo3ZL0mggNAsUEN6BnC80-xojwXImgmPq1ojH7t6A69ZG52c4U=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHTC59VfU9LtrDem_nq0EAu1mmgdJOJTwMZdqA5quaPCuBEAwT_uQBeKna-nhXGS1wsAtO5k2vKZTlWwPbVvCQhp-z0U2KO7OEYg7rWRdiG2SWXmGVO-YnjJ5DX_DUF",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG6e5QoBEfjSHz1XmkmIARz4xpaT1yNg81UJww2ZW7c6JmA5_sz_S7cVlppMBzPSjwWhpArXwI0836xLuEwOgR8iuWGrGYriYAMxS44s5jCtzbtQHXUA4aN_lF5f2xTsmGZzs5J4BQJH6LdMbJCelO2uCl50r9zvOVnrkbhjNprrgo0w4gvDfqPKw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFcRaJXIsfiULv1lUvAndDXEdAjvYMawXn7T7VxMT6o2OY0yrG0IGMJkqryxcDQ-AsiwlIZ2GfpJdpVtx0VVXOtryoNusgM6Y0ZotHL5tCOpHgvf3zfBOm6xC49VOxLxjQL_Q==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHoFhJH6hPupgDkJ-RFMOj7Ld389op-87r58KJmCdp0n2Ka-zJ7FXEnoyVZeo_fX6v7RbUd_AoaAQkYPA44775-OZeOnl95dlIRuS-0UwCPp5RthkUcNYEmzI99b77b95WLqk-ms_jGcsmqTTkuP7-qTMlbTgX7ng==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGc6Mtugf84HhP3OzPkW3-ywjtQj2mLad-jONTLW105U4u02dioDugweAVdVfOsmHgti_83uqu9O4zmxHWc1pwDLfmZdJiT3ZREfv_JOwuXb9yvP6oPbC5evG9ck4ArJ0fTOljxoPlVIWIf",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFNGJYeemHQ8aOmb7YdHhgre0tYt8vhjIaRwM1OHy5yNNavdl-NfBeh5R4oI9YuBLgHhMRMt0049zEPbdh0mvpYztLIKygrh3vk8EdP7zlc096QpVhVZVF8W5OSW7o=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHolKsqRcV6njudKNm6FOImbnlt3n7gNdSzbGeHkUpx_XVzrXAbxsUYK5korWe88_bcvdwTaZPKT3iZG8PdZcE2MXNpX6eNsJFJPAXH00dUDUXZ8BRYf8kiNKANe-TwgdhPoZlKaA-e",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHF5di6R8fb38vJITct0aaplbag0hHnyhBES_nRhQUCtyTHJwMBUlqgcT1Kh7wwUOPYigfnMpdlp8RImU_3kZ0S0DjgTeGrOYRyO-ltmVBe3vtv4p0H",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHAK3svsO09hdtTt3d-tkLXIoDhzDBabgNlm5AYF2pmYokCAfRhhS5I4ff1iIcRaaCynkeFZ9kr14Ge7gMfSLcuuSO98ePKpBKu_82Q0olMxa8CXKqWVffUmb7uIHo=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE7Pax1lRMk9_oq-6E0_pO6imtC5OiPyjNNBNWs4lYzshqxfJEcanlgNPpOsyZFO2IoefI9PNej2IKG6TRGPI-Qcf4YdAdHpmxRcru7Cmf_lj2xHHjIJj_ePP8qUY59CYyQUw==",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF3v124n1jQSy_a3A7EZaRA6xZ93gXGG1zIeLBwzM0LjTcWATOLyj8jEfWMkj-km6GQDYDmhJ9AscInwx6cfJjr5Wt72xhkKRDXhSKWPfBE6IdXowfnNcvfaOmBmDSUrZHoyhwGtP4BJA=="
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGnwVNGe_wP3zjBO5hH_kpcNv0FSz8DxwpIE7j10m53EEwn40qVEWl8vs6F5Uux26FCIiFp4v3kAI5VoVKQ1IumxRbq8MZUD3RQaa-64Jl07ctlY1fy25jgaPIiKVVq3b8BopM=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQERIRH_LYrGa49IlIHJyZ0iP4nf2lLnIqLmJyLfjDRJNkl8H9WaDgCyFPWZpEau5po03Rl4JOV1ZOqQQHwV-rNsxUBeamFqvJAKEjgM9wW42YnQi4FLo6VAaoC4fAuCDGPh",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGlYUAhXUqm6m-6gfOG_BtdVCIE6HykXmVKMCqCAwLXoOE0NfhFbK-1XiYUOCiZyTHreuD8XPUssWdr2Y7YuznbN37oWFMtAo8u95jkwGuTOnvYZGfMqDcZEJaL3KAo",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFzo9HZsIHeyOc6hGU7Lw-nIDzcclxwFG9aaDB1pykYcEY8yPtQ7OepE8zSAOyBDs740mnSiN41GvjkYg-CRdsXOhm-YZ1cjHEwWyJuWZY13ibY7XmdLFgSezO4leganWMAHw==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEBPtPhoq6UPA746hG9v3yaiWCNY6eHp91wWoPC6r32V44EJLnkDoTTOHrmkQUzXH_fuCbEW3gU2rZNarSVk7HdtDXWVoaPebvk6WThAh5gloW50qIW",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEg2_eMWavPNVajCVeOzNWPj6M5C0AiYgDjiKCVYaI3LLrA_fdngpeP84BQeGKz507PAKjCV8eu0XFMMnS9PZV6NlC2bqzftjAhwjxVo9xILXKJp6iYnpafA8yOqfHuCRqBEl-8KVPN8ahQGJjpozuLDOTyKhSQ9-IL6-cCUeXY",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE1gg2Zl5z19Obn-JjpYpy24xA3yDW0julITkxnN2RvPVAi8yF5-Cofy0eQMe09bMBhgaGZZP6rjuam5r639fEeVgqhq23QwA_EOoBPKt5eVDdTSyQJS39b7Mcn8YJkaFXyUD4g6J7qxVwRuiFacmBZ__k1Nau8y32Bf6FfnMLr7DYTs9vBTJRLA-248zcf__e95LFxYryM",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHVgFPjwjvcs-35JfZAnTetIDYLK5jvUVaMoq7u__8ZNReKrGMExDuzsLmdHKP9aZavglagJt-J3aHvqzyDiblJeoAH83fLgGlaHxhE1y5TLfHMGibxAV1-cZzKSU5jr2RaVnAEZeJNYAbcDGqFl-ZwCOM=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF7ZP-3NeRoa2Czzgepf-8NHBNk6RmoZMd3zaIInjZzcFvqKTaIznt-pyDbMWrQwmdw7oMMnp-QBLNFcRfizSLfvlKcjrHfYwmCqfZJKyPjOdCq35wYuuOsJwKgSZ8H7bP2Jjg=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHPgYS4hbNiAZrAV9yaMKjQPK9pJ2ZKQaTK4ta82Gwjk_FGE4mU3Sc9gkDSjiRb9ZETJppEDZYB8UUJagED43QAWnlGmVAAjiqK3Kd1gU_c2nAHziEn4J8Ce6RkxBGYQg==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHiHlQkaVdcj3skyE7gjl1wK2z3e3Kg88NM7i4DvhTlX0l2ZyB6lkmZMHQNCnXOdcuILto1QDxgoVHEjC3RfDdNihNw2-edmLo4FqCK48rzDiP0tqNHIiECa4aEBSd9NCDRFdTm10SVzwEbVp-dFZ-_VJjtk-Jb6Qwb3L8xuvtITwz37y72bXvXc0pJkf3suP5mlx9PfQwN2f7Slwm2A9togbVKNJL4gbPiM-ZQTO5WZURu9vt_f7LCwI7m6fTN9abc2EDjJMA_",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHZK7_ROgpDkOLUBb05ean7el3joPS6ft38o4IX138EcXWYS_VsvRqEUS8PGCOhxdr9ddHxm0NCj1LIwtafnLUkRVl-sAFe6MRRJdKfs798aDRiCb6d6CuIR886GUnC6qO3jLlWjQeAySOUWa1dZhmWH4K2",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE2171Eg1qoV8lpM_W2pVUi7Y2U5d87CwcJ0Nmrn4zAIYOQUMSV79gKEU1Lq7nmqdeQH0J-EbFB_Txx-pDoYQBUp7WQY2Ye5liqMlO21tiXUw63m2E4DtXoDIvrcoMj",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEc4JsGtWElNQsIwAhFkqBJSU4R03p1fZ2Q97JMuafHDXUVngmj_QLqUIuhJjdczm3Q2DkbJEOrs18jdZTjBqwpDxtAp6QIlFf1jHQI5fjbZGaL9VzI40PP4b6QXK6URNhiy0xcROHNh3ERRsgY0cZRhTqFWzhobwub119G761B",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGAj6tWXIYgH9ls7G1Hx_TYsM4Xm2hB2fJR5MSF2VpfDpxFmf7QFQ6tmAca2TMfHkwGajXwRXzLuwHxKiResrY6JzLXshGBijCbOFcDiEaDqi8o4_uL73_KgW7OQCY3Y6c=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFImxzSGgCtpfIbw8t4rrRZkQfQaRuN_NhQQkoHP64r6eS3O292u2EwmePRY-dqXjWCySG7auInf-hrB75EC22Hx7FEjYdKn51gXoJAyZuZE72pQd9PD9k7podmUYINhnzNBg==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEm1j6TuGQNosV8lPkD_LCujMjPeGxD0iBCad6RSaR1Z7HhbyEN8GK2hC9_wuqIfr-3W-6f4LO69qc2zHz5vgReILkS23ml2rVTY7M1P8xP-71yvwcAT7ezqJ1rS8dS2FvBjo0=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQ1i-kwqHfNSg5xv8FVyOfH7-sZPZAsl0awghVjnbq0cTAh0JyNhPz9KDOWXJL9b1QZA8ToRTEM6HpXH251eqDGrL2_f9KDUFVeU8THwuB0QaKj7vDGueanh5IOcBjcQSXdK2gb00Y0HTLG9JFa_1dT6rDlmDY1ak=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFFhTs3R33mpQmWZkrGVXoGWtetZPthx4cTZxxX_JM3a77mMxIoDdekWujszie4bJ4qZXTqxMkwjZMJQX1xOdSOzWO_UwedOUn7BOyK6ALlzM2YzL0LOSMz0Y6wbHYCUgeUriY=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGEo0R6EoL5PcX87bEkXiRhLJ7--brPCtoqDbiSKisvH80m_IG-I03rTHzO74st8gAFLpBv6ZWFrS7VrHHMwvIeCnlBJe419jI_G1F2eaOxDWcbbiWcBh5oGHcXtoqCZAGW2-bp_y8LjUy_VKlyfmG8mITQtVLCjC8=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHr0PZFReZvHsJwNw1yTc6Cg7_8qG-oSEH78BOYuXdbYU-N04eh_V08M11BqywwFWmCLbUfrqClldbbO7IbhlfOakv17-GG8F47c4lqgZuDQjTUuVxt8wWJghzkgZ-vsrL3U4syhP62HymmqNuB438KfjF4Y3ccsamsRIWSDUMGrqTCWBJgrptWIqtdFmG2hyRP5Vg=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE54dCGAP0h6NApZI8C_CuMpItihpr7LHkdxq5UywZCfYA6uu_hAjRVZfADYDu6G6ZoStAyEnxU7mnkSqv5lHnVySs-nBrFYyTCIo622y884217ilMZQSTH-ZRjlmHZO4KJlVA=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEDuFiCcfeY56VzayymYkp6eNdGck2TsnoR9b-7jkfiyHY1edowo5johNPBOX5atTzAEjrjdHI-8F5cp-3SaT9ZOfPL9kR7aty372wB0qshSA3Rz-O7kDqIvAXqMg==",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFFxt18rSK3Q834lIyZ08IaTN9r5wkhq5JHfBAJlJaYGT0MV-LHVyObsqTIrC_kLRWQQJrFfSBOwRu8vQ56SVUlR4xZiCcfF9LCz2RDDEGfb8ygd95Ca_EZR_21mO9d2dOcLT94pJTSSk_h1dIbEje33iXMUczwQIFQvTE=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFZfISa5SZ5AFodUBKCJ4Cf01ElhR2tXTU44DeSORrAJ_mx1jaGbsw_PzMk3CZTHTGNKJkXPr9Pm5Rtt-3oPwa2LbWcSz1-Ps8eYemKFhdX9l9JFDnzVvv-M3szT3esq-2KDFo=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHf1GEjnRqr0tuYTkAaidcORTmgp8dTLjoPwuP-OUeLuW3rYd6xw4k6DF2OHmN8Jy0GbIYIesVCU2ub_h73H2J08A_KXb0i-WeNwv6BCoqsV8fXS_IWVJ3RjEVhTBC0bNIK0yLN2bSal8pkvqvLBjgRYcyRlruJBA3aOMmYGvx4Cqw0WApB1e8=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGBW2R7tn98f6tz-fybOdP5ZWSBtusAaGa_jLSucKv4fvbLIjY-yTOH1IA6czVWYhgHUKujHFBszh9HuibinTpHa674d2t_s1KQlbfU4B23Azqc_JCabCjmaB8eRn5LvdLRAJU=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUKidzX1XSfCANqDH0pzX9bIHul4I3275NUognjK1Y_mmXh9vtPLQozazWAeGyXuAtGBVzw4zFYgutXXFhdrimgGLDSUEIJlvpZMM367a1bKGRE1ReCltYHGxHJgvPMqc_m6nRbATEfZwxSsGYuEdeC9AgLtg-PI7I05h99GExT4i0pNktX-LG",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEKxGMpvjxpStdVY1msVwtRanNBMfDwmb_SCJ0W5uSEzDeiMQ5bah5UIyGNOeBbTd21inja98Pr-yhLrednAwPKZK01jXe2He3vM3AhbxXF9wjn2SXQrimWrhhWucyzaKC7mjAgA5TaAcM=",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGZmsfLYaphts-eKFi306u71yc0jGybrxp-gXQu7MY9JXKn0JPGlQRMG-qf3KdN2umtmBF1cRx8SlIfLGPZHu0Q0T3N3NEWFMIXXk11TVbT",
+        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEGJPGo8wt9uI9bnr8NpBbv8-SoqopocMF0OCcqwrug7uS9d3xfyXkc10h0L21csp6ApepqAO5VHne654fWMAXDxDIc8K3_bSumawTWzTWCouQdW0-f5j3K3tSC9lH67Q=="
       ],
       "finish_reasons": [
         "FinishReason.STOP"
       ],
-      "response_text_chars": 38121
+      "response_text_chars": 41044,
+      "api_attempts_used": 1,
+      "logical_request_number": 2
+    },
+    {
+      "stage": "HTML summary",
+      "prompt_tokens": 6571,
+      "tool_tokens": 0,
+      "cached_tokens": 0,
+      "thinking_tokens": 4093,
+      "output_tokens": 2283,
+      "total_tokens": 12947,
+      "search_queries": [],
+      "source_urls": [],
+      "finish_reasons": [
+        "FinishReason.STOP"
+      ],
+      "response_text_chars": 10507,
+      "api_attempts_used": 1,
+      "logical_request_number": 3
     }
   ]
 }

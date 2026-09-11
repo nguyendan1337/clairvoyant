@@ -1,151 +1,151 @@
-name: Run recommenders and update page
-
-# Trigger workflow daily after the U.S. market close + manual trigger.
-on:
-  schedule:
-    - cron: '17 21 * * *' # 1:17 PM PST, 2:17 PM PDT
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  update-html:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Create cache directory
-        run: mkdir -p caches
-
-      # Runtime caches are intentionally not stored in Git. Each workflow run
-      # restores the newest prior Actions cache, while the recommenders remain
-      # authoritative for TTL, schema/version, prompt-hash, and evidence checks.
-      - name: Restore recommender runtime cache
-        id: recommender-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            caches/yf_cache.json
-            caches/etf_yf_cache.json
-            caches/stock_pages_cache.json
-            caches/top_qvm_stocks_cache.pkl
-            caches/top_qvm_etfs_cache.pkl
-            caches/gemini_market_context_cache.json
-            caches/gemini_stock_research_cache.json
-            caches/gemini_etf_research_cache.json
-            caches/stock_run_diagnostics.json
-            caches/etf_run_diagnostics.json
-          key: clairvoyant-runtime-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            clairvoyant-runtime-${{ runner.os }}-${{ github.ref_name }}-
-
-      - name: Run Stock Recommender
-        env:
-          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: python stock_recommender.py
-
-      - name: Run ETF Recommender
-        env:
-          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: python etf_recommender.py
-
-      # Save even when a later recommender step failed. The Python code writes
-      # only validated reusable research entries, so successful work from an
-      # earlier stage/run can still be reused on the next execution.
-      - name: Save recommender runtime cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            caches/yf_cache.json
-            caches/etf_yf_cache.json
-            caches/stock_pages_cache.json
-            caches/top_qvm_stocks_cache.pkl
-            caches/top_qvm_etfs_cache.pkl
-            caches/gemini_market_context_cache.json
-            caches/gemini_stock_research_cache.json
-            caches/gemini_etf_research_cache.json
-            caches/stock_run_diagnostics.json
-            caches/etf_run_diagnostics.json
-          key: ${{ steps.recommender-cache.outputs.cache-primary-key }}
-
-      - name: Commit and push published pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          echo "=== Generated HTML pages ==="
-          ls -lh index.html etf_index.html
-
-          echo "=== Runtime cache sizes (not committed) ==="
-          find caches -maxdepth 1 -type f -print -exec ls -lh {} \;
-
-          echo "=== Git status BEFORE staging ==="
-          git status --short
-
-          # Only viewer-facing published pages belong in daily Git history.
-          git add index.html etf_index.html
-
-          # First migration run: stop tracking runtime/generated state that was
-          # previously committed. --cached preserves the local files for the
-          # current run while removing them from Git's index.
-          git rm --cached --ignore-unmatch \
-            caches/yf_cache.json \
-            caches/etf_yf_cache.json \
-            caches/stock_pages_cache.json \
-            caches/etf_pages_cache.json \
-            caches/top_qvm_stocks_cache.pkl \
-            caches/top_qvm_etfs_cache.pkl \
-            caches/gemini_market_context_cache.json \
-            caches/gemini_stock_research_cache.json \
-            caches/gemini_etf_research_cache.json \
-            caches/stock_run_diagnostics.json \
-            caches/etf_run_diagnostics.json \
-            caches/top_qvm_stocks.md \
-            caches/top_qvm_etfs.md
-
-          # Remove obsolete legacy root-level generated files if any are still
-          # tracked from older versions of the project.
-          git rm --ignore-unmatch \
-            top_qvm_stocks.md \
-            top_qvm_etfs.md \
-            yf_cache.json \
-            etf_yf_cache.json \
-            stock_pages_cache.json \
-            etf_pages_cache.json \
-            top_qvm_stocks_cache.pkl \
-            top_qvm_etfs_cache.pkl \
-            gemini_market_context_cache.json \
-            gemini_stock_research_cache.json \
-            gemini_etf_research_cache.json \
-            stock_run_diagnostics.json \
-            etf_run_diagnostics.json
-
-          echo "=== Git status AFTER staging ==="
-          git status --short
-
-          echo "=== Staged changes ==="
-          git diff --cached --stat
-
-          if ! git diff --cached --quiet; then
-            git commit -m "Update stock and ETF pages"
-            git push origin main
-          else
-            echo "No published changes to commit"
-          fi
+#name: Run recommenders and update page
+#
+## Trigger workflow daily after the U.S. market close + manual trigger.
+#on:
+#  schedule:
+#    - cron: '17 21 * * *' # 1:17 PM PST, 2:17 PM PDT
+#  workflow_dispatch:
+#
+#permissions:
+#  contents: write
+#
+#jobs:
+#  update-html:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout repo
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.11'
+#
+#      - name: Install dependencies
+#        run: pip install -r requirements.txt
+#
+#      - name: Create cache directory
+#        run: mkdir -p caches
+#
+#      # Runtime caches are intentionally not stored in Git. Each workflow run
+#      # restores the newest prior Actions cache, while the recommenders remain
+#      # authoritative for TTL, schema/version, prompt-hash, and evidence checks.
+#      - name: Restore recommender runtime cache
+#        id: recommender-cache
+#        uses: actions/cache/restore@v4
+#        with:
+#          path: |
+#            caches/yf_cache.json
+#            caches/etf_yf_cache.json
+#            caches/stock_pages_cache.json
+#            caches/top_qvm_stocks_cache.pkl
+#            caches/top_qvm_etfs_cache.pkl
+#            caches/gemini_market_context_cache.json
+#            caches/gemini_stock_research_cache.json
+#            caches/gemini_etf_research_cache.json
+#            caches/stock_run_diagnostics.json
+#            caches/etf_run_diagnostics.json
+#          key: clairvoyant-runtime-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+#          restore-keys: |
+#            clairvoyant-runtime-${{ runner.os }}-${{ github.ref_name }}-
+#
+#      - name: Run Stock Recommender
+#        env:
+#          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+#        run: python stock_recommender.py
+#
+#      - name: Run ETF Recommender
+#        env:
+#          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+#        run: python etf_recommender.py
+#
+#      # Save even when a later recommender step failed. The Python code writes
+#      # only validated reusable research entries, so successful work from an
+#      # earlier stage/run can still be reused on the next execution.
+#      - name: Save recommender runtime cache
+#        if: always()
+#        uses: actions/cache/save@v4
+#        with:
+#          path: |
+#            caches/yf_cache.json
+#            caches/etf_yf_cache.json
+#            caches/stock_pages_cache.json
+#            caches/top_qvm_stocks_cache.pkl
+#            caches/top_qvm_etfs_cache.pkl
+#            caches/gemini_market_context_cache.json
+#            caches/gemini_stock_research_cache.json
+#            caches/gemini_etf_research_cache.json
+#            caches/stock_run_diagnostics.json
+#            caches/etf_run_diagnostics.json
+#          key: ${{ steps.recommender-cache.outputs.cache-primary-key }}
+#
+#      - name: Commit and push published pages
+#        run: |
+#          git config user.name "github-actions[bot]"
+#          git config user.email "github-actions[bot]@users.noreply.github.com"
+#
+#          echo "=== Generated HTML pages ==="
+#          ls -lh index.html etf_index.html
+#
+#          echo "=== Runtime cache sizes (not committed) ==="
+#          find caches -maxdepth 1 -type f -print -exec ls -lh {} \;
+#
+#          echo "=== Git status BEFORE staging ==="
+#          git status --short
+#
+#          # Only viewer-facing published pages belong in daily Git history.
+#          git add index.html etf_index.html
+#
+#          # First migration run: stop tracking runtime/generated state that was
+#          # previously committed. --cached preserves the local files for the
+#          # current run while removing them from Git's index.
+#          git rm --cached --ignore-unmatch \
+#            caches/yf_cache.json \
+#            caches/etf_yf_cache.json \
+#            caches/stock_pages_cache.json \
+#            caches/etf_pages_cache.json \
+#            caches/top_qvm_stocks_cache.pkl \
+#            caches/top_qvm_etfs_cache.pkl \
+#            caches/gemini_market_context_cache.json \
+#            caches/gemini_stock_research_cache.json \
+#            caches/gemini_etf_research_cache.json \
+#            caches/stock_run_diagnostics.json \
+#            caches/etf_run_diagnostics.json \
+#            caches/top_qvm_stocks.md \
+#            caches/top_qvm_etfs.md
+#
+#          # Remove obsolete legacy root-level generated files if any are still
+#          # tracked from older versions of the project.
+#          git rm --ignore-unmatch \
+#            top_qvm_stocks.md \
+#            top_qvm_etfs.md \
+#            yf_cache.json \
+#            etf_yf_cache.json \
+#            stock_pages_cache.json \
+#            etf_pages_cache.json \
+#            top_qvm_stocks_cache.pkl \
+#            top_qvm_etfs_cache.pkl \
+#            gemini_market_context_cache.json \
+#            gemini_stock_research_cache.json \
+#            gemini_etf_research_cache.json \
+#            stock_run_diagnostics.json \
+#            etf_run_diagnostics.json
+#
+#          echo "=== Git status AFTER staging ==="
+#          git status --short
+#
+#          echo "=== Staged changes ==="
+#          git diff --cached --stat
+#
+#          if ! git diff --cached --quiet; then
+#            git commit -m "Update stock and ETF pages"
+#            git push origin main
+#          else
+#            echo "No published changes to commit"
+#          fi
 
 
 #name: Run recommenders and update page

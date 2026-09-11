@@ -1,0 +1,113 @@
+name: Run Stock Recommender
+
+on:
+  schedule:
+    - cron: '17 21 * * *' # 1:17 PM PST, 2:17 PM PDT
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Use the same concurrency group as the ETF workflow so the two recommenders
+# never update main or the shared market-context cache at the same time.
+concurrency:
+  group: clairvoyant-pages-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  update-stock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create cache directory
+        run: mkdir -p caches
+
+      # Shared by the stock and ETF workflows. A unique restore key avoids
+      # trying to overwrite an immutable cache entry; restore-keys retrieves
+      # the newest shared market cache saved by either workflow.
+      - name: Restore shared market-context cache
+        id: market-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: caches/gemini_market_context_cache.json
+          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-restore-${{ github.run_id }}
+          restore-keys: |
+            clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Restore stock runtime cache
+        id: stock-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            caches/yf_cache.json
+            caches/stock_pages_cache.json
+            caches/top_qvm_stocks_cache.pkl
+            caches/gemini_stock_research_cache.json
+            caches/stock_run_diagnostics.json
+          key: clairvoyant-stock-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            clairvoyant-stock-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Run Stock Recommender
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: python stock_recommender.py
+
+      # Save validated runtime state even if a later step fails.
+      - name: Save stock runtime cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            caches/yf_cache.json
+            caches/stock_pages_cache.json
+            caches/top_qvm_stocks_cache.pkl
+            caches/gemini_stock_research_cache.json
+            caches/stock_run_diagnostics.json
+          key: ${{ steps.stock-cache.outputs.cache-primary-key }}
+
+      # Save the shared cache by content hash. If the market context did not
+      # change, GitHub can reuse the existing immutable cache instead of
+      # creating another identical shared-market entry.
+      - name: Save shared market-context cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: caches/gemini_market_context_cache.json
+          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('caches/gemini_market_context_cache.json') }}
+
+      - name: Commit and push stock page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "=== Stock page ==="
+          ls -lh index.html
+
+          echo "=== Git status BEFORE staging ==="
+          git status --short
+
+          # index.html is intentionally ignored for local development, so force
+          # staging keeps the published page update working in Actions.
+          git add -f index.html
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Update stock recommendations"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "No stock page changes to commit"
+          fi

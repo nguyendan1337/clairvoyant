@@ -1,0 +1,103 @@
+name: Run ETF Recommender
+
+on:
+  schedule:
+    - cron: '27 21 * * *' # 1:27 PM PST, 2:27 PM PDT
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Shared with the stock workflow. If both schedules overlap, the ETF workflow
+# waits for the stock workflow to finish, allowing it to restore any freshly
+# saved shared market context instead of duplicating that Gemini call.
+concurrency:
+  group: clairvoyant-pages-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  update-etf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create cache directory
+        run: mkdir -p caches
+
+      - name: Restore shared market-context cache
+        id: market-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: caches/gemini_market_context_cache.json
+          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-restore-${{ github.run_id }}
+          restore-keys: |
+            clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Restore ETF runtime cache
+        id: etf-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            caches/etf_yf_cache.json
+            caches/top_qvm_etfs_cache.pkl
+            caches/gemini_etf_research_cache.json
+            caches/etf_run_diagnostics.json
+          key: clairvoyant-etf-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            clairvoyant-etf-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Run ETF Recommender
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: python etf_recommender.py
+
+      - name: Save ETF runtime cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            caches/etf_yf_cache.json
+            caches/top_qvm_etfs_cache.pkl
+            caches/gemini_etf_research_cache.json
+            caches/etf_run_diagnostics.json
+          key: ${{ steps.etf-cache.outputs.cache-primary-key }}
+
+      - name: Save shared market-context cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: caches/gemini_market_context_cache.json
+          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('caches/gemini_market_context_cache.json') }}
+
+      - name: Commit and push ETF page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "=== ETF page ==="
+          ls -lh etf_index.html
+
+          echo "=== Git status BEFORE staging ==="
+          git status --short
+
+          git add etf_index.html
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Update ETF recommendations"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "No ETF page changes to commit"
+          fi

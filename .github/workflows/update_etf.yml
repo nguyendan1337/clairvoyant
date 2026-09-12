@@ -2,7 +2,8 @@ name: Run ETF Recommender
 
 on:
   schedule:
-    - cron: '47 9 * * *' # 1:47 AM PST, 2:47 AM PDT
+    - cron: '37 0 * * *'
+      timezone: 'America/Los_Angeles'
   workflow_dispatch:
 
 permissions:

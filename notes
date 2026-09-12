@@ -19,7 +19,8 @@ git update-index --assume-unchanged index.html
 git push origin main --force
 
 Features to add/Improvements to make:
-- remove web scraping and replace with yfinance, filter some here too
+- test etf recommender and stock recommender work both here and in github actions
+- remove web scraping and replace with yfinance in stock recommender, filter some here too
 - improve caching and github storage efficiency
 - polish
 - same file, classes, abstraction, different object types for stock and etf, different configs

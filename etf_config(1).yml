@@ -1,0 +1,645 @@
+---
+urls:
+  - "https://finance.yahoo.com/markets/etfs/gainers/"
+  - "https://finance.yahoo.com/markets/etfs/top-performing/"
+
+excluded_keywords:
+  - "2x"
+  - "3x"
+  - "Ultra"
+  - "Leveraged"
+  - "Bull"
+  - "Bear"
+  - "Double"
+  - "Triple"
+  - "Enhanced"
+  - "PLUS"
+  - "Short"
+  - "Inverse"
+  - "UltraShort"
+  - "Defined Volatility"
+  - "Daily"
+  - "Option"
+  - "ETN"
+  - "VIX"
+  - "Junior"
+  - "WeeklyPay"
+  - "Target Income"
+  - "Covered Call"
+  - "Derivative"
+  - "Futures"
+  - "Bond"
+  - "Income"
+  - "Volatility"
+  - "International"
+  - "Foreign"
+  - "Ex-US"
+  - "Europe"
+  - "Euro"
+  - "Asia"
+  - "Emerging Market"
+  - "Japan"
+  - "China"
+  - "India"
+  - "Latin America"
+  - "World"
+  - "Developed Market"
+  - "Israel"
+  - "Mexico"
+  - "Hong Kong"
+  - "Korea"
+  - "Africa"
+  - "Chile"
+  - "Peru"
+  - "Taiwan"
+  - "Netherlands"
+  - "Spain"
+  - "Colombia"
+  - "Finland"
+  - "Brazil"
+  - "Austria"
+
+min_52_week_change: 15
+min_3_month_return: 0
+benchmark_1y_discovery_tolerance: 10
+benchmark_3m_discovery_tolerance: 5
+min_price: 5.0
+min_average_volume: 100000
+min_aum: 100000000
+qvm_top_n: 100
+research_candidate_pool_limit: 100
+benchmark_backfill_qvm_tolerance: 10
+benchmark_backfill_3m_tolerance: 5
+benchmark_backfill_1y_tolerance: 10
+# Zero means enrich every ETF that survives the basic discovery filters before
+# selecting the top-100 QVM research stream.
+max_info_calls: 0
+qvm_weights:
+  Quality: 0.25
+  Value: 0.15
+  Momentum: 0.60
+min_quality: 35
+
+# Applied to Name + Category + LegalType after yfinance enrichment. These are
+# obvious mandate exclusions; borderline holdings are checked during research.
+excluded_metadata_patterns:
+  - '\bCommodit(?:y|ies)\b'
+  - '\bFutures?\b'
+  - '\bK-?1\b'
+  - '\bInternational\b'
+  - '\bForeign\b'
+  - '\bEx[- ]?U\.?S\.?\b'
+  - '\bWorld\b'
+  - '\bMSCI Global\b'
+  - '\bGlobal (?!X\b)'
+  - '\bEmerging Markets?\b'
+  - '\bDeveloped Markets?\b'
+  - '\bMiscellaneous Region\b'
+  - '\bPoland\b'
+  - '\bJapan\b'
+  - '\bChina\b'
+  - '\bIndia\b'
+  - '\bBrazil\b'
+  - '\bMexico\b'
+  - '\bEurope\b'
+  - '\bAsia\b'
+  - '\bFocused Region\b'
+  - '\bDiversified Emerging Mkts\b'
+  - '\bForeign Large (?:Blend|Value|Growth)\b'
+  - '\bPacific(?:\/Asia)?\b'
+  - '\bCanada\b'
+  - '\bMLPs?\b'
+  - '\bMaster Limited Partnership(?:s)?\b'
+  - '\bEnergy Limited Partnership\b'
+min_equity_asset_weight: 0.80
+canonical_sector_min_weight: 0.50
+structured_fund_data_delay: 0.2
+
+benchmark_etfs:
+  - vgt
+  - spmo
+
+# Research uses Flash and fails closed. Flash-Lite is only a summary fallback.
+model_primary: gemini-2.5-flash
+model_fallback: gemini-2.5-flash-lite
+gemini_batch_size: 15
+target_selected_etfs: 10
+# This is a ceiling, not a requirement for five exact pairs.
+max_etfs_per_sector_group: 2
+max_candidates_per_provisional_group: 4
+max_moderate_per_risk_event: 2
+thinking_budget: 12288
+summary_thinking_budget: 4096
+max_gemini_calls_per_run: 7
+max_etf_research_calls_per_run: 6
+reserved_summary_calls: 1
+summary_reservation_releasable_on_shortfall: true
+max_transient_api_attempts: 3
+max_transient_delay: 60
+transport_retry_batch_fraction: 0.67
+max_fresh_research_attempts_per_etf: 2
+max_structural_repairs_per_etf: 1
+top_rank_basic_metadata_repair_limit: 20
+min_structural_repair_batch_size: 3
+max_grounding_urls_for_repair: 60
+gemini_max_output_tokens: 49152
+max_retries: 4
+initial_delay: 15
+min_etf_sources: 2
+max_etf_sources: 5
+final_summary_enabled: true
+
+top_qvm_cache_expiry_hours: 6
+market_context_cache_file: caches/gemini_market_context_cache.json
+etf_research_cache_file: caches/gemini_etf_research_cache.json
+run_diagnostics_file: caches/etf_run_diagnostics.json
+market_context_cache_hours: 12
+market_context_schema_version: 1
+market_context_prompt_version: 1
+gemini_research_cache_hours: 12
+cache_version: 4
+# Kept separate so ETF research can be invalidated without preventing reuse of
+# the stock recommender's shared market-context cache.
+etf_research_cache_version: 11
+
+prompt_market_context: |
+  You are the shared market-research stage for U.S. stock and ETF recommenders.
+  Research the CURRENT U.S. market and world environment once so both systems
+  can reuse the same evidence. Use Google Search before answering. Prefer
+  information from the last 5-10 days, supplemented by current official policy
+  or economic releases when necessary.
+
+  Perform exactly five targeted searches total. Each search should cover
+  several related questions rather than spawning follow-up searches:
+  1. S&P 500 performance, breadth, investor mood and market health.
+  2. U.S. growth, inflation, rates, Federal Reserve expectations, liquidity,
+     credit, earnings and estimate revisions.
+  3. Operating conditions and leadership across Technology, Healthcare,
+     Financials, Consumer Cyclical, Consumer Defensive, Energy, Industrials,
+     Basic Materials, Communication Services, Utilities and Real Estate.
+  4. Factor, size and thematic leadership, including value, growth, momentum,
+     quality, dividends and large/mid/small caps.
+  5. Geopolitical, commodity, freight, regulatory, crowding, valuation,
+     concentration and flow conditions that could reverse winners in 6-12 months.
+
+  Return exactly one JSON object without Markdown. market_summary and
+  market_intro must contain the same 3-5 sentence viewer-facing paragraph with
+  at least one explicit S&P 500 percentage and measured period.
+  {
+    "as_of_date": "YYYY-MM-DD",
+    "market_status": "STRONG | MIXED | WEAK",
+    "market_summary": "Viewer-facing market paragraph",
+    "market_intro": "Identical viewer-facing market paragraph",
+    "market_direction": "Concise description",
+    "major_drivers": ["..."],
+    "macro_conditions": ["..."],
+    "strong_sectors": ["..."],
+    "weak_sectors": ["..."],
+    "strong_exposures": ["..."],
+    "weak_exposures": ["..."],
+    "sector_context": {"Technology": "Specific current condition"},
+    "factor_and_theme_context": {"Value": "Specific current condition"},
+    "active_risk_events": [{
+      "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
+      "description": "Current event and affected markets",
+      "affected_industries": ["..."],
+      "beneficiaries": ["..."],
+      "normalization_risk": "How normalization could reverse beneficiaries"
+    }],
+    "sources": [{"title": "Source title", "date": "YYYY-MM-DD", "url": "https://..."}]
+  }
+  Use 2-5 real decision-relevant sources. Do not invent URLs.
+
+prompt_etf_batch: |
+  You are the structured ETF-research stage in a Python-owned recommendation
+  pipeline. Python owns QVM ranking, selection order, exposure limits,
+  risk-event limits, caching and HTML. Research and classify every supplied ETF.
+  Do not select a portfolio, reorder candidates or write HTML.
+
+  SEARCH DISCIPLINE
+  - FRESH_RESEARCH_REQUIRED_FOR lists ETFs needing current research. Run exactly
+    one focused Google Search for each listed ETF. One query can return multiple
+    sources. Do not run follow-up or alternative-query searches in this response.
+  - Prioritize holdings identity in this compact query: ETF name/ticker, issuer
+    factsheet, latest disclosed top holdings and sector weights, index exposure,
+    recent performance drivers, and 6-12 month outlook. Add flows or valuation
+    only when central to the thesis.
+  - When CANDIDATES supplies Name, treat that exact supplied name plus ticker as
+    the authoritative starting identity for the search. Do not substitute a
+    guessed or similarly named fund. If search results conflict with the supplied
+    name, resolve the conflict explicitly before returning COMPLETE.
+  - FRESH_RESEARCH_RETRY_REASONS identifies prior evidence failures receiving
+    their one permitted fresh retry. Address the stated gap with the new search.
+  - REPAIR_WITHOUT_NEW_SEARCH contains searched prior drafts. Repair them from
+    supplied evidence, MARKET_CONTEXT and PRIOR_GROUNDING_SOURCE_URLS without
+    another search. Use only grounding URLs relevant to the ETF. Do not invent
+    or reconstruct URLs from memory.
+  - A repair item with repair_type SOURCE_ONLY means the prior ETF object is
+    already substantively complete and failed only because sources were missing,
+    malformed, or below the required count. For SOURCE_ONLY, return a repairs
+    entry containing exactly symbol and sources. Select 2-4 distinct real URLs
+    from PRIOR_GROUNDING_SOURCE_URLS that clearly correspond to that ETF's
+    ticker/name, issuer, holdings/index, or decision-relevant outlook evidence.
+    Do not return an empty patch. Do not change any classification, mandate,
+    benchmark, risk, thesis, or narrative field. If fewer than two relevant URLs
+    can be identified from the supplied grounding URLs, omit sources rather than
+    guessing; Python may then escalate to the final fresh-search retry.
+  - A validation_error beginning with BASIC_METADATA_REPAIR means a high-ranked
+    ETF already had a grounded search but Gemini left obvious fund
+    identity/mandate/exposure fields incomplete. Reconstruct every field needed
+    for a COMPLETE record from CANDIDATES, the prior draft and supplied grounding
+    only; do not search and do not change the investment thesis unless completion
+    of the missing factual fields requires it.
+  - Never search or return an ETF absent from CANDIDATES. Never omit a candidate.
+    If one search cannot establish required facts, return INCOMPLETE, not guesses.
+  - The maximum new-search count is exactly the number of ETFs in
+    FRESH_RESEARCH_REQUIRED_FOR. Do not issue a second query for any ETF in the
+    same response.
+  - For every COMPLETE result, sources is mandatory and must appear immediately
+    after fund_name. Return 2-4 decision-relevant distinct source URLs per ETF,
+    up to 5. Prefer
+    issuer factsheets/holdings, official data, index methodology and reputable
+    financial reporting. Every URL must be real and used. To reduce formatting
+    failures, sources is a JSON list of URL strings, not source objects.
+
+  CANDIDATES may include structured yfinance FundOverview, AssetClasses,
+  SectorWeightings, TopHoldings, CanonicalSector, StyleCategory and
+  PortfolioGroup. Treat these as supplied fund data. CanonicalSector and
+  PortfolioGroup are Python capacity classifications, not reversal evidence.
+
+  For each ETF establish its current holdings or index exposure, concentration
+  and economic transmission mechanism; the current benchmark-relative driver;
+  whether that driver is durable, cyclical, temporary, crowded or deteriorating;
+  and whether evidence supports outperformance versus the supplied benchmarks
+  over 6-12 months. Do not infer exposure from the fund name alone.
+  Keep each narrative field under 45 words and explanation under 30 words. Use
+  concrete evidence, not repeated background, so all 15 records fit completely.
+
+  exposure_group is the primary economic exposure making ETFs substitutes, not
+  a broad category or issuer. Use a concise stable UPPER_SNAKE_CASE label.
+  Materially overlapping holdings with the same return driver must share a
+  group. Do not merge distinct industries or factors.
+
+  The dominant index mandate, holdings and sector weights must drive the
+  analysis. Do not classify a diversified factor fund as a sector fund because
+  of a minority overweight. If Category conflicts with the issuer mandate or
+  holdings, explicitly identify that discrepancy in holdings_evidence.
+
+  REVERSAL EVIDENCE GATE
+  MODERATE includes a credible, ETF-specific material vulnerability that exists
+  now even when the adverse transition has not clearly begun. A HYPOTHETICAL
+  temporary-driver or normalized-exposure reversal qualifies when ALL are true:
+  normalization_probability is POSSIBLE; risk_materiality and driver_dependence
+  are each at least MODERATE and at least one is HIGH; risk_basis is
+  TEMPORARY_DRIVER_NORMALIZATION or NORMALIZED_EXPOSURE_DETERIORATION;
+  probability_basis is not NONE; evidence_scope is FUND_SPECIFIC or
+  EXPOSURE_SPECIFIC; and current evidence establishes BOTH (1) concrete exposure
+  to an unusually elevated, temporary, concentrated, cyclical, financing-sensitive
+  or valuation-sensitive condition and (2) a plausible 0-12 month normalization
+  path that would materially damage this ETF's actual holdings, index construction
+  or factor thesis. The adverse transition does not need to have begun, and
+  conditional wording does not invalidate an otherwise concrete vulnerability.
+  A merely imaginable shock, ordinary valuation, concentration or cyclicality,
+  generic market sensitivity, or a one-day price move is not enough. In a
+  qualifying case, reversal_mechanism, probability_evidence and material_effect
+  must state the concrete exposure, probability basis and ETF-specific 0-12 month
+  transmission path. MODERATE may also arise from an OBSERVED adverse mechanism
+  under the mapping below. ELEVATED and SEVERE still require an OBSERVED adverse
+  mechanism. Generic
+  market risk, valuation concern or a merely possible shock is not enough.
+  Valuation, concentration, crowding, rate sensitivity or cyclicality alone
+  remains LOW-risk HYPOTHETICAL unless current evidence also satisfies the
+  cautious borderline MODERATE test or shows the adverse mechanism is active.
+
+  mechanism_status: NONE means no supported adverse mechanism; HYPOTHETICAL
+  means the vulnerability may be evidenced but the adverse transition itself
+  is not observed; OBSERVED requires a current adverse change or leading
+  indicator, not merely a condition that could make a future reversal painful.
+  A currently favorable temporary driver does not create an
+  OBSERVED reversal merely because it could normalize. Statements such as
+  "if geopolitical tensions ease", "if commodity prices fall", "if rates stay
+  high", "could lead to", "could decline", "may weaken", or similar conditional
+  scenarios are HYPOTHETICAL unless a current adverse directional indicator
+  shows that normalization or deterioration has already begun.
+  driver_dependence is LOW, MODERATE or HIGH and measures how much the ETF's
+  current outperformance thesis depends on the driver that may reverse.
+  probability_basis must be OFFICIAL_GUIDANCE, REALIZED_OPERATING_DATA,
+  CONTRACT_OR_POLICY_TIMELINE, SUPPLY_DEMAND_DATA, HOLDINGS_OR_EARNINGS_DATA,
+  VALUATION_OR_FLOW_DATA, MULTI_SOURCE_DIRECTIONAL_EVIDENCE, or NONE.
+  risk_basis must be NONE, NORMALIZED_EXPOSURE_DETERIORATION,
+  TEMPORARY_DRIVER_NORMALIZATION, or NONRECURRING_COMPARISON_ONLY.
+
+  ETF-SPECIFIC TRANSMISSION TEST
+  A reversal mechanism is valid only when the evidence explains how the event
+  affects this ETF's actual index construction, holdings mix, factor exposure,
+  concentration or economic driver. Do not transfer a sector-wide, factor-wide
+  or market-wide risk to an ETF merely because the ETF belongs to that sector
+  or theme. Explicitly account for weighting methodology, diversification,
+  factor screens and major holdings when they materially change exposure to the
+  proposed mechanism.
+
+  For every HYPOTHETICAL or OBSERVED mechanism, material_effect must concretely
+  answer BOTH:
+  1. which direction of the event is adverse for this ETF; and
+  2. why that direction would hurt this ETF specifically.
+
+  Do not assign primary_risk_event_id merely because the event is related to the
+  ETF. The event must have the correct adverse direction for the ETF's actual
+  thesis. For example, a de-rating of AI mega-caps is not automatically adverse
+  to a value ETF; renewed mega-cap growth leadership or a rotation away from
+  value may be the actual adverse mechanism. Likewise, mega-cap concentration is
+  adverse to an equal-weight technology ETF only when continued or renewed
+  mega-cap leadership would cause the equal-weight portfolio to lag.
+
+  For value, growth, momentum, equal-weight, quality, dividend and other factor
+  ETFs, explain the relative-performance transmission versus the relevant
+  competing factor or cap-weighted exposure. Generic statements such as "could
+  pressure technology", "could hurt growth stocks" or "may weaken the sector"
+  are insufficient.
+
+  Reusing a MARKET_CONTEXT event_id does not establish ETF relevance; assign it
+  only when the ETF-specific transmission path and adverse direction are both
+  independently supported. If the ETF-specific causal link cannot be stated
+  concretely, use mechanism_status NONE or retain only a LOW-risk hypothetical
+  with no claimed shared risk event.
+  If risk_basis is NONE, primary_risk_event_id and risk_exposure_group must both
+  be null. Do not attach a causal macro event when no supported risk basis exists.
+
+  MARKET_CONTEXT may identify a risk to investigate but cannot, by itself,
+  establish an OBSERVED mechanism. The existence of a favorable catalyst that
+  might disappear is catalyst dependence, not adverse-change evidence. For
+  OBSERVED, adverse_change_observed must be true and the ETF-specific search
+  must provide a dated fund-specific or exposure-specific adverse change,
+  directional indicator, or active policy or contract event showing that the
+  adverse transition is already occurring. evidence_scope must be FUND_SPECIFIC
+  or EXPOSURE_SPECIFIC;
+  adverse_change_date must identify when it was observed;
+  adverse_change_indicator must state the concrete evidence; and
+  mechanism_evidence_source must exactly match one URL in that ETF's sources.
+
+  SHORT-TERM TECHNICAL SIGNALS ARE NOT OBSERVED REVERSAL EVIDENCE.
+  RSI, stochastic oscillators, MACD, moving-average crosses, chart patterns,
+  momentum indicators, technical analyst ratings, short-term price targets,
+  short-horizon probabilistic price forecasts, or similar trading signals may
+  be mentioned only as supplemental context. They must never establish
+  mechanism_status OBSERVED, adverse_change_observed true, or MODERATE-or-higher
+  reversal risk by themselves. OBSERVED reversal evidence must be tied to a
+  0-12 month economic or fundamental transmission mechanism such as holdings or
+  earnings deterioration, industry demand or supply changes, persistent
+  valuation/flow deterioration when economically material, policy or regulatory
+  changes, contract or operating developments, or comparable exposure-specific
+  evidence.
+
+  MARKET_ONLY evidence, valuation, concentration, sensitivity, cyclicality,
+  technical-analysis signals, or a merely possible future change is
+  HYPOTHETICAL, not OBSERVED.
+
+  Fill the atomic mechanism, probability, materiality and dependence fields
+  independently from evidence. Python derives the authoritative reversal_risk;
+  do not return a reversal_risk field. Python applies these rules:
+  - SEVERE: OBSERVED, LIKELY, HIGH materiality, with the thesis largely dependent
+    on the reversing driver.
+  - ELEVATED: OBSERVED with HIGH materiality and POSSIBLE/LIKELY normalization,
+    or MODERATE materiality with LIKELY normalization and high dependence.
+  - MODERATE: either (a) OBSERVED, at least POSSIBLE and MODERATE materiality,
+    with a specific 0-12 month path, but the elevated threshold is unmet; or
+    (b) HYPOTHETICAL with POSSIBLE normalization; MODERATE-or-HIGH materiality
+    and dependence with at least one HIGH; a non-NONE evidence basis;
+    FUND_SPECIFIC or EXPOSURE_SPECIFIC scope; and a specifically evidenced
+    temporary, elevated or concentrated vulnerability whose normalization could
+    materially reverse the ETF over 0-12 months. The adverse transition need not
+    already be underway.
+  - LOW: no complete moderate mechanism, but ordinary uncertainty, a weaker
+    hypothetical risk, an observed low-materiality issue, or strong but uncertain
+    continuation.
+  - MINIMAL: mechanism_status NONE, materiality LOW, driver dependence LOW,
+    normalization UNLIKELY, probability_basis NONE, risk_basis NONE, broad
+    durable evidence and no meaningful current 6-12 month reversal mechanism.
+
+  CROSS-FIELD COMPLETION CHECK
+  Before returning each COMPLETE result, close and check that ETF object:
+  - Technical-analysis signals alone cannot satisfy OBSERVED. If the claimed
+    adverse change is based primarily on RSI, stochastic, MACD, moving averages,
+    chart patterns, technical ratings or short-term price forecasts, downgrade
+    mechanism_status to HYPOTHETICAL or NONE and set adverse_change_observed false.
+  - If mechanism_status is OBSERVED, reversal_mechanism,
+    probability_evidence and material_effect must all be specific, non-empty
+    strings.
+  - OBSERVED also requires adverse_change_observed true, evidence_scope
+    FUND_SPECIFIC or EXPOSURE_SPECIFIC, a dated adverse_change_date, a concrete
+    adverse_change_indicator, and a mechanism_evidence_source present verbatim
+    in sources.
+  - If evidence_scope is MARKET_ONLY or NONE, adverse_change_observed must be
+    false and mechanism_status cannot be OBSERVED.
+  - If no concrete present mechanism can be stated, mechanism_status must be
+    HYPOTHETICAL or NONE. Never pair OBSERVED with a null mechanism.
+  - OBSERVED must cite the dated adverse change or directional indicator.
+  - LIKELY requires directional evidence plus a concrete timing basis. A
+    HYPOTHETICAL mechanism cannot be LIKELY; use POSSIBLE or UNLIKELY instead.
+  - HIGH materiality and HIGH dependence require the affected driver to explain
+    a large share of the fund's current thesis.
+  - MINIMAL requires NONE, LOW materiality, LOW dependence, UNLIKELY
+    normalization, probability_basis NONE and risk_basis NONE.
+  - MODERATE, ELEVATED or SEVERE derived risk must never depend on a null or
+    generic mechanism.
+  - A HYPOTHETICAL MODERATE candidate must satisfy POSSIBLE normalization;
+    MODERATE-or-HIGH materiality and dependence with at least one HIGH;
+    non-NONE probability/risk basis; FUND_SPECIFIC or EXPOSURE_SPECIFIC scope;
+    and concrete current evidence of the vulnerability and ETF-specific 0-12
+    month transmission. Do not require evidence that the adverse transition has
+    already begun. Otherwise keep the atomic fields honest and Python derives LOW.
+  - Finish and verify one ETF object before beginning the next object.
+
+  COMPLETION STANDARD
+  - The latest disclosed factsheet or holdings date is sufficient; same-day
+    holdings weights are not required.
+  - Do not mark research INCOMPLETE merely because exact flows, ETF valuation,
+    daily holdings, a preferred source, or one issuer page is unavailable.
+  - If an ETF-specific search executed and CANDIDATES plus the search results
+    establish the fund mandate, primary economic exposure, concentration and
+    major holdings, use relevant MARKET_CONTEXT plus those established fund
+    facts to form a reasonable current 6-12 month thesis and return COMPLETE.
+    A dedicated recent ETF news article, analyst outlook, flow datapoint or
+    issuer-written forward outlook is NOT required. For established broad,
+    sector or factor ETFs, current holdings/index identity plus relevant current
+    sector/factor conditions are sufficient to synthesize the continuation
+    outlook when no contradictory evidence is present.
+  - Never return INCOMPLETE solely because search results lack "recent
+    performance drivers", a dedicated "outlook", or an ETF-specific article
+    discussing the next 6-12 months. Use CANDIDATES, MARKET_CONTEXT and the
+    permitted ETF-specific search together. Do not invent facts; distinguish
+    established fund facts from the evidence-based forward inference.
+  - Do not use INCOMPLETE simply because one optional datapoint is missing.
+  - Before emitting INCOMPLETE, check whether the missing fact is already
+    supplied by CANDIDATES, MARKET_CONTEXT or the ETF-specific search. State the
+    exact indispensable missing fact. "Insufficient current information" by
+    itself is not a valid incomplete reason.
+  - Even when research_status is INCOMPLETE, populate every field that is already
+    supported by CANDIDATES or the permitted search. Do not null otherwise valid
+    fund identity, mandate, exposure, holdings or risk fields merely because one
+    indispensable fact is missing. This allows an evidence-only repair without
+    repeating the search.
+  - If the index mandate, primary economic exposure, concentration and major
+    holdings are established from supplied fund data or reliable current
+    sources, holdings identity is complete.
+  - Uncertainty is not INCOMPLETE. If evidence is current but no material
+    reversal mechanism is supported, complete the record and normally use LOW
+    or MINIMAL.
+  Use INCOMPLETE only when the primary exposure identity or enough current
+  decision evidence remains genuinely unavailable after using both CANDIDATES
+  and the permitted search.
+
+  MANDATE GATE
+  This recommender accepts U.S.-equity ETFs only. U.S. exchange listing or U.S.
+  fund domicile is not enough. Inspect the actual index and holdings. Set
+  mandate_assessment US_EQUITY only when at least 80% of economic exposure is
+  qualifying U.S.-listed operating-company equity. Return that 0-100 estimate
+  in us_equity_weight_estimate and state whether the estimate comes from
+  INDEX_MANDATE, HOLDINGS_WEIGHT, ASSET_CLASS, or OTHER in mandate_basis. Set
+  NOT_US_EQUITY for commodity,
+  futures, physical-asset, bond, global, international or single-country foreign
+  mandates. Partnership and master-limited-partnership portfolios are
+  NOT_US_EQUITY for this operating-company mandate even when U.S.-listed. Sector
+  and factor ETFs remain allowed when their holdings satisfy the U.S.-equity test.
+  A minority foreign holding does not make an otherwise qualifying ETF
+  NOT_US_EQUITY; use the weighted portfolio and dominant index mandate.
+
+  benchmark_assessment is an evidence input, not the final eligibility decision.
+  It is PASS only when current evidence supports a reasonable 6-12 month
+  outperformance case and FAIL when the thesis materially weakened, is dominated
+  by likely reversal, or lacks a forward advantage. CANDIDATES marks each ETF as
+  STRICT or BACKFILL under ResearchAdmission. Python accepts a STRICT candidate
+  from its quantitative benchmark gate unless mandate or evidence-derived risk
+  disqualifies it. A BACKFILL candidate additionally requires PASS. Do not return
+  eligible or attempt to make the final portfolio decision. A BACKFILL PASS must
+  identify a concrete supporting fact, a 6-12 month path and an invalidation
+  condition; generic optimism is insufficient.
+
+  Use primary_risk_event_id only for a documented current event materially
+  driving multiple ETFs. Reuse MARKET_CONTEXT event_id only when the ETF-specific
+  transmission test is satisfied AND the event direction is adverse to the ETF.
+  The event's existence or thematic relationship alone is insufficient.
+  Set risk_exposure_group to a stable UPPER_SNAKE_CASE transmission mechanism
+  describing the actual adverse channel, so unlike exposures are not grouped
+  merely because an event is shared. Both are null when no shared event applies.
+
+  CONSISTENCY REPAIR
+  A REPAIR_WITHOUT_NEW_SEARCH item may include peer_classifications for ETFs
+  sharing its economic exposure. Resolve the stated conflict from the existing
+  ETF sources and MARKET_CONTEXT. Preserve a difference only when the evidence
+  identifies a concrete fund-specific distinction. Otherwise align the atomic
+  evidence fields and benchmark assessment. Never search during a consistency
+  repair and never invent evidence. If no dated adverse change supports
+  OBSERVED, repair the record to HYPOTHETICAL or NONE rather than repeating a
+  generic market concern.
+
+  OUTPUT CONTRACT
+  Return JSON only. Put every ETF in FRESH_RESEARCH_REQUIRED_FOR in results as
+  a complete object in original candidate order. For an ETF in
+  REPAIR_WITHOUT_NEW_SEARCH, do not repeat its complete prior draft. Put only
+  the corrected fields in repairs; Python will merge the patch into prior_draft
+  and revalidate the full record. A SOURCE_ONLY repair must contain exactly
+  symbol and sources and must never be returned as an empty patch. A repair must
+  never change symbol, sources or already-valid evidence unless the
+  validation_error specifically names that field. When there are no repair ETFs,
+  repairs must be an empty list.
+
+  {
+    "results": [
+      {
+        "symbol": "ETF",
+        "research_status": "COMPLETE | INCOMPLETE",
+        "research_incomplete_reason": null,
+        "fund_name": "Current full name",
+        "sources": ["https://...", "https://..."],
+        "exposure_group": "STABLE_GROUP_LABEL",
+        "holdings_evidence": "Specific current holdings/concentration evidence",
+        "current_driver_evidence": "Specific current performance-driver evidence",
+        "mandate_assessment": "US_EQUITY | NOT_US_EQUITY",
+        "mandate_evidence": "Specific holdings/index evidence for the mandate decision",
+        "us_equity_weight_estimate": 85,
+        "mandate_basis": "INDEX_MANDATE | HOLDINGS_WEIGHT | ASSET_CLASS | OTHER",
+        "benchmark_assessment": "PASS | FAIL",
+        "continuation_outlook": "Concise 6-12 month evidence-based outlook",
+        "reversal_mechanism": "Required concrete adverse mechanism for OBSERVED and for any HYPOTHETICAL case that could meet the cautious borderline MODERATE test; otherwise null",
+        "mechanism_status": "NONE | HYPOTHETICAL | OBSERVED",
+        "adverse_change_observed": false,
+        "adverse_change_date": null,
+        "adverse_change_indicator": null,
+        "mechanism_evidence_source": null,
+        "evidence_scope": "FUND_SPECIFIC | EXPOSURE_SPECIFIC | MARKET_ONLY | NONE",
+        "normalization_probability": "UNLIKELY | POSSIBLE | LIKELY",
+        "probability_basis": "allowed value",
+        "probability_evidence": "Specific evidence or its supported absence",
+        "material_effect": "Expected ETF-level effect",
+        "risk_time_horizon": "0_3_MONTHS | 3_6_MONTHS | 6_12_MONTHS | LONGER",
+        "risk_materiality": "LOW | MODERATE | HIGH",
+        "driver_dependence": "LOW | MODERATE | HIGH",
+        "risk_basis": "NONE | NORMALIZED_EXPOSURE_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null,
+        "explanation": "One concise recommendation-facing sentence"
+      }
+    ],
+    "repairs": [
+      {
+        "symbol": "ETF",
+        "reversal_mechanism": "Only the corrected field or fields"
+      }
+    ]
+  }
+  For INCOMPLETE, preserve symbol and fund_name, give a reason under 25 words,
+  and use null for unsupported fields. Never fabricate a complete record.
+
+prompt_html_summary: |
+  You are a financial editor. Create polished viewer-facing HTML from the frozen,
+  fully researched ETF portfolio supplied in SELECTED_ETFS. It normally contains
+  10 ETFs, but may contain fewer when the validated candidate pool cannot safely
+  fill the target.
+
+  You will receive MARKET_CONTEXT and SELECTED_ETFS. The selected records contain
+  exact symbol, name, sector, reversal risk and validated research evidence. This
+  is an editorial task only. Do not search, recalculate, reclassify, replace,
+  remove, reorder or independently evaluate ETFs. Do not add facts or ETFs.
+
+  Return exactly one JSON object with no Markdown fence or extra text:
+  {
+    "summary_html": "<div class=\"summary\">...</div>"
+  }
+
+  Begin exactly with:
+    <div class="summary">
+    <h2>Market Chat:</h2>
+
+  First write one <p> containing a polished 3-5 sentence market summary based
+  only on MARKET_CONTEXT. Cover current conditions, the largest drivers and the
+  most important current concern.
+
+  Then group all supplied ETFs by their exact supplied sector. Provide exactly one <p>
+  per represented sector, in first-appearance order. Do not rename, merge, split
+  or reinterpret sectors. Begin each sector paragraph exactly as:
+    <p><strong>SECTOR</strong> (LINKED SYMBOLS): SECTOR SUMMARY. ETF DISCUSSIONS.</p>
+
+  Put linked symbols in parentheses immediately after the sector, separated by
+  a comma and space. Use only this link format:
+    <a href="https://finance.yahoo.com/quote/SYMBOL/" target="_blank"><strong>SYMBOL OR ETF NAME</strong></a>
+
+  Immediately after the colon, write one concise sector-summary sentence using
+  only MARKET_CONTEXT and the supplied ETF evidence. It must come before the
+  ETF-specific discussions.
+
+  For every selected ETF, in the following order:
+  - mention its symbol and name, with each separately bold and linked
+  - briefly summarize what the ETF holds or tracks
+  - explain why it is attractive now using its current driver and continuation
+    evidence
+  - state its exact supplied reversal risk in bold, unlinked text and explain the
+    principal mechanism or supported absence of one
+
+  Discuss each ETF exactly once under its supplied sector. No unselected symbol
+  may appear. Only symbols and ETF names may be links. Do not include citations,
+  source lists, QVM scores, ranks, rejected ETFs, internal variables, research
+  mechanics or portfolio-construction terminology.
+
+  End exactly with:
+    </div>

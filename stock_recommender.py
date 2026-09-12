@@ -1128,8 +1128,27 @@ NON_PROBABILITY_INDICATOR_ALIASES = {
 }
 
 NONRECURRING_TEMPORARY_ITEM_PATTERN = re.compile(
-    r"\b(?:refund|settlement|recovery|asset[ -]sale gain|tax benefit|"
-    r"tax credit|accounting gain|one[ -](?:time|off) gain)\b",
+    r"\b(?:refunds?|settlements?|recover(?:y|ies)|asset[ -]sale gains?|"
+    r"tax benefits?|tax credits?|accounting gains?|"
+    r"one[ -](?:time|off) gains?)\b",
+    re.IGNORECASE,
+)
+
+OPERATING_SUPPORT_ATTRIBUTION_PATTERN = re.compile(
+    r"\b(?:(?:driven|supported|boosted|aided)\s+by|benefited\s+from)\b",
+    re.IGNORECASE,
+)
+
+UNUSUALLY_FAVORABLE_MARKET_PATTERN = re.compile(
+    r"\b(?:elevated|exceptional(?:ly)?(?:[ -](?:high|strong))?|"
+    r"record(?:[ -]high)?|surging|"
+    r"unusually[ -](?:high|strong))\s+"
+    r"(?:(?:commodity|crude|oil|gas|gold|silver|refining|freight|tanker|"
+    r"memory|spot|tce|contract)\s+){0,3}"
+    r"(?:prices?|rates?|spreads?|margins?|demand)\b|"
+    r"\brobust\s+(?:(?:refining|freight|tanker|spot|tce)\s+){1,2}"
+    r"(?:rates?|spreads?|margins?)\b|"
+    r"\b(?:tight supply|supply shortages?|capacity constraints?)\b",
     re.IGNORECASE,
 )
 
@@ -1139,6 +1158,22 @@ def has_nonrecurring_temporary_item(temporary_drivers):
     return any(
         NONRECURRING_TEMPORARY_ITEM_PATTERN.search(str(driver))
         for driver in temporary_drivers or []
+    )
+
+
+def describes_unmodeled_temporary_market_support(result):
+    """Detect explicit temporary market support omitted from risk fields."""
+    text = " ".join(
+        str(result.get(field) or "")
+        for field in (
+            "current_operating_evidence",
+            "industry_context",
+            "explanation",
+        )
+    )
+    return bool(
+        OPERATING_SUPPORT_ATTRIBUTION_PATTERN.search(text)
+        and UNUSUALLY_FAVORABLE_MARKET_PATTERN.search(text)
     )
 
 
@@ -1508,6 +1543,18 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
         result["explanation"] = explanation
         if not str(result.get("reversal_mechanism", "")).strip():
             raise ValueError(f"{symbol} has no reversal mechanism.")
+
+        if (
+                risk_basis == "NONE"
+                and not temporary_drivers
+                and catalyst_dependence == "LOW"
+                and describes_unmodeled_temporary_market_support(result)
+        ):
+            raise ValueError(
+                f"{symbol} describes current results as supported by an "
+                "unusually favorable operating-market condition but omits "
+                "the corresponding temporary-driver risk fields."
+            )
 
         raw_risk_materiality = result.get("risk_materiality")
 
@@ -5065,6 +5112,8 @@ run_diagnostics = {
     "research": {
         "unique_symbols_requested": len(researched_symbols_this_run),
         "charged_search_attempts": stock_search_attempts_this_run,
+        "attempted_stock_requests": request_budget.stock_used,
+        "completed_stock_responses": len(stock_call_diagnostics),
         "newly_validated_symbols": newly_validated_symbols,
         "initial_validated_cache_symbols": sorted(
             initial_validated_cache_symbols
@@ -5098,8 +5147,13 @@ print(
 print(f"  newly validated stocks: {len(newly_validated_symbols)}")
 if stock_call_diagnostics:
     print(
-        "  newly validated stocks per stock call: "
+        "  newly validated stocks per completed stock response: "
         f"{len(newly_validated_symbols) / len(stock_call_diagnostics):.2f}"
+    )
+if request_budget.stock_used:
+    print(
+        "  newly validated stocks per attempted stock request: "
+        f"{len(newly_validated_symbols) / request_budget.stock_used:.2f}"
     )
 print(
     f"  exposed searches per newly validated stock: "

@@ -142,13 +142,13 @@ prompt_stock_batch: |
   RESEARCH EFFICIENCY
   For each new candidate, execute exactly one focused company-specific Google
   search using this compact pattern:
-  "[Company Name] [Symbol] investor relations latest results guidance pricing margins demand operating metrics"
+  "[Company Name] [Symbol] latest earnings results guidance operating metrics"
   Do not assume a calendar-quarter label; use the issuer's latest reported
   fiscal period. One search can return multiple sources. Do not issue follow-up,
-  earnings-period, or alternative-query searches in the same response. The
-  maximum search-query count equals the number of candidates explicitly
-  requiring fresh research. If one search is insufficient, return INCOMPLETE
-  rather than issuing another query.
+  investor-relations, earnings-period, or alternative-query searches in the same
+  response. The maximum search-query count equals the number of candidates
+  explicitly requiring fresh research. If one search is insufficient, return
+  INCOMPLETE rather than issuing another query.
 
   If a DEFERRED VALIDATION CORRECTIONS section is supplied, it overrides the
   preceding search rule. Search only symbols explicitly listed there as
@@ -216,22 +216,6 @@ prompt_stock_batch: |
   4. current evidence that the mechanism is probable, distinct from its damage
   5. company-specific normalized metric affected within 6-12 months
   6. continuation outlook and deterministic risk classification
-
-  CURRENT MARKET-DEPENDENCE CHECK
-  For commodity producers, refiners, shipping companies, semiconductor-memory
-  companies, insurers, and other market-sensitive businesses, explicitly test
-  whether current results are materially supported by unusually elevated
-  prices, rates, spreads, shortages, capacity constraints, or other temporary
-  operating conditions. Raised guidance and strong current earnings do not by
-  themselves establish that those conditions are durable.
-
-  When an unusually favorable operating condition materially supports normalized
-  results, use TEMPORARY_DRIVER_NORMALIZATION, identify it in temporary_drivers,
-  assess catalyst_dependence, and state the normalized recurring metric that
-  would weaken if it disappeared. Apply the cautious temporary-dependence floor
-  when its requirements are met. Do not use risk_basis NONE merely because
-  normalization has not yet started. MARKET_CONTEXT may identify the hypothesis,
-  but current candidate research must confirm the company's material exposure.
 
   mechanism_status:
   - NONE: no company-specific reversal mechanism was identified
@@ -314,16 +298,6 @@ prompt_stock_batch: |
   and probability_basis NONE. current_fact and probability_evidence may be null,
   but material_effect and a 0-12 month risk_time_horizon are required. Ordinary
   cyclicality, volatility, or a difficult comparison does not qualify.
-
-  LOW RISK CONFIRMATION
-  Before returning LOW, explicitly test the strongest plausible company-specific
-  reversal mechanism. If current results are described as driven or supported
-  by elevated, exceptional, record, or unusually favorable market pricing,
-  rates, spreads, shortages, or demand, LOW is valid only when current evidence
-  establishes LOW catalyst dependence or a durable company-specific protection
-  against normalization. The absence of current deterioration does not permit
-  risk_basis NONE when a material temporary operating driver currently supports
-  normalized results.
 
   RISK MAPPING
   Derive reversal_risk last from the completed fields:

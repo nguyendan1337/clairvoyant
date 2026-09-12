@@ -9,12 +9,25 @@ from bs4 import BeautifulSoup
 from google.genai import types
 from datetime import datetime, timedelta, UTC
 import requests, time, random, json, yaml, os, hashlib
+import signal
 from html import escape
 
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
 STOCK_RUN_DIAGNOSTICS_FILE = CACHE_DIR / "stock_run_diagnostics.json"
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 30 * 60
+GEMINI_REQUEST_TIMEOUT_MS = 5 * 60 * 1000
+
+
+class TotalRuntimeTimeout(BaseException):
+    """Stop the process when the recommender exceeds its total runtime."""
+
+
+def handle_total_runtime_timeout(signum, frame):
+    raise TotalRuntimeTimeout(
+        "Stock recommender exceeded its 30-minute total runtime limit."
+    )
 
 gemini_call_diagnostics = []
 duplicate_result_diagnostics = []
@@ -342,7 +355,10 @@ def initialize_gemini_client():
     if not api_key:
         raise ValueError("GEMINI_KEY not found in environment or .env")
 
-    return genai.Client(api_key=api_key)
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=GEMINI_REQUEST_TIMEOUT_MS),
+    )
 
 
 def build_gemini_config(thinking_budget, enable_search=True):
@@ -2157,6 +2173,7 @@ def call_gemini_json(
             except Exception as exc:
                 last_error = exc
                 error_text = str(exc).upper()
+                error_type = type(exc).__name__.upper()
                 error_code = getattr(exc, "code", None)
 
                 daily_quota_exhausted = (
@@ -2175,6 +2192,7 @@ def call_gemini_json(
                         or "TOO MANY REQUESTS" in error_text
                         or "UNAVAILABLE" in error_text
                         or "TIMEOUT" in error_text
+                        or "TIMEOUT" in error_type
                     )
                 )
 
@@ -3509,6 +3527,8 @@ def validate_summary_response(data, selected):
 # Main execution
 # Record the start time
 start_time = time.perf_counter()
+signal.signal(signal.SIGALRM, handle_total_runtime_timeout)
+signal.alarm(TOTAL_RUNTIME_TIMEOUT_SECONDS)
 
 with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
@@ -3817,9 +3837,6 @@ if market_context is None:
             "tool_tokens": market_metadata["tool_tokens"],
         },
     })
-
-print("\nValidated market context:")
-print(json.dumps(market_context, indent=2, ensure_ascii=False))
 
 market_context_hash = stable_json_hash(market_context)
 # Output-transport wording does not change researched facts or classifications,
@@ -5104,3 +5121,4 @@ print("Selected symbols: " + ", ".join(
 
 # print elapsed time
 print(f"Elapsed time: {str(round(end_time - start_time))} seconds\n\n")
+signal.alarm(0)

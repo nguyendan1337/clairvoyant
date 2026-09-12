@@ -160,7 +160,7 @@ gemini_research_cache_hours: 12
 cache_version: 4
 # Kept separate so ETF research can be invalidated without preventing reuse of
 # the stock recommender's shared market-context cache.
-etf_research_cache_version: 11
+etf_research_cache_version: 12
 
 prompt_market_context: |
   You are the shared market-research stage for U.S. stock and ETF recommenders.
@@ -286,36 +286,36 @@ prompt_etf_batch: |
   holdings, explicitly identify that discrepancy in holdings_evidence.
 
   REVERSAL EVIDENCE GATE
-  MODERATE normally requires a specific observable adverse mechanism present
-  now, current evidence of an adverse change or measurable directional
-  indicator, an evidence-based probability indicator, a material expected
-  effect on holdings/factor exposure, and a plausible 0-12 month transmission
-  path. There is one narrow exception: a HYPOTHETICAL temporary-driver or
-  normalized-exposure reversal may still qualify for MODERATE when ALL are true:
-  normalization_probability is POSSIBLE, risk_materiality is HIGH,
-  driver_dependence is HIGH, risk_basis is TEMPORARY_DRIVER_NORMALIZATION or
-  NORMALIZED_EXPOSURE_DETERIORATION, probability_basis is not NONE, and current
-  ETF/exposure-specific evidence shows BOTH (1) the favorable driver is unusually
-  elevated, temporary, concentrated, or cyclically vulnerable AND (2) a current
-  directional weakening signal tied to that same driver has appeared, even if it
-  is not yet strong enough to make the mechanism OBSERVED. Examples include
-  weakening supply/demand data, deteriorating earnings revisions, adverse flows
-  or valuation compression, or a dated policy/operating change that points toward
-  normalization. A favorable driver that merely COULD normalize, a one-day price
-  decline, or a generic statement that geopolitical tensions/rates/AI enthusiasm
-  may reverse is not enough for MODERATE and should remain LOW. In a qualifying
-  case, reversal_mechanism, probability_evidence and material_effect must each
-  state the concrete current weakening signal and its 0-12 month transmission
-  path. ELEVATED and SEVERE still require an OBSERVED adverse mechanism. Generic
+  MODERATE includes a credible, ETF-specific material vulnerability that exists
+  now even when the adverse transition has not clearly begun. A HYPOTHETICAL
+  temporary-driver or normalized-exposure reversal qualifies when ALL are true:
+  normalization_probability is POSSIBLE; risk_materiality and driver_dependence
+  are each at least MODERATE and at least one is HIGH; risk_basis is
+  TEMPORARY_DRIVER_NORMALIZATION or NORMALIZED_EXPOSURE_DETERIORATION;
+  probability_basis is not NONE; evidence_scope is FUND_SPECIFIC or
+  EXPOSURE_SPECIFIC; and current evidence establishes BOTH (1) concrete exposure
+  to an unusually elevated, temporary, concentrated, cyclical, financing-sensitive
+  or valuation-sensitive condition and (2) a plausible 0-12 month normalization
+  path that would materially damage this ETF's actual holdings, index construction
+  or factor thesis. The adverse transition does not need to have begun, and
+  conditional wording does not invalidate an otherwise concrete vulnerability.
+  A merely imaginable shock, ordinary valuation, concentration or cyclicality,
+  generic market sensitivity, or a one-day price move is not enough. In a
+  qualifying case, reversal_mechanism, probability_evidence and material_effect
+  must state the concrete exposure, probability basis and ETF-specific 0-12 month
+  transmission path. MODERATE may also arise from an OBSERVED adverse mechanism
+  under the mapping below. ELEVATED and SEVERE still require an OBSERVED adverse
+  mechanism. Generic
   market risk, valuation concern or a merely possible shock is not enough.
   Valuation, concentration, crowding, rate sensitivity or cyclicality alone
-  remains HYPOTHETICAL unless current evidence also satisfies the narrow
-  MODERATE exception or shows the adverse mechanism is already active.
+  remains LOW-risk HYPOTHETICAL unless current evidence also satisfies the
+  cautious borderline MODERATE test or shows the adverse mechanism is active.
 
   mechanism_status: NONE means no supported adverse mechanism; HYPOTHETICAL
-  means conceivable but not evidenced; OBSERVED requires a current adverse
-  change or leading indicator, not merely a condition that could make a future
-  reversal painful. A currently favorable temporary driver does not create an
+  means the vulnerability may be evidenced but the adverse transition itself
+  is not observed; OBSERVED requires a current adverse change or leading
+  indicator, not merely a condition that could make a future reversal painful.
+  A currently favorable temporary driver does not create an
   OBSERVED reversal merely because it could normalize. Statements such as
   "if geopolitical tensions ease", "if commodity prices fall", "if rates stay
   high", "could lead to", "could decline", "may weaken", or similar conditional
@@ -375,7 +375,9 @@ prompt_etf_batch: |
   or EXPOSURE_SPECIFIC;
   adverse_change_date must identify when it was observed;
   adverse_change_indicator must state the concrete evidence; and
-  mechanism_evidence_source must exactly match one URL in that ETF's sources.
+  mechanism_evidence_source_index must be the zero-based index of the source in
+  that ETF's sources list that directly supports the observed adverse change.
+  Do not repeat or reconstruct the URL in a separate field.
 
   SHORT-TERM TECHNICAL SIGNALS ARE NOT OBSERVED REVERSAL EVIDENCE.
   RSI, stochastic oscillators, MACD, moving-average crosses, chart patterns,
@@ -403,10 +405,12 @@ prompt_etf_batch: |
     or MODERATE materiality with LIKELY normalization and high dependence.
   - MODERATE: either (a) OBSERVED, at least POSSIBLE and MODERATE materiality,
     with a specific 0-12 month path, but the elevated threshold is unmet; or
-    (b) HYPOTHETICAL with POSSIBLE normalization, HIGH materiality, HIGH driver
-    dependence, a non-NONE evidence basis, and a specifically evidenced
-    temporary/elevated driver whose normalization could materially reverse the
-    ETF over 0-12 months.
+    (b) HYPOTHETICAL with POSSIBLE normalization; MODERATE-or-HIGH materiality
+    and dependence with at least one HIGH; a non-NONE evidence basis;
+    FUND_SPECIFIC or EXPOSURE_SPECIFIC scope; and a specifically evidenced
+    temporary, elevated or concentrated vulnerability whose normalization could
+    materially reverse the ETF over 0-12 months. The adverse transition need not
+    already be underway.
   - LOW: no complete moderate mechanism, but ordinary uncertainty, a weaker
     hypothetical risk, an observed low-materiality issue, or strong but uncertain
     continuation.
@@ -425,8 +429,8 @@ prompt_etf_batch: |
     strings.
   - OBSERVED also requires adverse_change_observed true, evidence_scope
     FUND_SPECIFIC or EXPOSURE_SPECIFIC, a dated adverse_change_date, a concrete
-    adverse_change_indicator, and a mechanism_evidence_source present verbatim
-    in sources.
+    adverse_change_indicator, and a valid mechanism_evidence_source_index
+    pointing to the source in sources that directly supports that change.
   - If evidence_scope is MARKET_ONLY or NONE, adverse_change_observed must be
     false and mechanism_status cannot be OBSERVED.
   - If no concrete present mechanism can be stated, mechanism_status must be
@@ -440,10 +444,12 @@ prompt_etf_batch: |
     normalization, probability_basis NONE and risk_basis NONE.
   - MODERATE, ELEVATED or SEVERE derived risk must never depend on a null or
     generic mechanism.
-  - A HYPOTHETICAL MODERATE candidate must satisfy POSSIBLE normalization, HIGH
-    materiality, HIGH dependence, non-NONE probability/risk basis, and concrete
-    current evidence that the favorable driver is temporary/elevated; otherwise
-    keep the atomic fields honest and Python will derive LOW.
+  - A HYPOTHETICAL MODERATE candidate must satisfy POSSIBLE normalization;
+    MODERATE-or-HIGH materiality and dependence with at least one HIGH;
+    non-NONE probability/risk basis; FUND_SPECIFIC or EXPOSURE_SPECIFIC scope;
+    and concrete current evidence of the vulnerability and ETF-specific 0-12
+    month transmission. Do not require evidence that the adverse transition has
+    already begun. Otherwise keep the atomic fields honest and Python derives LOW.
   - Finish and verify one ETF object before beginning the next object.
 
   COMPLETION STANDARD
@@ -529,6 +535,15 @@ prompt_etf_batch: |
   OBSERVED, repair the record to HYPOTHETICAL or NONE rather than repeating a
   generic market concern.
 
+  DETERMINISTIC PROVENANCE FIELDS
+  - Return adverse_change_date as YYYY-MM-DD whenever mechanism_status is OBSERVED.
+  - For OBSERVED, mechanism_evidence_source_index is mandatory and must be an
+    integer zero-based index into that ETF's sources list. Choose the one source
+    that most directly supports adverse_change_indicator.
+  - Do not return mechanism_evidence_source as a URL. Python binds the selected
+    source URL from the index after validating sources.
+  - For HYPOTHETICAL or NONE, mechanism_evidence_source_index must be null.
+
   OUTPUT CONTRACT
   Return JSON only. Put every ETF in FRESH_RESEARCH_REQUIRED_FOR in results as
   a complete object in original candidate order. For an ETF in
@@ -557,12 +572,12 @@ prompt_etf_batch: |
         "mandate_basis": "INDEX_MANDATE | HOLDINGS_WEIGHT | ASSET_CLASS | OTHER",
         "benchmark_assessment": "PASS | FAIL",
         "continuation_outlook": "Concise 6-12 month evidence-based outlook",
-        "reversal_mechanism": "Required concrete adverse mechanism for OBSERVED and for any HYPOTHETICAL case that could meet the narrow MODERATE exception; otherwise null",
+        "reversal_mechanism": "Required concrete adverse mechanism for OBSERVED and for any HYPOTHETICAL case that could meet the cautious borderline MODERATE test; otherwise null",
         "mechanism_status": "NONE | HYPOTHETICAL | OBSERVED",
         "adverse_change_observed": false,
         "adverse_change_date": null,
         "adverse_change_indicator": null,
-        "mechanism_evidence_source": null,
+        "mechanism_evidence_source_index": null,
         "evidence_scope": "FUND_SPECIFIC | EXPOSURE_SPECIFIC | MARKET_ONLY | NONE",
         "normalization_probability": "UNLIKELY | POSSIBLE | LIKELY",
         "probability_basis": "allowed value",

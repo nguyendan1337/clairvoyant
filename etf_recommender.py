@@ -417,71 +417,6 @@ def update_html_page(
         f.write(html_output)
 
 
-
-def existing_page_matches_etf_content(
-    display_page,
-    final_recommendations,
-    df_html_table,
-):
-    """Return True when the existing page already contains current ETF content.
-
-    Ignore volatile presentation metadata such as the rendered timestamp and model
-    label. This allows a fully cached run to preserve etf_index.html byte-for-byte
-    when its recommendation table, validated summary, and full data table are
-    unchanged.
-    """
-    if not os.path.exists(display_page):
-        return False
-    try:
-        with open(display_page, 'r', encoding='utf-8') as handle:
-            existing_page = handle.read().replace('\r\n', '\n')
-    except Exception as exc:
-        print(f'Could not read existing {display_page} for no-op check: {exc}')
-        return False
-
-    table_match = re.search(
-        r'(<table.*?</table>)',
-        final_recommendations,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
-    summary_match = re.search(
-        r'(<div[^>]*class=["\']summary["\'][^>]*>.*?</div>)',
-        final_recommendations,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
-    recommendation_table = (
-        table_match.group(1).strip() if table_match else ''
-    )
-    summary_html = summary_match.group(1).strip() if summary_match else ''
-
-    required_fragments = [
-        fragment.replace('\r\n', '\n').strip()
-        for fragment in (recommendation_table, summary_html, df_html_table)
-        if str(fragment or '').strip()
-    ]
-    if len(required_fragments) < 3:
-        return False
-    return all(fragment in existing_page for fragment in required_fragments)
-
-
-def extract_existing_summary_html(display_page):
-    """Return the existing rendered summary div from a prior published page."""
-    if not os.path.exists(display_page):
-        return None
-    try:
-        with open(display_page, 'r', encoding='utf-8') as handle:
-            page_html = handle.read()
-    except Exception as exc:
-        print(f'Could not read existing {display_page} for summary reuse: {exc}')
-        return None
-    match = re.search(
-        r'(<div[^>]*class=["\\\']summary["\\\'][^>]*>.*?</div>)',
-        page_html,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
-    return match.group(1).strip() if match else None
-
-
 def extract_number_with_suffix(value):
     if value is None or pd.isna(value):
         return None
@@ -1782,6 +1717,17 @@ def normalize_etf_result(result):
     result['us_equity_weight_estimate'] = safe_float(
         result.get('us_equity_weight_estimate')
     )
+    if result.get('mechanism_evidence_source_index') is not None:
+        try:
+            result['mechanism_evidence_source_index'] = int(
+                result['mechanism_evidence_source_index']
+            )
+        except (TypeError, ValueError):
+            pass
+    if result.get('adverse_change_date') is not None:
+        result['adverse_change_date'] = normalize_adverse_change_date(
+            result.get('adverse_change_date')
+        )
     reported_eligible = result.get('eligible')
     if isinstance(reported_eligible, str):
         reported_eligible = reported_eligible.strip().lower() in {
@@ -1795,18 +1741,23 @@ def normalize_etf_result(result):
 
 
 def hypothetical_moderate_is_supported(result):
-    """Require a real current weakening signal before HYPOTHETICAL reaches MODERATE."""
+    """Recognize a concrete borderline vulnerability before deterioration begins."""
     if result.get('mechanism_status') != 'HYPOTHETICAL':
         return False
     if result.get('normalization_probability') != 'POSSIBLE':
         return False
-    if result.get('risk_materiality') != 'HIGH' or result.get('driver_dependence') != 'HIGH':
+    levels = {'LOW': 0, 'MODERATE': 1, 'HIGH': 2}
+    materiality = levels.get(result.get('risk_materiality'), -1)
+    dependence = levels.get(result.get('driver_dependence'), -1)
+    if materiality < 1 or dependence < 1 or max(materiality, dependence) < 2:
         return False
     if result.get('risk_basis') not in {
         'TEMPORARY_DRIVER_NORMALIZATION', 'NORMALIZED_EXPOSURE_DETERIORATION'
     }:
         return False
     if result.get('probability_basis') in {None, 'NONE'}:
+        return False
+    if result.get('evidence_scope') not in {'FUND_SPECIFIC', 'EXPOSURE_SPECIFIC'}:
         return False
     required_evidence = (
         'current_driver_evidence', 'probability_evidence',
@@ -1818,28 +1769,7 @@ def hypothetical_moderate_is_supported(result):
     ):
         return False
 
-    # HYPOTHETICAL MODERATE is intentionally rare. The text must describe an
-    # actual current deterioration signal, not just a conditional future risk.
-    evidence_text = ' '.join(
-        str(result.get(field) or '')
-        for field in ('current_driver_evidence', 'probability_evidence', 'reversal_mechanism')
-    ).casefold()
-    purely_conditional = any(re.search(pattern, evidence_text) for pattern in (
-        r'\bif\s+',
-        r'\bcould\s+',
-        r'\bmay\s+',
-        r'\bmight\s+',
-        r'\bpossible\b',
-        r'\bpotential\b',
-    ))
-    weakening_terms = (
-        'weaken', 'deteriorat', 'declin', 'falling', 'slowing', 'soften',
-        'compression', 'outflow', 'negative revision', 'downgrade',
-        'inventory build', 'demand slowdown', 'supply increase', 'spread narrowing',
-        'margin pressure', 'earnings pressure', 'policy change', 'guidance cut',
-    )
-    has_weakening_signal = any(term in evidence_text for term in weakening_terms)
-    return has_weakening_signal and not purely_conditional
+    return True
 
 
 def derive_reversal_risk(result):
@@ -1897,7 +1827,11 @@ def normalize_hypothetical_consistency(result):
         result['adverse_change_date'] = None
         result['adverse_change_indicator'] = None
         result['mechanism_evidence_source'] = None
-        result['evidence_scope'] = 'NONE'
+        result['mechanism_evidence_source_index'] = None
+        if result.get('evidence_scope') not in {
+            'FUND_SPECIFIC', 'EXPOSURE_SPECIFIC', 'MARKET_ONLY', 'NONE'
+        }:
+            result['evidence_scope'] = 'NONE'
         if result.get('normalization_probability') == 'LIKELY':
             result['normalization_probability'] = 'POSSIBLE'
         if result.get('risk_basis') == 'NONE':
@@ -1910,6 +1844,7 @@ def normalize_hypothetical_consistency(result):
         result['adverse_change_date'] = None
         result['adverse_change_indicator'] = None
         result['mechanism_evidence_source'] = None
+        result['mechanism_evidence_source_index'] = None
         result['evidence_scope'] = 'NONE'
         result['normalization_probability'] = 'UNLIKELY'
         result['probability_basis'] = 'NONE'
@@ -1978,6 +1913,85 @@ def material_effect_is_generic(result, candidate):
     return looks_generic and not (has_etf_reference or has_construction_reference)
 
 
+def normalize_adverse_change_date(value):
+    """Normalize safely parseable evidence dates without changing their meaning."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    # Fast path for ISO dates/timestamps, including trailing Z.
+    try:
+        parsed = datetime.fromisoformat(text.replace('Z', '+00:00'))
+        return parsed.date().isoformat()
+    except (TypeError, ValueError):
+        pass
+    # Gemini occasionally emits unambiguous human-readable dates. Pandas is
+    # already a dependency and gives us a deterministic local normalization.
+    try:
+        parsed = pd.to_datetime(text, errors='coerce', utc=True)
+    except Exception:
+        parsed = None
+    if parsed is None or pd.isna(parsed):
+        return text
+    try:
+        return parsed.date().isoformat()
+    except Exception:
+        return text
+
+
+def canonicalize_source_url(value):
+    """Canonicalize harmless URL representation differences for provenance checks."""
+    text = str(value or '').strip()
+    if not text:
+        return ''
+    # Do not attempt network resolution. Normalize only deterministic syntax
+    # differences that cannot change the underlying resource identity.
+    text = re.sub(r'#.*$', '', text).rstrip('/')
+    text = re.sub(r'([?&])(utm_[^=&]+|gclid|fbclid)=[^&]*&?', r'\1', text, flags=re.I)
+    text = text.replace('?&', '?').rstrip('?&')
+    return text
+
+
+def bind_mechanism_evidence_source(result):
+    """Bind OBSERVED evidence to an already validated source deterministically.
+
+    New responses use mechanism_evidence_source_index, eliminating fragile URL
+    copying. Older cached responses remain compatible through canonical URL
+    matching.
+    """
+    result = dict(result)
+    sources = result.get('sources') or []
+    index = result.get('mechanism_evidence_source_index')
+    if index is not None:
+        try:
+            index = int(index)
+        except (TypeError, ValueError):
+            index = None
+        if index is not None and 0 <= index < len(sources):
+            result['mechanism_evidence_source_index'] = index
+            result['mechanism_evidence_source'] = str(
+                sources[index].get('url') or ''
+            ).strip()
+            return result
+
+    mechanism_source = canonicalize_source_url(
+        result.get('mechanism_evidence_source')
+    )
+    if mechanism_source:
+        matches = [
+            idx for idx, source in enumerate(sources)
+            if canonicalize_source_url(source.get('url')) == mechanism_source
+        ]
+        if len(matches) == 1:
+            index = matches[0]
+            result['mechanism_evidence_source_index'] = index
+            result['mechanism_evidence_source'] = str(
+                sources[index].get('url') or ''
+            ).strip()
+    return result
+
+
 def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5):
     result = normalize_etf_result(result)
     result = normalize_hypothetical_consistency(result)
@@ -1999,6 +2013,7 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
         result.get('sources'), symbol, minimum=minimum_sources,
         maximum=maximum_sources,
     )
+    result = bind_mechanism_evidence_source(result)
     if result.get('benchmark_assessment') not in {'PASS', 'FAIL'}:
         raise ValueError(f'{symbol} has invalid benchmark_assessment.')
     if result.get('mandate_assessment') not in {'US_EQUITY', 'NOT_US_EQUITY'}:
@@ -2067,10 +2082,13 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
             raise ValueError(
                 f'{symbol} observed mechanism lacks adverse_change_indicator.'
             )
-        date_text = str(result.get('adverse_change_date') or '').strip()
+        date_text = normalize_adverse_change_date(
+            result.get('adverse_change_date')
+        )
+        result['adverse_change_date'] = date_text
         try:
             evidence_date = datetime.fromisoformat(
-                date_text.replace('Z', '+00:00')
+                str(date_text).replace('Z', '+00:00')
             ).date()
         except (TypeError, ValueError):
             raise ValueError(
@@ -2081,17 +2099,17 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
             raise ValueError(
                 f'{symbol} adverse_change_date is not current.'
             )
-        mechanism_source = str(
-            result.get('mechanism_evidence_source') or ''
-        ).strip().rstrip('/')
-        source_urls = {
-            str(item.get('url') or '').strip().rstrip('/')
-            for item in result['sources']
-        }
-        if not mechanism_source or mechanism_source not in source_urls:
+        source_index = result.get('mechanism_evidence_source_index')
+        if not isinstance(source_index, int) or not (
+            0 <= source_index < len(result['sources'])
+        ):
             raise ValueError(
-                f'{symbol} mechanism_evidence_source is not in sources.'
+                f'{symbol} observed mechanism lacks a valid '
+                'mechanism_evidence_source_index.'
             )
+        result['mechanism_evidence_source'] = str(
+            result['sources'][source_index].get('url') or ''
+        ).strip()
         if observed_mechanism_is_conditionally_worded(result):
             raise ValueError(
                 f'{symbol} OBSERVED mechanism is conditional rather than a '
@@ -2155,7 +2173,7 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
         if risk == 'MODERATE' and result['mechanism_status'] == 'HYPOTHETICAL' and not hypothetical_moderate:
             raise ValueError(
                 f'{symbol} hypothetical MODERATE risk lacks the required '
-                'POSSIBLE/HIGH/HIGH normalization evidence.'
+                'cautious-borderline normalization evidence.'
             )
         for field in ('reversal_mechanism', 'probability_evidence', 'material_effect'):
             if len(str(result.get(field) or '').strip()) < 15:
@@ -2269,6 +2287,7 @@ def merge_structural_repair_patches(data, repair_payload):
             'risk_basis', 'primary_risk_event_id', 'risk_exposure_group',
             'adverse_change_observed', 'adverse_change_date',
             'adverse_change_indicator', 'mechanism_evidence_source',
+            'mechanism_evidence_source_index',
             'evidence_scope',
             'explanation',
         }
@@ -2280,7 +2299,8 @@ def merge_structural_repair_patches(data, repair_payload):
             allowed_fields.add('sources')
         if any(fragment in validation_error for fragment in (
             'observed mechanism', 'adverse_change', 'evidence_scope',
-            'mechanism_evidence_source', 'market context alone',
+            'mechanism_evidence_source', 'mechanism_evidence_source_index',
+            'market context alone',
             'etf-specific transmission path', 'material_effect is generic',
         )):
             allowed_fields.update({
@@ -2289,6 +2309,7 @@ def merge_structural_repair_patches(data, repair_payload):
                 'risk_materiality', 'driver_dependence', 'material_effect',
                 'adverse_change_observed', 'adverse_change_date',
                 'adverse_change_indicator', 'mechanism_evidence_source',
+                'mechanism_evidence_source_index',
                 'evidence_scope', 'probability_basis', 'risk_basis',
             })
         if any(fragment in validation_error for fragment in (
@@ -2314,6 +2335,7 @@ def merge_structural_repair_patches(data, repair_payload):
                 'risk_basis', 'primary_risk_event_id', 'risk_exposure_group',
                 'adverse_change_observed', 'adverse_change_date',
                 'adverse_change_indicator', 'mechanism_evidence_source',
+                'mechanism_evidence_source_index',
                 'evidence_scope', 'mandate_assessment', 'mandate_evidence',
                 'us_equity_weight_estimate', 'mandate_basis', 'explanation',
             })
@@ -3087,7 +3109,7 @@ def validate_summary_response(data, selected):
 
 
 start_time = time.perf_counter()
-config_path = SCRIPT_DIR / 'etf_config.yml'
+config_path = SCRIPT_DIR / 'etf_config(1).yml'
 with config_path.open('r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
 required_prompt_keys = {
@@ -3528,24 +3550,6 @@ if research_cache.get('version') != research_cache_version:
     }
 research_cache.setdefault('entries', {})
 research_cache.setdefault('deferred_entries', {})
-
-# Compact the persistent research cache before reuse/save. GitHub Actions Cache
-# restores the previous runtime cache as an opaque directory, while Python
-# remains authoritative for TTL freshness. Removing expired entries here keeps
-# successive Actions cache generations small without changing reuse semantics.
-research_cache['entries'] = {
-    key: entry
-    for key, entry in research_cache['entries'].items()
-    if isinstance(entry, dict)
-    and cache_entry_is_fresh(entry, research_cache_hours)
-}
-research_cache['deferred_entries'] = {
-    key: entry
-    for key, entry in research_cache['deferred_entries'].items()
-    if isinstance(entry, dict)
-    and cache_entry_is_fresh(entry, research_cache_hours)
-}
-save_json_object_atomic(research_cache_file, research_cache)
 
 candidate_by_symbol = {
     str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
@@ -4393,132 +4397,50 @@ print('\n' + context_review + '\n')
 
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
-summary_source = 'PYTHON_FALLBACK'
-summary_input_hash = None
-run_diagnostics_file = config.get(
-    'run_diagnostics_file', 'caches/etf_run_diagnostics.json'
-)
-previous_diagnostics = load_json_object(run_diagnostics_file)
-
-if config.get('final_summary_enabled', True):
+if config.get('final_summary_enabled', True) and request_budget.total_used < request_budget.total:
     selected_summary_input = build_summary_input(selected)
-    summary_prompt_text = config['prompt_html_summary'].rstrip()
-    summary_input_hash = stable_json_hash({
-        'prompt': summary_prompt_text,
-        'market_context': market_context,
-        'selected_etfs': selected_summary_input,
-    })
-    previous_summary_cache = previous_diagnostics.get('summary_cache', {})
-    existing_summary_html = extract_existing_summary_html('etf_index.html')
-    has_matching_summary_signature = (
-        isinstance(previous_summary_cache, dict)
-        and bool(previous_summary_cache.get('reusable_gemini_summary'))
-        and previous_summary_cache.get('input_hash') == summary_input_hash
+    summary_prompt = (
+        config['prompt_html_summary'].rstrip()
+        + '\n\nMARKET_CONTEXT:\n'
+        + json.dumps(market_context, ensure_ascii=False)
+        + '\n\nSELECTED_ETFS:\n'
+        + json.dumps(selected_summary_input, ensure_ascii=False)
     )
-    # Migration/bootstrap path: older successful runs predate summary_cache
-    # metadata. If this execution has needed zero Gemini calls so far, the
-    # existing page validates against the exact current selected portfolio, and
-    # the previous successful diagnostics reference the same selected symbols,
-    # adopt that existing Gemini summary as the baseline instead of spending a
-    # one-time editorial call solely to seed the new hash. The current run then
-    # writes summary_cache metadata, so subsequent reuse uses the strict hash.
-    current_selected_symbols = [
-        str(item['candidate']['Symbol']).upper() for item in selected
-    ]
-    previous_selected_symbols = [
-        str(symbol).upper()
-        for symbol in (
-            previous_diagnostics.get('research', {}).get('selected_symbols', [])
-            if isinstance(previous_diagnostics.get('research'), dict)
-            else []
-        )
-    ]
-    can_bootstrap_existing_summary = (
-        not has_matching_summary_signature
-        and not previous_summary_cache
-        and bool(previous_diagnostics)
-        and request_budget.total_used == 0
-        and previous_selected_symbols == current_selected_symbols
-        and bool(existing_summary_html)
-    )
-    can_reuse_existing_summary = (
-        bool(existing_summary_html)
-        and (has_matching_summary_signature or can_bootstrap_existing_summary)
-    )
-    if can_reuse_existing_summary:
+    summary_data = None
+    for summary_model in [model_primary, model_fallback]:
+        if request_budget.total_used >= request_budget.total:
+            break
         try:
-            summary_html = validate_summary_response(
-                {'summary_html': existing_summary_html}, selected
+            summary_data, used_model, metadata = call_gemini_json(
+                client,
+                summary_model,
+                summary_prompt,
+                build_gemini_config(
+                    summary_thinking_budget,
+                    enable_search=False,
+                    max_output_tokens=gemini_max_output_tokens,
+                ),
+                'ETF HTML summary',
+                request_budget,
+                'summary',
+                1,
+                initial_delay,
+                max_transient_delay,
             )
-            summary_source = 'REUSED_GEMINI'
-            if can_bootstrap_existing_summary:
-                print(
-                    'Bootstrapping ETF HTML summary cache from the existing '
-                    'validated etf_index.html; portfolio is unchanged and this '
-                    'run required no market-context or ETF-research Gemini calls.'
-                )
-            else:
-                print(
-                    'Reusing validated Gemini ETF HTML summary from existing '
-                    'etf_index.html; summary inputs are unchanged.'
-                )
+            models_used.append(used_model)
+            call_diagnostics.append({'stage': 'HTML summary', **metadata})
+            break
         except Exception as exc:
-            reason = (
-                'bootstrap candidate' if can_bootstrap_existing_summary
-                else 'prior input hash match'
-            )
+            print(f'ETF summary unavailable from {summary_model}: {exc}')
+    if isinstance(summary_data, dict):
+        try:
+            summary_html = validate_summary_response(summary_data, selected)
+            print('Using Gemini-written ETF HTML summary.')
+        except Exception as exc:
             print(
-                f'Existing ETF HTML summary ({reason}) no longer validates; '
-                f'regenerating it: {exc}'
+                'Gemini summary was invalid; using deterministic fallback summary: '
+                f'{exc}'
             )
-
-    if (
-        summary_source != 'REUSED_GEMINI'
-        and request_budget.total_used < request_budget.total
-    ):
-        summary_prompt = (
-            summary_prompt_text
-            + '\n\nMARKET_CONTEXT:\n'
-            + json.dumps(market_context, ensure_ascii=False)
-            + '\n\nSELECTED_ETFS:\n'
-            + json.dumps(selected_summary_input, ensure_ascii=False)
-        )
-        summary_data = None
-        for summary_model in [model_primary, model_fallback]:
-            if request_budget.total_used >= request_budget.total:
-                break
-            try:
-                summary_data, used_model, metadata = call_gemini_json(
-                    client,
-                    summary_model,
-                    summary_prompt,
-                    build_gemini_config(
-                        summary_thinking_budget,
-                        enable_search=False,
-                        max_output_tokens=gemini_max_output_tokens,
-                    ),
-                    'ETF HTML summary',
-                    request_budget,
-                    'summary',
-                    1,
-                    initial_delay,
-                    max_transient_delay,
-                )
-                models_used.append(used_model)
-                call_diagnostics.append({'stage': 'HTML summary', **metadata})
-                break
-            except Exception as exc:
-                print(f'ETF summary unavailable from {summary_model}: {exc}')
-        if isinstance(summary_data, dict):
-            try:
-                summary_html = validate_summary_response(summary_data, selected)
-                summary_source = 'GEMINI'
-                print('Using Gemini-written ETF HTML summary.')
-            except Exception as exc:
-                print(
-                    'Gemini summary was invalid; using deterministic fallback summary: '
-                    f'{exc}'
-                )
 
 final_recommendations = recommendations_table + summary_html
 model_used = ', '.join(dict.fromkeys(models_used)) or 'validated cache + Python'
@@ -4563,27 +4485,16 @@ df_html_table = df_html.to_html(
     classes='recommendations-table',
     border=0,
 )
-page_reused_without_write = bool(
-    summary_source == 'REUSED_GEMINI'
-    and existing_page_matches_etf_content(
-        'etf_index.html',
-        final_recommendations,
-        df_html_table,
-    )
+update_html_page(
+    final_recommendations,
+    df_html_table,
+    'etf_page_template.html',
+    'etf_index.html',
+    model_used,
 )
-if page_reused_without_write:
-    print(
-        'ETF page content is unchanged; preserving existing etf_index.html '
-        'without rewriting its timestamp or model metadata.'
-    )
-else:
-    update_html_page(
-        final_recommendations,
-        df_html_table,
-        'etf_page_template.html',
-        'etf_index.html',
-        model_used,
-    )
+previous_diagnostics = load_json_object(
+    config.get('run_diagnostics_file', 'caches/etf_run_diagnostics.json')
+)
 current_classifications = {
     symbol: {
         'portfolio_group': candidate_sector_group(candidate_by_symbol[symbol]),
@@ -4605,6 +4516,9 @@ current_classifications = {
         'adverse_change_date': research.get('adverse_change_date'),
         'adverse_change_indicator': research.get('adverse_change_indicator'),
         'mechanism_evidence_source': research.get('mechanism_evidence_source'),
+        'mechanism_evidence_source_index': research.get(
+            'mechanism_evidence_source_index'
+        ),
         'exposure_group': research.get('exposure_group'),
         'primary_risk_event_id': research.get('primary_risk_event_id'),
         'risk_exposure_group': research.get('risk_exposure_group'),
@@ -4621,6 +4535,7 @@ comparison_fields = {
     'mandate_assessment', 'us_equity_weight_estimate', 'mandate_basis',
     'evidence_scope', 'adverse_change_observed', 'adverse_change_date',
     'adverse_change_indicator', 'mechanism_evidence_source',
+    'mechanism_evidence_source_index',
     'exposure_group', 'primary_risk_event_id',
     'risk_exposure_group',
 }
@@ -4684,14 +4599,6 @@ diagnostics = {
     'research_disposition': research_disposition,
     'decision_ledger': decision_ledger,
     'context_review': context_review,
-    'summary_cache': {
-        'input_hash': summary_input_hash,
-        'summary_html_hash': stable_json_hash(summary_html),
-        'source': summary_source,
-        'reusable_gemini_summary': summary_source in {
-            'GEMINI', 'REUSED_GEMINI'
-        },
-    },
     'calls': call_diagnostics,
 }
 save_json_object_atomic(

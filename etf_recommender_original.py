@@ -3009,7 +3009,7 @@ def validate_summary_response(data, selected):
 
 
 start_time = time.perf_counter()
-config_path = SCRIPT_DIR / 'etf_config.yml'
+config_path = SCRIPT_DIR / 'etf_config(1).yml'
 with config_path.open('r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
 required_prompt_keys = {

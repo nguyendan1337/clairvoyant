@@ -9,19 +9,22 @@ model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
-max_candidates: 50
+# Evaluate the first 50 candidates normally, then backfill from ranks 51-75
+# only if the portfolio is still short.
+normal_candidate_limit: 50
+max_candidates: 75
 target_selected_stocks: 10
 max_stocks_per_sector: 2
 max_moderate_per_risk_event: 2
 cautious_exposure_floor_enabled: true
 cautious_exposure_floor_min_dependence: MODERATE
-exclude_high_catalyst_dependence: true
 excluded_crypto_dependence:
   - MATERIAL
   - PRIMARY
 thinking_budget: 12288
 require_google_search: true
 max_gemini_calls_per_run: 7
+# The sixth stock call is available for retries or ranks 51-75 backfill.
 max_stock_research_calls_per_run: 5
 reserved_summary_calls: 1
 max_validation_rounds: 4

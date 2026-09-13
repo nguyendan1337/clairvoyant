@@ -604,8 +604,7 @@ def preview_selectable_symbols(
         target_count,
         sector_limit,
         moderate_event_limit,
-        excluded_crypto_levels,
-        exclude_high_catalyst):
+        excluded_crypto_levels):
     """Replay portfolio rules without mutating the real selection ledger."""
     preview_selected = []
     preview_sector_counts = {}
@@ -625,9 +624,6 @@ def preview_selectable_symbols(
             continue
         if excluded_by_crypto_policy(research, excluded_crypto_levels):
             continue
-        if excluded_by_high_catalyst_policy(research, exclude_high_catalyst):
-            continue
-
         reversal_risk = str(research.get("reversal_risk", "")).upper()
         if reversal_risk in {"ELEVATED", "SEVERE"}:
             continue
@@ -1236,16 +1232,6 @@ def excluded_by_crypto_policy(research, excluded_levels):
     return str(research.get("crypto_dependence") or "NONE").upper() in {
         str(level).upper() for level in excluded_levels
     }
-
-
-def excluded_by_high_catalyst_policy(research, enabled):
-    return bool(
-        enabled
-        and str(research.get("reversal_risk") or "").upper() == "MODERATE"
-        and str(research.get("risk_basis") or "").upper()
-        == "TEMPORARY_DRIVER_NORMALIZATION"
-        and str(research.get("catalyst_dependence") or "").upper() == "HIGH"
-    )
 
 
 def downgrade_unproven_material_risk(result, symbol, reason):
@@ -2356,7 +2342,7 @@ def save_cache(cache):
 
 
 # ---------- TOP QVM DATAFRAME CACHE ----------
-# This cache stores the fully computed top-50 QVM DataFrame so that
+# This cache stores the fully computed ranked QVM candidate pool so that
 # Gemini prompt testing can skip the expensive stock-data/QVM pipeline.
 # The cache file can be persisted by GitHub Actions in the same way as
 # the existing JSON caches.
@@ -2364,7 +2350,7 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 2
+TOP_QVM_CACHE_VERSION = 3
 
 
 def load_top_qvm_cache():
@@ -3608,6 +3594,13 @@ max_research_candidates_per_open_sector_slot = max(
     int(config.get("max_research_candidates_per_open_sector_slot", 3)),
 )
 max_candidates = int(config.get("max_candidates", 50))
+normal_candidate_limit = int(
+    config.get("normal_candidate_limit", min(50, max_candidates))
+)
+if not 1 <= normal_candidate_limit <= max_candidates:
+    raise ValueError(
+        "normal_candidate_limit must be between 1 and max_candidates."
+    )
 target_selected_stocks = int(config.get("target_selected_stocks", 10))
 max_stocks_per_sector = int(config.get("max_stocks_per_sector", 2))
 max_moderate_per_risk_event = int(
@@ -3623,9 +3616,6 @@ if cautious_exposure_floor_min_dependence not in DEPENDENCE_LEVELS:
     raise ValueError(
         "cautious_exposure_floor_min_dependence must be LOW, MODERATE, or HIGH."
     )
-exclude_high_catalyst_dependence = bool(
-    config.get("exclude_high_catalyst_dependence", True)
-)
 excluded_crypto_dependence = {
     str(level).strip().upper()
     for level in config.get("excluded_crypto_dependence", ["MATERIAL", "PRIMARY"])
@@ -3679,12 +3669,13 @@ print(
     f"structural_repairs_per_stock={max_structural_repairs_per_stock}, "
     f"thinking_budget={thinking_budget}, cache_version={cache_version}, "
     f"cautious_floor={cautious_exposure_floor_enabled}, "
-    f"exclude_high_catalyst={exclude_high_catalyst_dependence}, "
+    f"normal_candidates={normal_candidate_limit}, "
+    f"max_candidates={max_candidates}, "
     f"excluded_crypto={sorted(excluded_crypto_dependence)}"
 )
 
 # ---------------------------------------------------------
-# Load cached top-50 QVM DataFrame when fresh.
+# Load the cached ranked QVM candidate pool when fresh.
 #
 # This check happens BEFORE any stock-page, yfinance, or
 # QVM-scoring work, so Gemini prompt testing can reuse the
@@ -3995,7 +3986,6 @@ cached_preview_symbols = preview_selectable_symbols(
     max_stocks_per_sector,
     max_moderate_per_risk_event,
     excluded_crypto_dependence,
-    exclude_high_catalyst_dependence,
 )
 cache_already_fills_portfolio = (
     len(cached_preview_symbols) >= target_selected_stocks
@@ -4020,6 +4010,9 @@ prior_invalid_results_by_symbol = {}
 research_attempts_by_symbol = {}
 repair_attempts_by_symbol = {}
 deferred_symbols_this_run = set()
+preexisting_deferred_cache_keys = set(
+    stock_research_cache["deferred_entries"]
+)
 unsearched_missing_refunds_this_run = set()
 batch_research_diagnostics = []
 normalization_diagnostics_by_symbol = {}
@@ -4035,14 +4028,24 @@ def per_run_attempt_limit(symbol, needs_research):
 
 batch_start = 0
 carried_ranked_candidates = []
+backfill_announced = False
 while batch_start < len(candidate_records) or carried_ranked_candidates:
     if len(selected) >= target_selected_stocks:
         break
 
-    new_ranked_candidates = candidate_records[
-        batch_start:batch_start + gemini_batch_size
-    ]
-    batch_start += gemini_batch_size
+    if batch_start >= normal_candidate_limit and not backfill_announced:
+        print(
+            f"Portfolio has {len(selected)}/{target_selected_stocks} stocks "
+            f"after the normal top-{normal_candidate_limit} search depth; "
+            f"backfilling from QVM ranks {normal_candidate_limit + 1}-"
+            f"{max_candidates}."
+        )
+        backfill_announced = True
+    batch_end = min(batch_start + gemini_batch_size, len(candidate_records))
+    if batch_start < normal_candidate_limit < batch_end:
+        batch_end = normal_candidate_limit
+    new_ranked_candidates = candidate_records[batch_start:batch_end]
+    batch_start = batch_end
     ranked_pool = sorted(
         carried_ranked_candidates + new_ranked_candidates,
         key=lambda candidate: int(candidate["QVM Rank"]),
@@ -4085,6 +4088,8 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         symbol = str(candidate["Symbol"]).upper()
         cache_key = global_cache_keys_by_symbol[symbol]
         cache_keys_by_symbol[symbol] = cache_key
+        if symbol in research_failures_by_symbol:
+            continue
         cached_result = validated_cached_research.get(symbol)
         if cached_result is not None:
             research_by_symbol[symbol] = cached_result
@@ -4094,9 +4099,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             continue
         uncached_candidates.append(candidate)
 
-    cached_candidate_count = (
-        len(research_candidates) - len(uncached_candidates)
-    )
+    cached_candidate_count = len(research_by_symbol)
 
     if cache_already_fills_portfolio:
         uncached_candidates = []
@@ -4122,11 +4125,19 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             for candidate in uncached_candidates
         }
         future_start = batch_start
-        for future_candidate in candidate_records[future_start:]:
+        future_limit = (
+            len(candidate_records)
+            if backfill_announced
+            else normal_candidate_limit
+        )
+        for future_candidate in candidate_records[future_start:future_limit]:
             if len(uncached_candidates) >= desired_research_count:
                 break
             future_symbol = str(future_candidate["Symbol"]).upper()
-            if future_symbol in queued_symbols:
+            if (
+                    future_symbol in queued_symbols
+                    or future_symbol in research_failures_by_symbol
+            ):
                 continue
             if sector_counts.get(future_candidate["Sector"], 0) >= (
                 max_stocks_per_sector
@@ -4187,7 +4198,11 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             deferred = stock_research_cache["deferred_entries"].get(
                 cache_keys_by_symbol[symbol]
             )
-            if not isinstance(deferred, dict):
+            if (
+                    cache_keys_by_symbol[symbol]
+                    not in preexisting_deferred_cache_keys
+                    or not isinstance(deferred, dict)
+            ):
                 continue
             draft = deferred.get("research")
             error = str(deferred.get("validation_error") or "").strip()
@@ -4577,7 +4592,6 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 max_stocks_per_sector,
                 max_moderate_per_risk_event,
                 excluded_crypto_dependence,
-                exclude_high_catalyst_dependence,
             )
             if len(preview_symbols) >= target_selected_stocks:
                 cache_already_fills_portfolio = True
@@ -4621,7 +4635,12 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 retry_queued_by_sector[retry_sector] = (
                     retry_queued_by_sector.get(retry_sector, 0) + 1
                 )
-            for future_candidate in candidate_records:
+            future_limit = (
+                len(candidate_records)
+                if backfill_announced
+                else normal_candidate_limit
+            )
+            for future_candidate in candidate_records[:future_limit]:
                 if len(next_pending) >= gemini_batch_size:
                     break
                 future_symbol = str(future_candidate["Symbol"]).upper()
@@ -4663,7 +4682,10 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 deferred = stock_research_cache["deferred_entries"].get(
                     future_cache_key
                 )
-                if isinstance(deferred, dict):
+                if (
+                        future_cache_key in preexisting_deferred_cache_keys
+                        and isinstance(deferred, dict)
+                ):
                     draft = deferred.get("research")
                     error = str(
                         deferred.get("validation_error") or ""
@@ -4800,23 +4822,6 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 "explanation": (
                     f"{research.get('crypto_dependence')} crypto dependence is "
                     "outside the configured portfolio policy. " + explanation
-                ),
-            })
-            continue
-
-        if excluded_by_high_catalyst_policy(
-                research, exclude_high_catalyst_dependence
-        ):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "NOT SELECTED — HIGH CATALYST DEPENDENCE",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": (
-                    "A HIGH-dependence temporary driver creates too much "
-                    "single-catalyst exposure for selection. " + explanation
                 ),
             })
             continue

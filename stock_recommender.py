@@ -598,60 +598,6 @@ def normalized_risk_event_key(research):
     return event_id, exposure_group
 
 
-def preview_selectable_symbols(
-        candidates,
-        research_by_symbol,
-        target_count,
-        sector_limit,
-        moderate_event_limit,
-        excluded_crypto_levels):
-    """Replay portfolio rules without mutating the real selection ledger."""
-    preview_selected = []
-    preview_sector_counts = {}
-    preview_event_counts = {}
-
-    for candidate in candidates:
-        if len(preview_selected) >= target_count:
-            break
-
-        symbol = str(candidate["Symbol"]).upper()
-        sector = candidate["Sector"]
-        if preview_sector_counts.get(sector, 0) >= sector_limit:
-            continue
-
-        research = research_by_symbol.get(symbol)
-        if research is None or not bool(research.get("eligible", True)):
-            continue
-        if excluded_by_crypto_policy(research, excluded_crypto_levels):
-            continue
-        reversal_risk = str(research.get("reversal_risk", "")).upper()
-        if reversal_risk in {"ELEVATED", "SEVERE"}:
-            continue
-        if reversal_risk not in {"MINIMAL", "LOW", "MODERATE"}:
-            continue
-
-        event_key = normalized_risk_event_key(research)
-
-        if (
-            reversal_risk == "MODERATE"
-            and event_key
-            and preview_event_counts.get(event_key, 0)
-            >= moderate_event_limit
-        ):
-            continue
-
-        preview_selected.append(symbol)
-        preview_sector_counts[sector] = (
-            preview_sector_counts.get(sector, 0) + 1
-        )
-        if reversal_risk == "MODERATE" and event_key:
-            preview_event_counts[event_key] = (
-                preview_event_counts.get(event_key, 0) + 1
-            )
-
-    return preview_selected
-
-
 def partition_ranked_research_candidates(
         ranked_pool,
         sector_counts,
@@ -3979,24 +3925,6 @@ if cache_consistency_changed:
 
 initial_validated_cache_symbols = set(validated_cached_research)
 
-cached_preview_symbols = preview_selectable_symbols(
-    candidate_records,
-    validated_cached_research,
-    target_selected_stocks,
-    max_stocks_per_sector,
-    max_moderate_per_risk_event,
-    excluded_crypto_dependence,
-)
-cache_already_fills_portfolio = (
-    len(cached_preview_symbols) >= target_selected_stocks
-)
-if cache_already_fills_portfolio:
-    print(
-        "Validated stock cache already supports the full portfolio; "
-        "no new Gemini stock research is required. Preview: "
-        + ", ".join(cached_preview_symbols)
-    )
-
 selected = []
 decision_ledger = []
 sector_counts = {}
@@ -4099,25 +4027,23 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             continue
         uncached_candidates.append(candidate)
 
-    cached_candidate_count = len(research_by_symbol)
-
-    if cache_already_fills_portfolio:
-        uncached_candidates = []
-
-    # Keep the first ordinary call full, but do not pad later calls to 18 after
-    # the portfolio is almost complete. Three alternatives per remaining slot,
-    # with a floor of five, balances sector/risk exclusions against search cost.
+    # Keep the first ordinary stock call full even when some higher-ranked
+    # candidates came from cache. Later calls use three alternatives per
+    # remaining slot, with a floor of five, to balance exclusions against cost.
     ordinary_uncached_count = len(uncached_candidates)
     remaining_selection_slots = max(
         1, target_selected_stocks - len(selected)
     )
-    desired_research_count = min(
-        gemini_batch_size,
-        max(5, remaining_selection_slots * 3),
+    desired_research_count = (
+        gemini_batch_size
+        if request_budget.stock_used == 0
+        else min(
+            gemini_batch_size,
+            max(5, remaining_selection_slots * 3),
+        )
     )
     if (
         uncached_candidates
-        and cached_candidate_count == 0
         and len(uncached_candidates) < desired_research_count
     ):
         queued_symbols = {
@@ -4544,6 +4470,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     }
 
                 prior_invalid_results_by_symbol.pop(symbol, None)
+                research_failures_by_symbol.pop(symbol, None)
                 stock_research_cache["deferred_entries"].pop(
                     cache_keys_by_symbol[symbol], None
                 )
@@ -4584,23 +4511,6 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             save_json_object_atomic(
                 stock_research_cache_file, stock_research_cache
             )
-
-            preview_symbols = preview_selectable_symbols(
-                candidate_records,
-                validated_cached_research,
-                target_selected_stocks,
-                max_stocks_per_sector,
-                max_moderate_per_risk_event,
-                excluded_crypto_dependence,
-            )
-            if len(preview_symbols) >= target_selected_stocks:
-                cache_already_fills_portfolio = True
-                print(
-                    "Validated research now supports the full portfolio; "
-                    "skipping remaining targeted retries. Preview: "
-                    + ", ".join(preview_symbols)
-                )
-                break
 
             # Valid results from this response have already been cached. Stop
             # only after a stock has received its own complete allowance.
@@ -4758,19 +4668,26 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
 
         research = research_by_symbol.get(symbol)
         if research is None:
+            failure_reason = research_failures_by_symbol.get(symbol)
+            status = (
+                "SKIPPED — RESEARCH INVALID"
+                if failure_reason
+                else "SKIPPED — NOT RESEARCHED"
+            )
+            explanation = (
+                "Research did not pass validation: " + failure_reason
+                if failure_reason
+                else "No research call or matching validated cache entry was "
+                     "available before selection ended."
+            )
             decision_ledger.append({
                 "qvm_rank": candidate["QVM Rank"],
                 "symbol": symbol,
                 "sector_group": sector,
-                "status": "SKIPPED — RESEARCH INVALID",
+                "status": status,
                 "sector_selected_after": sector_count,
                 "total_selected_after": len(selected),
-                "explanation": (
-                    "Research did not pass validation: "
-                    + research_failures_by_symbol.get(
-                        symbol, "no validated result was available"
-                    )
-                ),
+                "explanation": explanation,
             })
             continue
 

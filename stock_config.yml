@@ -24,7 +24,7 @@ excluded_crypto_dependence:
 thinking_budget: 12288
 require_google_search: true
 max_gemini_calls_per_run: 7
-# The sixth stock call is available for retries or ranks 51-75 backfill.
+# The five-call stock budget includes retries and any ranks 51-75 backfill.
 max_stock_research_calls_per_run: 5
 reserved_summary_calls: 1
 max_validation_rounds: 4

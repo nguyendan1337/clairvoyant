@@ -15,7 +15,7 @@ normal_candidate_limit: 50
 max_candidates: 75
 target_selected_stocks: 10
 max_stocks_per_sector: 2
-max_moderate_per_risk_event: 2
+max_stocks_per_risk_event: 2
 cautious_exposure_floor_enabled: true
 cautious_exposure_floor_min_dependence: MODERATE
 excluded_crypto_dependence:
@@ -68,6 +68,19 @@ prompt_market_context: |
   Treat wars and geopolitical disruptions as possible earnings and valuation
   drivers, not generic background. Identify the normalization mechanism for
   every material temporary event.
+
+  ACTIVE RISK-EVENT CATALOG
+  Build active_risk_events as the authoritative canonical event catalog for
+  this run. Include only documented, current real-world events that materially
+  affect multiple companies or industries in the covered sectors. Use one
+  stable UPPER_SNAKE_CASE event_id per real-world event, even when it reaches
+  companies through different prices, freight markets, costs, or operating
+  mechanisms. Do not create company-specific, industry-specific, commodity-
+  specific, or transmission-mechanism variants of the same event. Put those
+  distinctions in affected_industries and the description instead. Return an
+  empty array when no qualifying shared event is established by current
+  sources. Stock research will be required to use these exact IDs and may not
+  invent additional IDs.
 
   MARKET AND SECTOR WRITING QUALITY
   - market_intro must include at least one explicit S&P 500 percentage and the
@@ -402,11 +415,17 @@ prompt_stock_batch: |
     "analysts forecast a decline" or "if conditions normalize" is insufficient
 
   SHARED EVENTS
-  Use primary_risk_event_id only when current sources show the same documented
-  event materially drives multiple candidates. Broad sector similarity is not
-  enough. Different mechanism status or normalization probability within a real
-  shared event requires a sourced company_difference involving contracts,
-  geography, business mix, sensitivity, costs, or operating market.
+  MARKET_CONTEXT.active_risk_events is the authoritative event catalog for this
+  run. primary_risk_event_id must be null or exactly match one event_id from
+  that catalog. Never invent, rename, specialize, merge, or alias an event ID.
+  Use an event ID only when current sources show that documented event
+  materially drives the candidate; broad sector similarity is not enough. If
+  no catalog event applies, use null. Different mechanism status or
+  normalization probability within a real shared event requires a sourced
+  company_difference involving contracts, geography, business mix,
+  sensitivity, costs, or operating market.
+  Use the same catalog event ID even when the event affects companies through
+  different operating mechanisms.
   Shared-event consistency applies only to companies with comparable normalized
   risk_exposure_group values; an event alone does not make unlike business
   mechanisms comparable. Use a stable UPPER_SNAKE_CASE risk_exposure_group for

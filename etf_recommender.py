@@ -12,6 +12,7 @@ import json
 import hashlib
 import html
 import yaml
+import signal
 from datetime import datetime, timedelta, UTC
 from pathlib import Path
 
@@ -30,6 +31,19 @@ TOP_QVM_CACHE_FILE = 'caches/top_qvm_etfs_cache.pkl'
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 TOP_QVM_CACHE_VERSION = 13
 SCRIPT_DIR = Path(__file__).resolve().parent
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 45 * 60
+GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
+
+
+class TotalRuntimeTimeout(BaseException):
+    """Stop the process when the recommender exceeds its total runtime."""
+
+
+def handle_total_runtime_timeout(signum, frame):
+    raise TotalRuntimeTimeout(
+        f'ETF recommender exceeded its '
+        f'{TOTAL_RUNTIME_TIMEOUT_SECONDS // 60}-minute total runtime limit.'
+    )
 
 
 def initialize_gemini_client():
@@ -43,7 +57,10 @@ def initialize_gemini_client():
     if not api_key:
         raise ValueError('GEMINI_KEY not found in environment or .env')
 
-    return genai.Client(api_key=api_key)
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=GEMINI_REQUEST_TIMEOUT_MS),
+    )
 
 
 def build_gemini_config(
@@ -3109,6 +3126,8 @@ def validate_summary_response(data, selected):
 
 
 start_time = time.perf_counter()
+signal.signal(signal.SIGALRM, handle_total_runtime_timeout)
+signal.alarm(TOTAL_RUNTIME_TIMEOUT_SECONDS)
 config_path = SCRIPT_DIR / 'etf_config.yml'
 with config_path.open('r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
@@ -4617,3 +4636,4 @@ print(
 )
 end_time = time.perf_counter()
 print(f'Elapsed time: {round(end_time - start_time)} seconds\n')
+signal.alarm(0)

@@ -16,8 +16,8 @@ CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
 STOCK_RUN_DIAGNOSTICS_FILE = CACHE_DIR / "stock_run_diagnostics.json"
-TOTAL_RUNTIME_TIMEOUT_SECONDS = 30 * 60
-GEMINI_REQUEST_TIMEOUT_MS = 5 * 60 * 1000
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 45 * 60
+GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -26,7 +26,8 @@ class TotalRuntimeTimeout(BaseException):
 
 def handle_total_runtime_timeout(signum, frame):
     raise TotalRuntimeTimeout(
-        "Stock recommender exceeded its 30-minute total runtime limit."
+        f"Stock recommender exceeded its "
+        f"{TOTAL_RUNTIME_TIMEOUT_SECONDS // 60}-minute total runtime limit."
     )
 
 gemini_call_diagnostics = []
@@ -584,18 +585,14 @@ def minimum_sources_for_candidate(search_queries, candidate):
 
 
 def normalized_risk_event_key(research):
-    """Return the event-cap key for one economically comparable exposure."""
+    """Return one canonical event-only key for portfolio concentration."""
     event_id = re.sub(
         r"[^A-Z0-9]+", "_",
         str(research.get("primary_risk_event_id") or "").upper(),
     ).strip("_")
     if not event_id:
         return None
-    exposure_group = re.sub(
-        r"[^A-Z0-9]+", "_",
-        str(research.get("risk_exposure_group") or "").upper(),
-    ).strip("_")
-    return event_id, exposure_group
+    return event_id
 
 
 def partition_ranked_research_candidates(
@@ -1023,6 +1020,39 @@ def validate_market_context(data):
         raise ValueError("Market context market_intro has no S&P 500 percentage.")
     if not isinstance(data["sector_context"], dict):
         raise ValueError("Market context sector_context must be an object.")
+    active_risk_events = data["active_risk_events"]
+    if not isinstance(active_risk_events, list):
+        raise ValueError("Market context active_risk_events must be an array.")
+    seen_event_ids = set()
+    for index, event in enumerate(active_risk_events):
+        if not isinstance(event, dict):
+            raise ValueError(
+                f"Market risk event {index + 1} must be an object."
+            )
+        event_id = str(event.get("event_id", "")).strip()
+        if not re.fullmatch(r"[A-Z0-9]+(?:_[A-Z0-9]+)*", event_id):
+            raise ValueError(
+                f"Market risk event {index + 1} has invalid event_id "
+                f"{event_id!r}; expected UPPER_SNAKE_CASE."
+            )
+        if event_id in seen_event_ids:
+            raise ValueError(f"Duplicate market risk event_id {event_id!r}.")
+        seen_event_ids.add(event_id)
+        if not str(event.get("description", "")).strip():
+            raise ValueError(f"Market risk event {event_id} has no description.")
+        affected_industries = event.get("affected_industries")
+        if (
+                not isinstance(affected_industries, list)
+                or not affected_industries
+                or any(not str(value).strip() for value in affected_industries)
+        ):
+            raise ValueError(
+                f"Market risk event {event_id} must have affected_industries."
+            )
+        if not str(event.get("normalization_risk", "")).strip():
+            raise ValueError(
+                f"Market risk event {event_id} has no normalization_risk."
+            )
     validate_sources(data["sources"], "Market context")
 
 
@@ -1236,7 +1266,12 @@ def downgrade_unproven_material_risk(result, symbol, reason):
     })
 
 
-def validate_stock_batch(data, expected_candidates, minimum_sources=2):
+def validate_stock_batch(
+        data,
+        expected_candidates,
+        minimum_sources=2,
+        allowed_risk_event_ids=None,
+):
     results = data.get("results")
     if not isinstance(results, list):
         raise ValueError("Stock batch response is missing a results array.")
@@ -1397,12 +1432,27 @@ def validate_stock_batch(data, expected_candidates, minimum_sources=2):
             raise ValueError(f"{symbol} has no industry_group.")
         result["industry_group"] = industry_group
 
+        primary_risk_event_id = result.get("primary_risk_event_id")
+        if primary_risk_event_id is not None:
+            primary_risk_event_id = str(primary_risk_event_id).strip() or None
+        if (
+                primary_risk_event_id
+                and allowed_risk_event_ids is not None
+                and primary_risk_event_id not in allowed_risk_event_ids
+        ):
+            raise ValueError(
+                f"{symbol} has unknown primary_risk_event_id "
+                f"{primary_risk_event_id!r}; use an exact event_id from "
+                "MARKET_CONTEXT.active_risk_events or null."
+            )
+        result["primary_risk_event_id"] = primary_risk_event_id
+
         risk_exposure_group = result.get("risk_exposure_group")
         if risk_exposure_group is not None:
             risk_exposure_group = re.sub(
                 r"[^A-Z0-9]+", "_", str(risk_exposure_group).upper()
             ).strip("_") or None
-        if result.get("primary_risk_event_id") and not risk_exposure_group:
+        if primary_risk_event_id and not risk_exposure_group:
             raise ValueError(
                 f"{symbol} has a primary risk event without risk_exposure_group."
             )
@@ -3549,9 +3599,14 @@ if not 1 <= normal_candidate_limit <= max_candidates:
     )
 target_selected_stocks = int(config.get("target_selected_stocks", 10))
 max_stocks_per_sector = int(config.get("max_stocks_per_sector", 2))
-max_moderate_per_risk_event = int(
-    config.get("max_moderate_per_risk_event", 2)
+max_stocks_per_risk_event = int(
+    config.get(
+        "max_stocks_per_risk_event",
+        config.get("max_moderate_per_risk_event", 2),
+    )
 )
+if max_stocks_per_risk_event < 1:
+    raise ValueError("max_stocks_per_risk_event must be at least 1.")
 cautious_exposure_floor_enabled = bool(
     config.get("cautious_exposure_floor_enabled", True)
 )
@@ -3617,6 +3672,7 @@ print(
     f"cautious_floor={cautious_exposure_floor_enabled}, "
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
+    f"stocks_per_risk_event={max_stocks_per_risk_event}, "
     f"excluded_crypto={sorted(excluded_crypto_dependence)}"
 )
 
@@ -3823,6 +3879,13 @@ if market_context is None:
     })
 
 market_context_hash = stable_json_hash(market_context)
+allowed_risk_event_ids = {
+    event["event_id"] for event in market_context["active_risk_events"]
+}
+print(
+    "Dynamic market risk-event catalog: "
+    f"{len(allowed_risk_event_ids)} canonical event(s)."
+)
 # Output-transport wording does not change researched facts or classifications,
 # so it should not invalidate otherwise valid stock research. This preserves
 # the prior prompt hash while still applying the no-duplicate instruction to
@@ -3886,6 +3949,7 @@ for candidate in candidate_records:
             minimum_sources=minimum_sources_for_candidate(
                 cached_search_queries, candidate
             ),
+            allowed_risk_event_ids=allowed_risk_event_ids,
         )
         validated_cached_research[symbol] = cached_result
     except (KeyError, TypeError, ValueError) as exc:
@@ -3928,7 +3992,7 @@ initial_validated_cache_symbols = set(validated_cached_research)
 selected = []
 decision_ledger = []
 sector_counts = {}
-moderate_event_counts = {}
+risk_event_counts = {}
 prior_research_decisions = []
 research_failures_by_symbol = {}
 models_used = [market_model]
@@ -4390,6 +4454,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         {"results": [result]},
                         [candidate],
                         minimum_sources=minimum_sources,
+                        allowed_risk_event_ids=allowed_risk_event_ids,
                     )
                     validate_shared_event_consistency(
                         result,
@@ -4755,19 +4820,12 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             })
             continue
 
-        primary_event = research.get("primary_risk_event_id")
-        if primary_event:
-            primary_event = re.sub(
-                r"[^A-Z0-9]+", "_", str(primary_event).upper()
-            ).strip("_")
         event_key = normalized_risk_event_key(research)
-        exposure_group = event_key[1] if event_key else None
 
         if (
-                reversal_risk == "MODERATE"
-                and event_key
-                and moderate_event_counts.get(event_key, 0)
-                >= max_moderate_per_risk_event
+                event_key
+                and risk_event_counts.get(event_key, 0)
+                >= max_stocks_per_risk_event
         ):
             decision_ledger.append({
                 "qvm_rank": candidate["QVM Rank"],
@@ -4777,9 +4835,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 "sector_selected_after": sector_count,
                 "total_selected_after": len(selected),
                 "explanation": (
-                    f"The {primary_event} / {exposure_group} risk group already "
-                    f"contained "
-                    f"{max_moderate_per_risk_event} selected moderate-risk stocks."
+                    f"The {event_key} risk event already contained "
+                    f"{max_stocks_per_risk_event} selected stocks."
                 ),
             })
             continue
@@ -4787,9 +4844,9 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
         selected.append({"candidate": candidate, "research": research})
         sector_counts[sector] = sector_count + 1
 
-        if reversal_risk == "MODERATE" and event_key:
-            moderate_event_counts[event_key] = (
-                    moderate_event_counts.get(event_key, 0) + 1
+        if event_key:
+            risk_event_counts[event_key] = (
+                    risk_event_counts.get(event_key, 0) + 1
             )
 
         decision_ledger.append({

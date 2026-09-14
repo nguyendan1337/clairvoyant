@@ -32,7 +32,10 @@ max_research_attempts_per_stock: 2
 # A deferred failure gets one fresh, batched chance in each later execution.
 max_deferred_research_attempts_per_run: 1
 max_structural_repairs_per_stock: 2
-max_transient_api_attempts: 2
+max_transient_api_attempts: 3
+initial_transient_backoff_seconds: 30
+max_transient_backoff_seconds: 120
+transient_backoff_jitter_seconds: 15
 max_stock_sources: 5
 market_context_cache_file: caches/gemini_market_context_cache.json
 stock_research_cache_file: caches/gemini_stock_research_cache.json

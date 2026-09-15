@@ -23,6 +23,7 @@ dist/
 build/
 
 # Clairvoyant runtime caches
+/caches/last_gemini_failure_*.json
 caches/yf_cache.json
 caches/etf_yf_cache.json
 caches/stock_pages_cache.json

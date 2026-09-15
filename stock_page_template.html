@@ -9,12 +9,20 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
     <style>
-        /* Self-hosted TeX Gyre Adventor Regular. Keep this HTML file at the
-           repository root and the font at assets/fonts/TeXGyreAdventor-Regular.ttf. */
+        /* Self-hosted TeX Gyre Adventor. Keep this HTML file and both font
+           files together at the repository root. */
         @font-face {
             font-family: "TeX Gyre Adventor";
-            src: url("assets/fonts/TeXGyreAdventor-Regular.ttf") format("truetype");
+            src: url("./TeXGyreAdventor-Regular.ttf") format("truetype");
             font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "TeX Gyre Adventor";
+            src: url("./TeXGyreAdventor-Bold.ttf") format("truetype");
+            font-weight: 700;
             font-style: normal;
             font-display: swap;
         }
@@ -193,7 +201,7 @@
             font-size: 0.84rem;
             font-weight: normal;
             letter-spacing: 0.05em;
-            text-transform: uppercase;
+            text-transform: none;
         }
 
         .header-meta {
@@ -404,6 +412,11 @@
         .sector-summary {
             padding: 18px 20px;
             margin: 14px 0;
+        }
+
+        .summary a,
+        .summary a strong {
+            font-weight: 700 !important;
         }
 
         .disclaimer {

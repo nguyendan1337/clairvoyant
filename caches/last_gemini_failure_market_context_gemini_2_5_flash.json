@@ -1,0 +1,198 @@
+{
+  "created_at": "2026-09-15T05:22:08.586935+00:00",
+  "stage": "market context",
+  "model": "gemini-2.5-flash",
+  "error": "original failure: Invalid control character at: line 105 column 71 (char 8716); schema repair failure: market context removed source URLs from grounded research: https://vertexaisearch.cloud.google.com/grounding, https://vertexaisearch.cloud.google.com/grounding```json",
+  "response_text": "```json\n{\n  \"as_of_date\": \"2026-09-15\",\n  \"market_status\": \"MIXED\",\n  \"market_intro\": \"The S&P 500 has experienced a decline of 1.19% over the last 10 trading sessions, reflecting a cautious investor mood amidst significant global developments. The market is primarily driven by persistent inflationary pressures, which have solidified expectations for a Federal Reserve interest rate hike this week, and escalating geopolitical tensions in the Middle East impacting energy markets. The most important concern remains the potential for tighter monetary policy to dampen economic growth while global supply chains remain volatile.\",\n  \"market_direction\": \"Mixed, with downward pressure from inflation and geopolitical risks, but some underlying sector strength.\",\n  \"major_drivers\": [\n    \"Expectations of a Federal Reserve interest rate hike due to hotter-than-expected inflation data\",\n    \"Escalating geopolitical tensions in the Middle East impacting global oil supply and prices\",\n    \"Continued investment and innovation in Artificial Intelligence (AI) driving demand in related sectors\"\n  ],\n  \"macro_conditions\": [\n    \"The Consumer Price Index (CPI) rose 3.4% year-over-year and 0.4% month-over-month in August 2026, with core CPI increasing 0.3% monthly, exceeding economists' forecasts.\",\n    \"The Federal Reserve is widely expected to raise interest rates by 25 basis points at its September 15-16 meeting, which would be the first increase since 2023, bringing the federal funds rate to a target range of 3.75%-4.00%.\",\n    \"The U.S. unemployment rate remained at 4.1% in August, with payroll employment increasing by 162,000.\",\n    \"Global oil prices, specifically Brent crude, averaged $91 per barrel in August and are forecast to remain around $90/b in the second half of 2026 due to falling global inventories and Middle East conflict.\",\n    \"Global supply chains continue to face unprecedented disruption from geopolitical tensions, climate events, and port congestion, leading to volatile freight rates and extended vessel waiting times.\"\n  ],\n  \"strong_sectors\": [\n    \"Energy\",\n    \"Financial Services\",\n    \"Industrials\",\n    \"Technology\"\n  ],\n  \"weak_sectors\": [\n    \"Healthcare\",\n    \"Consumer Cyclical\"\n  ],\n  \"sector_context\": {\n    \"Financial Services\": \"The sector is experiencing upward earnings revisions driven by a steeper yield curve, solid net interest income, and improved capital markets activity.\",\n    \"Energy\": \"Benefiting from elevated global oil prices due to supply concerns stemming from Middle East geopolitical tensions and declining global inventories.\",\n    \"Healthcare\": \"Currently experiencing short-term weakness, but is expected to benefit in the longer term from technological advances and improving operational efficiencies, particularly in biotechnology.\",\n    \"Basic Materials\": \"A highly cyclical sector closely tied to global economic growth and industrial production, currently facing mixed conditions with support from AI infrastructure buildout but also risks from commodity price volatility and trade policy shifts.\",\n    \"Industrials\": \"Supported by broad-based demand from AI-fueled data center buildouts, increased defense spending, and re-industrialization efforts, with industrial services and backlog-driven businesses showing resilience.\",\n    \"Communication Services\": \"Demonstrated relative strength in recent sessions, but is also navigating a retreat from consumer-sensitive areas and facing regulatory scrutiny on some major deals.\",\n    \"Technology\": \"Remains a central investment theme, with strong demand for AI infrastructure, semiconductors, and cybersecurity solutions driving growth and investment.\",\n    \"Consumer Cyclical\": \"Exhibiting weakened fundamentals with softer revenue and free cash flow, making it vulnerable to rising interest rates and inflation's impact on consumer spending.\"\n  },\n  \"active_risk_events\": [\n    {\n      \"event_id\": \"MIDDLE_EAST_GEOPOLITICAL_TENSIONS\",\n      \"description\": \"Ongoing conflict in the Middle East, including the war in Iran, attacks impacting the Strait of Hormuz, and the closure of Saudi Arabia's East-West Crude Oil Pipeline due to attacks from Iraq. This is causing global oil supply concerns and elevated energy prices, with constraints on the Strait of Hormuz expected through Q4 2026.\",\n      \"affected_industries\": [\n        \"Energy\",\n        \"Transportation\",\n        \"Basic Materials\",\n        \"Industrials\"\n      ],\n      \"normalization_risk\": \"De-escalation of conflicts, increased oil flows through the Strait of Hormuz and other routes, and reopening of pipelines would lead to lower oil and gas prices, potentially reversing the strong performance of the energy sector and easing inflationary pressures.\"\n    },\n    {\n      \"event_id\": \"GLOBAL_SUPPLY_CHAIN_DISRUPTIONS\",\n      \"description\": \"Persistent global shipping disruptions due to geopolitical tensions, climate-related events like the Panama Canal drought, and port congestion (e.g., in China due to typhoons). This leads to volatile freight rates, increased transit times, and capacity constraints, with vessel waiting times nearly double 2019 levels.\",\n      \"affected_industries\": [\n        \"Industrials\",\n        \"Consumer Cyclical\",\n        \"Basic Materials\",\n        \"Technology\",\n        \"Retail\",\n        \"Transportation\"\n      ],\n      \"normalization_risk\": \"Resolution of geopolitical tensions affecting shipping lanes, improved water levels in the Panama Canal, and easing of port congestion would reduce freight costs, improve delivery times, and increase supply chain predictability, potentially impacting companies that have benefited from higher freight rates or supply scarcity.\"\n    },\n    {\n      \"event_id\": \"INFLATIONARY_PRESSURES_AND_RATE_HIKES\",\n      \"description\": \"Higher-than-expected inflation, particularly in August CPI data, is leading to strong market expectations for a Federal Reserve interest rate hike in September 2026, the first since 2023. The odds of a 25 basis point hike are currently around 85-90%.\",\n      \"affected_industries\": [\n        \"Financial Services\",\n        \"Consumer Cyclical\",\n        \"Real Estate\",\n        \"Technology\",\n        \"Industrials\"\n      ],\n      \"normalization_risk\": \"A sustained moderation of inflation back towards the Fed's 2% target, leading to a pause or reversal in rate hikes, would ease borrowing costs and potentially boost consumer and business investment, benefiting growth-oriented sectors and those sensitive to interest rates.\"\n    }\n  ],\n  \"sources\": [\n    {\n      \"title\": \"September 2026 Fed Rate Decision: Will Inflation Trigger a New Hike?\",\n      \"date\": \"2026-09-14\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHEM9aZIOZYMZEe0rc0WbnBoxXjLS0OhofDw5wKO0eA477OhH6zgd5p9DkVi6EBdZGxdCs6Xt1Dq4SV7z24ipq-XF-XsTneOmxKmnEft6OrYC8R1FjpmwlLrEUDfDUhIAdmjpadQzF61ECxla2XnBk_Enq1i9jqxtaoTK7-iUl4xh13KGIQgB9ef-AIYsaZugdt4QqhGXf6bnU3aVlo1lg8WgrfqA==\"\n    },\n    {\n      \"title\": \"Why the Odds of a Fed Interest Rate Hike Just Shot Higher | Morningstar\",\n      \"date\": \"2026-09-11\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFg1dKe0n8rWqX6-lJGfm2xKVq8u9wX_yzlCKSzfE_8NYIdYHJ84ME56A5kB0kDQj2IuaMfSr8qH-I5cUsKSf-SglKuosDhjj9AaETfSW1zYzKz8i322Ogu92tvzun-3DVBSGbSLT0i83ts23JfUT8OCWaloqVzPH6TMYfXvh4K6qObpVVr6t9xDrzgpBydmg==\"\n    },\n    {\n      \"title\": \"EIA expects record electricity generation in 2026 and 2027\",\n      \"date\": \"2026-09-09\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGYxkgzk8Wblw7UTGlIOHn116UbF_hXPi5emRBBswCFArAFsePB4tiSMVsmbdYd1gVdVYapjGcFBIxRcD4MLFSsfN2qGFH6NnoqaHNNEVlZ_ZUJvCR3mUPrMpzstvQp4vUv9PcnC4UKpdvdU34Nhw==\"\n    },\n    {\n      \"title\": \"Global Shipping Disruption in 2026: How Supply Chain Volatility Is Reshaping Freight and Logistics - Arpin International Movers\",\n      \"date\": \"2026-09-09\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEkeA6CFHjvBkhBAFtp_uoj_EPsTk7pq96G_Uwjy2Pwy8U9OlG_A8-BwTGDPmoCFs9W1ZMNRw_4bswGvzptuXk_rQkR2coBEni49oUSvp4TquNk0mLOgrIuWLzH0Bsx5cbAjXa4F3uhXXfSBXtt8xk7\"\n    },\n    {\n      \"title\": \"Fed rate hike in September is all but guaranteed after CPI report, economists say\",\n      \"date\": \"2026-09-11\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFqSLllh3s03mqlyjTT--YfyqcEE-goST1pWmz0z265ocXSOYi2irTuLCUy4p_0dEWcUaKOZVwKm_ZajqBisjvvJEEpgvLm_JNCMB5YY3zwaKsvu4bH3kiz95JwZawZFZQxlTjjyNnH1oAEVJWalfTvSjUVAtNdg0qTcVZ7J5lq\"\n    },\n    {\n      \"title\": \"Global Supply Chain News 2026: Trends and Updates\",\n      \"date\": \"2026-09-12\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding```json\n{\n  \"as_of_date\": \"2026-09-15\",\n  \"market_status\": \"MIXED\",\n  \"market_intro\": \"The S&P 500 has experienced a decline of 1.19% over the last 10 trading sessions, reflecting a cautious investor mood amidst significant global developments. The market is primarily driven by persistent inflationary pressures, which have solidified expectations for a Federal Reserve interest rate hike this week, and escalating geopolitical tensions in the Middle East impacting energy markets. The most important concern remains the potential for tighter monetary policy to dampen economic growth while global supply chains remain volatile.\",\n  \"market_direction\": \"Mixed, with downward pressure from inflation and geopolitical risks, but some underlying sector strength.\",\n  \"major_drivers\": [\n    \"Expectations of a Federal Reserve interest rate hike due to hotter-than-expected inflation data [cite: 3, 4, 10, 26]\",\n    \"Escalating geopolitical tensions in the Middle East impacting global oil supply and prices [cite: 4, 10, 26, 28]\",\n    \"Continued investment and innovation in Artificial Intelligence (AI) driving demand in related sectors [cite: 13, 26, 37]\"\n  ],\n  \"macro_conditions\": [\n    \"The Consumer Price Index (CPI) rose 3.4% year-over-year and 0.4% month-over-month in August 2026, with core CPI increasing 0.3% monthly, exceeding economists' forecasts [cite: 4, 10, 23, 26].\",\n    \"The Federal Reserve is widely expected to raise interest rates by 25 basis points at its September 15-16 meeting, which would be the first increase since 2023, bringing the federal funds rate to a target range of 3.75%-4.00% [cite: 3, 4, 10, 15, 26].\",\n    \"The U.S. unemployment rate remained at 4.1% in August, with payroll employment increasing by 162,000 [cite: 23].\",\n    \"Global oil prices, specifically Brent crude, averaged $91 per barrel in August and are forecast to remain around $90/b in the second half of 2026 due to falling global inventories and Middle East conflict [cite: 5, 16, 20].\",\n    \"Global supply chains continue to face unprecedented disruption from geopolitical tensions, climate events, and port congestion, leading to volatile freight rates and extended vessel waiting times [cite: 9, 11, 14].\"\n  ],\n  \"strong_sectors\": [\n    \"Energy\",\n    \"Financial Services\",\n    \"Industrials\",\n    \"Technology\"\n  ],\n  \"weak_sectors\": [\n    \"Healthcare\",\n    \"Consumer Cyclical\"\n  ],\n  \"sector_context\": {\n    \"Financial Services\": \"The sector is experiencing upward earnings revisions driven by a steeper yield curve, solid net interest income, and improved capital markets activity [cite: 2].\",\n    \"Energy\": \"Benefiting from elevated global oil prices due to supply concerns stemming from Middle East geopolitical tensions and declining global inventories [cite: 5, 16, 17, 20, 26, 34].\",\n    \"Healthcare\": \"Currently experiencing short-term weakness, but is expected to benefit in the longer term from technological advances and improving operational efficiencies, particularly in biotechnology [cite: 2, 17, 41].\",\n    \"Basic Materials\": \"A highly cyclical sector closely tied to global economic growth and industrial production, currently facing mixed conditions with support from AI infrastructure buildout but also risks from commodity price volatility and trade policy shifts [cite: 2, 24, 39].\",\n    \"Industrials\": \"Supported by broad-based demand from AI-fueled data center buildouts, increased defense spending, and re-industrialization efforts, with industrial services and backlog-driven businesses showing resilience [cite: 2, 21, 25, 36].\",\n    \"Communication Services\": \"Demonstrated relative strength in recent sessions, but is also navigating a retreat from consumer-sensitive areas and facing regulatory scrutiny on some major deals [cite: 24, 30].\",\n    \"Technology\": \"Remains a central investment theme, with strong demand for AI infrastructure, semiconductors, and cybersecurity solutions driving growth and investment [cite: 13, 26, 32, 37, 39, 40].\",\n    \"Consumer Cyclical\": \"Exhibiting weakened fundamentals with softer revenue and free cash flow, making it vulnerable to rising interest rates and inflation's impact on consumer spending [cite: 2].\"\n  },\n  \"active_risk_events\": [\n    {\n      \"event_id\": \"MIDDLE_EAST_GEOPOLITICAL_TENSIONS\",\n      \"description\": \"Ongoing conflict in the Middle East, including the war in Iran, attacks impacting the Strait of Hormuz, and the closure of Saudi Arabia's East-West Crude Oil Pipeline due to attacks from Iraq. This is causing global oil supply concerns and elevated energy prices, with constraints on the Strait of Hormuz expected through Q4 2026. [cite: 4, 5, 10, 16, 20, 26, 28, 31, 34]\",\n      \"affected_industries\": [\n        \"Energy\",\n        \"Transportation\",\n        \"Basic Materials\",\n        \"Industrials\"\n      ],\n      \"normalization_risk\": \"De-escalation of conflicts, increased oil flows through the Strait of Hormuz and other routes, and reopening of pipelines would lead to lower oil and gas prices, potentially reversing the strong performance of the energy sector and easing inflationary pressures.\"\n    },\n    {\n      \"event_id\": \"GLOBAL_SUPPLY_CHAIN_DISRUPTIONS\",\n      \"description\": \"Persistent global shipping disruptions due to geopolitical tensions, climate-related events like the Panama Canal drought, and port congestion (e.g., in China due to typhoons). This leads to volatile freight rates, increased transit times, and capacity constraints, with vessel waiting times nearly double 2019 levels. [cite: 9, 11, 14, 19, 22]\",\n      \"affected_industries\": [\n        \"Industrials\",\n        \"Consumer Cyclical\",\n        \"Basic Materials\",\n        \"Technology\",\n        \"Retail\",\n        \"Transportation\"\n      ],\n      \"normalization_risk\": \"Resolution of geopolitical tensions affecting shipping lanes, improved water levels in the Panama Canal, and easing of port congestion would reduce freight costs, improve delivery times, and increase supply chain predictability, potentially impacting companies that have benefited from higher freight rates or supply scarcity.\"\n    },\n    {\n      \"event_id\": \"INFLATIONARY_PRESSURES_AND_RATE_HIKES\",\n      \"description\": \"Higher-than-expected inflation, particularly in August CPI data, is leading to strong market expectations for a Federal Reserve interest rate hike in September 2026, the first since 2023. The odds of a 25 basis point hike are currently around 85-90%. [cite: 3, 4, 10, 12, 15, 23, 26]\",\n      \"affected_industries\": [\n        \"Financial Services\",\n        \"Consumer Cyclical\",\n        \"Real Estate\",\n        \"Technology\",\n        \"Industrials\"\n      ],\n      \"normalization_risk\": \"A sustained moderation of inflation back towards the Fed's 2% target, leading to a pause or reversal in rate hikes, would ease borrowing costs and potentially boost consumer and business investment, benefiting growth-oriented sectors and those sensitive to interest rates.\"\n    }\n  ],\n  \"sources\": [\n    {\n      \"title\": \"September 2026 Fed Rate Decision: Will Inflation Trigger a New Hike?\",\n      \"date\": \"2026-09-14\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHEM9aZIOZYMZEe0rc0WbnBoxXjLS0OhofDw5wKO0eA477OhH6zgd5p9DkVi6EBdZGxdCs6Xt1Dq4SV7z24ipq-XF-XsTneOmxKmnEft6OrYC8R1FjpmwlLrEUDfDUhIAdmjpadQzF61ECxla2XnBk_Enq1i9jqxtaoTK7-iUl4xh13KGIQgB9ef-AIYsaZugdt4QqhGXf6bnU3aVlo1lg8WgrfqA==\"\n    },\n    {\n      \"title\": \"Why the Odds of a Fed Interest Rate Hike Just Shot Higher | Morningstar\",\n      \"date\": \"2026-09-11\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFg1dKe0n8rWqX6-lJGfm2xKVq8u9wX_yzlCKSzfE_8NYIdYHJ84ME56A5kB0kDQj2IuaMfSr8qH-I5cUsKSf-SglKuosDhjj9AaETfSW1zYzKz8i322Ogu92tvzun-3DVBSGbSLT0i83ts23JfUT8OCWaloqVzPH6TMYfXvh4K6qObpVVr6t9xDrzgpBydmg==\"\n    },\n    {\n      \"title\": \"EIA expects record electricity generation in 2026 and 2027\",\n      \"date\": \"2026-09-09\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGYxkgzk8Wblw7UTGlIOHn116UbF_hXPi5emRBBswCFArAFsePB4tiSMVsmbdYd1gVdVYapjGcFBIxRcD4MLFSsfN2qGFH6NnoqaHNNEVlZ_ZUJvCR3mUPrMpzstvQp4vUv9PcnC4UKpdvdU34Nhw==\"\n    },\n    {\n      \"title\": \"Global Shipping Disruption in 2026: How Supply Chain Volatility Is Reshaping Freight and Logistics - Arpin International Movers\",\n      \"date\": \"2026-09-09\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEkeA6CFHjvBkhBAFtp_uoj_EPsTk7pq96G_Uwjy2Pwy8U9OlG_A8-BwTGDPmoCFs9W1ZMNRw_4bswGvzptuXk_rQkR2coBEni49oUSvp4TquNk0mLOgrIuWLzH0Bsx5cbAjXa4F3uhXXfSBXtt8xk7\"\n    },\n    {\n      \"title\": \"Fed rate hike in September is all but guaranteed after CPI report, economists say\",\n      \"date\": \"2026-09-11\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFqSLllh3s03mqlyjTT--YfyqcEE-goST1pWmz0z265ocXSOYi2irTuLCUy4p_0dEWcUaKOZVwKm_ZajqBisjvvJEEpgvLm_JNCMB5YY3zwaKsvu4bH3kiz95JwZawZFZQxlTjjyNnH1oAEVJWalfTvSjUVAtNdg0qTcVZ7J5lq\"\n    },\n    {\n      \"title\": \"Global Supply Chain News 2026: Trends and Updates\",\n      \"date\": \"2026-09-12\",\n      \"url\": \"https://vertexaisearch.cloud.google.com/grounding",
+  "metadata": {
+    "prompt_tokens": 1123,
+    "tool_tokens": 2173,
+    "cached_tokens": null,
+    "thinking_tokens": 6118,
+    "output_tokens": 5634,
+    "total_tokens": 15048,
+    "search_queries": [
+      "S&P 500 performance last 10-30 days",
+      "US stock market breadth recent",
+      "investor sentiment US stock market last 30 days",
+      "largest current market drivers US stock market",
+      "US inflation rate forecast next 30 days",
+      "Federal Reserve interest rate expectations September 2026",
+      "major US economic data releases last 30 days",
+      "US earnings trends Q3 2026",
+      "US regulatory developments affecting markets September 2026",
+      "geopolitical events impacting global markets September 2026",
+      "energy commodity prices recent trends September 2026",
+      "global freight and supply chain conditions September 2026",
+      "strongest US stock sectors September 2026",
+      "weakest US stock sectors September 2026",
+      "Financial Services sector outlook September 2026",
+      "Energy sector outlook September 2026",
+      "Healthcare sector outlook September 2026",
+      "Basic Materials sector outlook September 2026",
+      "Industrials sector outlook September 2026",
+      "Communication Services sector outlook September 2026",
+      "Technology sector outlook September 2026",
+      "Consumer Cyclical sector outlook September 2026"
+    ],
+    "grounding_sources": [
+      {
+        "title": "noradarealestate.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHEM9aZIOZYMZEe0rc0WbnBoxXjLS0OhofDw5wKO0eA477OhH6zgd5p9DkVi6EBdZGxdCs6Xt1Dq4SV7z24ipq-XF-XsTneOmxKmnEft6OrYC8R1FjpmwlLrEUDfDUhIAdmjpadQzF61ECxla2XnBk_Enq1i9jqxtaoTK7-iUl4xh13KGIQgB9ef-AIYsaZugdt4QqhGXf6bnUbaVlo1lg8WgrfqA=="
+      },
+      {
+        "title": "morningstar.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFg1dKe0n8rWqX6-lJGfm2xKVq8u9wX_yzlCKSzfE_8NYIdYHJ84ME56A5kB0kDQj2IuaMfSr8qH-I5cUsKSf-SglKuosDhjj9AaETfSW1zYzKz8i322Ogu92tvzun-3DVBSGbSLT0i83ts23JfUT8OCWaloqVzPH6TMYfXvh4K6qObpVVr6t9xDrzgpBydmg=="
+      },
+      {
+        "title": "cbsnews.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFqSLllh3s03mqlyjTT--YfyqcEE-goST1pWmz0z265ocXSOYi2irTuLCUy4p_0dEWcUaKOZVwKm_ZajqBisjvvJEEpgvLm_JNCMB5YY3zwaKsvu4bH3kiz95JwZawZFZQxlTjjyNnH1oAEVJWalfTvSjUVAtNdg0qTcVZ7J5lq"
+      },
+      {
+        "title": "aa.com.tr",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHmfI3b9B7hfgBF7RoNVaGcocoJIchIQ79PwGRRF4Gp_Ih9lag1h1G3ywU0zIc8pDLRMjT-H8liYsaBrFr3qwAujL9vV86jUB5z2wTRWaXK-OD8V39QEb5BicahFkdMjqyF6pv-Z25MuBCARQDHdMggLAMK-jnDdpZhw87SD7AR5da6X5SR3sWA6FJLbbKnBVH-IMAIVRgZp4vVT3cqwk3yQ0T5"
+      },
+      {
+        "title": "bis.org",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF4KKMXh_00lEAe5gshsq4MVSQiBWUE4EXN4yDd2NUrhsZgFgIFH22N7JecSzACT5zsj6egTse2nkxneOPfC6SZsIRa8C4mqlOkVYG42CNkjleAkKasOaOe3ijSeNkdwfSAPREDLA=="
+      },
+      {
+        "title": "usanology.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFPM-oDCRKm5tE1kUx9WhN3_xeetaW-M_p7QDmOM4D16hJc8LbFkxJxnX6msMt8Zce4GZGOMg6NNYY0IB203Xv6BIHnSmYgzIfTSD7CvveUN_cfPwtrKWwJywb2cMZB-zmy7p3lcI1bLsckBIg6tXp4vTlgvyMT5DyvEkoA"
+      },
+      {
+        "title": "harriswilliams.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGcEtftJNY3Jk7swWL2UrD-6IucMZV7dZxNLSurBtCmZsRQyDK2x8-0hVvf-DuJBcK1YDh8oSDDsQi274FkIsokjSAUYLwIQZ0PCPCGg2p0SBaecbCpxzabPXCChSyzaHNCEkKBG_Zn7Mp_jbJ2g8YrZwPFtoCSatzybToXkPlBMUfDwHCHMwhGaP3C-lZZvUiYXLF-s0Yw"
+      },
+      {
+        "title": "bls.gov",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGjLUwqcWzX4_40tq9KtYY-TOtVihCyfADolYSDKvduUPm1rOJKAzpipja5lI8kde7hlpcBuhbkNiIRY-gQvoKJbEiL4LOhOs1JlDm8dtd3"
+      },
+      {
+        "title": "cambridgecurrencies.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGaWD1BLjtqCDn0fzooMWr0oWwBIROXieBCwCjAN6LiKfvfD5RaX5Wgw9f1gnahy-nB2aEO6OOO--zWnXLlNKAvuvcZaj-gkLe78Uqcj0kCky4Dg6oMKMfv_hchbaGA184EkDsXOaCSw29ZOrbDiXzTwAx3MMXt31I3VO_C6CQGGnKd6g3Jl60="
+      },
+      {
+        "title": "eia.gov",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGYxkgzk8Wblw7UTGlIOHn116UbF_hXPi5emRBBswCFArAFsePB4tiSMVsmbdYd1gVdVYapjGcFBIxRcD4MLFSsfN2qGFH6NnoqaHNNEVlZ_ZUJvCR3mUPrMpzstvQp4vUv9PcnC4UKpdvdU34Nhw=="
+      },
+      {
+        "title": "eia.gov",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGKzJnq_ZLvlEQ2GqL-mh6kk-IgFhjNHacnvhQu_mwPcOLvO4kg5xqfzUo21tDF3LF0Xq3LkJTWXYXh2_nQIkA_D3YCOI_dcixxAPWzdB1cp8W0_1ctXbVxDiw2nwfcBJI64guibRKHI0Y2edx3HA=="
+      },
+      {
+        "title": "eia.gov",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF66wMmzbkmrH35x0XM10ycRQwbT22YCXC8QmEvN0BdICEGI-i2bQliGb7po-Z8c51LhBTG8xkZk39j7ga5w7JpZi9j7-RdXL4_BZbVU72H9M11HH934GLQObvRpTc="
+      },
+      {
+        "title": "arpinintl.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEkeA6CFHjvBkhBAFtp_uoj_EPsTk7pq96G_Uwjy2Pwy8U9OlG_A8-BwTGDPmoCFs9W1ZMNRw_4bswGvzptuXk_rQkR2coBEni49oUSvp4TquNk0mLOgrIuWLzH0Bsx5cbAjXa4F3uhXXfSBXtt8xk7"
+      },
+      {
+        "title": "olimpwarehousing.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEDjjg-0G2gdQDAus3rKx5e6vmmy0LlC8AfDvNfTatBLi0KwJqSILp1F-I7ysJchmBlkxtyq5fAj_hSiHcpHzEHmiicU2alXi9fUcnfLuA6UlaOdPruKGKLo4vbesxgavsRqBGR1wfnikqdg8bfUkYNDpzU6AuX4sUocTg="
+      },
+      {
+        "title": "cvinternational.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHA-U4Ts6R-qRKaxhUhmKLCNuc73liIuVjBzfv37FS5nIQAZm5WKMmUxtUKK8dmojklZjcn87pEIx3ZCT2BbnAvi-fedFjohsV8_togUYcrlNo6snBP0_zzoIkpBxFZ_PWVxd9jKUawbo6SQzf3ZEC_cAtoFBnzbIdR0V8FCCtlQw=="
+      },
+      {
+        "title": "schwab.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUcDbJ4mlVaCIlXiY9UyDaiBOOu4w--iBStsiJL-CsEfWdo3WoHmJFy28yp2HQnNSPn6cvwvQvd3r9ZfZfnG7R9OWaf93gIklbxfZD802kVzFB4agtHdTYLJ-FdHQh2OejwGqahuGWRnFtm1kZB4gROBM="
+      },
+      {
+        "title": "guggenheiminvestments.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHR7wby_tQ-1XU0KA4oNtlYVooqguDMV9w-dExbt8bz-PAnbi3s3c__PQzFtGrHid9H_FpDLJXaF19BpSMQ7rBphgVU19ymzAHr8KnMpXl1nTFgN3YJPVaIqqImgoR1ls4ouPPiHUslq2prNhbDTNG1jGzuSGU0QEQD6TgSL5N_1nRlSuQjKRCx-jMK2tahbliFFQYVfpbNWCduAtOTLSMN2duIq9-odZyt"
+      },
+      {
+        "title": "bostonpartners.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG1wx7ERuFhn_hwZV6r9uoCI6CKj9zP7zv_34u4dYAEmf9sDK6wTsWU7iryK4sWMev6exxTOXxVpwYEDq6cMziVZe5NS4wG8crwzXZTjk85zZLZGrIiEIPcuk5NK0RHVuOWEn1FJv4evwRQwIHK23gXSNJAw_BLD33w7aXX1wiR6DkoWvkYx3xGxLEf8xl96cEOhEcL0niEp9RXGlrG9DBtddqd2NTu3jRgI94QDU_U6jMNtJfMxlgNKU7Gw143rYAiuDV9gmFtIPI="
+      },
+      {
+        "title": "katadata.co.id",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGPnr0MHpgB2G25Kg0Ify9kS28SP_uqNE2HS69dYPnf5MWLC53u52EDt7hcAqjoQ5MmWV3v9TLqVMMC1rvAMATmtj8-YnR-JaXtxuJnLfTO6PLS58RqJ8OkB_w1M0GDKlEhMCAGt4OnTnh3vzgee-XWRvWpNiNun3uiDGMKyIPo-lZzfdfjzFRfb5vlHNr9DtZiw8blqRu0d1z2uEkQMwfcJxsi_qqqXhfEXkx9XtXhCEJFH8Q3f7NWJftOQzaJ_tAXCFgUQJRJxA=="
+      },
+      {
+        "title": "kalkine.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQElKCx-IVgkq3-CEep-dCMBuxr6powQvYtkaXz47S16NyekxkFBwJBXy__7b2RApon9YPiKY55rzaJPVTTmXDgQy6GqCsmv8qJMJLldwkHedjseeD_eWn5d-2l1fLjHvgptc9hBrS4Ww9d5Cn11Pqcl4R1zMmjw6O35fb0_2SE3qM8d4_K38E4Y6QsxQ01cssxuGWGPDMirSmMmxtaASFCsxHqXpvZQ2V_h_mpwuHXvamqq1XfepDvWOY2NHLYekrLHXJIYVE3h3WmnzS4l"
+      },
+      {
+        "title": "csimarket.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFouFGPcTHIl-SmLAG16qyFkBaXSQHsqYl8GpTgo6p1golUl8kxFNujQiQvuzXwfEl7KoC8Q-12uf3uZ_t6AkSvHmXY4q6aP79gQn3lHUJUTHz4O4_PrWf8hzq_ArbXlHrDdtf9RezL4Xembw=="
+      },
+      {
+        "title": "ey.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFsR-O9gjd-hKvmATN8rhkq3iPhd9BETPcAUirKRO0JcrJq3IhvKxjtWFn5K87QvojRCDHeDy7VtRd5ceFhOVNY3ZIT8iQgrWvrjOnrcHp8xo2TLv83frmhK1vz5R3UnFLFHXVnW49dOAcp1RYTakSURbKh50Gtay0veO7UXUc="
+      },
+      {
+        "title": "gainxalpha.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEuJnzbReMViXO4hLMN_dlveixD-Dlscu9XmqzvNCP4_PyEx8f9miBpnD2N9KED2H5Yp2OKvmaEviam6_tr9FteVah4qUNks8xoiifHRgr1lhdEGEw57FxECm2frHxcwPnXzvW_mARKuoTPRuQYWLlDGWGRuugCiRG_Ix-G-pMdjBSc-dmzsYDLQOB2r9Hd3CpRBGkHUv85T3bfv6Aj10pd"
+      },
+      {
+        "title": "harriswilliams.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHVXzzOrJQytn0AAgYYPKLa1NmW6b7f2BHSUC1aHdvnkRcpxDR9WtFaPLOKmvBlUVDYh6ui_jwMIRzerv7_mtwqj385DuN5MrVJ9SFJPShb_NkcsZXrAZ2k1S0AksgSvU7BrQsmPZRqavcv17BCD9fH_0GWDeFimHbBQ4fPIlfcoSqdgBU5FM0wVXBjlVzOslH0Heu6nEtl"
+      },
+      {
+        "title": "morningstar.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE-rrLdroU7unX39DnORL45sVAPns0_-BSrhHhBsYiApUlfChQ9mOWYEWidUwSfaZXY2ekYcyFmFcOu8jOn3mX3H3EZT3Gb2wa_WdGVX8d2IkFti9rmfPDzunCIk11W0qREQC5_07r4setZs4eyXyvZ0xHza3fVDcHEagQd8d_ihm4CROuz9wwC-aX-JULz5m9Y9xWqWKyBwMJEFvjTqyF-8kabjuggwQhKwYc1_ufxBC_1CW6IJwYF3MT-UwksmyBmHQ_Amigx3zUJ3inT6glxWtrvL1Sr0dnd-xA="
+      },
+      {
+        "title": "caveofx.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFNeWn5ULca5FBZy86dC-np_QM07_11M1uSBQ5qQweOrkrWZQn5FOtnQ52Lur1aG8UeBeI39hamsaByuKgb_o2JiXxWhMc_miGkAKfn6lmEzzh1HuIb3f4i36LfpFz7CvDBcS3XOzs3gFFXnpTqM_deds6MfPY1p1w="
+      },
+      {
+        "title": "comptia.org",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHa9wrasyYHLJ2eKDlFOsf7ieSdXXzIatIhzPzAafMilNWeyIdO_aW_vPt4hx7SUs_NxWCS5MmybHUDHf4i6xra8HEAmIvFt7rb56L0O47DdJORDlnI9DLs-kTv4z2gxbiW0UJRJ2_typ50S3YK3tJcDVyQQiav8T0tBLwvRLaOJ_V3LtZ9"
+      },
+      {
+        "title": "pricepedia.it",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFMi73Ajcd1kTH_pgBezryjw5jlXvfWfdPIFiPqn4VPdxGhbgiheclAlUCk7OlnYdB8fs6OgMMWfODm6A0IiVT1LTuwhh5eEbMHHc8VXOv0zfhNHcW7IS2Iol2OQG3rKdSvIXCcuvw29RBg6WsA34nzOwsqBydUt76t2jltNq02J9MoKPD8-LgXtKCNv8ihIxCULCOmPP7G"
+      },
+      {
+        "title": "youtube.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKBzHSFVHR_DanRK-hNzGZSatoIculu5kqIJEjLY3tGmS8-TyCWiIGYMCixqmekU0YTv29w6RwsGaj5rd8ZHWAwclQ1NKrQOrDV2NIFXrFf8kp8D3HPHMJ75EOGapk43pP6KAjsV0="
+      },
+      {
+        "title": "maersk.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHNROTclkAO2h3zpgK6LJLE75PBelJGf6bPPYGP7_hirXerQB5mmsaSdZbxdDsX4KyOKnLmMaFGjJLyrwgZ7KZ3DqSUdK8-VMBfzVyk-vTa-FIDqLreyqW2G1aEKeEToIqzZdjIX1X-55-WRDfmtyO17zMCT1mAMk-s5O1XXHK7XvFmBo24a2GqmYIRAh_pxCXTB9DxSwJSxeRntQ56_a4="
+      },
+      {
+        "title": "mufgresearch.com",
+        "date": "",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQERFZ_rbpUq8DeGYEXWTK4pnaAsE-02Tjs96XXvPDD70hGPBxmED_qJNptbLyHnwUwLyIIYnDornbi_wMTJaQuG8Pg5tMjAC3qkou1Zc9EUj8Iaqyn3v1jmmTJ4TsTPUZYAmE6Kv-PS1E6eEbCnVoaxRNEAdzXjY-Jw6rMTB02DG7y2fg=="
+      }
+    ],
+    "finish_reason": "FinishReason.MAX_TOKENS",
+    "response_chars": 17844
+  }
+}

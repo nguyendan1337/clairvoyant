@@ -8,6 +8,9 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
+    <!-- Freely licensed Weezer-inspired geometric font -->
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/tex-gyre-adventor" type="text/css"/>
+
     <style>
         :root {
             --bg-deep: #000000;
@@ -24,10 +27,18 @@
             --green-hover: #63E881;
             --orange: #FF9F0A;
             --orange-hover: #FFB340;
+            --font-weezer: "TeXGyreAdventorRegular", "Century Gothic", "URW Gothic", sans-serif;
         }
 
         * {
             box-sizing: border-box;
+            font-synthesis: none;
+        }
+
+        body,
+        body * {
+            font-weight: normal !important;
+            letter-spacing: 0.05em !important;
         }
 
         html {
@@ -35,7 +46,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: var(--font-weezer);
+            letter-spacing: 0.05em;
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -58,6 +70,25 @@
                 radial-gradient(circle at 50% 120%, rgba(48, 209, 88, 0.045), transparent 34%);
         }
 
+        button,
+        input,
+        select,
+        textarea {
+            font-family: var(--font-weezer);
+        }
+
+        strong,
+        b {
+            font-family: var(--font-weezer);
+            font-weight: normal;
+        }
+
+        em,
+        i {
+            font-family: var(--font-weezer);
+            font-style: normal;
+        }
+
         .page-shell {
             width: min(1500px, calc(100% - 32px));
             margin: 0 auto;
@@ -70,17 +101,20 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(1.7rem, 4vw, 2.35rem);
-            font-weight: 680;
-            letter-spacing: -0.035em;
+            font-family: var(--font-weezer);
+            font-size: clamp(1.85rem, 4.35vw, 2.55rem);
+            font-weight: normal;
+            letter-spacing: 0.05em;
             line-height: 1.05;
+            text-transform: lowercase;
         }
 
         h2 {
             margin: 38px 0 14px;
+            font-family: var(--font-weezer);
             font-size: 1.2rem;
-            font-weight: 620;
-            letter-spacing: -0.018em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
         }
 
         p {
@@ -146,11 +180,13 @@
 
         .brand-subtitle {
             display: block;
-            margin-top: 4px;
+            margin-top: 6px;
             color: var(--text-secondary);
+            font-family: var(--font-weezer);
             font-size: 0.84rem;
-            font-weight: 500;
-            letter-spacing: 0.01em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         .header-meta {
@@ -178,8 +214,10 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.075);
             -webkit-backdrop-filter: blur(16px) saturate(130%);
             backdrop-filter: blur(16px) saturate(130%);
+            font-family: var(--font-weezer);
             font-size: 0.86rem;
-            font-weight: 600;
+            font-weight: normal;
+            letter-spacing: 0.05em;
             white-space: nowrap;
         }
 
@@ -238,9 +276,10 @@
         th {
             background: rgba(255, 255, 255, 0.052);
             color: rgba(255, 255, 255, 0.72);
+            font-family: var(--font-weezer);
             font-size: 0.78rem;
-            font-weight: 650;
-            letter-spacing: 0.015em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
         }
 
         tbody tr {
@@ -392,7 +431,7 @@
             }
 
             h1 {
-                font-size: 1.55rem;
+                font-size: 1.68rem;
             }
 
             h2 {

@@ -9,6 +9,16 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
     <style>
+        /* Self-hosted TeX Gyre Adventor Regular. Keep this HTML file at the
+           repository root and the font at assets/fonts/TeXGyreAdventor-Regular.ttf. */
+        @font-face {
+            font-family: "TeX Gyre Adventor";
+            src: url("assets/fonts/TeXGyreAdventor-Regular.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --bg-deep: #000000;
             --bg-soft: #070908;
@@ -24,10 +34,18 @@
             --green-hover: #63E881;
             --orange: #FF9F0A;
             --orange-hover: #FFB340;
+            --font-weezer: "TeX Gyre Adventor", "Century Gothic", "URW Gothic", sans-serif;
         }
 
         * {
             box-sizing: border-box;
+            font-synthesis: none;
+        }
+
+        body,
+        body * {
+            font-weight: normal !important;
+            letter-spacing: 0.05em !important;
         }
 
         html {
@@ -35,7 +53,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: var(--font-weezer);
+            letter-spacing: 0.05em;
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -58,6 +77,22 @@
                 radial-gradient(circle at 50% 120%, rgba(48, 209, 88, 0.045), transparent 34%);
         }
 
+        button,
+        input,
+        select,
+        textarea {
+            font-family: var(--font-weezer);
+        }
+
+        strong,
+        b,
+        em,
+        i {
+            font-family: var(--font-weezer);
+            font-weight: normal;
+            font-style: normal;
+        }
+
         .page-shell {
             width: min(1500px, calc(100% - 32px));
             margin: 0 auto;
@@ -70,17 +105,20 @@
 
         h1 {
             margin: 0;
-            font-size: clamp(1.7rem, 4vw, 2.35rem);
-            font-weight: 680;
-            letter-spacing: -0.035em;
+            font-family: var(--font-weezer);
+            font-size: clamp(1.85rem, 4.35vw, 2.55rem);
+            font-weight: normal;
+            letter-spacing: 0.05em;
             line-height: 1.05;
+            text-transform: lowercase;
         }
 
         h2 {
             margin: 38px 0 14px;
+            font-family: var(--font-weezer);
             font-size: 1.2rem;
-            font-weight: 620;
-            letter-spacing: -0.018em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
         }
 
         p {
@@ -148,9 +186,10 @@
             display: block;
             margin-top: 4px;
             color: var(--text-secondary);
+            font-family: var(--font-weezer);
             font-size: 0.84rem;
-            font-weight: 500;
-            letter-spacing: 0.01em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
         }
 
         .header-meta {
@@ -178,8 +217,10 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.075);
             -webkit-backdrop-filter: blur(16px) saturate(130%);
             backdrop-filter: blur(16px) saturate(130%);
+            font-family: var(--font-weezer);
             font-size: 0.86rem;
-            font-weight: 600;
+            font-weight: normal;
+            letter-spacing: 0.05em;
             white-space: nowrap;
         }
 
@@ -238,9 +279,10 @@
         th {
             background: rgba(255, 255, 255, 0.052);
             color: rgba(255, 255, 255, 0.72);
+            font-family: var(--font-weezer);
             font-size: 0.78rem;
-            font-weight: 650;
-            letter-spacing: 0.015em;
+            font-weight: normal;
+            letter-spacing: 0.05em;
         }
 
         tbody tr {
@@ -360,37 +402,6 @@
             margin: 14px 0;
         }
 
-        .selection-card {
-            position: relative;
-            margin: 0 0 2rem;
-            padding: 18px 20px;
-            overflow: hidden;
-            background: rgba(30, 34, 31, 0.46);
-            -webkit-backdrop-filter: blur(22px) saturate(130%);
-            backdrop-filter: blur(22px) saturate(130%);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.065),
-                0 10px 30px rgba(0,0,0,0.18);
-        }
-
-        .selection-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 24%, transparent 72%, rgba(255,255,255,0.02));
-        }
-
-        .selection-card p {
-            position: relative;
-            z-index: 1;
-            margin: 0;
-            color: var(--text-secondary);
-        }
-
         .disclaimer {
             margin: 30px 4px 8px;
             font-size: 11px;
@@ -423,7 +434,7 @@
             }
 
             h1 {
-                font-size: 1.55rem;
+                font-size: 1.68rem;
             }
 
             h2 {
@@ -468,8 +479,7 @@
             .table-container,
             .summary-card,
             .market-summary,
-            .sector-summary,
-            .selection-card {
+            .sector-summary {
                 background: rgba(20, 23, 21, 0.96);
             }
         }
@@ -502,15 +512,6 @@
     <div class="table-container">
         <!--FULL_DF_TABLE_HERE-->
     </div>
-
-
-    <h2>How ETFs Were Selected</h2>
-    <section class="selection-card">
-        <p>
-            The initial universe of ETFs was compiled from multiple Yahoo Finance top performance lists. ETFs containing leveraged, inverse, foreign, or otherwise high-risk characteristics were filtered out using a set of exclusion keywords. From the remaining ETFs, only those showing strong performance—defined as a 52-week change above 25%, a 3-month return above 6%, and trading above both their 50-day and 200-day moving averages—were retained. These criteria capture short-, mid-, and long-term momentum and growth trends. The resulting list was then sorted by 52-week change to highlight the strongest performers. Finally, this refined list was analyzed using Google Gemini, which conducted focused searches for each ETF, incorporating recent news, macroeconomic context, and real-world developments to produce the final selection of up to 10 recommended ETFs.
-        </p>
-    </section>
-
     <div class="disclaimer">
         This content is for informational purposes only and not financial advice. There are gremlins with control over the markets that monitor your buys and sells and then do the opposite to spite you.
     </div>

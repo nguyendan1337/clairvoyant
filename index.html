@@ -8,10 +8,17 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
 
-    <!-- Freely licensed Weezer-inspired geometric font -->
-    <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/tex-gyre-adventor" type="text/css"/>
-
     <style>
+        /* Self-hosted TeX Gyre Adventor Regular. Keep this HTML file at the
+           repository root and the font at assets/fonts/TeXGyreAdventor-Regular.ttf. */
+        @font-face {
+            font-family: "TeX Gyre Adventor";
+            src: url("assets/fonts/TeXGyreAdventor-Regular.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --bg-deep: #000000;
             --bg-soft: #070908;
@@ -27,7 +34,7 @@
             --green-hover: #63E881;
             --orange: #FF9F0A;
             --orange-hover: #FFB340;
-            --font-weezer: "TeXGyreAdventorRegular", "Century Gothic", "URW Gothic", sans-serif;
+            --font-weezer: "TeX Gyre Adventor", "Century Gothic", "URW Gothic", sans-serif;
         }
 
         * {

@@ -1,12 +1,40 @@
 ---
 
-url: "https://finance.yahoo.com/markets/stocks/52-week-gainers/"
+# Yahoo Finance discovery now uses yfinance EquityQuery instead of HTML pages.
 min_52_week_change: 25
+min_market_cap: 300000000
+min_price: 5.0
+min_average_volume: 100000
+# Applied from one bulk history download before per-ticker fundamentals calls.
+min_3_month_return: 0
+stock_screener_page_size: 250
+# null means every stock that survives the bulk-history filter receives
+# fundamentals. A numeric value can be restored later as an explicit cap.
+max_info_calls: null
 max_retries: 2
-initial_delay: 10
+# Search-enabled evidence collection remains on Gemini 2.5.
 model_primary: gemini-2.5-flash
-# Research fails closed instead of silently publishing lower-quality Lite output.
 model_fallback: gemini-2.5-flash-lite
+# Gemini 3.5 handles schema-enforced work after research without using Search.
+structure_model: gemini-3.5-flash
+classification_model: gemini-3.5-flash
+summary_model: gemini-3.5-flash
+# The previous 8,192-token market limit truncated both models. Keep thinking
+# compact and leave enough room for one complete, concise JSON response.
+market_context_max_output_tokens: 16384
+market_thinking_budget: 2048
+stock_research_max_output_tokens: 32768
+structure_max_output_tokens: 16384
+summary_max_output_tokens: 8192
+structure_thinking_budget: 8192
+format_repair_thinking_budget: 2048
+max_format_repairs_per_response: 1
+max_postprocess_calls_per_run: 8
+max_market_sources: 8
+max_active_risk_events: 4
+# If today's market response cannot be recovered, reuse a still-valid recent
+# context instead of spending another scarce Search call or aborting the run.
+market_context_fallback_hours: 24
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
 # Evaluate the first 50 candidates normally, then backfill from ranks 51-75
@@ -23,15 +51,18 @@ excluded_crypto_dependence:
   - PRIMARY
 thinking_budget: 12288
 require_google_search: true
+# Normal unattended-run limits. These restore the pre-quota-test allowance for
+# one market call plus up to five stock-research calls, with one spare call.
 max_gemini_calls_per_run: 7
-# The five-call stock budget includes retries and any ranks 51-75 backfill.
 max_stock_research_calls_per_run: 5
-reserved_summary_calls: 1
+# Summary/classification/repair calls use max_postprocess_calls_per_run instead.
+reserved_summary_calls: 0
 max_validation_rounds: 4
 max_research_attempts_per_stock: 2
 # A deferred failure gets one fresh, batched chance in each later execution.
 max_deferred_research_attempts_per_run: 1
 max_structural_repairs_per_stock: 2
+# Normal unattended runs may retry temporary service/capacity failures.
 max_transient_api_attempts: 3
 initial_transient_backoff_seconds: 30
 max_transient_backoff_seconds: 120
@@ -42,9 +73,18 @@ stock_research_cache_file: caches/gemini_stock_research_cache.json
 gemini_research_cache_hours: 12
 # Stock prompt content is hashed separately, so prompt edits invalidate stock
 # research without unnecessarily invalidating a still-current market context.
-cache_version: 4
-final_summary_enabled: true
-summary_thinking_budget: 4096
+cache_version: 6
+# The report has a complete deterministic Python summary. Avoid spending a
+# separate model call on HTML-only rewriting; the Gemini path remains available
+# by setting this to true.
+final_summary_enabled: false
+summary_thinking_budget: 512
+
+# Prefer meaningfully lower reversal risk when QVM scores are close, while
+# preserving QVM as the dominant ranking signal.
+risk_adjusted_selection_enabled: true
+moderate_risk_qvm_penalty: 3.0
+repeated_risk_event_qvm_penalty: 4.0
 
 prompt_market_context: |
   You are an expert U.S. stock-market analyst with real-time Google Search.
@@ -58,6 +98,8 @@ prompt_market_context: |
   only for continuing events that remain materially relevant.
 
   RESEARCH COVERAGE
+  Keep this to at most 12 combined searches. Reuse broad market and sector-
+  performance searches instead of running a separate query for every sector.
   Use multiple targeted searches to assess:
     1. S&P 500 direction, recent performance, breadth, and market health
     2. Investor mood and the largest current market drivers
@@ -86,8 +128,8 @@ prompt_market_context: |
   invent additional IDs.
 
   MARKET AND SECTOR WRITING QUALITY
-  - market_intro must include at least one explicit S&P 500 percentage and the
-    period measured.
+  - Use the supplied PYTHON_MARKET_METRICS as authoritative. market_intro must
+    reproduce its S&P 500 percentage and measurement period exactly.
   - Separate positive market supports from negative pressures. Never describe
     cautious or bearish sentiment as being caused by positive earnings or
     investment.
@@ -100,6 +142,10 @@ prompt_market_context: |
     sector remains relevant."
   - Cover every sector named in REQUIRED_SECTOR_GROUPS when that section is
     supplied by Python.
+  - Keep market_intro to 3 concise sentences, every sector_context value to one
+    sentence of at most 30 words, and every list to no more than 4 items.
+  - Return no more than 8 sources and 4 active risk events. Complete the JSON
+    object before adding optional detail.
 
   OUTPUT
   Return exactly one valid JSON object with no Markdown fences, citations outside
@@ -136,9 +182,37 @@ prompt_market_context: |
   }
 
   SOURCE RULES
-  Include several credible current sources. Prefer official releases, government
+  Include no more than 8 credible current sources and no more than 4 active
+  risk events. Prefer official releases, government
   data, company or exchange information, and credible financial reporting.
   Every URL must be a real source used in the research. Do not invent sources.
+
+prompt_json_repair: |
+  Convert the supplied researched response into exactly one JSON object matching
+  the provided response schema. Correct the EXACT_VALIDATION_OR_PARSE_ERROR.
+  This is a no-Search formatting and normalization task. Do not add or replace
+  researched facts. Preserve the researched meaning and every source URL already
+  present. You may reconstruct missing source objects only from
+  ALLOWED_GROUNDING_SOURCES, preserving those URLs exactly. Never introduce a
+  URL outside the original response or ALLOWED_GROUNDING_SOURCES. Return only
+  the schema-conforming JSON object. When the original response is malformed,
+  URL-like fragments inside its raw text are not authoritative sources; use
+  only ALLOWED_GROUNDING_SOURCES.
+
+prompt_stock_postprocess: |
+  You are the final no-Search stock classification and structuring stage.
+  Grounded research has already been completed by another model. Apply the
+  evidence and risk rules in STOCK_POLICY to each RESEARCH_DRAFT_RESULT using
+  only the supplied evidence. Ignore STOCK_POLICY's Search and output-transport
+  instructions; the supplied response schema owns the output format.
+
+  Return only the compact classification patch requested by the schema. Do not
+  reproduce business descriptions, operating evidence, durable or temporary
+  drivers, source objects, or other research fields. Python will merge each
+  patch into the corresponding grounded research object and preserve that
+  evidence exactly. Re-evaluate derived risk labels for policy consistency, but
+  do not add current facts or conduct research. Return every supplied candidate
+  exactly once and preserve candidate order.
 
 prompt_stock_batch: |
   You are an expert U.S. stock analyst with real-time Google Search. Evaluate
@@ -387,15 +461,26 @@ prompt_stock_batch: |
 
   Nonrecurring refunds, gains, settlements, credits, recoveries, or asset sales
   are comparison adjustments, never temporary operating drivers. Remove them
-  before evaluating recurring operations. Their disappearance cannot produce
-  MODERATE or higher unless a separately sourced normalized recurring metric is
-  already deteriorating; otherwise use NONRECURRING_COMPARISON_ONLY and LOW.
+  before evaluating recurring operations. Use NONRECURRING_COMPARISON_ONLY and
+  LOW when removing the item merely creates a difficult comparison and the
+  recurring business remains independently sound.
+
+  Use CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE when current reported
+  profitability or cash generation materially depends on collaboration,
+  licensing, milestone, asset-sale, or similar nonrecurring revenue and the
+  recurring operating business is not independently profitable or sufficient.
+  When catalyst_dependence is MODERATE or HIGH and the loss of that contribution
+  would materially weaken normalized earnings or cash flow within 0-12 months,
+  apply a cautious MODERATE floor even if no separate probability indicator is
+  available. This is an earnings-quality floor, not evidence that another
+  one-time payment is probable or improbable.
 
   risk_basis:
   - NONE
   - NORMALIZED_OPERATING_DETERIORATION
   - TEMPORARY_DRIVER_NORMALIZATION
   - NONRECURRING_COMPARISON_ONLY
+  - CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE
 
   COMPLETE FIELD CONSISTENCY
   For every COMPLETE result:
@@ -489,7 +574,7 @@ prompt_stock_batch: |
     "crypto_dependence": "NONE | INCIDENTAL | MATERIAL | PRIMARY",
     "current_operating_evidence": "Concrete current operating fact",
     "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE | null only when INCOMPLETE",
-    "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | null only when INCOMPLETE",
+    "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE | null only when INCOMPLETE",
     "catalyst_dependence": "LOW | MODERATE | HIGH | null only when INCOMPLETE",
     "mechanism_status": "NONE | HYPOTHETICAL | ACTIVE | UNUSUALLY_PROBABLE | null only when INCOMPLETE",
     "normalization_probability": "NOT_APPLICABLE | NOT_ESTABLISHED | REASONABLY_PROBABLE | AT_LEAST_AS_LIKELY | null only when INCOMPLETE",
@@ -531,10 +616,8 @@ prompt_html_summary: |
   add new facts, stocks, sectors, reversal-risk levels, or recommendations.
   Do not reclassify, replace, remove, reorder, or independently evaluate stocks.
 
-  Return exactly one valid JSON object with no Markdown fence or extra text:
-  {
-    "summary_html": "<div class=\"summary\">...</div>"
-  }
+  Return exactly one response matching the supplied JSON schema, with no
+  Markdown fence or extra text.
 
   SUMMARY HTML RULES
   Begin exactly with:

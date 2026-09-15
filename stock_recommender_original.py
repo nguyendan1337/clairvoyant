@@ -8,9 +8,11 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 from google.genai import types
 from datetime import datetime, timedelta, UTC
-import requests, time, random, json, yaml, os, hashlib
+from yfinance import EquityQuery
+import time, random, json, yaml, os, hashlib
 import signal
 from html import escape
+from urllib.parse import urlsplit, urlunsplit
 
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -76,270 +78,162 @@ def cache_file_path(filename):
 
 
 
-def extract_number_with_suffix(s):
-    if s is None:
-        return None
-
-    s = str(s).strip().upper()
-
-    if s in ["N/A", "NONE", "-", "", "—"]:
-        return None
-
-    s = s.replace(',', '')
-
-    match = re.search(r'-?[\d.]+', s)
-    if not match:
-        return None
-
-    try:
-        num = float(match.group())
-    except ValueError:
-        return None
-
-    # Handle suffixes (B, M, K, T)
-    if 'T' in s:
-        num *= 1e12
-    elif 'B' in s:
-        num *= 1e9
-    elif 'M' in s:
-        num *= 1e6
-    elif 'K' in s:
-        num *= 1e3
-
-    return num
-
-
-
-def clean_52wk_change(s):
-    """Robust cleaner for '52 Wk Change %' values like '+2,734.88%' or '−12.34%' """
-    if pd.isna(s) or not isinstance(s, str):
-        return None
-    s = s.replace(',', '').replace('+', '').replace('%', '').strip()
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-
-def clean_numeric_columns(df, cols):
-    """
-    Clean numeric columns properly.
-    Use special logic for 52 Wk Change %.
-    """
-    for col in cols:
-        if col not in df.columns:
-            continue
-
-        if col == '52 WkChange %':
-            # Use the robust percentage cleaner
-            df[col] = df[col].apply(clean_52wk_change)
-        else:
-            # Use suffix extractor for Market Cap, Volume, etc.
-            df[col] = (
-                df[col]
-                .astype(str)
-                .apply(extract_number_with_suffix)
-            )
-
-    return df
-
-
-
-HTML_CACHE_FILE = cache_file_path("stock_pages_cache.json")
-HTML_CACHE_EXPIRY_DAYS = 1
-
-
-
-def load_html_cache():
-    if not os.path.exists(HTML_CACHE_FILE):
-        return {}
-
-    try:
-        with open(HTML_CACHE_FILE, "r", encoding="utf-8") as f:
-            cache = json.load(f)
-
-        if not isinstance(cache, dict):
-            print(
-                f"Warning: {HTML_CACHE_FILE} does not contain a JSON object. "
-                "Ignoring it."
-            )
-            return {}
-
-    except (json.JSONDecodeError, OSError) as e:
-        print(
-            f"Warning: could not read {HTML_CACHE_FILE}: {e}. "
-            "Ignoring the invalid cache and rebuilding it."
-        )
-        return {}
-
-    fresh_cache = {}
-    now = datetime.now(UTC)
-
-    for key, entry in cache.items():
-        try:
-            ts = datetime.fromisoformat(entry["timestamp"])
-
-            if ts.tzinfo is None:
-                ts = ts.replace(tzinfo=UTC)
-
-            if now - ts < timedelta(days=HTML_CACHE_EXPIRY_DAYS):
-                fresh_cache[key] = entry
-        except (KeyError, TypeError, ValueError):
-            continue
-
-    return fresh_cache
-
-
-def save_html_cache(cache):
-    temp_file = f"{HTML_CACHE_FILE}.tmp"
-
-    try:
-        with open(temp_file, "w", encoding="utf-8") as f:
-            json.dump(cache, f)
-            f.flush()
-            os.fsync(f.fileno())
-
-        # Atomic replacement prevents a partially written real cache.
-        os.replace(temp_file, HTML_CACHE_FILE)
-
-    finally:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-
-
-
-def fetch_single_stock_page(url, start=0, count=100, retries=3, sleep=2, cache=None, force_refresh=False):
-    paged_url = f"{url}?start={start}&count={count}"
-
-    # Unique cache key per page
-    cache_key = f"{url}|{start}|{count}"
-
-    # ---- CACHE HIT ----
-    if not force_refresh and cache is not None and cache_key in cache:
-        return cache[cache_key]["html"]
-
-    headers = {
-        'User-Agent': (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/120.0.0.0 Safari/537.36'
-        )
-    }
-
-    for attempt in range(1, retries + 1):
-        try:
-            response = requests.get(paged_url, headers=headers, timeout=10)
-            response.raise_for_status()
-
-            html = response.text
-
-            # ---- SAVE TO CACHE ----
-            if cache is not None:
-                cache[cache_key] = {
-                    "html": html,
-                    "timestamp": datetime.now(UTC).isoformat()
-                }
-
-            return html
-
-        except requests.exceptions.RequestException as e:
-            print(f"Attempt {attempt} failed for {paged_url}: {e}")
-            if attempt < retries:
-                time.sleep(sleep + random.uniform(0, 1))
-
-    print(f"Failed to fetch {paged_url} after {retries} attempts.")
-    return None
-
-
-
-def parse_stock_table(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find('table')
-    if not table:
-        print("No <table> found in HTML.")
-        return pd.DataFrame()
-
-    headers = [th.get_text(strip=True) for th in table.find_all('th')]
-    # print("Detected headers:", headers)
+def fetch_stock_universe(
+        min_52_week_change,
+        min_market_cap,
+        min_price,
+        min_average_volume,
+        max_retries=3,
+        page_size=250,
+):
+    """Fetch US stocks that pass the cheap Yahoo screener filters."""
+    query = EquityQuery(
+        "and",
+        [
+            EquityQuery("eq", ["region", "us"]),
+            EquityQuery(
+                "gte", ["fiftytwowkpercentchange", min_52_week_change]
+            ),
+            EquityQuery("gte", ["intradaymarketcap", min_market_cap]),
+            EquityQuery("gte", ["intradayprice", min_price]),
+            EquityQuery("gte", ["avgdailyvol3m", min_average_volume]),
+        ],
+    )
 
     rows = []
-    for tr in table.find_all('tr')[1:]:  # skip header row
-        tds = [td.get_text(strip=True) for td in tr.find_all('td')]
-        if len(tds) == len(headers):
-            rows.append(tds)
+    offset = 0
+    while True:
+        result = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                result = yf.screen(
+                    query,
+                    offset=offset,
+                    size=page_size,
+                    sortField="fiftytwowkpercentchange",
+                    sortAsc=False,
+                )
+                break
+            except Exception as exc:
+                print(
+                    f"Stock screener attempt {attempt}/{max_retries} failed "
+                    f"at offset {offset}: {exc}"
+                )
+                if attempt < max_retries:
+                    time.sleep(2 + random.uniform(0, 1))
+
+        if result is None:
+            raise RuntimeError(f"Yahoo stock screener failed at offset {offset}.")
+
+        page = result.get("quotes") or []
+        if not page:
+            break
+
+        rows.extend(page)
+        print(f"Fetched {len(page)} stock screener rows at offset {offset}.")
+        offset += len(page)
+        total = result.get("total")
+        if len(page) < page_size or (total is not None and offset >= total):
+            break
 
     if not rows:
-        print("No data rows parsed.")
-    return pd.DataFrame(rows, columns=headers)
+        raise RuntimeError("Yahoo stock screener returned no matching stocks.")
+
+    df = pd.DataFrame(rows)
+    if "symbol" not in df.columns:
+        raise RuntimeError("Yahoo stock screener response has no symbol field.")
+
+    df["Name"] = df.get(
+        "longName", pd.Series(index=df.index, dtype=object)
+    )
+    if "shortName" in df.columns:
+        df["Name"] = df["Name"].fillna(df["shortName"])
+
+    # Yahoo's screener query field names differ from its response names.
+    response_columns = {
+        "symbol": "Symbol",
+        "fiftyTwoWeekChangePercent": "52 WkChange %",
+        "fiftyTwoWeekChange": "52 WkChange %",
+        "regularMarketPrice": "Price",
+        "marketCap": "Market Cap",
+        "averageDailyVolume3Month": "Avg Vol (3M)",
+        "trailingPE": "P/E Ratio(TTM)",
+    }
+    for source, target in response_columns.items():
+        if source in df.columns and target not in df.columns:
+            df = df.rename(columns={source: target})
+
+    df["Symbol"] = df["Symbol"].astype(str).str.strip().str.upper()
+    df = df[df["Symbol"].str.match(r"^[A-Z0-9.-]+$", na=False)]
+    if "quoteType" in df.columns:
+        quote_type = df["quoteType"].fillna("").astype(str).str.upper()
+        df = df[(quote_type == "") | (quote_type == "EQUITY")]
+
+    numeric_floors = {
+        "52 WkChange %": min_52_week_change,
+        "Market Cap": min_market_cap,
+        "Price": min_price,
+        "Avg Vol (3M)": min_average_volume,
+    }
+    for column, floor in numeric_floors.items():
+        if column not in df.columns:
+            raise RuntimeError(
+                f"Yahoo stock screener response has no required {column} field."
+            )
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+        df = df[df[column].notna() & (df[column] >= floor)]
+
+    if "P/E Ratio(TTM)" in df.columns:
+        df["P/E Ratio(TTM)"] = pd.to_numeric(
+            df["P/E Ratio(TTM)"], errors="coerce"
+        )
+        df = df[
+            df["P/E Ratio(TTM)"].isna()
+            | (df["P/E Ratio(TTM)"] > 0)
+        ]
+    else:
+        df["P/E Ratio(TTM)"] = np.nan
+
+    df["Name"] = df["Name"].fillna(df["Symbol"])
+    df = df.drop_duplicates("Symbol", keep="first")
+    return df.sort_values(
+        "52 WkChange %", ascending=False
+    ).reset_index(drop=True)
 
 
-
-def fetch_all_stock_pages_from_url(url, min_52_week_change=20, force_refresh=False):
-    all_pages = []
-    start = 0
-    count = 100
-
-    # ---- LOAD CACHE ----
-    cache = load_html_cache()
-
-    target_col = '52 WkChange %'
-    numeric_cols = [
-        'Price', 'Change', 'Change %', 'Volume',
-        'Avg Vol (3M)', 'Market Cap', 'P/E Ratio(TTM)', '52 WkChange %'
-    ]
-
-    while True:
-        html = fetch_single_stock_page(url, start=start, count=count, cache=cache, force_refresh=force_refresh)
-
-        if not html:
-            print(f"No HTML returned for start={start}. Stopping.")
-            break
-
-        df_page = parse_stock_table(html)
-        if df_page.empty:
-            print(f"Empty page at start={start}. Stopping.")
-            break
-
-        if target_col not in df_page.columns:
-            print(f"Column '{target_col}' not found at start={start}. Stopping.")
-            break
-
-        df_page = clean_numeric_columns(df_page, numeric_cols)
-
-        df_page = df_page[
-            df_page[target_col].notna() &
-            (df_page['Avg Vol (3M)'] > 0) &
-            (df_page['Market Cap'] > 0)
-            ]
-
-        if df_page.empty:
-            print(f"No valid rows after cleaning at start={start}. Stopping.")
-            break
-
-        max_change_on_page = df_page[target_col].max()
-        if max_change_on_page < min_52_week_change:
-            print(f"Page at start={start} below threshold. Stopping early.")
-            break
-
-        all_pages.append(df_page)
-
-        if len(df_page) < count:
-            print(f"Last page reached at start={start}.")
-            break
-
-        start += count
-        time.sleep(1.0)
-
-    # ---- SAVE CACHE ----
-    save_html_cache(cache)
-
-    if not all_pages:
-        return pd.DataFrame()
-
-    df = pd.concat(all_pages, ignore_index=True)
-    df = df[df[target_col] >= min_52_week_change]
-    return df.sort_values(target_col, ascending=False).reset_index(drop=True)
+def fetch_sp500_snapshot():
+    """Calculate the required market percentage without spending an AI call."""
+    try:
+        history = yf.download(
+            "^GSPC",
+            period="1mo",
+            interval="1d",
+            auto_adjust=True,
+            progress=False,
+            threads=False,
+        )
+        close = history["Close"].dropna()
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+        if len(close) < 11:
+            raise ValueError("fewer than 11 S&P 500 closes were returned")
+        change_percent = (float(close.iloc[-1]) / float(close.iloc[-11]) - 1) * 100
+        as_of = pd.Timestamp(close.index[-1]).date().isoformat()
+        snapshot = {
+            "symbol": "^GSPC",
+            "change_percent": round(change_percent, 2),
+            "measurement_period": "10 trading sessions",
+            "as_of_date": as_of,
+        }
+        print(
+            "Python market metric: S&P 500 "
+            f"{snapshot['change_percent']:+.2f}% over "
+            f"{snapshot['measurement_period']} through {as_of}."
+        )
+        return snapshot
+    except Exception as exc:
+        print(f"Warning: could not calculate the S&P 500 snapshot: {exc}")
+        return None
 
 
 
@@ -362,23 +256,39 @@ def initialize_gemini_client():
     )
 
 
-def build_gemini_config(thinking_budget, enable_search=True):
+def build_gemini_config(
+        thinking_budget,
+        enable_search=True,
+        max_output_tokens=None,
+        response_json_schema=None,
+):
     """Create a low-variance Gemini configuration."""
     tools = None
     if enable_search:
         tools = [types.Tool(google_search=types.GoogleSearch())]
-    return types.GenerateContentConfig(
-        tools=tools,
-        temperature=0,
-        thinking_config=types.ThinkingConfig(
+    config_kwargs = {
+        "tools": tools,
+        "temperature": 0,
+        "thinking_config": types.ThinkingConfig(
             thinking_budget=thinking_budget
-        )
-    )
+        ),
+    }
+    if max_output_tokens is not None:
+        config_kwargs["max_output_tokens"] = int(max_output_tokens)
+    if response_json_schema is not None:
+        config_kwargs["response_mime_type"] = "application/json"
+        config_kwargs["response_json_schema"] = response_json_schema
+    return types.GenerateContentConfig(**config_kwargs)
 
 
 class GeminiRequestBudget:
     def __init__(
-            self, maximum, stock_maximum=None, reserved_summary_calls=0):
+            self,
+            maximum,
+            stock_maximum=None,
+            reserved_summary_calls=0,
+            postprocess_maximum=0,
+    ):
         self.maximum = int(maximum)
         self.stock_maximum = (
             None if stock_maximum is None else int(stock_maximum)
@@ -386,8 +296,22 @@ class GeminiRequestBudget:
         self.reserved_summary_calls = int(reserved_summary_calls)
         self.used = 0
         self.stock_used = 0
+        self.postprocess_maximum = int(postprocess_maximum)
+        self.postprocess_used = 0
 
     def consume(self, stage, category="general"):
+        if category in {"structure", "summary"}:
+            if self.postprocess_used >= self.postprocess_maximum:
+                raise RuntimeError(
+                    f"Gemini post-research request budget of "
+                    f"{self.postprocess_maximum} was exhausted before {stage}."
+                )
+            self.postprocess_used += 1
+            print(
+                f"Gemini post-research request "
+                f"{self.postprocess_used}/{self.postprocess_maximum}: {stage}"
+            )
+            return
         if category == "stock" and (
                 self.stock_maximum is not None
                 and self.stock_used >= self.stock_maximum
@@ -458,6 +382,33 @@ def save_json_object_atomic(path, value):
             os.remove(temp_path)
 
 
+def save_gemini_failure_snapshot(stage, model, error, response_text, metadata):
+    """Keep one bounded, inspectable failure artifact per stage and model."""
+    if not response_text:
+        return
+    safe_name = re.sub(
+        r"[^a-z0-9]+", "_", f"{stage}_{model}".lower()
+    ).strip("_")
+    path = CACHE_DIR / f"last_gemini_failure_{safe_name}.json"
+    serializable_metadata = {
+        key: value
+        for key, value in (metadata or {}).items()
+        if key not in {"grounding_chunks"}
+    }
+    try:
+        save_json_object_atomic(path, {
+            "created_at": datetime.now(UTC).isoformat(),
+            "stage": stage,
+            "model": model,
+            "error": str(error),
+            "response_text": response_text,
+            "metadata": serializable_metadata,
+        })
+        print(f"Saved latest Gemini failure details to {path}.")
+    except Exception as snapshot_error:
+        print(f"Warning: could not save Gemini failure details: {snapshot_error}")
+
+
 def parse_utc_timestamp(value):
     timestamp = datetime.fromisoformat(str(value))
     if timestamp.tzinfo is None:
@@ -481,7 +432,9 @@ def extract_gemini_metadata(response):
     )
 
     grounding_metadata = None
+    finish_reason = None
     if getattr(response, "candidates", None):
+        finish_reason = getattr(response.candidates[0], "finish_reason", None)
         grounding_metadata = getattr(
             response.candidates[0], "grounding_metadata", None
         )
@@ -496,6 +449,33 @@ def extract_gemini_metadata(response):
             getattr(grounding_metadata, "grounding_chunks", None) or []
         )
 
+    grounding_sources = []
+    seen_grounding_urls = set()
+    for chunk in grounding_chunks:
+        web = getattr(chunk, "web", None)
+        if web is None and isinstance(chunk, dict):
+            web = chunk.get("web")
+        if web is None:
+            continue
+        if isinstance(web, dict):
+            url = str(web.get("uri") or web.get("url") or "").strip()
+            title = str(web.get("title") or "Grounded research source").strip()
+        else:
+            url = str(
+                getattr(web, "uri", None)
+                or getattr(web, "url", None)
+                or ""
+            ).strip()
+            title = str(
+                getattr(web, "title", None) or "Grounded research source"
+            ).strip()
+        if not is_valid_source_url(url):
+            continue
+        if url in seen_grounding_urls:
+            continue
+        seen_grounding_urls.add(url)
+        grounding_sources.append({"title": title, "date": "", "url": url})
+
     return {
         "prompt_tokens": getattr(usage, "prompt_token_count", None),
         "tool_tokens": tool_tokens,
@@ -505,6 +485,9 @@ def extract_gemini_metadata(response):
         "total_tokens": getattr(usage, "total_token_count", None),
         "search_queries": search_queries,
         "grounding_chunks": grounding_chunks,
+        "grounding_sources": grounding_sources,
+        "finish_reason": str(finish_reason) if finish_reason is not None else None,
+        "response_chars": None,
     }
 
 
@@ -519,6 +502,9 @@ def print_gemini_metadata(stage, metadata):
         "total_tokens": metadata["total_tokens"],
         "searches_exposed": len(metadata["search_queries"]),
         "grounding_chunks_exposed": len(metadata["grounding_chunks"]),
+        "grounding_sources_extracted": len(metadata["grounding_sources"]),
+        "finish_reason": metadata["finish_reason"],
+        "response_chars": metadata["response_chars"],
     })
     print(
         f"Gemini usage [{stage}]:",
@@ -538,6 +524,12 @@ def print_gemini_metadata(stage, metadata):
     print(
         f"Grounding citation chunks exposed [{stage}]: "
         f"{len(metadata['grounding_chunks'])}"
+    )
+    print(
+        f"Response diagnostics [{stage}]: "
+        f"finish_reason={metadata['finish_reason']}, "
+        f"characters={metadata['response_chars']}, "
+        f"usable_grounding_sources={len(metadata['grounding_sources'])}"
     )
 
 
@@ -593,6 +585,81 @@ def normalized_risk_event_key(research):
     if not event_id:
         return None
     return event_id
+
+
+def risk_adjusted_candidate_order(
+        ranked_batch,
+        research_by_symbol,
+        initial_sector_counts,
+        initial_event_counts,
+        sector_limit,
+        event_limit,
+        excluded_crypto_levels,
+        moderate_penalty,
+        repeated_event_penalty,
+):
+    """Greedily order a researched batch by QVM with small risk penalties."""
+    remaining = list(ranked_batch)
+    ordered = []
+    simulated_sectors = dict(initial_sector_counts)
+    simulated_events = dict(initial_event_counts)
+
+    while remaining:
+        scored = []
+        for index, candidate in enumerate(remaining):
+            symbol = str(candidate["Symbol"]).upper()
+            research = research_by_symbol.get(symbol)
+            qvm_score = float(candidate.get("QVMScore") or 0.0)
+            selectable = bool(
+                research
+                and research.get("eligible", True)
+                and not excluded_by_crypto_policy(
+                    research, excluded_crypto_levels
+                )
+                and str(research.get("reversal_risk") or "").upper()
+                not in {"ELEVATED", "SEVERE"}
+                and simulated_sectors.get(candidate["Sector"], 0) < sector_limit
+            )
+            event_key = normalized_risk_event_key(research or {})
+            if event_key and simulated_events.get(event_key, 0) >= event_limit:
+                selectable = False
+
+            effective_score = qvm_score
+            if research and str(research.get("reversal_risk") or "").upper() == "MODERATE":
+                effective_score -= moderate_penalty
+            if event_key and simulated_events.get(event_key, 0) >= 1:
+                effective_score -= repeated_event_penalty
+            scored.append((effective_score, -int(candidate["QVM Rank"]), -index))
+
+        chosen_index = max(range(len(remaining)), key=lambda i: scored[i])
+        chosen = remaining.pop(chosen_index)
+        ordered.append(chosen)
+
+        symbol = str(chosen["Symbol"]).upper()
+        research = research_by_symbol.get(symbol)
+        if not research:
+            continue
+        sector = chosen["Sector"]
+        event_key = normalized_risk_event_key(research)
+        selectable = bool(
+            research.get("eligible", True)
+            and not excluded_by_crypto_policy(research, excluded_crypto_levels)
+            and str(research.get("reversal_risk") or "").upper()
+            not in {"ELEVATED", "SEVERE"}
+            and simulated_sectors.get(sector, 0) < sector_limit
+            and (
+                not event_key
+                or simulated_events.get(event_key, 0) < event_limit
+            )
+        )
+        if selectable:
+            simulated_sectors[sector] = simulated_sectors.get(sector, 0) + 1
+            if event_key:
+                simulated_events[event_key] = (
+                    simulated_events.get(event_key, 0) + 1
+                )
+
+    return ordered
 
 
 def partition_ranked_research_candidates(
@@ -697,12 +764,467 @@ def parse_json_response(text):
 
     try:
         return json.loads(cleaned)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as original_error:
         start = cleaned.find("{")
-        end = cleaned.rfind("}")
-        if start >= 0 and end > start:
-            return json.loads(cleaned[start:end + 1])
-        raise
+        if start >= 0:
+            try:
+                # raw_decode safely accepts one complete JSON document even
+                # when Gemini appends commentary or another value afterward.
+                value, _ = json.JSONDecoder().raw_decode(cleaned[start:])
+                return value
+            except json.JSONDecodeError:
+                pass
+            if "Invalid control character" in str(original_error):
+                try:
+                    # Gemini occasionally emits a literal newline or tab in a
+                    # quoted JSON string. This permissive parse fixes only that
+                    # transport defect; full schema/content validation remains
+                    # mandatory afterward.
+                    value, _ = json.JSONDecoder(strict=False).raw_decode(
+                        cleaned[start:]
+                    )
+                    print(
+                        "Recovered JSON containing an unescaped control "
+                        "character with the local permissive decoder."
+                    )
+                    return value
+                except json.JSONDecodeError:
+                    pass
+        raise original_error
+
+
+def nullable_string(enum=None):
+    string_schema = {"type": "string"}
+    if enum is not None:
+        string_schema["enum"] = list(enum)
+    return {"anyOf": [string_schema, {"type": "null"}]}
+
+
+SOURCE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "date": {"type": "string"},
+        "url": {"type": "string"},
+    },
+    "required": ["title", "date", "url"],
+    "additionalProperties": False,
+}
+
+MARKET_CONTEXT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "as_of_date": {"type": "string"},
+        "market_status": {"type": "string", "enum": ["STRONG", "MIXED", "WEAK"]},
+        "market_intro": {"type": "string"},
+        "market_direction": {"type": "string"},
+        "major_drivers": {"type": "array", "items": {"type": "string"}},
+        "macro_conditions": {"type": "array", "items": {"type": "string"}},
+        "strong_sectors": {"type": "array", "items": {"type": "string"}},
+        "weak_sectors": {"type": "array", "items": {"type": "string"}},
+        "sector_context": {
+            "type": "object",
+            "additionalProperties": {"type": "string"},
+        },
+        "active_risk_events": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "event_id": {"type": "string"},
+                    "description": {"type": "string"},
+                    "affected_industries": {
+                        "type": "array", "items": {"type": "string"}
+                    },
+                    "normalization_risk": {"type": "string"},
+                },
+                "required": [
+                    "event_id", "description", "affected_industries",
+                    "normalization_risk",
+                ],
+                "additionalProperties": False,
+            },
+        },
+        "sources": {"type": "array", "items": SOURCE_SCHEMA},
+    },
+    "required": [
+        "as_of_date", "market_status", "market_intro", "market_direction",
+        "major_drivers", "macro_conditions", "strong_sectors",
+        "weak_sectors", "sector_context", "active_risk_events", "sources",
+    ],
+    "additionalProperties": False,
+}
+
+STOCK_RESULT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "symbol": {"type": "string"},
+        "research_status": {"type": "string", "enum": ["COMPLETE", "INCOMPLETE"]},
+        "research_incomplete_reason": nullable_string(),
+        "industry_group": nullable_string(),
+        "business_description": nullable_string(),
+        "industry_context": nullable_string(),
+        "crypto_dependence": nullable_string(["NONE", "INCIDENTAL", "MATERIAL", "PRIMARY"]),
+        "current_operating_evidence": nullable_string(),
+        "reversal_risk": nullable_string(["MINIMAL", "LOW", "MODERATE", "ELEVATED", "SEVERE"]),
+        "risk_basis": nullable_string([
+            "NONE", "NORMALIZED_OPERATING_DETERIORATION",
+            "TEMPORARY_DRIVER_NORMALIZATION", "NONRECURRING_COMPARISON_ONLY",
+            "CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE",
+        ]),
+        "catalyst_dependence": nullable_string(["LOW", "MODERATE", "HIGH"]),
+        "mechanism_status": nullable_string(["NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE"]),
+        "normalization_probability": nullable_string([
+            "NOT_APPLICABLE", "NOT_ESTABLISHED", "REASONABLY_PROBABLE",
+            "AT_LEAST_AS_LIKELY",
+        ]),
+        "continuation_outlook": nullable_string([
+            "CONTINUATION_MORE_LIKELY", "REVERSAL_AT_LEAST_AS_LIKELY",
+            "THESIS_BROKEN",
+        ]),
+        "durable_drivers": {"type": "array", "items": {"type": "string"}},
+        "temporary_drivers": {"type": "array", "items": {"type": "string"}},
+        "reversal_mechanism": nullable_string(),
+        "current_fact": nullable_string(),
+        "probability_evidence": nullable_string(),
+        "probability_indicator_type": nullable_string([
+            "NONE", "GUIDANCE_REDUCTION", "ORDER_CONTRACTION",
+            "UTILIZATION_DECLINE", "PRICE_OR_MARGIN_COMPRESSION",
+            "CAPACITY_INCREASE", "CONTRACT_EXPIRY", "INVENTORY_CHANGE",
+            "REGULATORY_ACTION", "FORWARD_MARKET_CHANGE",
+            "OTHER_CURRENT_INDICATOR",
+        ]),
+        "probability_basis": nullable_string([
+            "COMPANY_REPORTED_CHANGE", "OBSERVABLE_MARKET_CHANGE",
+            "REGULATORY_OR_CONTRACT_ACTION", "EXTERNAL_EXPECTATION_ONLY", "NONE",
+        ]),
+        "material_effect": nullable_string(),
+        "risk_time_horizon": nullable_string([
+            "0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS", "LONGER",
+        ]),
+        "risk_materiality": nullable_string(["LOW", "MODERATE", "HIGH"]),
+        "company_difference": nullable_string(),
+        "primary_risk_event_id": nullable_string(),
+        "risk_exposure_group": nullable_string(),
+        "explanation": nullable_string(),
+        "sources": {"type": "array", "items": SOURCE_SCHEMA},
+    },
+    "required": [
+        "symbol", "research_status", "research_incomplete_reason",
+        "industry_group", "business_description", "industry_context",
+        "crypto_dependence", "current_operating_evidence", "reversal_risk",
+        "risk_basis", "catalyst_dependence", "mechanism_status",
+        "normalization_probability", "continuation_outlook", "durable_drivers",
+        "temporary_drivers", "reversal_mechanism", "current_fact",
+        "probability_evidence", "probability_indicator_type",
+        "probability_basis", "material_effect", "risk_time_horizon",
+        "risk_materiality", "company_difference", "primary_risk_event_id",
+        "risk_exposure_group", "explanation", "sources",
+    ],
+    "additionalProperties": False,
+}
+
+STOCK_BATCH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "results": {"type": "array", "items": STOCK_RESULT_SCHEMA},
+    },
+    "required": ["results"],
+    "additionalProperties": False,
+}
+
+# Gemini 3.5 performs classification only. It does not rewrite the large,
+# grounded research objects or their citations. Python merges these compact
+# patches back into the corresponding draft objects before full validation.
+CLASSIFICATION_PATCH_FIELDS = (
+    "crypto_dependence", "reversal_risk", "risk_basis",
+    "catalyst_dependence", "mechanism_status", "normalization_probability",
+    "continuation_outlook", "reversal_mechanism", "current_fact",
+    "probability_evidence", "probability_indicator_type", "probability_basis",
+    "material_effect", "risk_time_horizon", "risk_materiality",
+    "company_difference", "primary_risk_event_id", "risk_exposure_group",
+    "explanation",
+)
+
+CLASSIFICATION_PATCH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "results": {
+            "type": "array",
+            "description": (
+                "One compact classification patch per supplied candidate, in "
+                "the original candidate order."
+            ),
+            "items": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "Exact supplied ticker symbol.",
+                    },
+                    "crypto_dependence": nullable_string([
+                        "NONE", "INCIDENTAL", "MATERIAL", "PRIMARY",
+                    ]),
+                    "reversal_risk": nullable_string([
+                        "MINIMAL", "LOW", "MODERATE", "ELEVATED", "SEVERE",
+                    ]),
+                    "risk_basis": nullable_string([
+                            "NONE", "NORMALIZED_OPERATING_DETERIORATION",
+                            "TEMPORARY_DRIVER_NORMALIZATION",
+                            "NONRECURRING_COMPARISON_ONLY",
+                            "CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE",
+                    ]),
+                    "catalyst_dependence": nullable_string([
+                        "LOW", "MODERATE", "HIGH",
+                    ]),
+                    "mechanism_status": nullable_string([
+                        "NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE",
+                    ]),
+                    "normalization_probability": nullable_string([
+                            "NOT_APPLICABLE", "NOT_ESTABLISHED",
+                            "REASONABLY_PROBABLE", "AT_LEAST_AS_LIKELY",
+                    ]),
+                    "continuation_outlook": nullable_string([
+                            "CONTINUATION_MORE_LIKELY",
+                            "REVERSAL_AT_LEAST_AS_LIKELY", "THESIS_BROKEN",
+                    ]),
+                    "reversal_mechanism": nullable_string(),
+                    "current_fact": nullable_string(),
+                    "probability_evidence": nullable_string(),
+                    "probability_indicator_type": nullable_string([
+                        "NONE", "GUIDANCE_REDUCTION", "ORDER_CONTRACTION",
+                        "UTILIZATION_DECLINE", "PRICE_OR_MARGIN_COMPRESSION",
+                        "CAPACITY_INCREASE", "CONTRACT_EXPIRY", "INVENTORY_CHANGE",
+                        "REGULATORY_ACTION", "FORWARD_MARKET_CHANGE",
+                        "OTHER_CURRENT_INDICATOR",
+                    ]),
+                    "probability_basis": nullable_string([
+                        "COMPANY_REPORTED_CHANGE", "OBSERVABLE_MARKET_CHANGE",
+                        "REGULATORY_OR_CONTRACT_ACTION",
+                        "EXTERNAL_EXPECTATION_ONLY", "NONE",
+                    ]),
+                    "material_effect": nullable_string(),
+                    "risk_time_horizon": nullable_string([
+                        "0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS", "LONGER",
+                    ]),
+                    "risk_materiality": nullable_string([
+                        "LOW", "MODERATE", "HIGH",
+                    ]),
+                    "company_difference": nullable_string(),
+                    "primary_risk_event_id": nullable_string(),
+                    "risk_exposure_group": nullable_string(),
+                    "explanation": nullable_string(),
+                },
+                "required": ["symbol", *CLASSIFICATION_PATCH_FIELDS],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["results"],
+    "additionalProperties": False,
+}
+
+SUMMARY_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {"summary_html": {"type": "string"}},
+    "required": ["summary_html"],
+    "additionalProperties": False,
+}
+
+
+def source_urls(value):
+    urls = set()
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if key == "url" and is_valid_source_url(nested):
+                urls.add(nested.strip())
+            else:
+                urls.update(source_urls(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            urls.update(source_urls(nested))
+    return urls
+
+
+def is_valid_source_url(value):
+    """Reject truncated, fenced, whitespace-containing, or runaway URLs."""
+    url = str(value or "").strip()
+    return bool(
+        url.startswith(("https://", "http://"))
+        and len(url) <= 2048
+        and not re.search(r"[\s`]", url)
+    )
+
+
+def canonical_source_url(value):
+    """Normalize harmless URL differences without treating redirects as proof."""
+    if not is_valid_source_url(value):
+        return ""
+    parsed = urlsplit(str(value).strip())
+    host = parsed.netloc.lower()
+    path = parsed.path.rstrip("/") or "/"
+    return urlunsplit((parsed.scheme.lower(), host, path, parsed.query, ""))
+
+
+def annotate_source_provenance(result, source_metadata):
+    """Record whether cited URLs are present in Gemini grounding metadata."""
+    cited = {
+        canonical_source_url(source.get("url"))
+        for source in result.get("sources", [])
+        if isinstance(source, dict)
+    }
+    cited.discard("")
+    grounded = {
+        canonical_source_url(source.get("url"))
+        for source in (source_metadata or {}).get("grounding_sources", [])
+        if isinstance(source, dict)
+    }
+    grounded.discard("")
+    matched = cited.intersection(grounded)
+    if not grounded:
+        status = "NO_GROUNDING_METADATA"
+    elif cited and matched == cited:
+        status = "VERIFIED"
+    elif matched:
+        status = "PARTIAL_GROUNDING"
+    else:
+        status = "UNVERIFIED"
+    result["grounded_source_count"] = len(matched)
+    result["cited_source_count"] = len(cited)
+    result["source_provenance_status"] = status
+    print(
+        f"Source provenance [{result.get('symbol')}]: {status}, "
+        f"{len(matched)}/{len(cited)} cited URLs matched grounding metadata."
+    )
+
+
+def response_data(response):
+    parsed = getattr(response, "parsed", None)
+    if isinstance(parsed, dict):
+        return parsed
+    text = getattr(response, "text", None)
+    if not text or not text.strip():
+        raise ValueError("Empty structured response from Gemini.")
+    return parse_json_response(text)
+
+
+def ensure_sources_preserved(
+        original, revised, label, allowed_additional_sources=None
+):
+    # Raw malformed text is not a trustworthy source container. In the failed
+    # run it contained truncated Markdown fences and a runaway duplicated
+    # Vertex redirect. Preserve URLs only from parsed source objects; syntax
+    # repair may otherwise use the structured grounding-source allowlist.
+    original_urls = set() if isinstance(original, str) else source_urls(original)
+    allowed_urls = source_urls(allowed_additional_sources or [])
+    revised_urls = source_urls(revised)
+    introduced = revised_urls.difference(original_urls | allowed_urls)
+    removed = original_urls.difference(revised_urls)
+    if introduced:
+        raise ValueError(
+            f"{label} introduced source URLs absent from grounded research: "
+            + ", ".join(sorted(introduced))
+        )
+    if removed:
+        raise ValueError(
+            f"{label} removed source URLs from grounded research: "
+            + ", ".join(sorted(removed))
+        )
+
+
+def normalize_market_response(
+        data,
+        metadata,
+        sp500_snapshot,
+        required_sectors,
+        maximum_sources,
+        maximum_risk_events,
+):
+    """Apply deterministic, evidence-preserving market-response corrections."""
+    if not isinstance(data, dict):
+        return data
+
+    market_intro = str(data.get("market_intro") or "").strip()
+    if (
+            sp500_snapshot
+            and not re.search(r"\d+(?:\.\d+)?\s*%", market_intro)
+    ):
+        market_sentence = (
+            "The S&P 500 changed "
+            f"{sp500_snapshot['change_percent']:+.2f}% over the latest "
+            f"{sp500_snapshot['measurement_period']} through "
+            f"{sp500_snapshot['as_of_date']}."
+        )
+        data["market_intro"] = (
+            f"{market_intro} {market_sentence}".strip()
+        )
+        print("Inserted the Python-calculated S&P 500 percentage into market_intro.")
+
+    sources = data.get("sources")
+    sources = sources if isinstance(sources, list) else []
+    usable_sources = []
+    seen_urls = set()
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        url = str(source.get("url") or "").strip()
+        title = str(source.get("title") or "").strip()
+        if not is_valid_source_url(url) or not title:
+            continue
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+        usable_sources.append({
+            "title": title,
+            "date": str(source.get("date") or ""),
+            "url": url,
+        })
+
+    grounding_sources = (metadata or {}).get("grounding_sources", [])
+    if not usable_sources:
+        for source in grounding_sources:
+            url = str(source.get("url") or "").strip()
+            if url in seen_urls or not is_valid_source_url(url):
+                continue
+            seen_urls.add(url)
+            usable_sources.append(dict(source))
+            if len(usable_sources) >= maximum_sources:
+                break
+        if usable_sources:
+            print(
+                "Reconstructed the missing market sources list from "
+                f"{len(usable_sources)} Search grounding source(s)."
+            )
+    data["sources"] = usable_sources[:maximum_sources]
+
+    risk_events = data.get("active_risk_events")
+    if isinstance(risk_events, list) and len(risk_events) > maximum_risk_events:
+        data["active_risk_events"] = risk_events[:maximum_risk_events]
+        print(
+            f"Trimmed active market risk events to {maximum_risk_events}."
+        )
+
+    sector_context = data.get("sector_context")
+    if isinstance(sector_context, dict):
+        normalized_keys = {
+            str(key).strip().casefold() for key, value in sector_context.items()
+            if str(value or "").strip()
+        }
+        market_direction = str(
+            data.get("market_direction") or "Current market conditions are mixed."
+        ).strip()
+        for sector in required_sectors:
+            if sector.strip().casefold() not in normalized_keys:
+                sector_context[sector] = (
+                    f"No distinct {sector} condition was established; apply "
+                    f"the researched market-wide context: {market_direction}"
+                )
+                print(
+                    "Filled missing sector context without inventing a "
+                    f"sector-specific claim: {sector}."
+                )
+
+    return data
 
 
 def extract_partial_stock_results(text):
@@ -984,7 +1506,7 @@ def validate_sources(sources, label, minimum=1, maximum=None):
             raise ValueError(f"{label} has a source without a title.")
 
         url = str(source.get("url", "")).strip()
-        if not url.startswith(("https://", "http://")):
+        if not is_valid_source_url(url):
             raise ValueError(f"{label} has a source without a valid URL.")
 
         unique_urls.add(url)
@@ -1065,7 +1587,9 @@ ALLOWED_REVERSAL_RISKS = {
 }
 
 
-def validate_stock_batch_structure(data, expected_candidates):
+def validate_stock_batch_structure(
+        data, expected_candidates, require_complete=False
+):
     """Allow partial batches while rejecting duplicate or unexpected symbols."""
     results = data.get("results")
     if not isinstance(results, list):
@@ -1087,6 +1611,16 @@ def validate_stock_batch_structure(data, expected_candidates):
         raise ValueError(
             "Stock batch contains unexpected symbols: " + ", ".join(unexpected)
         )
+    if require_complete:
+        expected_order = [
+            str(candidate["Symbol"]).upper()
+            for candidate in expected_candidates
+        ]
+        if returned_symbols != expected_order:
+            raise ValueError(
+                "Structured stock batch symbols/order mismatch: expected "
+                f"{expected_order}, received {returned_symbols}."
+            )
 
 
 NON_PROBABILITY_INDICATOR_ALIASES = {
@@ -1423,6 +1957,7 @@ def validate_stock_batch(
             "NONE", "NORMALIZED_OPERATING_DETERIORATION",
             "TEMPORARY_DRIVER_NORMALIZATION",
             "NONRECURRING_COMPARISON_ONLY",
+            "CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE",
         }:
             raise ValueError(f"{symbol} has invalid risk_basis {risk_basis!r}.")
         result["risk_basis"] = risk_basis
@@ -1699,6 +2234,51 @@ def validate_stock_batch(
             )
         result["probability_basis"] = probability_basis
 
+        operating_deterioration_floor = bool(
+            risk_basis == "NORMALIZED_OPERATING_DETERIORATION"
+            and mechanism_status in {"ACTIVE", "UNUSUALLY_PROBABLE"}
+            and probability_indicator_type != "NONE"
+            and probability_basis in {
+                "COMPANY_REPORTED_CHANGE", "OBSERVABLE_MARKET_CHANGE",
+                "REGULATORY_OR_CONTRACT_ACTION",
+            }
+            and str(result.get("material_effect") or "").strip()
+            and risk_time_horizon in {
+                "0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS"
+            }
+        )
+        if operating_deterioration_floor and reversal_risk in {"MINIMAL", "LOW"}:
+            prior_risk = reversal_risk
+            reversal_risk = "MODERATE"
+            continuation_outlook = "CONTINUATION_MORE_LIKELY"
+            if risk_materiality == "LOW":
+                risk_materiality = "MODERATE"
+            result.update({
+                "reversal_risk": reversal_risk,
+                "continuation_outlook": continuation_outlook,
+                "risk_materiality": risk_materiality,
+            })
+            evidence_parts = [
+                str(result.get(field) or "").strip()
+                for field in (
+                    "current_fact", "probability_evidence", "material_effect"
+                )
+            ]
+            reversal_evidence = " ".join(
+                " ".join(part.split()[:11]) for part in evidence_parts if part
+            )
+            result["reversal_evidence"] = reversal_evidence
+            print(
+                f"Applied current operating-deterioration floor to {symbol}: "
+                f"{prior_risk}->MODERATE without another Gemini call."
+            )
+            runtime_reconciliation_diagnostics.append({
+                "symbol": symbol,
+                "type": "current_operating_deterioration_floor",
+                "from": prior_risk,
+                "to": "MODERATE",
+            })
+
         exposure_floor = bool(
             cautious_exposure_floor_applies(
                 result,
@@ -1711,11 +2291,27 @@ def validate_stock_batch(
                 or normalization_probability == "NOT_ESTABLISHED"
             )
         )
-        if exposure_floor:
+        earnings_quality_floor = bool(
+            cautious_exposure_floor_enabled
+            and risk_basis
+            == "CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE"
+            and DEPENDENCE_LEVELS.get(catalyst_dependence, -1)
+            >= DEPENDENCE_LEVELS.get(
+                cautious_exposure_floor_min_dependence, 1
+            )
+            and str(result.get("material_effect") or "").strip()
+            and risk_time_horizon in {
+                "0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS"
+            }
+        )
+        cautious_floor = exposure_floor or earnings_quality_floor
+        if cautious_floor:
             prior_risk = reversal_risk
             reversal_risk = "MODERATE"
             mechanism_status = "HYPOTHETICAL"
-            normalization_probability = "NOT_ESTABLISHED"
+            normalization_probability = (
+                "NOT_ESTABLISHED" if exposure_floor else "NOT_APPLICABLE"
+            )
             continuation_outlook = "CONTINUATION_MORE_LIKELY"
             probability_indicator_type = "NONE"
             probability_basis = "NONE"
@@ -1732,24 +2328,35 @@ def validate_stock_batch(
                 "current_fact": None,
                 "probability_evidence": None,
             })
-            reversal_evidence = " ".join(
-                (" ".join(str(temporary_drivers[0]).split()[:12]),
-                 " ".join(str(result.get("material_effect")).split()[:18]))
-            ).strip()
+            floor_basis = (
+                temporary_drivers[0]
+                if exposure_floor and temporary_drivers
+                else result.get("current_operating_evidence")
+            )
+            reversal_evidence = " ".join((
+                " ".join(str(floor_basis or "").split()[:12]),
+                " ".join(str(result.get("material_effect")).split()[:18]),
+            )).strip()
             result["reversal_evidence"] = reversal_evidence
             print(
-                f"Applied cautious temporary-dependence floor to {symbol}: "
+                f"Applied cautious "
+                f"{'temporary-dependence' if exposure_floor else 'earnings-quality'} "
+                f"floor to {symbol}: "
                 f"{prior_risk}->MODERATE without another Gemini call."
             )
             runtime_reconciliation_diagnostics.append({
                 "symbol": symbol,
-                "type": "cautious_temporary_dependence_floor",
+                "type": (
+                    "cautious_temporary_dependence_floor"
+                    if exposure_floor
+                    else "cautious_nonrecurring_earnings_floor"
+                ),
                 "from": prior_risk,
                 "to": "MODERATE",
             })
 
         reconciliation_reason = None
-        if reversal_risk in evidence_required_risks and not exposure_floor:
+        if reversal_risk in evidence_required_risks and not cautious_floor:
             if (
                     risk_basis == "TEMPORARY_DRIVER_NORMALIZATION"
                     and has_nonrecurring_temporary_item(temporary_drivers)
@@ -1830,7 +2437,7 @@ def validate_stock_batch(
         if reversal_risk in evidence_required_risks:
             required_fields = (
                 ("material_effect",)
-                if exposure_floor
+                if cautious_floor
                 else ("current_fact", "probability_evidence", "material_effect")
             )
             missing_evidence_fields = [
@@ -1888,7 +2495,7 @@ def validate_stock_batch(
                 raise ValueError(f"{symbol} LOW fields violate outlook mapping.")
         elif reversal_risk == "MODERATE":
             if (
-                    not exposure_floor
+                    not cautious_floor
                     and mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}
             ):
                 raise ValueError(f"{symbol} MODERATE fields violate mechanism mapping.")
@@ -1901,6 +2508,7 @@ def validate_stock_batch(
             if risk_basis not in {
                 "NORMALIZED_OPERATING_DETERIORATION",
                 "TEMPORARY_DRIVER_NORMALIZATION",
+                "CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE",
             }:
                 raise ValueError(f"{symbol} MODERATE has an invalid risk basis.")
         elif reversal_risk == "ELEVATED":
@@ -1919,7 +2527,7 @@ def validate_stock_batch(
                 )
             if (
                 reversal_risk in evidence_required_risks
-                and not exposure_floor
+                and not cautious_floor
                 and (
                 normalization_probability not in {
                     "REASONABLY_PROBABLE", "AT_LEAST_AS_LIKELY"
@@ -2049,6 +2657,139 @@ def validate_shared_event_consistency(result, comparison_results):
             })
 
 
+def repair_json_with_model(
+        client,
+        model,
+        original_response,
+        response_schema,
+        validator,
+        request_budget,
+        stage,
+        repair_prompt,
+        thinking_budget,
+        max_output_tokens,
+        validation_error,
+        source_metadata,
+        response_normalizer=None,
+        repair_kind="syntax repair",
+):
+    """Repair researched content without Search, then validate it strictly."""
+    request_budget.consume(f"{stage} JSON repair ({model})", category="structure")
+    prompt = (
+        repair_prompt
+        + f"\n\nREPAIR_KIND: {repair_kind}"
+        + "\n\nEXACT_VALIDATION_OR_PARSE_ERROR:\n"
+        + str(validation_error)
+        + "\n\nALLOWED_GROUNDING_SOURCES:\n"
+        + json.dumps(
+            (source_metadata or {}).get("grounding_sources", []),
+            ensure_ascii=False,
+        )
+        + "\n\nORIGINAL_RESEARCHED_RESPONSE:\n"
+        + (
+            json.dumps(original_response, ensure_ascii=False)
+            if isinstance(original_response, (dict, list))
+            else str(original_response)
+        )
+    )
+    response = client.models.generate_content(
+        model=model,
+        config=build_gemini_config(
+            thinking_budget,
+            enable_search=False,
+            max_output_tokens=max_output_tokens,
+            response_json_schema=response_schema,
+        ),
+        contents=prompt,
+    )
+    data = response_data(response)
+    ensure_sources_preserved(
+        original_response,
+        data,
+        stage,
+        allowed_additional_sources=(
+            (source_metadata or {}).get("grounding_sources", [])
+        ),
+    )
+    if response_normalizer is not None:
+        data = response_normalizer(data, source_metadata)
+    validator(data)
+    metadata = extract_gemini_metadata(response)
+    metadata["response_chars"] = len(str(getattr(response, "text", "") or ""))
+    print_gemini_metadata(f"{stage} JSON repair", metadata)
+    return data
+
+
+def postprocess_stock_batch(
+        client,
+        model,
+        draft_data,
+        expected_candidates,
+        market_context,
+        stock_policy,
+        request_budget,
+        prompt,
+        thinking_budget,
+        max_output_tokens,
+):
+    """Apply a compact no-Search classification patch to grounded drafts."""
+    stage = f"stock classification for {len(expected_candidates)} stocks"
+    request_budget.consume(f"{stage} ({model})", category="structure")
+    contents = (
+        prompt
+        + "\n\nSTOCK_POLICY:\n"
+        + stock_policy
+        + "\n\nMARKET_CONTEXT:\n"
+        + json.dumps(market_context, ensure_ascii=False)
+        + "\n\nCANDIDATES:\n"
+        + json.dumps(expected_candidates, ensure_ascii=False)
+        + "\n\nRESEARCH_DRAFT_RESULTS:\n"
+        + json.dumps(draft_data, ensure_ascii=False)
+    )
+    response = client.models.generate_content(
+        model=model,
+        config=build_gemini_config(
+            thinking_budget,
+            enable_search=False,
+            max_output_tokens=max_output_tokens,
+            response_json_schema=CLASSIFICATION_PATCH_SCHEMA,
+        ),
+        contents=contents,
+    )
+    patch_data = response_data(response)
+    validate_stock_batch_structure(
+        patch_data, expected_candidates, require_complete=True
+    )
+
+    draft_by_symbol = {
+        str(result.get("symbol", "")).upper(): result
+        for result in draft_data.get("results", [])
+    }
+    merged_results = []
+    for patch_result in patch_data["results"]:
+        symbol = str(patch_result.get("symbol", "")).upper()
+        draft_result = draft_by_symbol.get(symbol)
+        if draft_result is None:
+            raise ValueError(
+                f"Classification patch contains no matching draft for {symbol}."
+            )
+        merged = json.loads(json.dumps(draft_result, default=str))
+        for field in CLASSIFICATION_PATCH_FIELDS:
+            merged[field] = patch_result[field]
+        merged["symbol"] = symbol
+        merged["classification_model"] = model
+        merged["classification_fallback"] = False
+        merged_results.append(merged)
+
+    data = {"results": merged_results}
+    ensure_sources_preserved(draft_data, data, stage)
+    validate_stock_batch_structure(data, expected_candidates, require_complete=True)
+    metadata = extract_gemini_metadata(response)
+    metadata["response_chars"] = len(str(getattr(response, "text", "") or ""))
+    print_gemini_metadata(stage, metadata)
+    return data, metadata
+
+
 def call_gemini_json(
         client,
         model_primary,
@@ -2062,7 +2803,15 @@ def call_gemini_json(
         required_search_candidates=None,
         allow_partial_stock_results=False,
         max_attempts=None,
-        budget_category="general"):
+        budget_category="general",
+        format_repair_model=None,
+        format_repair_schema=None,
+        format_repair_prompt="",
+        format_repair_thinking_budget=2048,
+        format_repair_max_output_tokens=8192,
+        max_format_repairs=0,
+        response_normalizer=None,
+):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
     if model_fallback and model_fallback != model_primary:
@@ -2077,6 +2826,8 @@ def call_gemini_json(
         for attempt in range(attempt_limit):
             attempt_prompt = prompt
             metadata = None
+            parsed_data = None
+            response_text = None
             try:
                 request_budget.consume(
                     f"{stage} ({model_name}, attempt {attempt + 1})",
@@ -2092,6 +2843,7 @@ def call_gemini_json(
                     raise ValueError("Empty response from Gemini.")
 
                 metadata = extract_gemini_metadata(response)
+                metadata["response_chars"] = len(response_text)
                 print_gemini_metadata(stage, metadata)
 
                 used_search = bool(metadata["search_queries"]) or (
@@ -2173,6 +2925,7 @@ def call_gemini_json(
                 else:
                     try:
                         data = parse_json_response(response_text)
+                        parsed_data = data
                     except json.JSONDecodeError as parse_error:
                         if not allow_partial_stock_results:
                             raise
@@ -2197,12 +2950,67 @@ def call_gemini_json(
                         )
                         data = {"results": partial_results}
 
+                if response_normalizer is not None:
+                    data = response_normalizer(data, metadata)
                 validator(data)
                 return data, model_name, metadata
             except Exception as exc:
-                last_error = exc
-                error_text = str(exc).upper()
-                error_type = type(exc).__name__.upper()
+                effective_error = exc
+                if (
+                    metadata is not None
+                    and format_repair_model
+                    and format_repair_schema is not None
+                    and max_format_repairs > 0
+                    and not allow_partial_stock_results
+                ):
+                    try:
+                        repaired = repair_json_with_model(
+                            client=client,
+                            model=format_repair_model,
+                            original_response=(
+                                parsed_data
+                                if parsed_data is not None
+                                else response_text
+                            ),
+                            response_schema=format_repair_schema,
+                            validator=validator,
+                            request_budget=request_budget,
+                            stage=stage,
+                            repair_prompt=format_repair_prompt,
+                            thinking_budget=format_repair_thinking_budget,
+                            max_output_tokens=format_repair_max_output_tokens,
+                            validation_error=exc,
+                            source_metadata=metadata,
+                            response_normalizer=response_normalizer,
+                            repair_kind=(
+                                "JSON syntax repair"
+                                if isinstance(exc, json.JSONDecodeError)
+                                else "parsed-content normalization"
+                            ),
+                        )
+                        print(
+                            f"Recovered {stage} with schema-enforced "
+                            f"{format_repair_model} repair."
+                        )
+                        return repaired, model_name, metadata
+                    except Exception as repair_exc:
+                        print(
+                            f"Schema repair failed for {stage}: {repair_exc}"
+                        )
+                        effective_error = RuntimeError(
+                            f"original failure: {exc}; "
+                            f"schema repair failure: {repair_exc}"
+                        )
+                last_error = effective_error
+                save_gemini_failure_snapshot(
+                    stage=stage,
+                    model=model_name,
+                    error=effective_error,
+                    response_text=response_text,
+                    metadata=metadata,
+                )
+                error_text = str(effective_error).upper()
+                error_type = type(effective_error).__name__.upper()
                 error_code = getattr(exc, "code", None)
 
                 daily_quota_exhausted = (
@@ -2346,7 +3154,7 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 3
+TOP_QVM_CACHE_VERSION = 5
 
 
 def load_top_qvm_cache():
@@ -2429,8 +3237,10 @@ def save_top_qvm_cache(df):
 
 def append_qvm_data_yfinance(
         df: pd.DataFrame,
-        max_info_calls: int = 500,
-        delay: float = 0.5
+        max_info_calls=None,
+        delay: float = 0.5,
+        min_3_month_return: float = 0.0,
+        min_price: float = 5.0,
 ):
     df = df.copy()
     tickers_list = df["Symbol"].tolist()
@@ -2480,7 +3290,14 @@ def append_qvm_data_yfinance(
 
             latest_price = float(close.iloc[-1])   # ← This is the fix
 
-            score = np.nanmean([ret_3m, ret_6m, ret_9m])
+            available_momentum = [
+                value for value in (ret_3m, ret_6m, ret_9m)
+                if value is not None
+            ]
+            score = (
+                float(np.mean(available_momentum))
+                if available_momentum else -np.inf
+            )
             momentum_scores[symbol] = score
 
             data_map[symbol] = {
@@ -2493,15 +3310,59 @@ def append_qvm_data_yfinance(
                 "1Y Return": ret_1y
             }
 
-        except:
+        except Exception as exc:
+            print(f"Could not calculate price history for {symbol}: {exc}")
             momentum_scores[symbol] = -np.inf
             data_map[symbol] = {}
 
-    # ---- STEP 2: Select top N for expensive calls ----
-    sorted_symbols = sorted(momentum_scores, key=lambda x: momentum_scores[x], reverse=True)
-    selected_for_info = set(sorted_symbols[:max_info_calls])
+    # ---- STEP 2: Reject weak/invalid price histories before info calls ----
+    eligible_symbols = []
+    negative_3m_symbols = []
+    invalid_history_symbols = []
+    for symbol in tickers_list:
+        history = data_map.get(symbol, {})
+        latest_price = history.get("Price")
+        return_3m = history.get("3M Return")
+        if latest_price is None or latest_price < min_price:
+            invalid_history_symbols.append(symbol)
+            continue
+        if return_3m is not None and return_3m < min_3_month_return:
+            negative_3m_symbols.append(symbol)
+            continue
+        eligible_symbols.append(symbol)
 
-    print(f"Fetching fundamentals for top {len(selected_for_info)} tickers...")
+    print(
+        "Bulk-history prefilter: "
+        f"{len(eligible_symbols)} eligible, "
+        f"{len(negative_3m_symbols)} below the 3M floor, "
+        f"{len(invalid_history_symbols)} with missing/invalid price history."
+    )
+    if not eligible_symbols:
+        raise RuntimeError(
+            "No stocks survived the bulk price-history prefilter."
+        )
+
+    df = df[df["Symbol"].isin(eligible_symbols)].copy()
+    sorted_symbols = sorted(
+        eligible_symbols,
+        key=lambda symbol: momentum_scores[symbol],
+        reverse=True,
+    )
+    selected_for_info = (
+        sorted_symbols
+        if max_info_calls is None
+        else sorted_symbols[:max_info_calls]
+    )
+
+    # If an explicit cap is restored later, do not leave unresearched rows in
+    # the QVM pool with neutral/missing fundamentals. With the default null
+    # setting this retains every eligible stock.
+    df = df[df["Symbol"].isin(set(selected_for_info))].copy()
+
+    print(
+        f"Fetching fundamentals for all {len(selected_for_info)} eligible "
+        "tickers..."
+    )
 
     # ---- STEP 3: Fetch info (unchanged) ----
     for symbol in tqdm(selected_for_info):
@@ -2812,7 +3673,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         value_df = value_df.replace(
             ['Infinity', '-Infinity'],
             np.nan
-        )
+        ).infer_objects(copy=False)
 
         value_df = value_df.apply(
             pd.to_numeric,
@@ -3562,10 +4423,21 @@ signal.alarm(TOTAL_RUNTIME_TIMEOUT_SECONDS)
 with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
 previous_run_diagnostics = load_json_object(STOCK_RUN_DIAGNOSTICS_FILE)
-url = config["url"]
 min_52_week_change = config["min_52_week_change"]
+min_market_cap = int(config.get("min_market_cap", 300_000_000))
+min_price = float(config.get("min_price", 5.0))
+min_average_volume = int(config.get("min_average_volume", 100_000))
+min_3_month_return = float(config.get("min_3_month_return", 0.0))
+stock_screener_page_size = int(config.get("stock_screener_page_size", 250))
+configured_max_info_calls = config.get("max_info_calls")
+max_info_calls = (
+    None
+    if configured_max_info_calls is None
+    else int(configured_max_info_calls)
+)
+if max_info_calls is not None and max_info_calls < 1:
+    raise ValueError("max_info_calls must be null or a positive integer.")
 max_retries = config["max_retries"]
-initial_delay = config["initial_delay"]
 max_validation_rounds = max(
     1,
     int(config.get("max_validation_rounds", 4)),
@@ -3584,6 +4456,58 @@ transient_backoff_jitter_seconds = float(
 )
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
+structure_model = str(config.get("structure_model", "gemini-3.5-flash"))
+classification_model = str(
+    config.get("classification_model", structure_model)
+)
+summary_model = str(config.get("summary_model", structure_model))
+if not all((structure_model, classification_model, summary_model)):
+    raise ValueError("Gemini structure/classification/summary models are required.")
+market_context_max_output_tokens = int(
+    config.get("market_context_max_output_tokens", 8192)
+)
+market_thinking_budget = int(config.get("market_thinking_budget", 2048))
+stock_research_max_output_tokens = int(
+    config.get("stock_research_max_output_tokens", 32768)
+)
+structure_max_output_tokens = int(
+    config.get("structure_max_output_tokens", 32768)
+)
+summary_max_output_tokens = int(
+    config.get("summary_max_output_tokens", 8192)
+)
+structure_thinking_budget = int(config.get("structure_thinking_budget", 8192))
+format_repair_thinking_budget = int(
+    config.get("format_repair_thinking_budget", 2048)
+)
+max_format_repairs_per_response = int(
+    config.get("max_format_repairs_per_response", 1)
+)
+max_postprocess_calls_per_run = int(
+    config.get("max_postprocess_calls_per_run", 8)
+)
+max_market_sources = int(config.get("max_market_sources", 10))
+max_active_risk_events = int(config.get("max_active_risk_events", 6))
+market_context_fallback_hours = float(
+    config.get("market_context_fallback_hours", 24)
+)
+for setting_name, setting_value in (
+    ("market_context_max_output_tokens", market_context_max_output_tokens),
+    ("market_thinking_budget", market_thinking_budget),
+    ("stock_research_max_output_tokens", stock_research_max_output_tokens),
+    ("structure_max_output_tokens", structure_max_output_tokens),
+    ("summary_max_output_tokens", summary_max_output_tokens),
+    ("structure_thinking_budget", structure_thinking_budget),
+    ("format_repair_thinking_budget", format_repair_thinking_budget),
+    ("max_postprocess_calls_per_run", max_postprocess_calls_per_run),
+    ("max_market_sources", max_market_sources),
+    ("max_active_risk_events", max_active_risk_events),
+    ("market_context_fallback_hours", market_context_fallback_hours),
+):
+    if setting_value < 1:
+        raise ValueError(f"{setting_name} must be at least 1.")
+if max_format_repairs_per_response < 0:
+    raise ValueError("max_format_repairs_per_response cannot be negative.")
 gemini_batch_size = int(config.get("gemini_batch_size", 5))
 max_research_candidates_per_open_sector_slot = max(
     1,
@@ -3607,6 +4531,17 @@ max_stocks_per_risk_event = int(
 )
 if max_stocks_per_risk_event < 1:
     raise ValueError("max_stocks_per_risk_event must be at least 1.")
+risk_adjusted_selection_enabled = bool(
+    config.get("risk_adjusted_selection_enabled", True)
+)
+moderate_risk_qvm_penalty = float(
+    config.get("moderate_risk_qvm_penalty", 3.0)
+)
+repeated_risk_event_qvm_penalty = float(
+    config.get("repeated_risk_event_qvm_penalty", 4.0)
+)
+if moderate_risk_qvm_penalty < 0 or repeated_risk_event_qvm_penalty < 0:
+    raise ValueError("Selection QVM penalties cannot be negative.")
 cautious_exposure_floor_enabled = bool(
     config.get("cautious_exposure_floor_enabled", True)
 )
@@ -3664,6 +4599,11 @@ print(
     f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
+    f"postprocess_calls={max_postprocess_calls_per_run}, "
+    f"research_model={model_primary}, "
+    f"classification_model={classification_model}, "
+    f"summary_model={summary_model}, "
+    f"market_thinking_budget={market_thinking_budget}, "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
     f"deferred_research_attempts_per_run="
     f"{max_deferred_research_attempts_per_run}, "
@@ -3673,13 +4613,16 @@ print(
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
     f"stocks_per_risk_event={max_stocks_per_risk_event}, "
+    f"risk_adjusted_selection={risk_adjusted_selection_enabled}, "
+    f"moderate_qvm_penalty={moderate_risk_qvm_penalty:g}, "
+    f"repeat_event_qvm_penalty={repeated_risk_event_qvm_penalty:g}, "
     f"excluded_crypto={sorted(excluded_crypto_dependence)}"
 )
 
 # ---------------------------------------------------------
 # Load the cached ranked QVM candidate pool when fresh.
 #
-# This check happens BEFORE any stock-page, yfinance, or
+# This check happens BEFORE any screener, yfinance, or
 # QVM-scoring work, so Gemini prompt testing can reuse the
 # exact same quantitative input without rerunning the
 # expensive pipeline.
@@ -3688,18 +4631,16 @@ top_stocks = load_top_qvm_cache()
 
 if top_stocks is None:
 
-    df = fetch_all_stock_pages_from_url(url, min_52_week_change)
-    df = df.drop_duplicates()
+    df = fetch_stock_universe(
+        min_52_week_change=min_52_week_change,
+        min_market_cap=min_market_cap,
+        min_price=min_price,
+        min_average_volume=min_average_volume,
+        max_retries=max_retries,
+        page_size=stock_screener_page_size,
+    )
 
-    # Filter rules
-    df = df[
-        (df['Market Cap'] >= 300_000_000) &
-        (df['Price'] >= 5.0) &
-        (df['Avg Vol (3M)'] >= 75_000) &
-        ((df['P/E Ratio(TTM)'].isna()) | (df['P/E Ratio(TTM)'] > 0))
-    ].copy()
-
-    print("\nTrash Filtered Stocks:")
+    print("\nStocks passing screener-level filters:")
     print(df[['Symbol', 'Name', '52 WkChange %']].reset_index(drop=True))
 
     minimal_cols = [
@@ -3713,7 +4654,12 @@ if top_stocks is None:
     ]
     df_minimal = df[minimal_cols].copy()
 
-    df_yf = append_qvm_data_yfinance(df_minimal)
+    df_yf = append_qvm_data_yfinance(
+        df_minimal,
+        max_info_calls=max_info_calls,
+        min_3_month_return=min_3_month_return,
+        min_price=min_price,
+    )
     df_scored = score_qvm(df_yf, weights = {
         'Quality': 0.45,
         'Value': 0.10,
@@ -3793,10 +4739,31 @@ candidate_records = dataframe_records(df_gemini)
 required_sector_groups = list(dict.fromkeys(
     str(candidate["Sector"]) for candidate in candidate_records
 ))
+sp500_snapshot = fetch_sp500_snapshot()
+
+
+def normalize_current_market_context(data, metadata=None):
+    return normalize_market_response(
+        data=data,
+        metadata=metadata or {},
+        sp500_snapshot=sp500_snapshot,
+        required_sectors=required_sector_groups,
+        maximum_sources=max_market_sources,
+        maximum_risk_events=max_active_risk_events,
+    )
 
 
 def validate_current_market_context(data):
     validate_market_context(data)
+    if len(data.get("sources", [])) > max_market_sources:
+        raise ValueError(
+            f"Market context has more than {max_market_sources} sources."
+        )
+    if len(data.get("active_risk_events", [])) > max_active_risk_events:
+        raise ValueError(
+            "Market context has more than "
+            f"{max_active_risk_events} active risk events."
+        )
     context = data.get("sector_context", {})
     normalized_context = {
         str(key).strip().casefold(): str(value).strip()
@@ -3813,16 +4780,28 @@ def validate_current_market_context(data):
         )
 
 client = initialize_gemini_client()
-gemini_config = build_gemini_config(thinking_budget)
+gemini_config = build_gemini_config(
+    thinking_budget,
+    max_output_tokens=stock_research_max_output_tokens,
+)
+market_gemini_config = build_gemini_config(
+    market_thinking_budget,
+    max_output_tokens=market_context_max_output_tokens,
+)
 request_budget = GeminiRequestBudget(
     max_gemini_calls_per_run,
     stock_maximum=max_stock_research_calls_per_run,
-    reserved_summary_calls=(reserved_summary_calls if final_summary_enabled else 0),
+    # No-Search structure/classification/summary calls have their own budget.
+    reserved_summary_calls=0,
+    postprocess_maximum=max_postprocess_calls_per_run,
 )
 
 market_prompt = (
     config["prompt_market_context"]
     + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
+    + "PYTHON_MARKET_METRICS (authoritative; reproduce exactly):\n"
+    + json.dumps(sp500_snapshot, ensure_ascii=False)
+    + "\n"
     + "REQUIRED_SECTOR_GROUPS:\n"
     + json.dumps(required_sector_groups, ensure_ascii=False)
     + "\n"
@@ -3830,11 +4809,31 @@ market_prompt = (
 market_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
     "model": model_primary,
+    "structure_model": structure_model,
     "prompt": market_prompt,
 })
 market_cache = load_json_object(market_context_cache_file)
 market_context = None
 market_model = None
+last_known_good_market_context = None
+last_known_good_market_model = None
+
+# Retain a recent validated context as an availability fallback even when its
+# prompt hash or cache version differs. It is used only if today's call and
+# repairs fail, and never overwrites a successful current response.
+if cache_entry_is_fresh(market_cache, market_context_fallback_hours):
+    try:
+        fallback_context = normalize_current_market_context(
+            json.loads(json.dumps(market_cache["market_context"])),
+            market_cache.get("research_metadata", {}),
+        )
+        validate_current_market_context(fallback_context)
+        last_known_good_market_context = fallback_context
+        last_known_good_market_model = str(
+            market_cache.get("model") or model_primary
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        print(f"Recent market cache is not usable as a fallback: {exc}")
 
 if (
         market_cache.get("version") == cache_version
@@ -3845,8 +4844,12 @@ if (
         )
 ):
     try:
-        validate_current_market_context(market_cache["market_context"])
-        market_context = market_cache["market_context"]
+        cached_context = normalize_current_market_context(
+            json.loads(json.dumps(market_cache["market_context"])),
+            market_cache.get("research_metadata", {}),
+        )
+        validate_current_market_context(cached_context)
+        market_context = cached_context
         market_model = market_cache["model"]
         print(f"Using validated market context cache: {market_context_cache_file}")
     except (KeyError, TypeError, ValueError) as exc:
@@ -3854,29 +4857,49 @@ if (
 
 if market_context is None:
     print("\n...calling Gemini for current market context...\n")
-    market_context, market_model, market_metadata = call_gemini_json(
-        client=client,
-        model_primary=model_primary,
-        model_fallback=model_fallback,
-        gemini_config=gemini_config,
-        prompt=market_prompt,
-        stage="market context",
-        validator=validate_current_market_context,
-        request_budget=request_budget,
-        require_google_search=require_google_search,
-        budget_category="market",
-    )
-    save_json_object_atomic(market_context_cache_file, {
-        "version": cache_version,
-        "created_at": datetime.now(UTC).isoformat(),
-        "prompt_hash": market_prompt_hash,
-        "model": market_model,
-        "market_context": market_context,
-        "research_metadata": {
-            "search_queries": market_metadata["search_queries"],
-            "tool_tokens": market_metadata["tool_tokens"],
-        },
-    })
+    try:
+        market_context, market_model, market_metadata = call_gemini_json(
+            client=client,
+            model_primary=model_primary,
+            model_fallback=model_fallback,
+            gemini_config=market_gemini_config,
+            prompt=market_prompt,
+            stage="market context",
+            validator=validate_current_market_context,
+            request_budget=request_budget,
+            require_google_search=require_google_search,
+            budget_category="market",
+            format_repair_model=structure_model,
+            format_repair_schema=MARKET_CONTEXT_SCHEMA,
+            format_repair_prompt=config["prompt_json_repair"],
+            format_repair_thinking_budget=format_repair_thinking_budget,
+            format_repair_max_output_tokens=market_context_max_output_tokens,
+            max_format_repairs=max_format_repairs_per_response,
+            response_normalizer=normalize_current_market_context,
+        )
+        save_json_object_atomic(market_context_cache_file, {
+            "version": cache_version,
+            "created_at": datetime.now(UTC).isoformat(),
+            "prompt_hash": market_prompt_hash,
+            "model": market_model,
+            "market_context": market_context,
+            "research_metadata": {
+                "search_queries": market_metadata["search_queries"],
+                "tool_tokens": market_metadata["tool_tokens"],
+                "grounding_sources": market_metadata["grounding_sources"],
+                "finish_reason": market_metadata["finish_reason"],
+                "response_chars": market_metadata["response_chars"],
+            },
+        })
+    except RuntimeError as exc:
+        if last_known_good_market_context is None:
+            raise
+        market_context = last_known_good_market_context
+        market_model = last_known_good_market_model
+        print(
+            "Warning: current market research failed; using the recent "
+            f"validated market context instead: {exc}"
+        )
 
 market_context_hash = stable_json_hash(market_context)
 allowed_risk_event_ids = {
@@ -3898,6 +4921,7 @@ stock_prompt_cache_text = config["prompt_stock_batch"].replace(
 stock_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
     "model": model_primary,
+    "classification_model": classification_model,
     "prompt": stock_prompt_cache_text,
 })
 stock_research_cache = load_json_object(stock_research_cache_file)
@@ -4354,6 +5378,31 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 budget_category="stock",
             )
             models_used.append(batch_model)
+            try:
+                batch_data, classification_metadata = postprocess_stock_batch(
+                    client=client,
+                    model=classification_model,
+                    draft_data=batch_data,
+                    expected_candidates=pending_candidates,
+                    market_context=market_context,
+                    stock_policy=config["prompt_stock_batch"],
+                    request_budget=request_budget,
+                    prompt=config["prompt_stock_postprocess"],
+                    thinking_budget=structure_thinking_budget,
+                    max_output_tokens=structure_max_output_tokens,
+                )
+                models_used.append(classification_model)
+            except Exception as exc:
+                # The grounded draft remains usable and still passes through
+                # the same strict Python validator below. A 3.5 quota or
+                # service failure therefore does not discard completed Search.
+                print(
+                    "Warning: Gemini structured stock post-processing was "
+                    f"unavailable; validating the grounded draft directly: {exc}"
+                )
+                for result in batch_data.get("results", []):
+                    result["classification_model"] = batch_model
+                    result["classification_fallback"] = True
             requested_research_symbols = {
                 str(candidate["Symbol"]).upper()
                 for candidate in research_required_candidates
@@ -4461,6 +5510,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         list(research_by_symbol.values())
                         + prior_research_decisions,
                     )
+                    annotate_source_provenance(result, batch_metadata)
                 except (KeyError, TypeError, ValueError) as exc:
                     # Keep the normalized, otherwise usable object so the next
                     # call can repair it instead of recreating its research.
@@ -4707,8 +5757,28 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             pending_candidates = next_pending
             validation_errors = next_errors
 
-    # Python alone owns portfolio selection and the authoritative ledger.
-    for candidate in ranked_batch:
+    # Python alone owns portfolio selection and the authoritative ledger. When
+    # enabled, small penalties prefer lower-risk and less-correlated candidates
+    # only when their QVM scores are close.
+    selection_batch = ranked_batch
+    if risk_adjusted_selection_enabled:
+        selection_batch = risk_adjusted_candidate_order(
+            ranked_batch=ranked_batch,
+            research_by_symbol=research_by_symbol,
+            initial_sector_counts=sector_counts,
+            initial_event_counts=risk_event_counts,
+            sector_limit=max_stocks_per_sector,
+            event_limit=max_stocks_per_risk_event,
+            excluded_crypto_levels=excluded_crypto_dependence,
+            moderate_penalty=moderate_risk_qvm_penalty,
+            repeated_event_penalty=repeated_risk_event_qvm_penalty,
+        )
+        print(
+            "Risk-adjusted selection order: "
+            + ", ".join(str(item["Symbol"]) for item in selection_batch)
+        )
+
+    for candidate in selection_batch:
         if len(selected) >= target_selected_stocks:
             break
 
@@ -4988,13 +6058,13 @@ if final_summary_enabled:
     try:
         summary_data, summary_model, _ = call_gemini_json(
             client=client,
-            model_primary=model_primary,
-            # Summary generation is lower-risk than stock classification, so
-            # Flash-Lite is an acceptable fallback when Flash has exhausted its
-            # separate per-model daily quota.
-            model_fallback=model_fallback,
+            model_primary=summary_model,
+            model_fallback=summary_model,
             gemini_config=build_gemini_config(
-                summary_thinking_budget, enable_search=False
+                summary_thinking_budget,
+                enable_search=False,
+                max_output_tokens=summary_max_output_tokens,
+                response_json_schema=SUMMARY_RESPONSE_SCHEMA,
             ),
             prompt=summary_prompt,
             stage="final HTML summary",
@@ -5069,8 +6139,25 @@ source_counts = {
     symbol: snapshot["source_count"]
     for symbol, snapshot in current_classifications.items()
 }
+classification_fallback_symbols = sorted(
+    symbol for symbol, research in validated_cached_research.items()
+    if research.get("classification_fallback")
+)
+source_provenance = {
+    symbol: {
+        "status": research.get("source_provenance_status", "NOT_RECORDED"),
+        "grounded_source_count": research.get("grounded_source_count", 0),
+        "cited_source_count": research.get("cited_source_count", 0),
+    }
+    for symbol, research in validated_cached_research.items()
+}
 run_diagnostics = {
-    "schema_version": 1,
+    "schema_version": 2,
+    "run_status": (
+        "completed_with_fallbacks"
+        if classification_fallback_symbols
+        else "completed"
+    ),
     "created_at": datetime.now(UTC).isoformat(),
     "model_used": model_used,
     "qvm_candidate_hash": stable_json_hash(candidate_records),
@@ -5079,6 +6166,8 @@ run_diagnostics = {
         "maximum": request_budget.maximum,
         "stock_used": request_budget.stock_used,
         "stock_maximum": request_budget.stock_maximum,
+        "postprocess_used": request_budget.postprocess_used,
+        "postprocess_maximum": request_budget.postprocess_maximum,
     },
     "gemini_calls": gemini_call_diagnostics,
     "token_totals": {
@@ -5098,6 +6187,8 @@ run_diagnostics = {
             initial_validated_cache_symbols
         ),
         "source_counts": source_counts,
+        "source_provenance": source_provenance,
+        "classification_fallback_symbols": classification_fallback_symbols,
         "batches": batch_research_diagnostics,
     },
     "duplicate_results": duplicate_result_diagnostics,
@@ -5122,6 +6213,10 @@ print(f"  requests used: {request_budget.used}/{request_budget.maximum}")
 print(
     f"  stock research calls: {request_budget.stock_used}/"
     f"{request_budget.stock_maximum}"
+)
+print(
+    f"  post-research calls: {request_budget.postprocess_used}/"
+    f"{request_budget.postprocess_maximum}"
 )
 print(f"  newly validated stocks: {len(newly_validated_symbols)}")
 if stock_call_diagnostics:

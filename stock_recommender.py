@@ -1,3 +1,31 @@
+import sys
+
+
+class TeeStream:
+    """Keep the console output while recording the complete run in the repo root."""
+
+    def __init__(self, original, log):
+        self.original = original
+        self.log = log
+
+    def write(self, message):
+        self.original.write(message)
+        self.log.write(message)
+        self.log.flush()
+
+    def flush(self):
+        self.original.flush()
+        self.log.flush()
+
+    def __getattr__(self, name):
+        return getattr(self.original, name)
+
+
+# Truncate the previous run before any imports or configuration can fail.
+_stock_run_log = open("stock_run.log", "w", encoding="utf-8", buffering=1)
+sys.stdout = TeeStream(sys.stdout, _stock_run_log)
+sys.stderr = TeeStream(sys.stderr, _stock_run_log)
+
 import re
 import numpy as np
 import pandas as pd
@@ -41,7 +69,12 @@ classification_calls_used = 0
 DECISION_DIAGNOSTIC_FIELDS = (
     "research_status",
     "crypto_dependence",
+    "business_reversal_risk",
+    "entry_reversal_risk",
     "reversal_risk",
+    "business_concentration",
+    "binary_event_risk",
+    "benchmark_outperformance_outlook",
     "risk_basis",
     "catalyst_dependence",
     "mechanism_status",
@@ -210,6 +243,85 @@ def save_html_cache(cache):
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
+
+
+def fetch_benchmark_performance(symbols, fallback_52_week_change):
+    """Return multi-horizon ETF returns and the strongest 52-week hurdle."""
+    normalized_symbols = list(dict.fromkeys(
+        str(symbol).strip().upper() for symbol in symbols if str(symbol).strip()
+    ))
+    if not normalized_symbols:
+        raise ValueError("benchmark_symbols must contain at least one symbol.")
+
+    print("Downloading benchmark price history: " + ", ".join(normalized_symbols))
+    performance = {}
+    try:
+        downloaded = yf.download(
+            normalized_symbols,
+            period="1y",
+            interval="1d",
+            group_by="ticker",
+            auto_adjust=True,
+            progress=False,
+            threads=True,
+        )
+        for symbol in normalized_symbols:
+            try:
+                frame = (
+                    downloaded
+                    if len(normalized_symbols) == 1
+                    else downloaded[symbol]
+                )
+                close = frame["Close"].dropna()
+                if len(close) < 64:
+                    raise ValueError(f"only {len(close)} daily closes")
+
+                def trailing_return(sessions):
+                    if len(close) <= sessions:
+                        return None
+                    return float((close.iloc[-1] / close.iloc[-sessions]) * 100 - 100)
+
+                performance[symbol] = {
+                    "1M Return": trailing_return(21),
+                    "3M Return": trailing_return(63),
+                    "6M Return": trailing_return(126),
+                    "9M Return": trailing_return(189),
+                    "1Y Return": (
+                        float((close.iloc[-1] / close.iloc[0]) * 100 - 100)
+                        if len(close) >= 230 else None
+                    ),
+                }
+            except Exception as exc:
+                print(f"Could not calculate benchmark returns for {symbol}: {exc}")
+    except Exception as exc:
+        print(f"Benchmark download failed: {exc}")
+
+    valid_1y = {
+        symbol: values["1Y Return"]
+        for symbol, values in performance.items()
+        if values.get("1Y Return") is not None
+    }
+    if valid_1y:
+        hurdle_symbol = max(valid_1y, key=valid_1y.get)
+        hurdle_return = float(valid_1y[hurdle_symbol])
+        used_fallback = False
+    else:
+        hurdle_symbol = "FALLBACK"
+        hurdle_return = float(fallback_52_week_change)
+        used_fallback = True
+
+    context = {
+        "symbols": normalized_symbols,
+        "returns": performance,
+        "hurdle_symbol": hurdle_symbol,
+        "hurdle_52_week_return": hurdle_return,
+        "used_fallback": used_fallback,
+    }
+    print(
+        f"Effective 52-week stock hurdle: {hurdle_return:.2f}% "
+        f"from {hurdle_symbol}."
+    )
+    return context
 
 
 
@@ -463,18 +575,22 @@ def initialize_gemini_client():
     )
 
 
-def build_gemini_config(thinking_budget, enable_search=True):
+def build_gemini_config(
+        thinking_budget, enable_search=True, max_output_tokens=None):
     """Create a low-variance Gemini configuration."""
     tools = None
     if enable_search:
         tools = [types.Tool(google_search=types.GoogleSearch())]
-    return types.GenerateContentConfig(
-        tools=tools,
-        temperature=0,
-        thinking_config=types.ThinkingConfig(
+    options = {
+        "tools": tools,
+        "temperature": 0,
+        "thinking_config": types.ThinkingConfig(
             thinking_budget=thinking_budget
-        )
-    )
+        ),
+    }
+    if max_output_tokens is not None:
+        options["max_output_tokens"] = int(max_output_tokens)
+    return types.GenerateContentConfig(**options)
 
 
 class GeminiRequestBudget:
@@ -487,8 +603,10 @@ class GeminiRequestBudget:
         self.reserved_summary_calls = int(reserved_summary_calls)
         self.used = 0
         self.stock_used = 0
+        self.api_attempts = 0
+        self.stock_api_attempts = 0
 
-    def consume(self, stage, category="general"):
+    def reserve(self, stage, category="general"):
         if category == "stock" and (
                 self.stock_maximum is not None
                 and self.stock_used >= self.stock_maximum
@@ -518,8 +636,15 @@ class GeminiRequestBudget:
         self.used += 1
         if category == "stock":
             self.stock_used += 1
+
+    def record_api_attempt(self, stage, category="general"):
+        self.api_attempts += 1
+        if category == "stock":
+            self.stock_api_attempts += 1
         print(
-            f"Gemini request {self.used}/{self.maximum}: {stage}"
+            f"Gemini logical request {self.used}/{self.maximum}: {stage} "
+            f"(API attempt {self.api_attempts}; "
+            f"stock API attempts {self.stock_api_attempts})"
         )
 
 
@@ -694,6 +819,97 @@ def normalized_risk_event_key(research):
     if not event_id:
         return None
     return event_id
+
+
+def combined_reversal_risk(research):
+    """Return the most conservative overall, business, or entry-risk label."""
+    levels = [
+        str(research.get(field) or "").upper()
+        for field in (
+            "reversal_risk", "business_reversal_risk", "entry_reversal_risk"
+        )
+    ]
+    valid = [level for level in levels if level in REVERSAL_RISK_ORDER]
+    return max(valid, key=REVERSAL_RISK_ORDER.get) if valid else "SEVERE"
+
+
+def risk_adjusted_candidate_order(
+        ranked_batch,
+        research_by_symbol,
+        initial_sector_counts,
+        initial_event_counts,
+        initial_moderate_count,
+):
+    """Greedily prefer safer entries when their QVM scores are close."""
+    remaining = list(ranked_batch)
+    ordered = []
+    simulated_sectors = dict(initial_sector_counts)
+    simulated_events = dict(initial_event_counts)
+    simulated_moderate_count = int(initial_moderate_count)
+
+    while remaining:
+        scored = []
+        for index, candidate in enumerate(remaining):
+            symbol = str(candidate["Symbol"]).upper()
+            research = research_by_symbol.get(symbol)
+            qvm_score = float(candidate.get("QVMScore") or 0.0)
+            risk = combined_reversal_risk(research or {})
+            benchmark_outlook = str(
+                (research or {}).get("benchmark_outperformance_outlook")
+                or "UNCERTAIN"
+            ).upper()
+            event_key = normalized_risk_event_key(research or {})
+            effective_score = qvm_score
+            if risk == "MODERATE":
+                effective_score -= moderate_risk_qvm_penalty
+            elif risk in {"ELEVATED", "SEVERE"}:
+                effective_score -= 1000
+            if event_key and simulated_events.get(event_key, 0) >= 1:
+                effective_score -= repeated_risk_event_qvm_penalty
+            if benchmark_outlook == "UNCERTAIN":
+                effective_score -= benchmark_uncertain_qvm_penalty
+            elif benchmark_outlook == "UNLIKELY":
+                effective_score -= 1000
+            scored.append((effective_score, -int(candidate["QVM Rank"]), -index))
+
+        chosen_index = max(range(len(remaining)), key=lambda i: scored[i])
+        chosen = remaining.pop(chosen_index)
+        ordered.append(chosen)
+
+        symbol = str(chosen["Symbol"]).upper()
+        research = research_by_symbol.get(symbol)
+        if not research:
+            continue
+        sector = chosen["Sector"]
+        event_key = normalized_risk_event_key(research)
+        risk = combined_reversal_risk(research)
+        selectable = bool(
+            research.get("eligible", True)
+            and not excluded_by_crypto_policy(research, excluded_crypto_dependence)
+            and risk not in {"ELEVATED", "SEVERE"}
+            and (
+                not exclude_unlikely_benchmark_outperformance
+                or str(research.get("benchmark_outperformance_outlook")).upper()
+                != "UNLIKELY"
+            )
+            and simulated_sectors.get(sector, 0) < max_stocks_per_sector
+            and (
+                not event_key
+                or simulated_events.get(event_key, 0) < max_stocks_per_risk_event
+            )
+            and (
+                risk != "MODERATE"
+                or simulated_moderate_count < max_moderate_risk_selections
+            )
+        )
+        if selectable:
+            simulated_sectors[sector] = simulated_sectors.get(sector, 0) + 1
+            if event_key:
+                simulated_events[event_key] = simulated_events.get(event_key, 0) + 1
+            if risk == "MODERATE":
+                simulated_moderate_count += 1
+
+    return ordered
 
 
 def partition_ranked_research_candidates(
@@ -945,11 +1161,38 @@ def judge_stock_research_batch(
             "sector": candidate.get("Sector"),
             "qvm_rank": candidate.get("QVM Rank"),
             "qvm_score": candidate.get("QVMScore"),
+            "quality_score": candidate.get("QualityScore"),
+            "value_score": candidate.get("ValueScore"),
+            "momentum_score": candidate.get("MomentumScore"),
+            "quantitative_entry_risk": candidate.get("QuantitativeEntryRisk"),
+            "overextension_penalty": candidate.get("OverextensionPenalty"),
             "returns": {
+                "1m": candidate.get("1M Return"),
                 "3m": candidate.get("3M Return"),
                 "6m": candidate.get("6M Return"),
                 "9m": candidate.get("9M Return"),
                 "1y": candidate.get("52 WkChange %"),
+            },
+            "price_path": {
+                "annualized_volatility": candidate.get("AnnualizedVolatility"),
+                "downside_volatility": candidate.get("DownsideVolatility"),
+                "max_drawdown": candidate.get("MaxDrawdown"),
+                "positive_day_pct": candidate.get("PositiveDayPct"),
+                "trend_r2": candidate.get("TrendR2"),
+                "annualized_trend": candidate.get("AnnualizedTrend"),
+                "distance_50dma": candidate.get("Distance50DMA"),
+                "distance_200dma": candidate.get("Distance200DMA"),
+                "distance_52w_high": candidate.get("Distance52WHigh"),
+                "largest_1d_move": candidate.get("Largest1DayMove"),
+                "largest_5d_move": candidate.get("Largest5DayMove"),
+                "momentum_acceleration": candidate.get("MomentumAcceleration"),
+            },
+            "benchmark_excess_returns": {
+                "1m": candidate.get("BenchmarkExcess1M"),
+                "3m": candidate.get("BenchmarkExcess3M"),
+                "6m": candidate.get("BenchmarkExcess6M"),
+                "9m": candidate.get("BenchmarkExcess9M"),
+                "1y": candidate.get("BenchmarkExcess1Y"),
             },
             "research": by_symbol[symbol],
             "previous_classification": previous_classifications.get(symbol),
@@ -961,6 +1204,8 @@ def judge_stock_research_batch(
         + datetime.now(UTC).date().isoformat()
         + "\n\nMARKET_CONTEXT:\n"
         + json.dumps(market_context, ensure_ascii=False)
+        + "\n\nBENCHMARK_CONTEXT:\n"
+        + json.dumps(benchmark_context, ensure_ascii=False)
         + "\n\nPEER_CLASSIFICATIONS_FROM_EARLIER_BATCHES:\n"
         + json.dumps(peer_classifications, ensure_ascii=False)
         + "\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n"
@@ -1013,7 +1258,10 @@ def judge_stock_research_batch(
                     )
 
                 allowed = {
+                    "business_reversal_risk", "entry_reversal_risk",
                     "reversal_risk", "risk_basis", "catalyst_dependence",
+                    "business_concentration", "binary_event_risk",
+                    "benchmark_outperformance_outlook",
                     "mechanism_status", "normalization_probability",
                     "continuation_outlook", "probability_indicator_type",
                     "probability_basis", "risk_time_horizon",
@@ -1362,6 +1610,13 @@ ALLOWED_REVERSAL_RISKS = {
     "ELEVATED",
     "SEVERE",
 }
+REVERSAL_RISK_ORDER = {
+    "MINIMAL": 0,
+    "LOW": 1,
+    "MODERATE": 2,
+    "ELEVATED": 3,
+    "SEVERE": 4,
+}
 
 
 def validate_stock_batch_structure(data, expected_candidates):
@@ -1620,6 +1875,39 @@ def validate_stock_batch(
         reversal_risk = str(result.get("reversal_risk", "")).upper()
         if reversal_risk not in ALLOWED_REVERSAL_RISKS:
             raise ValueError(f"{symbol} has invalid reversal_risk {reversal_risk!r}.")
+        component_risks = {}
+        for field in ("business_reversal_risk", "entry_reversal_risk"):
+            component = str(result.get(field) or reversal_risk).strip().upper()
+            if component not in ALLOWED_REVERSAL_RISKS:
+                raise ValueError(f"{symbol} has invalid {field} {component!r}.")
+            component_risks[field] = component
+            result[field] = component
+
+        for field in ("business_concentration", "binary_event_risk"):
+            level = str(result.get(field) or "LOW").strip().upper()
+            if level == "MEDIUM":
+                level = "MODERATE"
+            if level not in {"LOW", "MODERATE", "HIGH"}:
+                raise ValueError(f"{symbol} has invalid {field} {level!r}.")
+            result[field] = level
+
+        benchmark_outlook = str(
+            result.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+        ).strip().upper()
+        if benchmark_outlook not in {"LIKELY", "UNCERTAIN", "UNLIKELY"}:
+            raise ValueError(
+                f"{symbol} has invalid benchmark_outperformance_outlook "
+                f"{benchmark_outlook!r}."
+            )
+        result["benchmark_outperformance_outlook"] = benchmark_outlook
+
+        # The combined selection label is conservatively floored by both
+        # component judgments, preventing a low overall label from hiding a
+        # material business or entry-specific vulnerability.
+        reversal_risk = max(
+            [reversal_risk, *component_risks.values()],
+            key=lambda level: REVERSAL_RISK_ORDER[level],
+        )
         result["reversal_risk"] = reversal_risk
         catalyst_dependence = str(
             result.get("catalyst_dependence", "")
@@ -2047,8 +2335,45 @@ def validate_stock_batch(
                 "to": "MODERATE",
             })
 
+        primary_reversal_channel = re.sub(
+            r"[^A-Z0-9]+", "_",
+            str(result.get("primary_reversal_channel") or "").upper(),
+        ).strip("_")
+        result["primary_reversal_channel"] = primary_reversal_channel or None
+        entry_or_concentration_floor = bool(
+            REVERSAL_RISK_ORDER.get(reversal_risk, 0)
+            >= REVERSAL_RISK_ORDER["MODERATE"]
+            and (
+                REVERSAL_RISK_ORDER.get(
+                    result.get("entry_reversal_risk"), 0
+                ) >= REVERSAL_RISK_ORDER["MODERATE"]
+                or result.get("business_concentration") in {"MODERATE", "HIGH"}
+                or result.get("binary_event_risk") in {"MODERATE", "HIGH"}
+            )
+            and primary_reversal_channel in {
+                "CATALYST_EXHAUSTION", "VALUATION_RERATING", "BINARY_EVENT",
+                "MOMENTUM_FRAGILITY", "FUNDAMENTAL_DETERIORATION",
+            }
+            and str(result.get("material_effect") or "").strip()
+        )
+        if entry_or_concentration_floor and not reversal_evidence:
+            reversal_evidence = " ".join(
+                part for part in (
+                    str(result.get("reversal_mechanism") or "").strip(),
+                    str(result.get("material_effect") or "").strip(),
+                ) if part
+            )
+            result["reversal_evidence"] = reversal_evidence
+            if risk_materiality == "LOW":
+                risk_materiality = "MODERATE"
+                result["risk_materiality"] = risk_materiality
+
         reconciliation_reason = None
-        if reversal_risk in evidence_required_risks and not exposure_floor:
+        if (
+                reversal_risk in evidence_required_risks
+                and not exposure_floor
+                and not entry_or_concentration_floor
+        ):
             if (
                     risk_basis == "TEMPORARY_DRIVER_NORMALIZATION"
                     and has_nonrecurring_temporary_item(temporary_drivers)
@@ -2129,7 +2454,7 @@ def validate_stock_batch(
         if reversal_risk in evidence_required_risks:
             required_fields = (
                 ("material_effect",)
-                if exposure_floor
+                if exposure_floor or entry_or_concentration_floor
                 else ("current_fact", "probability_evidence", "material_effect")
             )
             missing_evidence_fields = [
@@ -2164,9 +2489,11 @@ def validate_stock_batch(
                     f"risk_time_horizon={risk_time_horizon!r}."
                 )
 
-        if risk_basis == "NONRECURRING_COMPARISON_ONLY" and reversal_risk not in {
-            "MINIMAL", "LOW"
-        }:
+        if (
+                risk_basis == "NONRECURRING_COMPARISON_ONLY"
+                and reversal_risk not in {"MINIMAL", "LOW"}
+                and not entry_or_concentration_floor
+        ):
             raise ValueError(
                 f"{symbol} uses only a non-recurring comparison to justify "
                 f"{reversal_risk} risk."
@@ -2371,13 +2698,14 @@ def call_gemini_json(
         max_transient_api_attempts
         if max_attempts is None else max(1, int(max_attempts))
     )
+    request_budget.reserve(stage, category=budget_category)
     last_error = None
     for model_name in models:
         for attempt in range(attempt_limit):
             attempt_prompt = prompt
             metadata = None
             try:
-                request_budget.consume(
+                request_budget.record_api_attempt(
                     f"{stage} ({model_name}, attempt {attempt + 1})",
                     category=budget_category,
                 )
@@ -2675,10 +3003,10 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 3
+TOP_QVM_CACHE_VERSION = 5
 
 
-def load_top_qvm_cache():
+def load_top_qvm_cache(benchmark_context=None, hurdle_tolerance_pct=0.25):
     """Load cached top-QVM DataFrame if it exists and is still fresh."""
 
     print(f"Checking top QVM cache: {TOP_QVM_CACHE_FILE}", flush=True)
@@ -2703,6 +3031,24 @@ def load_top_qvm_cache():
         if cached.get("version") != TOP_QVM_CACHE_VERSION:
             print("Top QVM cache version mismatch. Rebuilding cache.")
             return None
+
+        if benchmark_context:
+            expected_symbols = benchmark_context.get("symbols", [])
+            cached_symbols = cached.get("benchmark_symbols", [])
+            if cached_symbols != expected_symbols:
+                print("Top QVM benchmark list changed. Rebuilding cache.")
+                return None
+            current_hurdle = float(
+                benchmark_context.get("hurdle_52_week_return", 0.0)
+            )
+            cached_hurdle = cached.get("benchmark_hurdle_52_week_return")
+            if (
+                    cached_hurdle is None
+                    or abs(float(cached_hurdle) - current_hurdle)
+                    > float(hurdle_tolerance_pct)
+            ):
+                print("Top QVM benchmark hurdle changed. Rebuilding cache.")
+                return None
 
         created_at = cached.get("created_at")
         if not created_at:
@@ -2740,12 +3086,19 @@ def load_top_qvm_cache():
         print(f"Could not load top QVM cache: {e}")
         return None
 
-def save_top_qvm_cache(df):
+def save_top_qvm_cache(df, benchmark_context=None):
     """Save the fully computed top-QVM DataFrame for later Gemini testing."""
     try:
         cache = {
             "version": TOP_QVM_CACHE_VERSION,
             "created_at": datetime.now(UTC).isoformat(),
+            "benchmark_symbols": (
+                benchmark_context.get("symbols", []) if benchmark_context else []
+            ),
+            "benchmark_hurdle_52_week_return": (
+                benchmark_context.get("hurdle_52_week_return")
+                if benchmark_context else None
+            ),
             "data": df.copy()
         }
 
@@ -2761,6 +3114,7 @@ def append_qvm_data_yfinance(
         max_info_calls: int = 500,
         delay: float = 0.5,
         min_3_month_return: float = 0.0,
+        benchmark_context=None,
 ):
     df = df.copy()
     tickers_list = df["Symbol"].tolist()
@@ -2782,6 +3136,20 @@ def append_qvm_data_yfinance(
 
     data_map = {}
     momentum_scores = {}
+    benchmark_returns = (
+        benchmark_context.get("returns", {})
+        if isinstance(benchmark_context, dict) else {}
+    )
+    best_benchmark_return = {}
+    for metric in (
+        "1M Return", "3M Return", "6M Return", "9M Return", "1Y Return"
+    ):
+        values = [
+            returns.get(metric)
+            for returns in benchmark_returns.values()
+            if returns.get(metric) is not None
+        ]
+        best_benchmark_return[metric] = max(values) if values else None
 
     # ---- STEP 1: Compute momentum + extract Price ----
     print("Computing momentum and extracting latest price...")
@@ -2808,7 +3176,78 @@ def append_qvm_data_yfinance(
             ret_3m = ((close.iloc[-1] / close.iloc[-63]) - 1) * 100 if len(close) > 63 else None
             ret_1m = ((close.iloc[-1] / close.iloc[-21]) - 1) * 100 if len(close) > 21 else None
 
-            latest_price = float(close.iloc[-1])   # ← This is the fix
+            latest_price = float(close.iloc[-1])
+            daily_returns = close.pct_change().dropna()
+            annualized_volatility = (
+                float(daily_returns.std(ddof=0) * np.sqrt(252) * 100)
+                if len(daily_returns) >= 20 else None
+            )
+            downside_returns = daily_returns[daily_returns < 0]
+            downside_volatility = (
+                float(downside_returns.std(ddof=0) * np.sqrt(252) * 100)
+                if len(downside_returns) >= 10 else None
+            )
+            running_peak = close.cummax()
+            drawdowns = close / running_peak - 1
+            max_drawdown = float(drawdowns.min() * 100)
+            positive_day_pct = float((daily_returns > 0).mean() * 100)
+
+            trend_window = close.tail(min(126, len(close)))
+            log_prices = np.log(trend_window.to_numpy(dtype=float))
+            x_values = np.arange(len(log_prices), dtype=float)
+            if len(log_prices) >= 20 and np.isfinite(log_prices).all():
+                slope, intercept = np.polyfit(x_values, log_prices, 1)
+                fitted = slope * x_values + intercept
+                residual_sum = float(np.square(log_prices - fitted).sum())
+                total_sum = float(np.square(log_prices - log_prices.mean()).sum())
+                trend_r2 = 1.0 - residual_sum / total_sum if total_sum > 0 else 0.0
+                annualized_trend = float((np.exp(slope * 252) - 1) * 100)
+            else:
+                trend_r2 = None
+                annualized_trend = None
+
+            sma_50 = float(close.tail(min(50, len(close))).mean())
+            sma_200 = float(close.tail(min(200, len(close))).mean())
+            high_52w = float(close.max())
+            distance_50dma = (latest_price / sma_50 - 1) * 100 if sma_50 else None
+            distance_200dma = (latest_price / sma_200 - 1) * 100 if sma_200 else None
+            distance_52w_high = (
+                (latest_price / high_52w - 1) * 100 if high_52w else None
+            )
+            largest_1d_move = (
+                float(daily_returns.abs().max() * 100)
+                if not daily_returns.empty else None
+            )
+            rolling_5d = close.pct_change(5).dropna()
+            largest_5d_move = (
+                float(rolling_5d.abs().max() * 100)
+                if not rolling_5d.empty else None
+            )
+            prior_2m_monthly = None
+            if len(close) > 63:
+                prior_2m_total = float(close.iloc[-21] / close.iloc[-63])
+                prior_2m_monthly = (prior_2m_total ** 0.5 - 1) * 100
+            momentum_acceleration = (
+                float(ret_1m - prior_2m_monthly)
+                if ret_1m is not None and prior_2m_monthly is not None else None
+            )
+
+            stock_returns = {
+                "1M Return": ret_1m,
+                "3M Return": ret_3m,
+                "6M Return": ret_6m,
+                "9M Return": ret_9m,
+                "1Y Return": ret_1y,
+            }
+            benchmark_excess = {
+                metric: (
+                    value - best_benchmark_return[metric]
+                    if value is not None
+                    and best_benchmark_return.get(metric) is not None
+                    else None
+                )
+                for metric, value in stock_returns.items()
+            }
 
             score = np.nanmean([ret_3m, ret_6m, ret_9m])
             momentum_scores[symbol] = score
@@ -2820,10 +3259,28 @@ def append_qvm_data_yfinance(
                 "3M Return": ret_3m,
                 "6M Return": ret_6m,
                 "9M Return": ret_9m,
-                "1Y Return": ret_1y
+                "1Y Return": ret_1y,
+                "AnnualizedVolatility": annualized_volatility,
+                "DownsideVolatility": downside_volatility,
+                "MaxDrawdown": max_drawdown,
+                "PositiveDayPct": positive_day_pct,
+                "TrendR2": trend_r2,
+                "AnnualizedTrend": annualized_trend,
+                "Distance50DMA": distance_50dma,
+                "Distance200DMA": distance_200dma,
+                "Distance52WHigh": distance_52w_high,
+                "Largest1DayMove": largest_1d_move,
+                "Largest5DayMove": largest_5d_move,
+                "MomentumAcceleration": momentum_acceleration,
+                "BenchmarkExcess1M": benchmark_excess["1M Return"],
+                "BenchmarkExcess3M": benchmark_excess["3M Return"],
+                "BenchmarkExcess6M": benchmark_excess["6M Return"],
+                "BenchmarkExcess9M": benchmark_excess["9M Return"],
+                "BenchmarkExcess1Y": benchmark_excess["1Y Return"],
             }
 
-        except:
+        except Exception as exc:
+            print(f"Could not calculate price-history metrics for {symbol}: {exc}")
             momentum_scores[symbol] = -np.inf
             data_map[symbol] = {}
 
@@ -2863,7 +3320,16 @@ def append_qvm_data_yfinance(
     # ---- STEP 4: Fetch info ----
     for symbol in tqdm(selected_for_info):
         try:
-            if symbol in cache:
+            required_cached_fields = {
+                "operatingMargins", "revenueGrowth", "earningsGrowth",
+                "freeCashflow", "operatingCashflow", "totalDebt",
+                "totalCash", "sharesOutstanding",
+            }
+            cached_info = (
+                cache.get(symbol, {}).get("info", {})
+                if isinstance(cache.get(symbol), dict) else {}
+            )
+            if cached_info and required_cached_fields.issubset(cached_info):
                 info = cache[symbol]["info"]
             else:
                 ticker_obj = yf.Ticker(symbol)
@@ -2876,6 +3342,9 @@ def append_qvm_data_yfinance(
                         "returnOnAssets": info.get("returnOnAssets"),
                         "profitMargins": info.get("profitMargins"),
                         "grossMargins": info.get("grossMargins"),
+                        "operatingMargins": info.get("operatingMargins"),
+                        "revenueGrowth": info.get("revenueGrowth"),
+                        "earningsGrowth": info.get("earningsGrowth"),
                         "debtToEquity": info.get("debtToEquity"),
                         "currentRatio": info.get("currentRatio"),
                         "interestCoverage": info.get("interestCoverage"),
@@ -2885,6 +3354,11 @@ def append_qvm_data_yfinance(
                         "enterpriseValue": info.get("enterpriseValue"),
                         "ebitda": info.get("ebitda"),
                         "totalRevenue": info.get("totalRevenue"),
+                        "freeCashflow": info.get("freeCashflow"),
+                        "operatingCashflow": info.get("operatingCashflow"),
+                        "totalDebt": info.get("totalDebt"),
+                        "totalCash": info.get("totalCash"),
+                        "sharesOutstanding": info.get("sharesOutstanding"),
                     },
                     "timestamp": datetime.now(UTC).isoformat()
                 }
@@ -2894,6 +3368,10 @@ def append_qvm_data_yfinance(
             ev = info.get("enterpriseValue")
             ebitda = info.get("ebitda")
             revenue = info.get("totalRevenue")
+            free_cash_flow = info.get("freeCashflow")
+            operating_cash_flow = info.get("operatingCashflow")
+            total_debt = info.get("totalDebt")
+            total_cash = info.get("totalCash")
 
             data_map[symbol].update({
                 "Sector": info.get("sector"),
@@ -2901,6 +3379,9 @@ def append_qvm_data_yfinance(
                 "ROA": info.get("returnOnAssets"),
                 "ProfitMargin": info.get("profitMargins"),
                 "GrossMargin": info.get("grossMargins"),
+                "OperatingMargin": info.get("operatingMargins"),
+                "RevenueGrowth": info.get("revenueGrowth"),
+                "EarningsGrowth": info.get("earningsGrowth"),
                 "DebtToEquity": info.get("debtToEquity"),
                 "CurrentRatio": info.get("currentRatio"),
                 "InterestCoverage": info.get("interestCoverage"),
@@ -2909,6 +3390,19 @@ def append_qvm_data_yfinance(
                 "PEG": info.get("pegRatio"),
                 "EV_EBITDA": (ev / ebitda) if ev and ebitda and ebitda != 0 else None,
                 "EV_Revenue": (ev / revenue) if ev and revenue and revenue != 0 else None,
+                "FCFMargin": (
+                    free_cash_flow / revenue
+                    if free_cash_flow is not None and revenue else None
+                ),
+                "OperatingCashFlowMargin": (
+                    operating_cash_flow / revenue
+                    if operating_cash_flow is not None and revenue else None
+                ),
+                "NetDebt": (
+                    (total_debt or 0) - (total_cash or 0)
+                    if total_debt is not None or total_cash is not None else None
+                ),
+                "SharesOutstanding": info.get("sharesOutstanding"),
             })
 
         except Exception as e:
@@ -2920,10 +3414,18 @@ def append_qvm_data_yfinance(
     # ---- Map back to df ----
     all_columns = [
         "Sector", "Price", "ROE", "ROA", "ProfitMargin", "GrossMargin",
+        "OperatingMargin", "RevenueGrowth", "EarningsGrowth", "FCFMargin",
+        "OperatingCashFlowMargin", "NetDebt", "SharesOutstanding",
         "DebtToEquity", "CurrentRatio", "InterestCoverage",
         "PE", "PriceToBook", "PEG", "EV_EBITDA", "EV_Revenue",
         "HistoryDays",
-        "1M Return", "3M Return", "6M Return", "9M Return", "1Y Return"
+        "1M Return", "3M Return", "6M Return", "9M Return", "1Y Return",
+        "AnnualizedVolatility", "DownsideVolatility", "MaxDrawdown",
+        "PositiveDayPct", "TrendR2", "AnnualizedTrend", "Distance50DMA",
+        "Distance200DMA", "Distance52WHigh", "Largest1DayMove",
+        "Largest5DayMove", "MomentumAcceleration",
+        "BenchmarkExcess1M", "BenchmarkExcess3M", "BenchmarkExcess6M",
+        "BenchmarkExcess9M", "BenchmarkExcess1Y"
     ]
 
     for col in all_columns:
@@ -2953,7 +3455,8 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
       4. Manageable balance-sheet risk.
 
     Function defaults are approximately balanced. The production caller
-    explicitly uses Quality 45%, Value 10%, and Momentum 45%.
+    explicitly uses configurable continuation-oriented weights (currently
+    Quality 50%, Value 15%, and Momentum 35%).
     """
 
     df = df.copy()
@@ -2974,6 +3477,11 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         'ROA',
         'ProfitMargin',
         'GrossMargin',
+        'OperatingMargin',
+        'RevenueGrowth',
+        'EarningsGrowth',
+        'FCFMargin',
+        'OperatingCashFlowMargin',
         'CurrentRatio',
         'InterestCoverage',
         'DebtToEquity',
@@ -2986,7 +3494,24 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         '3M Return',
         '6M Return',
         '9M Return',
-        '1Y Return'
+        '1Y Return',
+        'AnnualizedVolatility',
+        'DownsideVolatility',
+        'MaxDrawdown',
+        'PositiveDayPct',
+        'TrendR2',
+        'AnnualizedTrend',
+        'Distance50DMA',
+        'Distance200DMA',
+        'Distance52WHigh',
+        'Largest1DayMove',
+        'Largest5DayMove',
+        'MomentumAcceleration',
+        'BenchmarkExcess1M',
+        'BenchmarkExcess3M',
+        'BenchmarkExcess6M',
+        'BenchmarkExcess9M',
+        'BenchmarkExcess1Y'
     ]
 
     for col in numeric_columns:
@@ -3013,6 +3538,10 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         'ROA',
         'ProfitMargin',
         'GrossMargin',
+        'OperatingMargin',
+        'RevenueGrowth',
+        'FCFMargin',
+        'OperatingCashFlowMargin',
         'CurrentRatio',
         'InterestCoverage'
     ]
@@ -3063,19 +3592,21 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         # -----------------------------------------------------
         # Missing-data confidence adjustment
         #
-        # 2+ valid metrics = full confidence
-        # 1 valid metric  = reduced confidence
+        # 5+ valid metrics = full confidence
+        # Sparse fundamentals are pulled progressively toward neutral.
         # 0 valid metrics = neutral score
         # -----------------------------------------------------
 
-        quality_confidence = np.where(
-            valid_quality_count >= 2,
-            1.00,
-            np.where(
+        quality_confidence = np.select(
+            [
+                valid_quality_count >= 5,
+                valid_quality_count == 4,
+                valid_quality_count == 3,
+                valid_quality_count == 2,
                 valid_quality_count == 1,
-                0.75,
-                0.50
-            )
+            ],
+            [1.00, 0.90, 0.75, 0.60, 0.50],
+            default=0.40,
         )
 
         # Move one-metric observations toward neutral (50).
@@ -3095,9 +3626,10 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
         if 'DebtToEquity' in df.columns:
 
+            debt_available = df['DebtToEquity'].notna()
             debt = (
                 df['DebtToEquity']
-                .fillna(0)
+                .fillna(50)
                 .clip(
                     lower=0,
                     upper=300
@@ -3118,6 +3650,9 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
                     quality -
                     0.30 * debt_penalty
             )
+            # Unknown leverage is uncertainty, not evidence that the company
+            # is debt-free. Apply a small deterministic confidence penalty.
+            quality = quality - np.where(debt_available, 0.0, 0.03)
 
         df['QualityScore'] = (
                 quality * 100
@@ -3382,27 +3917,32 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
             consistency_score = raw_momentum
 
         # -----------------------------------------------------
-        # D. Risk-adjusted momentum
+        # D. Daily price-path quality
         # -----------------------------------------------------
+        # Cumulative 1M/3M/6M returns are overlapping observations and their
+        # dispersion is not volatility. Use actual daily-price statistics for
+        # risk adjustment and trend quality.
+        def percentile_score(column, ascending=True):
+            if column not in df.columns:
+                return pd.Series(50.0, index=df.index)
+            values = pd.to_numeric(df[column], errors='coerce')
+            return (values.rank(pct=True, ascending=ascending) * 100).fillna(50)
 
-        volatility = m.std(
-            axis=1,
-            skipna=True
+        low_daily_volatility = percentile_score(
+            'AnnualizedVolatility', ascending=False
         )
-
-        risk_adjusted_return = (
-                mean_return /
-                (volatility + 1e-5)
+        low_downside_volatility = percentile_score(
+            'DownsideVolatility', ascending=False
         )
-
-        risk_adj = (
-                risk_adjusted_return.rank(
-                    pct=True
-                ) * 100
-        )
-
-        risk_adj = (
-            risk_adj.fillna(50)
+        shallow_drawdown = percentile_score('MaxDrawdown', ascending=True)
+        positive_days = percentile_score('PositiveDayPct', ascending=True)
+        trend_fit = percentile_score('TrendR2', ascending=True)
+        price_path_quality = (
+                0.20 * low_daily_volatility +
+                0.20 * low_downside_volatility +
+                0.25 * shallow_drawdown +
+                0.15 * positive_days +
+                0.20 * trend_fit
         )
 
         # -----------------------------------------------------
@@ -3423,22 +3963,40 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         else:
             recent_rank = raw_momentum
 
+        benchmark_excess_columns = [
+            column for column in (
+                'BenchmarkExcess1M', 'BenchmarkExcess3M',
+                'BenchmarkExcess6M', 'BenchmarkExcess9M', 'BenchmarkExcess1Y'
+            ) if column in df.columns
+        ]
+        if benchmark_excess_columns:
+            relative_mean = df[benchmark_excess_columns].mean(
+                axis=1, skipna=True
+            )
+            benchmark_relative_score = (
+                relative_mean.rank(pct=True) * 100
+            ).fillna(50)
+        else:
+            benchmark_relative_score = pd.Series(50.0, index=df.index)
+
         # -----------------------------------------------------
         # F. Final momentum blend
         #
-        # 30% overall return
-        # 30% persistence
-        # 20% multi-period consistency
-        # 10% risk adjustment
+        # 25% overall return
+        # 15% persistence
+        # 15% multi-period consistency
+        # 25% daily price-path quality
         # 10% recent confirmation
+        # 10% performance relative to the configured benchmarks
         # -----------------------------------------------------
 
         momentum = (
-                0.30 * raw_momentum +
-                0.30 * trend_alignment +
-                0.20 * consistency_score +
-                0.10 * risk_adj +
-                0.10 * recent_rank
+                0.25 * raw_momentum +
+                0.15 * trend_alignment +
+                0.15 * consistency_score +
+                0.25 * price_path_quality +
+                0.10 * recent_rank +
+                0.10 * benchmark_relative_score
         )
 
         # Established listings normally provide all five windows. Pull sparse
@@ -3493,6 +4051,34 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
                 df['MomentumScore'] -
                 recent_penalty
         ).clip(0, 100)
+
+    # Penalize only unusually fragile entries, not strong momentum by itself.
+    # Percentile construction adapts to the current candidate universe and
+    # avoids arbitrary universal cutoffs across sectors and volatility regimes.
+    entry_risk_components = []
+    for column in (
+        'Distance50DMA', 'MomentumAcceleration', 'Largest5DayMove',
+        'AnnualizedVolatility',
+    ):
+        if column in df.columns:
+            values = pd.to_numeric(df[column], errors='coerce')
+            entry_risk_components.append(values.rank(pct=True) * 100)
+    if entry_risk_components:
+        quantitative_entry_risk = pd.concat(
+            entry_risk_components, axis=1
+        ).mean(axis=1, skipna=True).fillna(50)
+        overextension_penalty = (
+            (quantitative_entry_risk - 75).clip(lower=0) / 25 * 15
+        ).clip(0, 15)
+    else:
+        quantitative_entry_risk = pd.Series(50.0, index=df.index)
+        overextension_penalty = pd.Series(0.0, index=df.index)
+
+    df['QuantitativeEntryRisk'] = quantitative_entry_risk.clip(0, 100)
+    df['OverextensionPenalty'] = overextension_penalty
+    df['MomentumScore'] = (
+        df['MomentumScore'] - df['OverextensionPenalty']
+    ).clip(0, 100)
 
     # =========================================================
     # 5. FINAL QVM SCORE
@@ -3645,6 +4231,8 @@ def build_stock_analysis_snapshots(candidate_records, research_by_symbol, cache_
             "quality_score": candidate.get("QualityScore"),
             "value_score": candidate.get("ValueScore"),
             "momentum_score": candidate.get("MomentumScore"),
+            "quantitative_entry_risk": candidate.get("QuantitativeEntryRisk"),
+            "overextension_penalty": candidate.get("OverextensionPenalty"),
             "sector": candidate.get("Sector"),
             "market_cap": candidate.get("MarketCap"),
             "price": candidate.get("Price"),
@@ -3654,6 +4242,25 @@ def build_stock_analysis_snapshots(candidate_records, research_by_symbol, cache_
                 "6m": candidate.get("6M Return"),
                 "9m": candidate.get("9M Return"),
                 "1y": candidate.get("1Y Return", candidate.get("52 WkChange %")),
+            },
+            "price_path": {
+                "annualized_volatility": candidate.get("AnnualizedVolatility"),
+                "downside_volatility": candidate.get("DownsideVolatility"),
+                "max_drawdown": candidate.get("MaxDrawdown"),
+                "positive_day_pct": candidate.get("PositiveDayPct"),
+                "trend_r2": candidate.get("TrendR2"),
+                "distance_50dma": candidate.get("Distance50DMA"),
+                "distance_200dma": candidate.get("Distance200DMA"),
+                "distance_52w_high": candidate.get("Distance52WHigh"),
+                "largest_5d_move": candidate.get("Largest5DayMove"),
+                "momentum_acceleration": candidate.get("MomentumAcceleration"),
+            },
+            "benchmark_excess_returns": {
+                "1m": candidate.get("BenchmarkExcess1M"),
+                "3m": candidate.get("BenchmarkExcess3M"),
+                "6m": candidate.get("BenchmarkExcess6M"),
+                "9m": candidate.get("BenchmarkExcess9M"),
+                "1y": candidate.get("BenchmarkExcess1Y"),
             },
             "research_provenance": {
                 "model": cache_entry.get("research_model") or cache_entry.get("model"),
@@ -3983,7 +4590,18 @@ for legacy_run_artifact in (
     except Exception as exc:
         print(f"Warning: could not remove legacy run artifact {legacy_run_artifact}: {exc}")
 print(f"Run report: {Path(run_report_file).resolve()}")
-min_52_week_change = config["min_52_week_change"]
+print(f"Run log: {Path('stock_run.log').resolve()}")
+benchmark_symbols = [
+    str(symbol).strip().upper()
+    for symbol in config.get("benchmark_symbols", ["SPMO", "VGT"])
+    if str(symbol).strip()
+]
+benchmark_min_52_week_change_fallback = float(
+    config.get("benchmark_min_52_week_change_fallback", 15.0)
+)
+benchmark_hurdle_cache_tolerance_pct = max(
+    0.0, float(config.get("benchmark_hurdle_cache_tolerance_pct", 0.25))
+)
 min_market_cap = int(config.get("min_market_cap", 300_000_000))
 min_price = float(config.get("min_price", 5.0))
 min_average_volume = int(config.get("min_average_volume", 100_000))
@@ -4048,6 +4666,34 @@ max_stocks_per_risk_event = int(
 )
 if max_stocks_per_risk_event < 1:
     raise ValueError("max_stocks_per_risk_event must be at least 1.")
+risk_adjusted_selection_enabled = bool(
+    config.get("risk_adjusted_selection_enabled", True)
+)
+moderate_risk_qvm_penalty = float(
+    config.get("moderate_risk_qvm_penalty", 6.0)
+)
+repeated_risk_event_qvm_penalty = float(
+    config.get("repeated_risk_event_qvm_penalty", 4.0)
+)
+max_moderate_risk_selections = max(
+    0, int(config.get("max_moderate_risk_selections", 3))
+)
+exclude_elevated_entry_risk = bool(
+    config.get("exclude_elevated_entry_risk", True)
+)
+benchmark_uncertain_qvm_penalty = float(
+    config.get("benchmark_uncertain_qvm_penalty", 3.0)
+)
+exclude_unlikely_benchmark_outperformance = bool(
+    config.get("exclude_unlikely_benchmark_outperformance", True)
+)
+qvm_weights = {
+    "Quality": float(config.get("qvm_quality_weight", 0.50)),
+    "Value": float(config.get("qvm_value_weight", 0.15)),
+    "Momentum": float(config.get("qvm_momentum_weight", 0.35)),
+}
+if not np.isclose(sum(qvm_weights.values()), 1.0):
+    raise ValueError("Configured QVM weights must sum to 1.0.")
 cautious_exposure_floor_enabled = bool(
     config.get("cautious_exposure_floor_enabled", True)
 )
@@ -4114,7 +4760,18 @@ print(
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
     f"stocks_per_risk_event={max_stocks_per_risk_event}, "
+    f"max_moderate={max_moderate_risk_selections}, "
+    f"qvm_weights={qvm_weights}, "
+    f"benchmarks={benchmark_symbols}, "
     f"excluded_crypto={sorted(excluded_crypto_dependence)}"
+)
+
+benchmark_context = fetch_benchmark_performance(
+    benchmark_symbols,
+    benchmark_min_52_week_change_fallback,
+)
+min_52_week_change = float(
+    benchmark_context["hurdle_52_week_return"]
 )
 
 # ---------------------------------------------------------
@@ -4125,7 +4782,10 @@ print(
 # exact same quantitative input without rerunning the
 # expensive pipeline.
 # ---------------------------------------------------------
-top_stocks = load_top_qvm_cache()
+top_stocks = load_top_qvm_cache(
+    benchmark_context=benchmark_context,
+    hurdle_tolerance_pct=benchmark_hurdle_cache_tolerance_pct,
+)
 
 if top_stocks is None:
 
@@ -4156,22 +4816,19 @@ if top_stocks is None:
         df_minimal,
         max_info_calls=max_info_calls,
         min_3_month_return=min_3_month_return,
+        benchmark_context=benchmark_context,
     )
     if "3M Return" in df_yf.columns:
         df_yf = df_yf[
             df_yf["3M Return"].notna()
             & (df_yf["3M Return"] >= min_3_month_return)
         ].copy()
-    df_scored = score_qvm(df_yf, weights = {
-        'Quality': 0.45,
-        'Value': 0.10,
-        'Momentum': 0.45
-    })
+    df_scored = score_qvm(df_yf, weights=qvm_weights)
 
     # Keep the configured top QVM candidate stream for Gemini evaluation.
     top_stocks = df_scored.head(max_candidates).copy()
 
-    save_top_qvm_cache(top_stocks)
+    save_top_qvm_cache(top_stocks, benchmark_context=benchmark_context)
 
 print("\nTop QVM Stocks:")
 top_stocks = top_stocks.head(max_candidates).copy().reset_index(drop=True)
@@ -4186,15 +4843,23 @@ cols_for_eval = [
     'ValueMetricCount',
     'MomentumScore',
     'MomentumMetricCount',
+    'QuantitativeEntryRisk',
+    'OverextensionPenalty',
     'HistoryDays',
     'ROE',
     'DebtToEquity',
     'DebtDataAvailable',
     'EV_EBITDA',
     'PEG',
+    'RevenueGrowth',
+    'OperatingMargin',
+    'FCFMargin',
     '3M Return',
     '6M Return',
-    '1Y Return'
+    '1Y Return',
+    'BenchmarkExcess3M',
+    'BenchmarkExcess6M',
+    'BenchmarkExcess1Y'
 ]
 #print to file for inspection and evaluation
 TOP_QVM_STOCKS_MD_FILE.write_text(
@@ -4216,10 +4881,17 @@ essential_columns_for_gemini = [
     "QualityScore",
     "ValueScore",
     "MomentumScore",
+    "QuantitativeEntryRisk",
+    "OverextensionPenalty",
 
     # Key fundamentals
     "ROE",
     "ProfitMargin",
+    "OperatingMargin",
+    "RevenueGrowth",
+    "EarningsGrowth",
+    "FCFMargin",
+    "OperatingCashFlowMargin",
     "DebtToEquity",
     "EV_EBITDA",
     "PEG",
@@ -4228,10 +4900,27 @@ essential_columns_for_gemini = [
     "PE",
 
     # Momentum anchors
+    "1M Return",
     "3M Return",
     "6M Return",
     "9M Return",
-    "52 WkChange %"
+    "52 WkChange %",
+
+    # Daily price-path and entry-risk evidence
+    "AnnualizedVolatility",
+    "DownsideVolatility",
+    "MaxDrawdown",
+    "PositiveDayPct",
+    "TrendR2",
+    "AnnualizedTrend",
+    "Distance50DMA",
+    "Distance200DMA",
+    "Distance52WHigh",
+    "Largest1DayMove",
+    "Largest5DayMove",
+    "MomentumAcceleration",
+    "BenchmarkExcess1M", "BenchmarkExcess3M", "BenchmarkExcess6M",
+    "BenchmarkExcess9M", "BenchmarkExcess1Y"
 ]
 
 # Build the strict, ranked candidate stream sent to Gemini in batches.
@@ -4441,6 +5130,7 @@ selected = []
 decision_ledger = []
 sector_counts = {}
 risk_event_counts = {}
+moderate_selected_count = 0
 prior_research_decisions = []
 research_failures_by_symbol = {}
 models_used = [market_model]
@@ -5185,7 +5875,23 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             validation_errors = next_errors
 
     # Python alone owns portfolio selection and the authoritative ledger.
-    for candidate in ranked_batch:
+    # Apply modest risk penalties only after grounded research so QVM remains
+    # the dominant signal while safer entries win close comparisons.
+    selection_batch = ranked_batch
+    if risk_adjusted_selection_enabled:
+        selection_batch = risk_adjusted_candidate_order(
+            ranked_batch=ranked_batch,
+            research_by_symbol=research_by_symbol,
+            initial_sector_counts=sector_counts,
+            initial_event_counts=risk_event_counts,
+            initial_moderate_count=moderate_selected_count,
+        )
+        print(
+            "Risk-adjusted selection order: "
+            + ", ".join(str(item["Symbol"]) for item in selection_batch)
+        )
+
+    for candidate in selection_batch:
         if len(selected) >= target_selected_stocks:
             break
 
@@ -5233,13 +5939,24 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             })
             continue
 
-        reversal_risk = str(research["reversal_risk"]).upper()
+        reversal_risk = combined_reversal_risk(research)
+        entry_reversal_risk = str(
+            research.get("entry_reversal_risk") or reversal_risk
+        ).upper()
+        benchmark_outlook = str(
+            research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+        ).upper()
         explanation = str(research["explanation"]).strip()
 
         prior_research_decisions.append({
             "symbol": symbol,
             "industry_group": research.get("industry_group"),
             "reversal_risk": reversal_risk,
+            "business_reversal_risk": research.get("business_reversal_risk"),
+            "entry_reversal_risk": entry_reversal_risk,
+            "business_concentration": research.get("business_concentration"),
+            "binary_event_risk": research.get("binary_event_risk"),
+            "benchmark_outperformance_outlook": benchmark_outlook,
             "risk_basis": research.get("risk_basis"),
             "catalyst_dependence": research.get("catalyst_dependence"),
             "crypto_dependence": research.get("crypto_dependence"),
@@ -5297,6 +6014,55 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             })
             continue
 
+        if (
+                exclude_elevated_entry_risk
+                and entry_reversal_risk in {"ELEVATED", "SEVERE"}
+        ):
+            decision_ledger.append({
+                "qvm_rank": candidate["QVM Rank"],
+                "symbol": symbol,
+                "sector_group": sector,
+                "status": f"NOT SELECTED — {entry_reversal_risk} ENTRY RISK",
+                "sector_selected_after": sector_count,
+                "total_selected_after": len(selected),
+                "explanation": explanation,
+            })
+            continue
+
+        if (
+                exclude_unlikely_benchmark_outperformance
+                and benchmark_outlook == "UNLIKELY"
+        ):
+            decision_ledger.append({
+                "qvm_rank": candidate["QVM Rank"],
+                "symbol": symbol,
+                "sector_group": sector,
+                "status": "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY",
+                "sector_selected_after": sector_count,
+                "total_selected_after": len(selected),
+                "explanation": explanation,
+            })
+            continue
+
+        if (
+                reversal_risk == "MODERATE"
+                and moderate_selected_count >= max_moderate_risk_selections
+        ):
+            decision_ledger.append({
+                "qvm_rank": candidate["QVM Rank"],
+                "symbol": symbol,
+                "sector_group": sector,
+                "status": "NOT SELECTED — MODERATE-RISK CAPACITY",
+                "sector_selected_after": sector_count,
+                "total_selected_after": len(selected),
+                "explanation": (
+                    f"The portfolio already contains "
+                    f"{max_moderate_risk_selections} MODERATE-risk selections. "
+                    + explanation
+                ),
+            })
+            continue
+
         event_key = normalized_risk_event_key(research)
 
         if (
@@ -5320,6 +6086,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
 
         selected.append({"candidate": candidate, "research": research})
         sector_counts[sector] = sector_count + 1
+        if reversal_risk == "MODERATE":
+            moderate_selected_count += 1
 
         if event_key:
             risk_event_counts[event_key] = (
@@ -5565,11 +6333,14 @@ run_report = {
         "models_used_this_run": list(dict.fromkeys(models_used)),
     },
     "qvm_candidate_hash": stable_json_hash(candidate_records),
+    "benchmark_context": benchmark_context,
     "request_budget": {
         "used": request_budget.used,
         "maximum": request_budget.maximum,
         "stock_used": request_budget.stock_used,
         "stock_maximum": request_budget.stock_maximum,
+        "api_attempts": request_budget.api_attempts,
+        "stock_api_attempts": request_budget.stock_api_attempts,
         "classification_api_attempts_used": classification_calls_used,
         "classification_api_attempts_maximum": max_classification_calls_per_run,
     },

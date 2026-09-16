@@ -97,19 +97,31 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           echo "=== Stock page ==="
-          ls -lh index.html
+          ls -lh index.html || true
+
+          echo "=== Run reports ==="
+          ls -lh run_reports/ || true
 
           echo "=== Git status BEFORE staging ==="
           git status --short
 
-          # index.html is intentionally ignored for local development, so force
-          # staging keeps the published page update working in Actions.
-          git add -f index.html run_reports/
+          # index.html is intentionally ignored for local development.
+          if [ -f index.html ]; then
+            git add -f index.html
+          fi
+
+          # Run reports are normal tracked diagnostic artifacts.
+          if [ -d run_reports ]; then
+            git add run_reports/
+          fi
+
+          echo "=== Git status AFTER staging ==="
+          git status --short
 
           if ! git diff --cached --quiet; then
-            git commit -m "Update stock recommendations"
+            git commit -m "Update stock recommendations and run reports"
             git pull --rebase origin main
             git push origin main
           else
-            echo "No stock page changes to commit"
+            echo "No stock page or run report changes to commit"
           fi

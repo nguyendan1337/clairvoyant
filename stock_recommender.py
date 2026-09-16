@@ -73,6 +73,15 @@ duplicate_result_diagnostics = []
 runtime_reconciliation_diagnostics = []
 classification_call_diagnostics = []
 classification_calls_used = 0
+yfinance_fundamentals_diagnostics = {
+    "eligible_symbols": 0,
+    "cache_hits": 0,
+    "live_fetches": 0,
+    "fetch_successes": 0,
+    "fetch_failures": [],
+    "apply_failures": [],
+    "pipeline_used": False,
+}
 
 
 DECISION_DIAGNOSTIC_FIELDS = (
@@ -977,6 +986,7 @@ def validation_error_requires_fresh_research(message):
         "source without a title",
         "documented shared event",
         "issuer identity conflict",
+        "cross-company evidence contamination",
     )
     return any(marker in error for marker in research_markers)
 
@@ -1502,6 +1512,93 @@ def deduplicate_stock_results(results, expected_candidates, stage=None):
     return ordered
 
 
+def normalized_evidence_text(value):
+    return re.sub(r"\s+", " ", str(value or "").strip().lower())
+
+
+def detect_cross_company_evidence_contamination(results):
+    """Flag unusually specific issuer evidence duplicated across different stocks.
+
+    Shared sector context is normal. This check focuses on issuer-specific operating
+    text and repeated concrete financial figures that are unlikely to belong to two
+    unrelated companies by coincidence.
+    """
+    items = [item for item in results if isinstance(item, dict)]
+    conflicts = {}
+    exact_fields = (
+        "current_operating_evidence",
+        "current_fact",
+        "probability_evidence",
+        "material_effect",
+    )
+    figure_fields = exact_fields + ("explanation",)
+    money_pattern = re.compile(
+        r"\$\s*\d+(?:\.\d+)?\s*(?:million|billion|m|b)\b",
+        flags=re.IGNORECASE,
+    )
+
+    for left_index, left in enumerate(items):
+        left_symbol = str(left.get("symbol") or "").strip().upper()
+        if not left_symbol:
+            continue
+        for right in items[left_index + 1:]:
+            right_symbol = str(right.get("symbol") or "").strip().upper()
+            if not right_symbol or right_symbol == left_symbol:
+                continue
+
+            identical_fields = []
+            for field in exact_fields:
+                left_text = normalized_evidence_text(left.get(field))
+                right_text = normalized_evidence_text(right.get(field))
+                if len(left_text) >= 35 and left_text == right_text:
+                    identical_fields.append(field)
+
+            left_figures = set()
+            right_figures = set()
+            for field in figure_fields:
+                left_figures.update(m.group(0).lower() for m in money_pattern.finditer(
+                    str(left.get(field) or "")
+                ))
+                right_figures.update(m.group(0).lower() for m in money_pattern.finditer(
+                    str(right.get(field) or "")
+                ))
+            shared_figures = sorted(left_figures.intersection(right_figures))
+
+            # Require either duplicated issuer-specific prose or at least two
+            # matching monetary figures. One shared figure alone can be coincidental.
+            if not identical_fields and len(shared_figures) < 2:
+                continue
+
+            detail = (
+                f"possible cross-company evidence contamination between "
+                f"{left_symbol} and {right_symbol}: "
+                f"identical_fields={identical_fields or 'none'}, "
+                f"shared_specific_financial_figures={shared_figures or 'none'}"
+            )
+            conflicts[left_symbol] = detail
+            conflicts[right_symbol] = detail
+
+    return conflicts
+
+
+def validate_final_research_state(research_by_symbol):
+    """Fail closed if deterministic reconciliation leaves contradictory risk state."""
+    errors = []
+    for symbol, research in research_by_symbol.items():
+        stored = str(research.get("reversal_risk") or "").upper()
+        effective = combined_reversal_risk(research)
+        if stored != effective:
+            errors.append(
+                f"{symbol}: reversal_risk={stored or 'MISSING'}, "
+                f"business={research.get('business_reversal_risk')}, "
+                f"entry={research.get('entry_reversal_risk')}, effective={effective}"
+            )
+    if errors:
+        raise RuntimeError(
+            "Final research-state consistency failure:\n" + "\n".join(errors)
+        )
+
+
 def prioritize_stock_sources(sources, maximum):
     """Deduplicate sources in model-provided relevance order."""
     if not isinstance(sources, list):
@@ -1773,10 +1870,32 @@ def excluded_by_crypto_policy(research, excluded_levels):
     }
 
 
+def align_component_risks_to_authoritative(result, authoritative_risk):
+    """Keep component risks consistent after a deterministic Python reconciliation."""
+    authoritative_risk = str(authoritative_risk).upper()
+    if authoritative_risk not in REVERSAL_RISK_ORDER:
+        return {}
+    changed = {}
+    for field in ("business_reversal_risk", "entry_reversal_risk"):
+        current = str(result.get(field) or authoritative_risk).upper()
+        if (
+                current in REVERSAL_RISK_ORDER
+                and REVERSAL_RISK_ORDER[current] > REVERSAL_RISK_ORDER[authoritative_risk]
+        ):
+            changed[field] = {"from": current, "to": authoritative_risk}
+            result[field] = authoritative_risk
+    return changed
+
+
 def downgrade_unproven_material_risk(result, symbol, reason):
     """Apply the prompt's LOW mapping when probability was not established."""
     prior_risk = str(result.get("reversal_risk", "")).upper()
+    prior_components = {
+        field: str(result.get(field) or prior_risk).upper()
+        for field in ("business_reversal_risk", "entry_reversal_risk")
+    }
     result["reversal_risk"] = "LOW"
+    component_changes = align_component_risks_to_authoritative(result, "LOW")
     result["mechanism_status"] = "HYPOTHETICAL"
     result["normalization_probability"] = (
         "NOT_ESTABLISHED"
@@ -1825,6 +1944,8 @@ def downgrade_unproven_material_risk(result, symbol, reason):
         "type": "risk_downgrade",
         "from": prior_risk,
         "to": "LOW",
+        "component_risks_before": prior_components,
+        "component_risk_changes": component_changes,
         "reason": reason,
     })
 
@@ -2449,6 +2570,17 @@ def validate_stock_batch(
                 )
         ):
             result["reversal_risk"] = "MODERATE"
+            component_changes = align_component_risks_to_authoritative(
+                result, "MODERATE"
+            )
+            if component_changes:
+                runtime_reconciliation_diagnostics.append({
+                    "symbol": symbol,
+                    "type": "component_risk_alignment",
+                    "to": "MODERATE",
+                    "component_risk_changes": component_changes,
+                    "reason": "overall ELEVATED risk was reconciled to MODERATE",
+                })
             result["continuation_outlook"] = "CONTINUATION_MORE_LIKELY"
             if risk_basis == "TEMPORARY_DRIVER_NORMALIZATION":
                 result["normalization_probability"] = "REASONABLY_PROBABLE"
@@ -3321,59 +3453,92 @@ def append_qvm_data_yfinance(
         sorted_symbols if max_info_calls is None else sorted_symbols[:max_info_calls]
     )
 
+    required_cached_fields = {
+        "operatingMargins", "revenueGrowth", "earningsGrowth",
+        "freeCashflow", "operatingCashflow", "totalDebt",
+        "totalCash", "sharesOutstanding",
+    }
+    cache_hit_symbols = []
+    live_fetch_symbols = []
+    for symbol in selected_for_info:
+        cached_info = (
+            cache.get(symbol, {}).get("info", {})
+            if isinstance(cache.get(symbol), dict) else {}
+        )
+        if cached_info and required_cached_fields.issubset(cached_info):
+            cache_hit_symbols.append(symbol)
+        else:
+            live_fetch_symbols.append(symbol)
+
     print(
-        f"Fetching fundamentals for {len(selected_for_info)} "
-        "3M-return-eligible tickers..."
+        "Fundamentals plan: "
+        f"eligible={len(selected_for_info)}, "
+        f"cache_hits={len(cache_hit_symbols)}, "
+        f"live_fetches={len(live_fetch_symbols)}."
     )
 
-    # ---- STEP 4: Fetch info ----
-    for symbol in tqdm(selected_for_info):
+    fundamentals_fetch_failures = []
+    fundamentals_apply_failures = []
+    fetched_info_by_symbol = {}
+    for symbol in cache_hit_symbols:
+        fetched_info_by_symbol[symbol] = cache[symbol]["info"]
+
+    if live_fetch_symbols:
+        print(
+            f"Fetching Yahoo fundamentals for {len(live_fetch_symbols)} "
+            "uncached tickers..."
+        )
+    for symbol in tqdm(
+            live_fetch_symbols,
+            desc="Yahoo fundamentals",
+            disable=not live_fetch_symbols,
+    ):
         try:
-            required_cached_fields = {
-                "operatingMargins", "revenueGrowth", "earningsGrowth",
-                "freeCashflow", "operatingCashflow", "totalDebt",
-                "totalCash", "sharesOutstanding",
+            ticker_obj = yf.Ticker(symbol)
+            raw_info = ticker_obj.info or {}
+            info = {
+                "sector": raw_info.get("sector"),
+                "returnOnEquity": raw_info.get("returnOnEquity"),
+                "returnOnAssets": raw_info.get("returnOnAssets"),
+                "profitMargins": raw_info.get("profitMargins"),
+                "grossMargins": raw_info.get("grossMargins"),
+                "operatingMargins": raw_info.get("operatingMargins"),
+                "revenueGrowth": raw_info.get("revenueGrowth"),
+                "earningsGrowth": raw_info.get("earningsGrowth"),
+                "debtToEquity": raw_info.get("debtToEquity"),
+                "currentRatio": raw_info.get("currentRatio"),
+                "interestCoverage": raw_info.get("interestCoverage"),
+                "trailingPE": raw_info.get("trailingPE"),
+                "priceToBook": raw_info.get("priceToBook"),
+                "pegRatio": raw_info.get("pegRatio"),
+                "enterpriseValue": raw_info.get("enterpriseValue"),
+                "ebitda": raw_info.get("ebitda"),
+                "totalRevenue": raw_info.get("totalRevenue"),
+                "freeCashflow": raw_info.get("freeCashflow"),
+                "operatingCashflow": raw_info.get("operatingCashflow"),
+                "totalDebt": raw_info.get("totalDebt"),
+                "totalCash": raw_info.get("totalCash"),
+                "sharesOutstanding": raw_info.get("sharesOutstanding"),
             }
-            cached_info = (
-                cache.get(symbol, {}).get("info", {})
-                if isinstance(cache.get(symbol), dict) else {}
-            )
-            if cached_info and required_cached_fields.issubset(cached_info):
-                info = cache[symbol]["info"]
-            else:
-                ticker_obj = yf.Ticker(symbol)
-                info = ticker_obj.info
+            fetched_info_by_symbol[symbol] = info
+            cache[symbol] = {
+                "info": info,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+            time.sleep(delay + random.uniform(0, 0.3))
+        except Exception as exc:
+            fundamentals_fetch_failures.append({
+                "symbol": symbol,
+                "error": str(exc),
+            })
+            print(f"Error retrieving fundamentals for {symbol}: {exc}")
 
-                cache[symbol] = {
-                    "info": {
-                        "sector": info.get("sector"),
-                        "returnOnEquity": info.get("returnOnEquity"),
-                        "returnOnAssets": info.get("returnOnAssets"),
-                        "profitMargins": info.get("profitMargins"),
-                        "grossMargins": info.get("grossMargins"),
-                        "operatingMargins": info.get("operatingMargins"),
-                        "revenueGrowth": info.get("revenueGrowth"),
-                        "earningsGrowth": info.get("earningsGrowth"),
-                        "debtToEquity": info.get("debtToEquity"),
-                        "currentRatio": info.get("currentRatio"),
-                        "interestCoverage": info.get("interestCoverage"),
-                        "trailingPE": info.get("trailingPE"),
-                        "priceToBook": info.get("priceToBook"),
-                        "pegRatio": info.get("pegRatio"),
-                        "enterpriseValue": info.get("enterpriseValue"),
-                        "ebitda": info.get("ebitda"),
-                        "totalRevenue": info.get("totalRevenue"),
-                        "freeCashflow": info.get("freeCashflow"),
-                        "operatingCashflow": info.get("operatingCashflow"),
-                        "totalDebt": info.get("totalDebt"),
-                        "totalCash": info.get("totalCash"),
-                        "sharesOutstanding": info.get("sharesOutstanding"),
-                    },
-                    "timestamp": datetime.now(UTC).isoformat()
-                }
-                time.sleep(delay + random.uniform(0, 0.3))
-
-            # compute derived metrics
+    # ---- STEP 4: Apply cached/fetched info ----
+    for symbol in selected_for_info:
+        info = fetched_info_by_symbol.get(symbol)
+        if not isinstance(info, dict):
+            continue
+        try:
             ev = info.get("enterpriseValue")
             ebitda = info.get("ebitda")
             revenue = info.get("totalRevenue")
@@ -3413,9 +3578,34 @@ def append_qvm_data_yfinance(
                 ),
                 "SharesOutstanding": info.get("sharesOutstanding"),
             })
+        except Exception as exc:
+            fundamentals_apply_failures.append({
+                "symbol": symbol,
+                "error": str(exc),
+            })
+            print(f"Error applying fundamentals for {symbol}: {exc}")
 
-        except Exception as e:
-            print(f"Error on {symbol}: {e}")
+    global yfinance_fundamentals_diagnostics
+    yfinance_fundamentals_diagnostics = {
+        "eligible_symbols": len(selected_for_info),
+        "cache_hits": len(cache_hit_symbols),
+        "live_fetches": len(live_fetch_symbols),
+        "fetch_successes": len(live_fetch_symbols) - len({
+            item["symbol"] for item in fundamentals_fetch_failures
+        }),
+        "fetch_failures": fundamentals_fetch_failures,
+        "apply_failures": fundamentals_apply_failures,
+        "pipeline_used": True,
+    }
+    print(
+        "Fundamentals summary: "
+        f"eligible={yfinance_fundamentals_diagnostics['eligible_symbols']}, "
+        f"cache_hits={yfinance_fundamentals_diagnostics['cache_hits']}, "
+        f"yahoo_fetches={yfinance_fundamentals_diagnostics['live_fetches']}, "
+        f"fetch_successes={yfinance_fundamentals_diagnostics['fetch_successes']}, "
+        f"fetch_failures={len(yfinance_fundamentals_diagnostics['fetch_failures'])}, "
+        f"apply_failures={len(yfinance_fundamentals_diagnostics['apply_failures'])}."
+    )
 
     # ---- Save cache ----
     save_cache(cache)
@@ -5126,6 +5316,31 @@ for symbol, cached_result in list(validated_cached_research.items()):
         cache_consistency_changed = True
         print(f"Deferred inconsistent cached research for {symbol}: {exc}")
 
+# Cross-check individually valid cached records against one another so stale
+# issuer-fact contamination cannot survive simply because each object validates
+# in isolation. Flagged entries are deferred for one fresh issuer-specific retry.
+cached_contamination = detect_cross_company_evidence_contamination(
+    list(validated_cached_research.values())
+)
+if cached_contamination:
+    for symbol, reason in cached_contamination.items():
+        cached_result = validated_cached_research.pop(symbol, None)
+        if cached_result is None:
+            continue
+        cache_key = global_cache_keys_by_symbol[symbol]
+        prior_entry = stock_research_cache["entries"].pop(cache_key, {})
+        stock_research_cache["deferred_entries"][cache_key] = {
+            "created_at": datetime.now(UTC).isoformat(),
+            "model": prior_entry.get("model") or model_primary,
+            "research": cached_result,
+            "validation_error": reason,
+            "research_attempts": 0,
+            "repair_attempts": 0,
+            "research_metadata": prior_entry.get("research_metadata", {}),
+        }
+        cache_consistency_changed = True
+        print(f"Deferred contaminated cached research for {symbol}: {reason}")
+
 if cache_consistency_changed:
     save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
@@ -5547,6 +5762,15 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 f"{len(requested_research_symbols) - repeated_searches} first, "
                 f"{repeated_searches} repeated."
             )
+            contamination_conflicts = detect_cross_company_evidence_contamination(
+                batch_data["results"]
+            )
+            if contamination_conflicts:
+                print(
+                    "Cross-company evidence contamination check flagged: "
+                    + ", ".join(sorted(contamination_conflicts))
+                )
+
             next_pending = []
             next_errors = {}
             exhausted_errors = {}
@@ -5608,6 +5832,41 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     continue
 
                 raw_result = json.loads(json.dumps(result, default=str))
+                contamination_error = contamination_conflicts.get(symbol)
+                if contamination_error:
+                    prior_invalid_results_by_symbol[symbol] = result
+                    research_failures_by_symbol[symbol] = contamination_error
+                    batch_stats["incomplete"] += 1
+                    attempt_limit = per_run_attempt_limit(symbol, True)
+                    can_retry = (
+                        research_round < max_validation_rounds
+                        and research_attempts_by_symbol.get(symbol, 0) < attempt_limit
+                    )
+                    stock_research_cache["deferred_entries"][
+                        cache_keys_by_symbol[symbol]
+                    ] = {
+                        "created_at": datetime.now(UTC).isoformat(),
+                        "model": batch_model,
+                        "research": result,
+                        "validation_error": contamination_error,
+                        "research_attempts": research_attempts_by_symbol.get(symbol, 0),
+                        "repair_attempts": repair_attempts_by_symbol.get(symbol, 0),
+                        "research_metadata": {
+                            "search_queries": batch_metadata["search_queries"],
+                            "tool_tokens": batch_metadata["tool_tokens"],
+                        },
+                    }
+                    if can_retry:
+                        next_pending.append(candidate)
+                        next_errors[symbol] = contamination_error
+                    else:
+                        exhausted_errors[symbol] = contamination_error
+                    print(
+                        f"{symbol} requires fresh issuer-specific research: "
+                        f"{contamination_error}"
+                    )
+                    continue
+
                 minimum_sources = minimum_sources_for_candidate(
                     batch_metadata["search_queries"], candidate
                 )
@@ -6109,6 +6368,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             "explanation": explanation,
         })
 
+validate_final_research_state(validated_cached_research)
+
 print(
     f"Research efficiency: {len(researched_symbols_this_run)} unique stocks, "
     f"{stock_search_attempts_this_run} requested searches, "
@@ -6339,6 +6600,7 @@ run_report = {
     },
     "qvm_candidate_hash": stable_json_hash(candidate_records),
     "benchmark_context": benchmark_context,
+    "yfinance_fundamentals": yfinance_fundamentals_diagnostics,
     "request_budget": {
         "used": request_budget.used,
         "maximum": request_budget.maximum,

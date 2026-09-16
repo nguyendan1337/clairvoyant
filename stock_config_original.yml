@@ -1,40 +1,27 @@
 ---
 
-# Yahoo Finance discovery now uses yfinance EquityQuery instead of HTML pages.
+# Yahoo Finance discovery uses yfinance EquityQuery rather than HTML scraping.
 min_52_week_change: 25
 min_market_cap: 300000000
 min_price: 5.0
 min_average_volume: 100000
-# Applied from one bulk history download before per-ticker fundamentals calls.
 min_3_month_return: 0
 stock_screener_page_size: 250
-# null means every stock that survives the bulk-history filter receives
-# fundamentals. A numeric value can be restored later as an explicit cap.
 max_info_calls: null
+run_report_file: run_reports/stock_run_report.json
 max_retries: 2
-# Search-enabled evidence collection remains on Gemini 2.5.
+initial_delay: 10
 model_primary: gemini-2.5-flash
+# Search-enabled evidence collection stays on Gemini 2.5 Flash.
 model_fallback: gemini-2.5-flash-lite
-# Gemini 3.5 handles schema-enforced work after research without using Search.
-structure_model: gemini-3.5-flash
+# Gemini 3.5 Flash is the primary no-Search risk judge. If it is unavailable,
+# the same evidence packet is judged by 2.5 Flash without Search.
 classification_model: gemini-3.5-flash
-summary_model: gemini-3.5-flash
-# The previous 8,192-token market limit truncated both models. Keep thinking
-# compact and leave enough room for one complete, concise JSON response.
-market_context_max_output_tokens: 16384
-market_thinking_budget: 2048
-stock_research_max_output_tokens: 32768
-structure_max_output_tokens: 16384
-summary_max_output_tokens: 8192
-structure_thinking_budget: 8192
-format_repair_thinking_budget: 2048
-max_format_repairs_per_response: 1
-max_postprocess_calls_per_run: 8
-max_market_sources: 8
-max_active_risk_events: 4
-# If today's market response cannot be recovered, reuse a still-valid recent
-# context instead of spending another scarce Search call or aborting the run.
-market_context_fallback_hours: 24
+classification_fallback_model: gemini-2.5-flash
+classification_thinking_budget: 8192
+classification_max_output_tokens: 32768
+classification_attempts: 2
+max_classification_calls_per_run: 8
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
 # Evaluate the first 50 candidates normally, then backfill from ranks 51-75
@@ -51,18 +38,15 @@ excluded_crypto_dependence:
   - PRIMARY
 thinking_budget: 12288
 require_google_search: true
-# Normal unattended-run limits. These restore the pre-quota-test allowance for
-# one market call plus up to five stock-research calls, with one spare call.
 max_gemini_calls_per_run: 7
+# Search/research budget remains separate from no-Search 3.5 judgment calls.
 max_stock_research_calls_per_run: 5
-# Summary/classification/repair calls use max_postprocess_calls_per_run instead.
-reserved_summary_calls: 0
+reserved_summary_calls: 1
 max_validation_rounds: 4
 max_research_attempts_per_stock: 2
 # A deferred failure gets one fresh, batched chance in each later execution.
 max_deferred_research_attempts_per_run: 1
 max_structural_repairs_per_stock: 2
-# Normal unattended runs may retry temporary service/capacity failures.
 max_transient_api_attempts: 3
 initial_transient_backoff_seconds: 30
 max_transient_backoff_seconds: 120
@@ -74,17 +58,8 @@ gemini_research_cache_hours: 12
 # Stock prompt content is hashed separately, so prompt edits invalidate stock
 # research without unnecessarily invalidating a still-current market context.
 cache_version: 6
-# The report has a complete deterministic Python summary. Avoid spending a
-# separate model call on HTML-only rewriting; the Gemini path remains available
-# by setting this to true.
-final_summary_enabled: false
-summary_thinking_budget: 512
-
-# Prefer meaningfully lower reversal risk when QVM scores are close, while
-# preserving QVM as the dominant ranking signal.
-risk_adjusted_selection_enabled: true
-moderate_risk_qvm_penalty: 3.0
-repeated_risk_event_qvm_penalty: 4.0
+final_summary_enabled: true
+summary_thinking_budget: 4096
 
 prompt_market_context: |
   You are an expert U.S. stock-market analyst with real-time Google Search.
@@ -98,8 +73,6 @@ prompt_market_context: |
   only for continuing events that remain materially relevant.
 
   RESEARCH COVERAGE
-  Keep this to at most 12 combined searches. Reuse broad market and sector-
-  performance searches instead of running a separate query for every sector.
   Use multiple targeted searches to assess:
     1. S&P 500 direction, recent performance, breadth, and market health
     2. Investor mood and the largest current market drivers
@@ -128,8 +101,8 @@ prompt_market_context: |
   invent additional IDs.
 
   MARKET AND SECTOR WRITING QUALITY
-  - Use the supplied PYTHON_MARKET_METRICS as authoritative. market_intro must
-    reproduce its S&P 500 percentage and measurement period exactly.
+  - market_intro must include at least one explicit S&P 500 percentage and the
+    period measured.
   - Separate positive market supports from negative pressures. Never describe
     cautious or bearish sentiment as being caused by positive earnings or
     investment.
@@ -142,10 +115,6 @@ prompt_market_context: |
     sector remains relevant."
   - Cover every sector named in REQUIRED_SECTOR_GROUPS when that section is
     supplied by Python.
-  - Keep market_intro to 3 concise sentences, every sector_context value to one
-    sentence of at most 30 words, and every list to no more than 4 items.
-  - Return no more than 8 sources and 4 active risk events. Complete the JSON
-    object before adding optional detail.
 
   OUTPUT
   Return exactly one valid JSON object with no Markdown fences, citations outside
@@ -182,37 +151,81 @@ prompt_market_context: |
   }
 
   SOURCE RULES
-  Include no more than 8 credible current sources and no more than 4 active
-  risk events. Prefer official releases, government
+  Include several credible current sources. Prefer official releases, government
   data, company or exchange information, and credible financial reporting.
   Every URL must be a real source used in the research. Do not invent sources.
 
-prompt_json_repair: |
-  Convert the supplied researched response into exactly one JSON object matching
-  the provided response schema. Correct the EXACT_VALIDATION_OR_PARSE_ERROR.
-  This is a no-Search formatting and normalization task. Do not add or replace
-  researched facts. Preserve the researched meaning and every source URL already
-  present. You may reconstruct missing source objects only from
-  ALLOWED_GROUNDING_SOURCES, preserving those URLs exactly. Never introduce a
-  URL outside the original response or ALLOWED_GROUNDING_SOURCES. Return only
-  the schema-conforming JSON object. When the original response is malformed,
-  URL-like fragments inside its raw text are not authoritative sources; use
-  only ALLOWED_GROUNDING_SOURCES.
+prompt_stock_judgment: |
+  You are the authoritative no-Search reversal-risk judge for a U.S. momentum
+  stock recommender. Another model already completed current grounded research.
+  Use ONLY the supplied research, quantitative momentum inputs, market context,
+  peer classifications, and previous successful-run classification. Do not use
+  Google Search and do not invent current facts or URLs.
 
-prompt_stock_postprocess: |
-  You are the final no-Search stock classification and structuring stage.
-  Grounded research has already been completed by another model. Apply the
-  evidence and risk rules in STOCK_POLICY to each RESEARCH_DRAFT_RESULT using
-  only the supplied evidence. Ignore STOCK_POLICY's Search and output-transport
-  instructions; the supplied response schema owns the output format.
+  REVERSAL-RISK MEANING
+  Estimate the chance that a stock bought now experiences a meaningful
+  deterioration in its current positive momentum during the next 6-12 months,
+  including a material price decline, sustained benchmark/peer underperformance,
+  or a transition from positive to negative momentum. This is broader than
+  accounting deterioration alone. Judge the stock-price thesis from the supplied
+  evidence while distinguishing evidence from speculation.
 
-  Return only the compact classification patch requested by the schema. Do not
-  reproduce business descriptions, operating evidence, durable or temporary
-  drivers, source objects, or other research fields. Python will merge each
-  patch into the corresponding grounded research object and preserve that
-  evidence exactly. Re-evaluate derived risk labels for policy consistency, but
-  do not add current facts or conduct research. Return every supplied candidate
-  exactly once and preserve candidate order.
+  Evaluate six channels for every stock:
+  1. TEMPORARY_DRIVER_NORMALIZATION: unusually favorable freight, commodity,
+     pricing, spread, shortage, geopolitical, insurance, or other temporary
+     conditions normalize.
+  2. FUNDAMENTAL_DETERIORATION: recurring revenue, demand, margins, earnings,
+     cash flow, guidance, orders, utilization, production, or estimates weaken.
+  3. CATALYST_EXHAUSTION: a major catalyst is substantially reflected in the
+     price and incremental fundamental upside is fading.
+  4. VALUATION_RERATING: valuation/expectations have expanded enough that even
+     acceptable results leave a credible 6-12 month downside path. Valuation
+     alone is not MODERATE unless the supplied evidence shows material fragility.
+  5. BINARY_EVENT: clinical, regulatory, financing, litigation, customer,
+     contract, approval, dilution, or similarly discrete event risk can materially
+     impair the current momentum thesis.
+  6. MOMENTUM_FRAGILITY: recent price appreciation has materially outrun the
+     operating/fundamental improvement supporting it. Do not use RSI, MACD,
+     moving averages, chart patterns, or other short-term technical indicators
+     as the primary evidence.
+
+  CLASSIFICATION STANDARD
+  - MINIMAL: unusually strong evidence of durable continuation and no meaningful
+    supported 6-12 month reversal mechanism.
+  - LOW: continuation is more likely than meaningful reversal; supported risks
+    are ordinary, weak, or insufficiently material/probable.
+  - MODERATE: a concrete, stock-specific, material 6-12 month reversal path is
+    credibly plausible now, even if deterioration has not yet begun.
+  - ELEVATED: current evidence indicates the reversal mechanism is developing,
+    unusually probable, or the momentum thesis is materially fragile.
+  - SEVERE: current evidence strongly indicates the continuation thesis is
+    breaking or is overwhelmingly dependent on a reversing condition.
+
+  CONSISTENCY / HYSTERESIS
+  PREVIOUS_CLASSIFICATIONS are priors, not ground truth. Preserve a prior risk
+  level when current evidence is substantially unchanged. Change it only when
+  current evidence materially changes reversal probability. Every changed risk
+  level must include classification_change_reason and material_new_evidence.
+  If a prior concrete mechanism disappears, explicitly explain why it no longer
+  applies; wording differences are not evidence of a changed risk.
+
+  PEER CONSISTENCY
+  Compare candidates sharing the same economic driver/risk event. Similar
+  exposures should normally receive compatible atomic judgments. Preserve a
+  difference only when supplied company-specific evidence explains it.
+
+  REJECTIONS
+  Judge evidence, not portfolio policy. Python owns sector caps, crypto-policy
+  exclusions, risk-event caps, ranking, and final selection.
+
+  OUTPUT
+  Return exactly one JSON object with a results array in candidate order. Each
+  result must include: symbol, reversal_risk, primary_reversal_channel,
+  reversal_mechanism, continuation_outlook, mechanism_status,
+  normalization_probability, catalyst_dependence, probability_indicator_type,
+  probability_basis, risk_time_horizon, risk_materiality, primary_risk_event_id,
+  risk_exposure_group, classification_change_reason, material_new_evidence, and
+  explanation. Preserve source-backed research meaning. Do not return sources.
 
 prompt_stock_batch: |
   You are an expert U.S. stock analyst with real-time Google Search. Evaluate
@@ -293,10 +306,14 @@ prompt_stock_batch: |
   data, including possible spin-offs, relistings, and reorganizations.
 
   REVERSAL STANDARD
-  reversal_risk concerns normalized revenue, recurring demand, adjusted
-  earnings, operating margin, guidance, recurring cash flow, or the principal
-  operating growth driver materially weakening within 6-12 months. It does not
-  measure valuation, share-price correction, sentiment, or ordinary uncertainty.
+  Research should gather evidence relevant to whether the stock's current positive
+  momentum can materially deteriorate within 6-12 months. Include normalized
+  revenue, recurring demand, adjusted earnings, operating margin, guidance,
+  recurring cash flow and principal operating drivers, plus decision-relevant
+  valuation/expectation expansion, catalyst exhaustion, binary-event exposure and
+  whether recent price appreciation has outrun supplied fundamental improvement.
+  Do not use short-term technical indicators as primary reversal evidence. Gemini
+  3.5 Flash owns the final reversal-risk judgment.
 
   MARKET_CONTEXT supplies hypotheses and shared background only. It does not
   establish company-level reversal probability. Confirm a current probability
@@ -461,26 +478,15 @@ prompt_stock_batch: |
 
   Nonrecurring refunds, gains, settlements, credits, recoveries, or asset sales
   are comparison adjustments, never temporary operating drivers. Remove them
-  before evaluating recurring operations. Use NONRECURRING_COMPARISON_ONLY and
-  LOW when removing the item merely creates a difficult comparison and the
-  recurring business remains independently sound.
-
-  Use CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE when current reported
-  profitability or cash generation materially depends on collaboration,
-  licensing, milestone, asset-sale, or similar nonrecurring revenue and the
-  recurring operating business is not independently profitable or sufficient.
-  When catalyst_dependence is MODERATE or HIGH and the loss of that contribution
-  would materially weaken normalized earnings or cash flow within 0-12 months,
-  apply a cautious MODERATE floor even if no separate probability indicator is
-  available. This is an earnings-quality floor, not evidence that another
-  one-time payment is probable or improbable.
+  before evaluating recurring operations. Their disappearance cannot produce
+  MODERATE or higher unless a separately sourced normalized recurring metric is
+  already deteriorating; otherwise use NONRECURRING_COMPARISON_ONLY and LOW.
 
   risk_basis:
   - NONE
   - NORMALIZED_OPERATING_DETERIORATION
   - TEMPORARY_DRIVER_NORMALIZATION
   - NONRECURRING_COMPARISON_ONLY
-  - CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE
 
   COMPLETE FIELD CONSISTENCY
   For every COMPLETE result:
@@ -574,7 +580,7 @@ prompt_stock_batch: |
     "crypto_dependence": "NONE | INCIDENTAL | MATERIAL | PRIMARY",
     "current_operating_evidence": "Concrete current operating fact",
     "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE | null only when INCOMPLETE",
-    "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | CURRENT_EARNINGS_DEPENDENCE_ON_NONRECURRING_REVENUE | null only when INCOMPLETE",
+    "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | null only when INCOMPLETE",
     "catalyst_dependence": "LOW | MODERATE | HIGH | null only when INCOMPLETE",
     "mechanism_status": "NONE | HYPOTHETICAL | ACTIVE | UNUSUALLY_PROBABLE | null only when INCOMPLETE",
     "normalization_probability": "NOT_APPLICABLE | NOT_ESTABLISHED | REASONABLY_PROBABLE | AT_LEAST_AS_LIKELY | null only when INCOMPLETE",
@@ -616,8 +622,10 @@ prompt_html_summary: |
   add new facts, stocks, sectors, reversal-risk levels, or recommendations.
   Do not reclassify, replace, remove, reorder, or independently evaluate stocks.
 
-  Return exactly one response matching the supplied JSON schema, with no
-  Markdown fence or extra text.
+  Return exactly one valid JSON object with no Markdown fence or extra text:
+  {
+    "summary_html": "<div class=\"summary\">...</div>"
+  }
 
   SUMMARY HTML RULES
   Begin exactly with:

@@ -1,4 +1,18 @@
 import sys
+import re
+import numpy as np
+import pandas as pd
+import yfinance as yf
+from tqdm import tqdm
+from pathlib import Path
+from google import genai
+from bs4 import BeautifulSoup
+from google.genai import types
+from datetime import datetime, timedelta, UTC
+import time, random, json, yaml, os, hashlib
+import signal
+from html import escape
+from yfinance import EquityQuery
 
 
 class TeeStream:
@@ -22,24 +36,19 @@ class TeeStream:
 
 
 # Truncate the previous run before any imports or configuration can fail.
-_stock_run_log = open("stock_run.log", "w", encoding="utf-8", buffering=1)
+RUN_REPORTS_DIR = Path("run_reports")
+RUN_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+STOCK_RUN_LOG_FILE = RUN_REPORTS_DIR / "stock_run.log"
+
+_stock_run_log = open(
+    STOCK_RUN_LOG_FILE,
+    "w",
+    encoding="utf-8",
+    buffering=1,
+)
 sys.stdout = TeeStream(sys.stdout, _stock_run_log)
 sys.stderr = TeeStream(sys.stderr, _stock_run_log)
-
-import re
-import numpy as np
-import pandas as pd
-import yfinance as yf
-from tqdm import tqdm
-from google import genai
-from pathlib import Path
-from bs4 import BeautifulSoup
-from google.genai import types
-from datetime import datetime, timedelta, UTC
-import time, random, json, yaml, os, hashlib
-import signal
-from html import escape
-from yfinance import EquityQuery
 
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -4579,18 +4588,14 @@ signal.alarm(TOTAL_RUNTIME_TIMEOUT_SECONDS)
 
 with open("stock_config.yml") as f:
     config = yaml.safe_load(f)
-run_report_file = cache_file_path(config.get("run_report_file", "stock_run_report.json"))
+run_report_file = config.get(
+    "run_report_file",
+    "run_reports/stock_run_report.json",
+)
 previous_run_diagnostics = load_json_object(run_report_file)
-for legacy_run_artifact in (
-    CACHE_DIR / "stock_run_diagnostics.json",
-    CACHE_DIR / "stock_run.log",
-):
-    try:
-        legacy_run_artifact.unlink(missing_ok=True)
-    except Exception as exc:
-        print(f"Warning: could not remove legacy run artifact {legacy_run_artifact}: {exc}")
+
 print(f"Run report: {Path(run_report_file).resolve()}")
-print(f"Run log: {Path('stock_run.log').resolve()}")
+print(f"Run log: {STOCK_RUN_LOG_FILE.resolve()}")
 benchmark_symbols = [
     str(symbol).strip().upper()
     for symbol in config.get("benchmark_symbols", ["SPMO", "VGT"])

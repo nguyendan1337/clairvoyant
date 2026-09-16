@@ -8,7 +8,7 @@ min_average_volume: 100000
 min_3_month_return: 0
 stock_screener_page_size: 250
 max_info_calls: null
-run_report_file: stock_run_report.json
+run_report_file: run_reports/stock_run_report.json
 max_retries: 2
 initial_delay: 10
 model_primary: gemini-2.5-flash

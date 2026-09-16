@@ -103,7 +103,7 @@ jobs:
 
           # index.html is intentionally ignored for local development, so force
           # staging keeps the published page update working in Actions.
-          git add -f index.html stock_run.log
+          git add -f index.html run_reports/
 
           if ! git diff --cached --quiet; then
             git commit -m "Update stock recommendations"

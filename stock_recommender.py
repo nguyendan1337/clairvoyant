@@ -93,6 +93,7 @@ DECISION_DIAGNOSTIC_FIELDS = (
     "business_concentration",
     "binary_event_risk",
     "benchmark_outperformance_outlook",
+    "continuation_strength",
     "risk_basis",
     "catalyst_dependence",
     "mechanism_status",
@@ -1280,7 +1281,7 @@ def judge_stock_research_batch(
                     "business_reversal_risk", "entry_reversal_risk",
                     "reversal_risk", "risk_basis", "catalyst_dependence",
                     "business_concentration", "binary_event_risk",
-                    "benchmark_outperformance_outlook",
+                    "benchmark_outperformance_outlook", "continuation_strength",
                     "mechanism_status", "normalization_probability",
                     "continuation_outlook", "probability_indicator_type",
                     "probability_basis", "risk_time_horizon",
@@ -1517,21 +1518,31 @@ def normalized_evidence_text(value):
 
 
 def detect_cross_company_evidence_contamination(results):
-    """Flag unusually specific issuer evidence duplicated across different stocks.
+    """Flag likely issuer-fact contamination without rejecting shared reasoning.
 
-    Shared sector context is normal. This check focuses on issuer-specific operating
-    text and repeated concrete financial figures that are unlikely to belong to two
-    unrelated companies by coincidence.
+    Generic mechanism/effect wording is common among peers and is only a weak
+    signal. Fresh research is required only when duplicated issuer-specific
+    evidence or multiple matching specific financial figures creates a strong
+    contamination signal.
     """
     items = [item for item in results if isinstance(item, dict)]
     conflicts = {}
-    exact_fields = (
+    high_specificity_fields = (
         "current_operating_evidence",
         "current_fact",
         "probability_evidence",
-        "material_effect",
     )
-    figure_fields = exact_fields + ("explanation",)
+    medium_specificity_fields = ("business_description",)
+    low_specificity_fields = (
+        "material_effect",
+        "reversal_mechanism",
+        "explanation",
+    )
+    figure_fields = (
+        *high_specificity_fields,
+        *medium_specificity_fields,
+        *low_specificity_fields,
+    )
     money_pattern = re.compile(
         r"\$\s*\d+(?:\.\d+)?\s*(?:million|billion|m|b)\b",
         flags=re.IGNORECASE,
@@ -1546,40 +1557,65 @@ def detect_cross_company_evidence_contamination(results):
             if not right_symbol or right_symbol == left_symbol:
                 continue
 
-            identical_fields = []
-            for field in exact_fields:
+            identical_high = []
+            identical_medium = []
+            identical_low = []
+            for field, bucket in (
+                *((field, identical_high) for field in high_specificity_fields),
+                *((field, identical_medium) for field in medium_specificity_fields),
+                *((field, identical_low) for field in low_specificity_fields),
+            ):
                 left_text = normalized_evidence_text(left.get(field))
                 right_text = normalized_evidence_text(right.get(field))
                 if len(left_text) >= 35 and left_text == right_text:
-                    identical_fields.append(field)
+                    bucket.append(field)
 
             left_figures = set()
             right_figures = set()
             for field in figure_fields:
-                left_figures.update(m.group(0).lower() for m in money_pattern.finditer(
-                    str(left.get(field) or "")
-                ))
-                right_figures.update(m.group(0).lower() for m in money_pattern.finditer(
-                    str(right.get(field) or "")
-                ))
+                left_figures.update(
+                    match.group(0).lower()
+                    for match in money_pattern.finditer(str(left.get(field) or ""))
+                )
+                right_figures.update(
+                    match.group(0).lower()
+                    for match in money_pattern.finditer(str(right.get(field) or ""))
+                )
             shared_figures = sorted(left_figures.intersection(right_figures))
 
-            # Require either duplicated issuer-specific prose or at least two
-            # matching monetary figures. One shared figure alone can be coincidental.
-            if not identical_fields and len(shared_figures) < 2:
+            suspicion_score = 0.0
+            suspicion_score += 3.0 * len(identical_high)
+            suspicion_score += 2.0 * len(identical_medium)
+            suspicion_score += 0.5 * len(identical_low)
+            suspicion_score += min(4.0, 2.0 * len(shared_figures))
+
+            # A generic shared material effect or reversal mechanism is normal
+            # for peers. Require a strong issuer-specific signal before forcing
+            # another company search.
+            if suspicion_score < 3.0:
+                if identical_low or shared_figures:
+                    print(
+                        f"Cross-company similarity noted for {left_symbol}/"
+                        f"{right_symbol} but below retry threshold: "
+                        f"score={suspicion_score:.1f}, "
+                        f"low_specificity_fields={identical_low or 'none'}, "
+                        f"shared_specific_financial_figures="
+                        f"{shared_figures or 'none'}."
+                    )
                 continue
 
             detail = (
                 f"possible cross-company evidence contamination between "
-                f"{left_symbol} and {right_symbol}: "
-                f"identical_fields={identical_fields or 'none'}, "
+                f"{left_symbol} and {right_symbol}: score={suspicion_score:.1f}, "
+                f"high_specificity_fields={identical_high or 'none'}, "
+                f"medium_specificity_fields={identical_medium or 'none'}, "
+                f"low_specificity_fields={identical_low or 'none'}, "
                 f"shared_specific_financial_figures={shared_figures or 'none'}"
             )
             conflicts[left_symbol] = detail
             conflicts[right_symbol] = detail
 
     return conflicts
-
 
 def validate_final_research_state(research_by_symbol):
     """Fail closed if deterministic reconciliation leaves contradictory risk state."""
@@ -2030,6 +2066,16 @@ def validate_stock_batch(
                 f"{benchmark_outlook!r}."
             )
         result["benchmark_outperformance_outlook"] = benchmark_outlook
+
+        continuation_strength = str(
+            result.get("continuation_strength") or ""
+        ).strip().upper()
+        if continuation_strength not in {"STRONG", "ADEQUATE", "WEAK"}:
+            raise ValueError(
+                f"{symbol} has invalid continuation_strength "
+                f"{continuation_strength!r}."
+            )
+        result["continuation_strength"] = continuation_strength
 
         # The combined selection label is conservatively floored by both
         # component judgments, preventing a low overall label from hiding a
@@ -4162,40 +4208,49 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         else:
             recent_rank = raw_momentum
 
-        benchmark_excess_columns = [
-            column for column in (
-                'BenchmarkExcess1M', 'BenchmarkExcess3M',
-                'BenchmarkExcess6M', 'BenchmarkExcess9M', 'BenchmarkExcess1Y'
-            ) if column in df.columns
-        ]
-        if benchmark_excess_columns:
-            relative_mean = df[benchmark_excess_columns].mean(
-                axis=1, skipna=True
+        benchmark_relative_components = {
+            'BenchmarkExcess1M': 0.05,
+            'BenchmarkExcess3M': 0.15,
+            'BenchmarkExcess6M': 0.25,
+            'BenchmarkExcess9M': 0.25,
+            'BenchmarkExcess1Y': 0.30,
+        }
+        weighted_excess = pd.Series(0.0, index=df.index)
+        available_weight = pd.Series(0.0, index=df.index)
+        for column, weight in benchmark_relative_components.items():
+            if column not in df.columns:
+                continue
+            values = pd.to_numeric(df[column], errors='coerce')
+            valid = values.notna()
+            weighted_excess = weighted_excess.add(
+                values.fillna(0) * weight, fill_value=0
             )
-            benchmark_relative_score = (
-                relative_mean.rank(pct=True) * 100
-            ).fillna(50)
-        else:
-            benchmark_relative_score = pd.Series(50.0, index=df.index)
+            available_weight = available_weight.add(
+                valid.astype(float) * weight, fill_value=0
+            )
+        weighted_excess = weighted_excess / available_weight.replace(0, np.nan)
+        benchmark_relative_score = (
+            weighted_excess.rank(pct=True) * 100
+        ).fillna(50)
 
         # -----------------------------------------------------
         # F. Final momentum blend
         #
-        # 25% overall return
+        # 20% overall return
         # 15% persistence
         # 15% multi-period consistency
         # 25% daily price-path quality
-        # 10% recent confirmation
-        # 10% performance relative to the configured benchmarks
+        #  5% recent confirmation
+        # 20% performance relative to the configured benchmarks
         # -----------------------------------------------------
 
         momentum = (
-                0.25 * raw_momentum +
+                0.20 * raw_momentum +
                 0.15 * trend_alignment +
                 0.15 * consistency_score +
                 0.25 * price_path_quality +
-                0.10 * recent_rank +
-                0.10 * benchmark_relative_score
+                0.05 * recent_rank +
+                0.20 * benchmark_relative_score
         )
 
         # Established listings normally provide all five windows. Pull sparse
@@ -4376,6 +4431,7 @@ def dataframe_records(df):
 def build_context_review(decision_ledger):
     headers = [
         "QVM Rank", "Symbol", "Sector Group", "Reversal Risk / Status",
+        "Final Score", "Continuation", "Benchmark Outlook",
         "Sector Selected After", "Total Selected After", "Explanation"
     ]
     rows = []
@@ -4385,6 +4441,9 @@ def build_context_review(decision_ledger):
             decision["symbol"],
             decision["sector_group"],
             decision["status"],
+            decision.get("final_selection_score"),
+            decision.get("continuation_strength"),
+            decision.get("benchmark_outperformance_outlook"),
             decision["sector_selected_after"],
             decision["total_selected_after"],
             decision["explanation"],
@@ -4514,6 +4573,11 @@ def build_decision_snapshots(decision_ledger):
             "qvm_rank": decision["qvm_rank"],
             "sector_group": decision["sector_group"],
             "status": decision["status"],
+            "final_selection_score": decision.get("final_selection_score"),
+            "continuation_strength": decision.get("continuation_strength"),
+            "benchmark_outperformance_outlook": decision.get(
+                "benchmark_outperformance_outlook"
+            ),
         }
         for decision in decision_ledger
     }
@@ -4770,6 +4834,55 @@ def validate_summary_response(data, selected):
 
 
 
+def final_candidate_adjustment(research):
+    """Small deterministic post-research adjustment; QVM remains dominant."""
+    risk = combined_reversal_risk(research)
+    adjustment = {
+        "MINIMAL": 5.0,
+        "LOW": 3.0,
+        "MODERATE": -3.0,
+        "ELEVATED": -1000.0,
+        "SEVERE": -1000.0,
+    }.get(risk, -1000.0)
+
+    benchmark_outlook = str(
+        research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+    ).upper()
+    adjustment += {
+        "LIKELY": 3.0,
+        "UNCERTAIN": -2.0,
+        "UNLIKELY": -1000.0,
+    }.get(benchmark_outlook, -2.0)
+
+    continuation_strength = str(
+        research.get("continuation_strength") or "WEAK"
+    ).upper()
+    adjustment += continuation_strength_adjustments.get(
+        continuation_strength, continuation_strength_adjustments["WEAK"]
+    )
+
+    catalyst_dependence = str(
+        research.get("catalyst_dependence") or "LOW"
+    ).upper()
+    adjustment += {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
+        catalyst_dependence, -1.0
+    )
+
+    for field in ("business_concentration", "binary_event_risk"):
+        level = str(research.get(field) or "LOW").upper()
+        adjustment += {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
+            level, -1.0
+        )
+
+    if str(research.get("mechanism_status") or "").upper() == "NONE":
+        adjustment += 1.0
+    return adjustment
+
+
+def final_candidate_score(candidate, research):
+    return float(candidate.get("QVMScore") or 0.0) + final_candidate_adjustment(research)
+
+
 # Main execution
 # Record the start time
 start_time = time.perf_counter()
@@ -4883,12 +4996,28 @@ exclude_unlikely_benchmark_outperformance = bool(
     config.get("exclude_unlikely_benchmark_outperformance", True)
 )
 qvm_weights = {
-    "Quality": float(config.get("qvm_quality_weight", 0.50)),
-    "Value": float(config.get("qvm_value_weight", 0.15)),
-    "Momentum": float(config.get("qvm_momentum_weight", 0.35)),
+    "Quality": float(config.get("qvm_quality_weight", 0.45)),
+    "Value": float(config.get("qvm_value_weight", 0.10)),
+    "Momentum": float(config.get("qvm_momentum_weight", 0.45)),
 }
 if not np.isclose(sum(qvm_weights.values()), 1.0):
     raise ValueError("Configured QVM weights must sum to 1.0.")
+minimum_validated_candidates_for_final_selection = max(
+    target_selected_stocks,
+    int(config.get("minimum_validated_candidates_for_final_selection", 20)),
+)
+minimum_distinct_sectors_for_final_selection = max(
+    1,
+    int(config.get(
+        "minimum_distinct_sectors_for_final_selection",
+        int(np.ceil(target_selected_stocks / max_stocks_per_sector)),
+    )),
+)
+continuation_strength_adjustments = {
+    "STRONG": float(config.get("continuation_strong_bonus", 3.0)),
+    "ADEQUATE": float(config.get("continuation_adequate_bonus", 0.0)),
+    "WEAK": float(config.get("continuation_weak_penalty", -4.0)),
+}
 cautious_exposure_floor_enabled = bool(
     config.get("cautious_exposure_floor_enabled", True)
 )
@@ -5231,6 +5360,10 @@ stock_prompt_hash = stable_json_hash({
     "cache_version": cache_version,
     "model": model_primary,
     "prompt": stock_prompt_cache_text,
+    # The cache stores the post-judgment merged result, so a judgment-schema
+    # change must invalidate stock research even when grounded research text is unchanged.
+    "judgment_prompt": config["prompt_stock_judgment"],
+    "classification_model": classification_model,
 })
 stock_research_cache = load_json_object(stock_research_cache_file)
 if stock_research_cache.get("version") != cache_version:
@@ -5349,6 +5482,9 @@ initial_validated_cache_symbols = set(validated_cached_research)
 selected = []
 decision_ledger = []
 sector_counts = {}
+# Research coverage is independent from provisional portfolio fills. Final
+# sector/risk caps are applied only after the validated pool is frozen.
+research_sector_counts = {}
 risk_event_counts = {}
 moderate_selected_count = 0
 prior_research_decisions = []
@@ -5380,12 +5516,51 @@ batch_start = 0
 carried_ranked_candidates = []
 backfill_announced = False
 while batch_start < len(candidate_records) or carried_ranked_candidates:
-    if len(selected) >= target_selected_stocks:
+    validated_for_pool = []
+    validated_pool_sectors = set()
+    for pool_candidate in candidate_records:
+        pool_symbol = str(pool_candidate["Symbol"]).upper()
+        pool_research = validated_cached_research.get(pool_symbol)
+        if not pool_research:
+            continue
+        pool_risk = combined_reversal_risk(pool_research)
+        pool_benchmark = str(
+            pool_research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+        ).upper()
+        if (
+            pool_risk in {"ELEVATED", "SEVERE"}
+            or excluded_by_crypto_policy(pool_research, excluded_crypto_dependence)
+            or (exclude_unlikely_benchmark_outperformance and pool_benchmark == "UNLIKELY")
+        ):
+            continue
+        validated_for_pool.append(pool_symbol)
+        validated_pool_sectors.add(str(pool_candidate["Sector"]))
+
+    if (
+        request_budget.stock_maximum is not None
+        and request_budget.stock_used >= request_budget.stock_maximum
+    ):
+        print(
+            "Stock research-call budget exhausted; freezing the validated "
+            f"comparison pool at {len(validated_for_pool)} eligible candidates."
+        )
+        break
+
+    if (
+        batch_start > 0
+        and len(validated_for_pool) >= minimum_validated_candidates_for_final_selection
+        and len(validated_pool_sectors) >= minimum_distinct_sectors_for_final_selection
+    ):
+        print(
+            "Validated final-selection pool is deep enough: "
+            f"{len(validated_for_pool)} eligible candidates across "
+            f"{len(validated_pool_sectors)} sectors. Freezing research pool."
+        )
         break
 
     if batch_start >= normal_candidate_limit and not backfill_announced:
         print(
-            f"Portfolio has {len(selected)}/{target_selected_stocks} stocks "
+            f"Validated pool has {len(validated_for_pool)} eligible stocks "
             f"after the normal top-{normal_candidate_limit} search depth; "
             f"backfilling from QVM ranks {normal_candidate_limit + 1}-"
             f"{max_candidates}."
@@ -5415,7 +5590,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         queued_by_sector,
     ) = partition_ranked_research_candidates(
         ranked_pool,
-        sector_counts,
+        research_sector_counts,
         max_stocks_per_sector,
         gemini_batch_size,
         max_research_candidates_per_open_sector_slot,
@@ -5449,19 +5624,21 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             continue
         uncached_candidates.append(candidate)
 
-    # Keep the first ordinary stock call full even when some higher-ranked
-    # candidates came from cache. Later calls use three alternatives per
-    # remaining slot, with a floor of five, to balance exclusions against cost.
+    # Keep the first ordinary stock call full. Later calls are sized to fill
+    # the broader validated comparison pool rather than merely the first ten
+    # provisional selections.
     ordinary_uncached_count = len(uncached_candidates)
-    remaining_selection_slots = max(
-        1, target_selected_stocks - len(selected)
+    remaining_pool_slots = max(
+        1,
+        minimum_validated_candidates_for_final_selection
+        - len(validated_for_pool),
     )
     desired_research_count = (
         gemini_batch_size
         if request_budget.stock_used == 0
         else min(
             gemini_batch_size,
-            max(5, remaining_selection_slots * 3),
+            max(5, remaining_pool_slots),
         )
     )
     if (
@@ -5487,13 +5664,13 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
                     or future_symbol in research_failures_by_symbol
             ):
                 continue
-            if sector_counts.get(future_candidate["Sector"], 0) >= (
+            if research_sector_counts.get(future_candidate["Sector"], 0) >= (
                 max_stocks_per_sector
             ):
                 continue
             future_sector = future_candidate["Sector"]
             future_open_slots = (
-                max_stocks_per_sector - sector_counts.get(future_sector, 0)
+                max_stocks_per_sector - research_sector_counts.get(future_sector, 0)
             )
             future_sector_limit = (
                 future_open_slots
@@ -6058,14 +6235,14 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         or future_symbol in research_failures_by_symbol
                 ):
                     continue
-                if sector_counts.get(future_candidate["Sector"], 0) >= (
+                if research_sector_counts.get(future_candidate["Sector"], 0) >= (
                         max_stocks_per_sector
                 ):
                     continue
                 future_sector = future_candidate["Sector"]
                 future_open_slots = (
                     max_stocks_per_sector
-                    - sector_counts.get(future_sector, 0)
+                    - research_sector_counts.get(future_sector, 0)
                 )
                 future_sector_limit = (
                     future_open_slots
@@ -6138,89 +6315,30 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             pending_candidates = next_pending
             validation_errors = next_errors
 
-    # Python alone owns portfolio selection and the authoritative ledger.
-    # Apply modest risk penalties only after grounded research so QVM remains
-    # the dominant signal while safer entries win close comparisons.
-    selection_batch = ranked_batch
-    if risk_adjusted_selection_enabled:
-        selection_batch = risk_adjusted_candidate_order(
-            ranked_batch=ranked_batch,
-            research_by_symbol=research_by_symbol,
-            initial_sector_counts=sector_counts,
-            initial_event_counts=risk_event_counts,
-            initial_moderate_count=moderate_selected_count,
-        )
-        print(
-            "Risk-adjusted selection order: "
-            + ", ".join(str(item["Symbol"]) for item in selection_batch)
-        )
-
-    for candidate in selection_batch:
-        if len(selected) >= target_selected_stocks:
-            break
-
+    # Preserve validated prior-batch judgments as peer context for later Gemini
+    # calls, but do not make portfolio selections yet. Final selection happens
+    # only after the validated research pool is frozen.
+    known_peer_symbols = {
+        str(item.get("symbol") or "").upper()
+        for item in prior_research_decisions
+    }
+    for candidate in ranked_batch:
         symbol = str(candidate["Symbol"]).upper()
-        sector = candidate["Sector"]
-        sector_count = sector_counts.get(sector, 0)
-
-        if sector_count >= max_stocks_per_sector:
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "SKIPPED — SECTOR CAPACITY",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": (
-                    f"{max_stocks_per_sector} stocks from {sector} were already "
-                    "selected."
-                ),
-            })
-            continue
-
         research = research_by_symbol.get(symbol)
-        if research is None:
-            failure_reason = research_failures_by_symbol.get(symbol)
-            status = (
-                "SKIPPED — RESEARCH INVALID"
-                if failure_reason
-                else "SKIPPED — NOT RESEARCHED"
-            )
-            explanation = (
-                "Research did not pass validation: " + failure_reason
-                if failure_reason
-                else "No research call or matching validated cache entry was "
-                     "available before selection ended."
-            )
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": status,
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": explanation,
-            })
+        if research is None or symbol in known_peer_symbols:
             continue
-
-        reversal_risk = combined_reversal_risk(research)
-        entry_reversal_risk = str(
-            research.get("entry_reversal_risk") or reversal_risk
-        ).upper()
-        benchmark_outlook = str(
-            research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
-        ).upper()
-        explanation = str(research["explanation"]).strip()
-
         prior_research_decisions.append({
             "symbol": symbol,
             "industry_group": research.get("industry_group"),
-            "reversal_risk": reversal_risk,
+            "reversal_risk": combined_reversal_risk(research),
             "business_reversal_risk": research.get("business_reversal_risk"),
-            "entry_reversal_risk": entry_reversal_risk,
+            "entry_reversal_risk": research.get("entry_reversal_risk"),
             "business_concentration": research.get("business_concentration"),
             "binary_event_risk": research.get("binary_event_risk"),
-            "benchmark_outperformance_outlook": benchmark_outlook,
+            "benchmark_outperformance_outlook": research.get(
+                "benchmark_outperformance_outlook"
+            ),
+            "continuation_strength": research.get("continuation_strength"),
             "risk_basis": research.get("risk_basis"),
             "catalyst_dependence": research.get("catalyst_dependence"),
             "crypto_dependence": research.get("crypto_dependence"),
@@ -6236,136 +6354,131 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             "risk_exposure_group": research.get("risk_exposure_group"),
             "company_difference": research.get("company_difference"),
         })
+        known_peer_symbols.add(symbol)
 
-        if not bool(research.get("eligible", True)):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "EXCLUDED — ELIGIBILITY",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": str(
-                    research.get("eligibility_reason") or explanation
-                ),
-            })
-            continue
+# Rebuild the portfolio from the entire frozen validated pool. Earlier batch
+# selections were provisional only and must not prevent a later, stronger LOW/
+# MODERATE candidate from displacing them.
+selected = []
+decision_ledger = []
+sector_counts = {}
+risk_event_counts = {}
+moderate_selected_count = 0
 
-        if excluded_by_crypto_policy(research, excluded_crypto_dependence):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "EXCLUDED — CRYPTO DEPENDENCE",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": (
-                    f"{research.get('crypto_dependence')} crypto dependence is "
-                    "outside the configured portfolio policy. " + explanation
-                ),
-            })
-            continue
+scored_validated_candidates = []
+for candidate in candidate_records:
+    symbol = str(candidate["Symbol"]).upper()
+    research = validated_cached_research.get(symbol)
+    if research is None:
+        continue
+    scored_validated_candidates.append((
+        final_candidate_score(candidate, research),
+        -int(candidate["QVM Rank"]),
+        candidate,
+        research,
+    ))
+scored_validated_candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
 
-        if reversal_risk in {"ELEVATED", "SEVERE"}:
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": f"NOT SELECTED — {reversal_risk}",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": explanation,
-            })
-            continue
+print("FINAL VALIDATED CANDIDATE COMPARISON")
+for score, _, candidate, research in scored_validated_candidates:
+    print(
+        f"  {candidate['Symbol']}: final_score={score:.2f}, "
+        f"qvm={float(candidate.get('QVMScore') or 0):.2f}, "
+        f"risk={combined_reversal_risk(research)}, "
+        f"continuation={research.get('continuation_strength')}, "
+        f"benchmark={research.get('benchmark_outperformance_outlook')}"
+    )
 
-        if (
-                exclude_elevated_entry_risk
-                and entry_reversal_risk in {"ELEVATED", "SEVERE"}
-        ):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": f"NOT SELECTED — {entry_reversal_risk} ENTRY RISK",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": explanation,
-            })
-            continue
+for score, _, candidate, research in scored_validated_candidates:
+    symbol = str(candidate["Symbol"]).upper()
+    sector = candidate["Sector"]
+    sector_count = sector_counts.get(sector, 0)
+    reversal_risk = combined_reversal_risk(research)
+    entry_reversal_risk = str(
+        research.get("entry_reversal_risk") or reversal_risk
+    ).upper()
+    benchmark_outlook = str(
+        research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+    ).upper()
+    continuation_strength = str(
+        research.get("continuation_strength") or "WEAK"
+    ).upper()
+    explanation = str(research.get("explanation") or "").strip()
+    event_key = normalized_risk_event_key(research)
 
-        if (
-                exclude_unlikely_benchmark_outperformance
-                and benchmark_outlook == "UNLIKELY"
-        ):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": explanation,
-            })
-            continue
-
-        if (
-                reversal_risk == "MODERATE"
-                and moderate_selected_count >= max_moderate_risk_selections
-        ):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "NOT SELECTED — MODERATE-RISK CAPACITY",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": (
-                    f"The portfolio already contains "
-                    f"{max_moderate_risk_selections} MODERATE-risk selections. "
-                    + explanation
-                ),
-            })
-            continue
-
-        event_key = normalized_risk_event_key(research)
-
-        if (
-                event_key
-                and risk_event_counts.get(event_key, 0)
-                >= max_stocks_per_risk_event
-        ):
-            decision_ledger.append({
-                "qvm_rank": candidate["QVM Rank"],
-                "symbol": symbol,
-                "sector_group": sector,
-                "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-                "sector_selected_after": sector_count,
-                "total_selected_after": len(selected),
-                "explanation": (
-                    f"The {event_key} risk event already contained "
-                    f"{max_stocks_per_risk_event} selected stocks."
-                ),
-            })
-            continue
-
+    status = None
+    if not bool(research.get("eligible", True)):
+        status = "EXCLUDED — ELIGIBILITY"
+    elif excluded_by_crypto_policy(research, excluded_crypto_dependence):
+        status = "EXCLUDED — CRYPTO DEPENDENCE"
+    elif reversal_risk in {"ELEVATED", "SEVERE"}:
+        status = f"NOT SELECTED — {reversal_risk}"
+    elif (
+        exclude_elevated_entry_risk
+        and entry_reversal_risk in {"ELEVATED", "SEVERE"}
+    ):
+        status = f"NOT SELECTED — {entry_reversal_risk} ENTRY RISK"
+    elif (
+        exclude_unlikely_benchmark_outperformance
+        and benchmark_outlook == "UNLIKELY"
+    ):
+        status = "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY"
+    elif sector_count >= max_stocks_per_sector:
+        status = "SKIPPED — SECTOR CAPACITY"
+    elif (
+        reversal_risk == "MODERATE"
+        and moderate_selected_count >= max_moderate_risk_selections
+    ):
+        status = "NOT SELECTED — MODERATE-RISK CAPACITY"
+    elif (
+        event_key
+        and risk_event_counts.get(event_key, 0) >= max_stocks_per_risk_event
+    ):
+        status = "NOT SELECTED — RISK-EVENT CAPACITY"
+    elif len(selected) >= target_selected_stocks:
+        status = "NOT SELECTED — LOWER FINAL SCORE"
+    else:
         selected.append({"candidate": candidate, "research": research})
         sector_counts[sector] = sector_count + 1
         if reversal_risk == "MODERATE":
             moderate_selected_count += 1
-
         if event_key:
-            risk_event_counts[event_key] = (
-                    risk_event_counts.get(event_key, 0) + 1
-            )
+            risk_event_counts[event_key] = risk_event_counts.get(event_key, 0) + 1
+        status = f"SELECTED — {reversal_risk}"
 
+    decision_ledger.append({
+        "qvm_rank": candidate["QVM Rank"],
+        "symbol": symbol,
+        "sector_group": sector,
+        "status": status,
+        "sector_selected_after": sector_counts.get(sector, 0),
+        "total_selected_after": len(selected),
+        "final_selection_score": score,
+        "continuation_strength": continuation_strength,
+        "benchmark_outperformance_outlook": benchmark_outlook,
+        "explanation": explanation,
+    })
+
+# Keep failed research visible in diagnostics even though it cannot enter the
+# frozen comparison pool.
+scored_symbols = {str(item[2]["Symbol"]).upper() for item in scored_validated_candidates}
+for candidate in candidate_records:
+    symbol = str(candidate["Symbol"]).upper()
+    if symbol in scored_symbols:
+        continue
+    failure_reason = research_failures_by_symbol.get(symbol)
+    if failure_reason:
         decision_ledger.append({
             "qvm_rank": candidate["QVM Rank"],
             "symbol": symbol,
-            "sector_group": sector,
-            "status": f"SELECTED — {reversal_risk}",
-            "sector_selected_after": sector_counts[sector],
+            "sector_group": candidate["Sector"],
+            "status": "SKIPPED — RESEARCH INVALID",
+            "sector_selected_after": sector_counts.get(candidate["Sector"], 0),
             "total_selected_after": len(selected),
-            "explanation": explanation,
+            "final_selection_score": None,
+            "continuation_strength": None,
+            "benchmark_outperformance_outlook": None,
+            "explanation": "Research did not pass validation: " + failure_reason,
         })
 
 validate_final_research_state(validated_cached_research)

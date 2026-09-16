@@ -271,6 +271,17 @@ prompt_stock_batch: |
   page plus a credible forward-industry source when relevant. Never return more
   than 5 sources. Do not invent, duplicate, or include unused URLs.
 
+  CROSS-COMPANY EVIDENCE ISOLATION
+  Treat every candidate's issuer-specific evidence as isolated. Facts for one
+  candidate must never be copied, reused, or inferred for another candidate.
+  Similar companies may share industry context, but revenue, earnings, margins,
+  guidance, operating metrics, products, contracts, catalysts, and other issuer-
+  specific facts must be independently supported for that exact ticker. Before
+  closing each result block, verify that every company-specific financial figure
+  and operating statement belongs to that symbol and is supported by that
+  candidate's own returned sources. If identity or evidence cannot be verified,
+  return INCOMPLETE instead of borrowing facts from another candidate.
+
   COMPLETENESS
   COMPLETE requires:
   - one concrete recent current_operating_evidence fact from a current source
@@ -605,7 +616,9 @@ prompt_stock_batch: |
   }
 
   Before responding, confirm every candidate has one closed block, every COMPLETE
-  object obeys the cross-field rules, and no source list exceeds 5 entries.
+  object obeys the cross-field rules, and no source list exceeds 5 entries. Also
+  verify that no issuer-specific sentence or financial metric was copied from a
+  different candidate in the batch.
 
 
 prompt_html_summary: |

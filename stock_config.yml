@@ -25,12 +25,24 @@ max_classification_calls_per_run: 8
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
 # Evaluate the first 50 candidates normally, then backfill from ranks 51-75
-# only if the portfolio is still short.
+# only if the validated comparison pool is still too shallow or lacks enough
+# sector breadth for final portfolio construction.
 normal_candidate_limit: 50
 max_candidates: 75
 target_selected_stocks: 10
 max_stocks_per_sector: 2
 max_stocks_per_risk_event: 2
+# QVM emphasizes durable quality and benchmark-beating continuation equally.
+qvm_quality_weight: 0.45
+qvm_value_weight: 0.10
+qvm_momentum_weight: 0.45
+# Research a broader validated pool before final portfolio construction so
+# later LOW-risk candidates can displace weaker earlier candidates.
+minimum_validated_candidates_for_final_selection: 20
+minimum_distinct_sectors_for_final_selection: 5
+continuation_strong_bonus: 3.0
+continuation_adequate_bonus: 0.0
+continuation_weak_penalty: -4.0
 cautious_exposure_floor_enabled: true
 cautious_exposure_floor_min_dependence: MODERATE
 excluded_crypto_dependence:
@@ -201,6 +213,25 @@ prompt_stock_judgment: |
   - SEVERE: current evidence strongly indicates the continuation thesis is
     breaking or is overwhelmingly dependent on a reversing condition.
 
+  CONTINUATION STRENGTH
+  Judge the affirmative evidence that the stock can continue outperforming the
+  configured benchmarks over the next 6-12 months. This is separate from
+  reversal risk: absence of a current reversal mechanism does not by itself
+  establish an attractive continuation thesis.
+  - STRONG: current operating evidence, durable company-specific drivers, and
+    benchmark-relative momentum provide substantial evidence that above-benchmark
+    performance can continue.
+  - ADEQUATE: continuation remains more likely than reversal and at least one
+    current company-specific durable driver supports further progress, but the
+    evidence for continued benchmark outperformance is not unusually strong.
+  - WEAK: the stock may avoid a material reversal, but evidence that it can
+    continue outperforming the configured benchmarks is insufficient.
+
+  If current results are primarily attributable to a nonrecurring item and no
+  independent recurring driver supports continued benchmark outperformance,
+  continuation_strength must be WEAK. LOW reversal risk must never be used as a
+  substitute for affirmative continuation evidence.
+
   CONSISTENCY / HYSTERESIS
   PREVIOUS_CLASSIFICATIONS are priors, not ground truth. Preserve a prior risk
   level when current evidence is substantially unchanged. Change it only when
@@ -218,14 +249,26 @@ prompt_stock_judgment: |
   Judge evidence, not portfolio policy. Python owns sector caps, crypto-policy
   exclusions, risk-event caps, ranking, and final selection.
 
+  ATOMIC JUDGMENT FIELDS
+  Return business_reversal_risk and entry_reversal_risk separately, then derive
+  reversal_risk conservatively from them. Also return business_concentration and
+  binary_event_risk as LOW, MODERATE, or HIGH. Return
+  benchmark_outperformance_outlook as LIKELY, UNCERTAIN, or UNLIKELY based on
+  the supplied quantitative benchmark-excess data plus grounded continuation
+  evidence. Do not call benchmark outperformance LIKELY merely because reversal
+  risk is LOW.
+
   OUTPUT
   Return exactly one JSON object with a results array in candidate order. Each
-  result must include: symbol, reversal_risk, primary_reversal_channel,
-  reversal_mechanism, continuation_outlook, mechanism_status,
-  normalization_probability, catalyst_dependence, probability_indicator_type,
-  probability_basis, risk_time_horizon, risk_materiality, primary_risk_event_id,
-  risk_exposure_group, classification_change_reason, material_new_evidence, and
-  explanation. Preserve source-backed research meaning. Do not return sources.
+  result must include: symbol, business_reversal_risk, entry_reversal_risk,
+  reversal_risk, business_concentration, binary_event_risk,
+  benchmark_outperformance_outlook, continuation_strength,
+  primary_reversal_channel, reversal_mechanism, continuation_outlook,
+  mechanism_status, normalization_probability, catalyst_dependence,
+  probability_indicator_type, probability_basis, risk_time_horizon,
+  risk_materiality, primary_risk_event_id, risk_exposure_group,
+  classification_change_reason, material_new_evidence, and explanation.
+  Preserve source-backed research meaning. Do not return sources.
 
 prompt_stock_batch: |
   You are an expert U.S. stock analyst with real-time Google Search. Evaluate

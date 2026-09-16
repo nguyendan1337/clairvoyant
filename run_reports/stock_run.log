@@ -1,0 +1,439 @@
+Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run_report.json
+Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
+Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
+Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=7, max_stock_calls=5, research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cache_version=6, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.5, 'Value': 0.15, 'Momentum': 0.35}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
+Downloading benchmark price history: SPMO, VGT
+Effective 52-week stock hurdle: 32.30% from VGT.
+Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
+Top QVM cache exists.
+About to read top QVM pickle...
+Top QVM pickle loaded successfully.
+Top QVM benchmark hurdle changed. Rebuilding cache.
+Fetched 250 stock screener rows at offset 0.
+Fetched 250 stock screener rows at offset 250.
+Fetched 250 stock screener rows at offset 500.
+Fetched 226 stock screener rows at offset 750.
+
+Stocks passing screener-level filters:
+    Symbol                            Name  52 WkChange %
+0     SNDK             Sandisk Corporation    1529.131700
+1     AXTI                       AXT, Inc.    1364.467000
+2     NUAI  New Era Energy & Digital, Inc.    1110.643100
+3     ERAS                    Erasca, Inc.     873.053960
+4     DMRA       Damora Therapeutics, Inc.     768.421100
+..     ...                             ...            ...
+969   CIVB        Civista Bancshares, Inc.      32.515633
+970  RUSHA          Rush Enterprises, Inc.      32.493720
+971  ALPMY            Astellas Pharma Inc.      32.324135
+972     KO           The Coca-Cola Company      32.323982
+973   VCEL             Vericel Corporation      32.311800
+
+[974 rows x 3 columns]
+Downloading price data...
+Computing momentum and extracting latest price...
+Could not calculate price-history metrics for MANE: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for VOGX: unsupported operand type(s) for +: 'NoneType' and 'NoneType'
+Could not calculate price-history metrics for LIFE: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for ANDG: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for TRAX: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for SCTX: unsupported operand type(s) for +: 'NoneType' and 'NoneType'
+Could not calculate price-history metrics for PS: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for SHAZ: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for VGNT: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for BLSM: unsupported operand type(s) for +: 'NoneType' and 'NoneType'
+Could not calculate price-history metrics for HQ: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for ODTX: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for JAN: unsupported operand type(s) for +: 'float' and 'NoneType'
+Could not calculate price-history metrics for NHP: unsupported operand type(s) for +: 'float' and 'NoneType'
+3M return gate >= 0.00%: 628 survivors; 346 removed before fundamentals.
+Fetching fundamentals for 628 3M-return-eligible tickers...
+  0%|          | 0/628 [00:00<?, ?it/s] 35%|███▍      | 218/628 [00:00<00:01, 253.79it/s] 40%|████      | 254/628 [00:01<00:02, 126.21it/s] 45%|████▌     | 284/628 [00:02<00:03, 88.75it/s]  60%|█████▉    | 376/628 [00:03<00:02, 106.54it/s] 75%|███████▌  | 473/628 [00:04<00:01, 109.28it/s] 80%|████████  | 503/628 [00:04<00:01, 81.52it/s] 100%|██████████| 628/628 [00:04<00:00, 127.39it/s]
+Done.
+/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:3531: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
+  .infer_objects(copy=False)
+Saved top QVM cache to caches/top_qvm_stocks_cache.pkl.
+
+Top QVM Stocks:
+   Symbol   QVMScore  3M Return   1Y Return
+0    INSW  83.754874  42.959589  166.838719
+1     TNK  82.245491  38.714848   92.230687
+2    SLDE  80.188351  54.241179   84.475950
+3     ECO  78.728959  83.260917  231.612796
+4     DHT  78.550914  37.029250  107.413930
+..    ...        ...        ...         ...
+70   PBYI  63.426505  27.800826  104.424775
+71   AUGO  63.332791  31.227244  176.309986
+72   RDVT  63.280346  40.693692   56.185620
+73    KRT  63.221032  70.695052  118.758640
+74   ETON  63.016888  70.879128  218.792718
+
+[75 rows x 4 columns]
+
+...calling Gemini for current market context...
+
+Gemini logical request 1/7: market context (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Gemini usage [market context]: prompt_tokens=1044, tool_tokens=2518, cached_tokens=None, thinking_tokens=5126, output_tokens=10950, total_tokens=19638
+Google searches performed [market context]: 30
+  Search: S&P 500 performance last 10 days September 2026
+  Search: S&P 500 market breadth current September 2026
+  Search: US stock market health indicators September 2026
+  Search: US investor sentiment current September 2026
+  Search: Largest drivers of US stock market today September 2026
+  Search: Market sentiment indicators September 2026
+  Search: US inflation rate September 2026
+  Search: Federal Reserve interest rate expectations September 2026
+  Search: FOMC meeting outlook September 2026
+  Search: US economic data releases last 10 days September 2026
+  Search: US corporate earnings trends Q3 2026
+  Search: US regulatory developments affecting stock market September 2026
+  Search: Current geopolitical risks affecting global markets September 2026
+  Search: Major world events impacting economy September 2026
+  Search: Ukraine war economic impact September 2026
+  Search: Middle East geopolitical tensions September 2026
+  Search: Crude oil prices September 2026
+  Search: Global commodity prices outlook September 2026
+  Search: Global freight rates September 2026
+  Search: Supply chain issues current status September 2026
+  Search: Strongest US stock sectors September 2026
+  Search: Weakest US stock sectors September 2026
+  Search: Performance of Energy sector September 2026
+  Search: Performance of Financial Services sector September 2026
+  Search: Performance of Industrials sector September 2026
+  Search: Performance of Basic Materials sector September 2026
+  Search: Performance of Communication Services sector September 2026
+  Search: Performance of Healthcare sector September 2026
+  Search: Performance of Technology sector September 2026
+  Search: Performance of Consumer Cyclical sector September 2026
+Grounding citation chunks exposed [market context]: 34
+Dynamic market risk-event catalog: 3 canonical event(s).
+Deferred excess same-sector research candidates: NAT, FRO, TK, STNG
+Filled ordinary research batch with future uncached QVM candidates: INSW, TNK, SLDE, ECO, DHT, TEN, LPG, TRMD, DAC, WDOFF, HAFN, MAKO, DDI, GSL, SHIP
+
+...calling Gemini for stock batch: INSW, TNK, SLDE, ECO, DHT, TEN, LPG, TRMD, DAC, WDOFF, HAFN, MAKO, DDI, GSL, SHIP...
+
+Gemini logical request 2/7: stock batch containing 15 stocks, spanning QVM ranks 1-22 (gemini-2.5-flash, attempt 1) (API attempt 2; stock API attempts 1)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 1-22]: prompt_tokens=28440, tool_tokens=562400, cached_tokens=None, thinking_tokens=17789, output_tokens=24056, total_tokens=632685
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 1-22]: 15
+  Search: International Seaways, Inc. INSW investor relations latest results guidance pricing margins demand operating metrics
+  Search: Teekay Tankers Ltd. TNK investor relations latest results guidance pricing margins demand operating metrics
+  Search: Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics
+  Search: Okeanis Eco Tankers Corp. ECO investor relations latest results guidance pricing margins demand operating metrics
+  Search: DHT Holdings, Inc. DHT investor relations latest results guidance pricing margins demand operating metrics
+  Search: Tsakos Energy Navigation Limited TEN investor relations latest results guidance pricing margins demand operating metrics
+  Search: Dorian LPG Ltd. LPG investor relations latest results guidance pricing margins demand operating metrics
+  Search: TORM plc TRMD investor relations latest results guidance pricing margins demand operating metrics
+  Search: Danaos Corporation DAC investor relations latest results guidance pricing margins demand operating metrics
+  Search: Wesdome Gold Mines Ltd. WDOFF investor relations latest results guidance pricing margins demand operating metrics
+  Search: Hafnia Limited HAFN investor relations latest results guidance pricing margins demand operating metrics
+  Search: Mako Mining Corp. MAKO investor relations latest results guidance pricing margins demand operating metrics
+  Search: DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance pricing margins demand operating metrics
+  Search: Global Ship Lease, Inc. GSL investor relations latest results guidance pricing margins demand operating metrics
+  Search: Seanergy Maritime Holdings Corp SHIP investor relations latest results guidance pricing margins demand operating metrics
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 1-22]: 5
+Recovered independently delimited stock results: INSW, TNK, SLDE, ECO, DHT, TEN, LPG, TRMD, DAC, WDOFF, HAFN, MAKO, DDI, GSL, SHIP
+Gemini classification request 1/8: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/2)
+Stock response coverage: 15/15 returned; 0 missing.
+Research searches requested this call: 15 total; 15 first, 0 repeated.
+Applied cautious temporary-dependence floor to INSW: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [INSW]: 5 distinct URLs
+Applied cautious temporary-dependence floor to TNK: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [TNK]: 5 distinct URLs
+Saving other valid results; SLDE requires a targeted repair retry: SLDE has invalid risk_time_horizon: 'NONE'
+Applied cautious temporary-dependence floor to ECO: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [ECO]: 5 distinct URLs
+Applied cautious temporary-dependence floor to DHT: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [DHT]: 5 distinct URLs
+Applied cautious temporary-dependence floor to TEN: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [TEN]: 5 distinct URLs
+Applied cautious temporary-dependence floor to LPG: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [LPG]: 5 distinct URLs
+Applied cautious temporary-dependence floor to TRMD: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [TRMD]: 5 distinct URLs
+Saving other valid results; DAC requires a targeted repair retry: DAC has invalid risk_time_horizon: 'NONE'
+Saving other valid results; WDOFF requires a targeted repair retry: WDOFF has invalid risk_time_horizon: 'NONE'
+Applied cautious temporary-dependence floor to HAFN: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [HAFN]: 5 distinct URLs
+Saving other valid results; MAKO requires a targeted repair retry: MAKO has invalid risk_time_horizon: 'NONE'
+Saving other valid results; DDI requires a targeted repair retry: DDI has invalid risk_time_horizon: 'NONE'
+Saving other valid results; GSL requires a targeted repair retry: GSL has invalid risk_time_horizon: 'NONE'
+Applied cautious temporary-dependence floor to SHIP: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [SHIP]: 5 distinct URLs
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 15
+  results returned: 15
+  results validated: 9
+  incomplete research: 0
+  structural repairs needed: 6
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 0
+Carrying retryable stocks into the next batch and filling remaining capacity with: NAT, FRO, TK, STNG, PBT, SM, ARREF, NUTX, CGAU
+
+...calling Gemini for stock batch: SLDE, DAC, WDOFF, MAKO, DDI, GSL, NAT, FRO, TK, STNG, PBT, SM, ARREF, NUTX, CGAU...
+
+Gemini logical request 3/7: stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 1 (gemini-2.5-flash, attempt 1) (API attempt 3; stock API attempts 2)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 1]: prompt_tokens=37503, tool_tokens=37678, cached_tokens=37354, thinking_tokens=933, output_tokens=73900, total_tokens=150014
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 1]: 9
+  Search: Amerigo Resources Ltd. ARREF investor relations latest results guidance pricing margins demand operating metrics
+  Search: Centerra Gold Inc. CGAU investor relations latest results guidance pricing margins demand operating metrics
+  Search: Frontline plc FRO investor relations latest results guidance pricing margins demand operating metrics
+  Search: Nordic American Tankers Limited NAT investor relations latest results guidance pricing margins demand operating metrics
+  Search: Nutex Health Inc. NUTX investor relations latest results guidance pricing margins demand operating metrics
+  Search: Permian Basin Royalty Trust PBT investor relations latest results guidance pricing margins demand operating metrics
+  Search: SM Energy Company SM investor relations latest results guidance pricing margins demand operating metrics
+  Search: Scorpio Tankers Inc. STNG investor relations latest results guidance pricing margins demand operating metrics
+  Search: Teekay Corporation Ltd. TK investor relations latest results guidance pricing margins demand operating metrics
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 1]: 0
+Malformed stock-batch JSON; recovered 0 individual result(s): none
+The recovered results will be validated and cached; only missing or invalid stocks will be retried. Original JSON error: Expecting ',' delimiter: line 1 column 3337 (char 3336)
+Stock response coverage: 0/15 returned; 15 missing.
+Research searches requested this call: 9 total; 9 first, 0 repeated.
+Did not charge SLDE a research attempt: no result or company-specific search was exposed.
+Did not charge DAC a research attempt: no result or company-specific search was exposed.
+Did not charge WDOFF a research attempt: no result or company-specific search was exposed.
+Did not charge MAKO a research attempt: no result or company-specific search was exposed.
+Did not charge DDI a research attempt: no result or company-specific search was exposed.
+Did not charge GSL a research attempt: no result or company-specific search was exposed.
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 9
+  results returned: 0
+  results validated: 0
+  incomplete research: 0
+  structural repairs needed: 0
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 6
+
+...calling Gemini for stock batch: SLDE, DAC, WDOFF, MAKO, DDI, GSL, NAT, FRO, TK, STNG, PBT, SM, ARREF, NUTX, CGAU...
+
+Gemini logical request 4/7: stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2 (gemini-2.5-flash, attempt 1) (API attempt 4; stock API attempts 3)
+Error on attempt 1/3 during stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2 with gemini-2.5-flash: Empty response from Gemini.
+Transient Gemini error; retrying the same model and unchanged request in 30.6s...
+Gemini logical request 4/7: stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2 (gemini-2.5-flash, attempt 2) (API attempt 5; stock API attempts 4)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2]: prompt_tokens=37589, tool_tokens=39067, cached_tokens=37880, thinking_tokens=12876, output_tokens=16712, total_tokens=106244
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2]: 15
+  Search: Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance
+  Search: Danaos Corporation DAC investor relations latest results guidance
+  Search: Wesdome Gold Mines Ltd. WDOFF investor relations latest results guidance
+  Search: Mako Mining Corp. MAKO investor relations latest results guidance
+  Search: DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance
+  Search: Global Ship Lease, Inc. GSL investor relations latest results guidance
+  Search: Nordic American Tankers Limited NAT investor relations latest results guidance
+  Search: Frontline plc FRO investor relations latest results guidance
+  Search: Teekay Corporation Ltd. TK investor relations latest results guidance
+  Search: Scorpio Tankers Inc. STNG investor relations latest results guidance
+  Search: Permian Basin Royalty Trust PBT investor relations latest results guidance
+  Search: SM Energy Company SM investor relations latest results guidance
+  Search: Amerigo Resources Ltd. ARREF investor relations latest results guidance
+  Search: Nutex Health Inc. NUTX investor relations latest results guidance
+  Search: Centerra Gold Inc. CGAU investor relations latest results guidance
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 3-25 targeted retry 2]: 20
+Recovered independently delimited stock results: SLDE, DAC, WDOFF, MAKO, DDI, GSL, NAT, FRO, TK, STNG, PBT, SM, ARREF, NUTX, CGAU
+Gemini classification request 2/8: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/2)
+Stock response coverage: 15/15 returned; 0 missing.
+Research searches requested this call: 15 total; 6 first, 9 repeated.
+Validated JSON sources [SLDE]: 5 distinct URLs
+Validated JSON sources [DAC]: 5 distinct URLs
+Saving other valid results; WDOFF requires a targeted repair retry: WDOFF has invalid risk_time_horizon: '0_12_MONTHS'
+Saving other valid results; MAKO requires a targeted repair retry: MAKO has invalid risk_time_horizon: '0_12_MONTHS'
+Validated JSON sources [DDI]: 2 distinct URLs
+Validated JSON sources [GSL]: 5 distinct URLs
+Saving other valid results; NAT requires a targeted repair retry: NAT has invalid risk_time_horizon: '0_12_MONTHS'
+Saving other valid results; FRO requires a targeted repair retry: FRO has invalid risk_time_horizon: '0_12_MONTHS'
+Saving other valid results; TK requires a targeted repair retry: TK has invalid risk_time_horizon: '0_12_MONTHS'
+STNG remains invalid after 2/2 permitted research attempts this run: STNG research incomplete: Missing current operating evidence for Q2 2026.
+PBT remains invalid after 2/2 permitted research attempts this run: PBT research incomplete: Missing current operating evidence for Q2 2026.
+Saving other valid results; SM requires a targeted repair retry: SM has invalid risk_time_horizon: '0_12_MONTHS'
+ARREF remains invalid after 2/2 permitted research attempts this run: ARREF research incomplete: Missing current operating evidence for Q2 2026.
+NUTX remains invalid after 2/2 permitted research attempts this run: NUTX research incomplete: Missing current operating evidence for Q2 2026.
+Saving other valid results; CGAU requires a targeted repair retry: CGAU has invalid risk_time_horizon: '0_12_MONTHS'
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 15
+  results returned: 15
+  results validated: 4
+  incomplete research: 4
+  structural repairs needed: 7
+  genuine repeated searches: 9
+  missing/unsearched attempts refunded: 0
+Skipping exhausted invalid research and continuing to lower-ranked candidates: STNG: STNG research incomplete: Missing current operating evidence for Q2 2026.; PBT: PBT research incomplete: Missing current operating evidence for Q2 2026.; ARREF: ARREF research incomplete: Missing current operating evidence for Q2 2026.; NUTX: NUTX research incomplete: Missing current operating evidence for Q2 2026.
+Carrying retryable stocks into the next batch and filling remaining capacity with: REPX, ASC, APA, MGTX, SBLK, PTGX, NMM, AYA
+
+...calling Gemini for stock batch: WDOFF, MAKO, NAT, FRO, TK, SM, CGAU, REPX, ASC, APA, MGTX, SBLK, PTGX, NMM, AYA...
+
+Gemini logical request 5/7: stock batch containing 15 stocks, spanning QVM ranks 12-34 targeted retry 3 (gemini-2.5-flash, attempt 1) (API attempt 6; stock API attempts 5)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 12-34 targeted retry 3]: prompt_tokens=38922, tool_tokens=40052, cached_tokens=40062, thinking_tokens=6521, output_tokens=20667, total_tokens=106162
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 12-34 targeted retry 3]: 8
+  Search: APA Corporation APA investor relations latest results guidance pricing margins demand operating metrics
+  Search: Ardmore Shipping Corporation ASC investor relations latest results guidance pricing margins demand operating metrics
+  Search: Aya Gold & Silver Inc. AYA investor relations latest results guidance pricing margins demand operating metrics
+  Search: MeiraGTx Holdings plc MGTX investor relations latest results guidance pricing margins demand operating metrics
+  Search: Navios Maritime Partners L.P. NMM investor relations latest results guidance pricing margins demand operating metrics
+  Search: Protagonist Therapeutics, Inc. PTGX investor relations latest results guidance pricing margins demand operating metrics
+  Search: Riley Exploration Permian, Inc. REPX investor relations latest results guidance pricing margins demand operating metrics
+  Search: Star Bulk Carriers Corp. SBLK investor relations latest results guidance pricing margins demand operating metrics
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 12-34 targeted retry 3]: 0
+Recovered independently delimited stock results: REPX, ASC, APA, MGTX, SBLK, PTGX, NMM, AYA, WDOFF, MAKO, NAT, FRO, TK, SM, CGAU
+Gemini classification request 3/8: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/2)
+Stock response coverage: 15/15 returned; 0 missing.
+Research searches requested this call: 8 total; 8 first, 0 repeated.
+Applied cautious temporary-dependence floor to WDOFF: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [WDOFF]: 5 distinct URLs
+Normalized continuation_outlook for MAKO: 'CONTINUATION_MORE_LATER' -> 'CONTINUATION_MORE_LIKELY'.
+Applied cautious temporary-dependence floor to MAKO: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [MAKO]: 5 distinct URLs
+Applied cautious temporary-dependence floor to NAT: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [NAT]: 3 distinct URLs
+Applied cautious temporary-dependence floor to FRO: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [FRO]: 4 distinct URLs
+Applied cautious temporary-dependence floor to TK: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [TK]: 4 distinct URLs
+Applied cautious temporary-dependence floor to SM: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [SM]: 5 distinct URLs
+Applied cautious temporary-dependence floor to CGAU: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [CGAU]: 5 distinct URLs
+Applied cautious temporary-dependence floor to REPX: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [REPX]: 5 distinct URLs
+Applied cautious temporary-dependence floor to ASC: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [ASC]: 4 distinct URLs
+Applied cautious temporary-dependence floor to APA: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [APA]: 4 distinct URLs
+Reconciled MGTX ELEVATED to LOW without another Gemini call: risk is based only on a nonrecurring comparison.
+Validated JSON sources [MGTX]: 5 distinct URLs
+Applied cautious temporary-dependence floor to SBLK: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [SBLK]: 5 distinct URLs
+Reconciled PTGX ELEVATED to LOW without another Gemini call: risk is based only on a nonrecurring comparison.
+Validated JSON sources [PTGX]: 5 distinct URLs
+Applied cautious temporary-dependence floor to NMM: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [NMM]: 5 distinct URLs
+Applied cautious temporary-dependence floor to AYA: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [AYA]: 4 distinct URLs
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 8
+  results returned: 15
+  results validated: 15
+  incomplete research: 0
+  structural repairs needed: 0
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 0
+Risk-adjusted selection order: SLDE, INSW, DAC, TNK, WDOFF, ECO, DHT, TEN, LPG, TRMD, HAFN
+Deferred excess same-sector research candidates: SBLK
+Using validated stock research cache for MAKO.
+Using validated stock research cache for DDI.
+Using validated stock research cache for GSL.
+Using validated stock research cache for SHIP.
+Using validated stock research cache for CGAU.
+Using validated stock research cache for ASC.
+Using validated stock research cache for MGTX.
+Using validated stock research cache for PTGX.
+Risk-adjusted selection order: DDI, GSL, MAKO, SHIP, CGAU, ASC, NAT, FRO, TK, STNG, PBT, SM, REPX, ARREF, NUTX, APA, MGTX, PTGX
+Using validated stock research cache for AYA.
+Filled ordinary research batch with future uncached QVM candidates: FTNT, CF, VCTR, DAVE, HNGE, INCY, DSVSF
+
+...calling Gemini for stock batch: FTNT, CF, VCTR, DAVE, HNGE, INCY, DSVSF...
+
+Gemini logical request 6/7: stock batch containing 7 stocks, spanning QVM ranks 35-49 (gemini-2.5-flash, attempt 1) (API attempt 7; stock API attempts 6)
+Gemini usage [stock batch containing 7 stocks, spanning QVM ranks 35-49]: prompt_tokens=23636, tool_tokens=24891, cached_tokens=18653, thinking_tokens=7064, output_tokens=9302, total_tokens=64893
+Google searches performed [stock batch containing 7 stocks, spanning QVM ranks 35-49]: 7
+  Search: Fortinet, Inc. FTNT investor relations latest results guidance pricing margins demand operating metrics
+  Search: CF Industries Holdings, Inc. CF investor relations latest results guidance pricing margins demand operating metrics
+  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance pricing margins demand operating metrics
+  Search: Dave Inc. DAVE investor relations latest results guidance pricing margins demand operating metrics
+  Search: Hinge Health, Inc. HNGE investor relations latest results guidance pricing margins demand operating metrics
+  Search: Incyte Corporation INCY investor relations latest results guidance pricing margins demand operating metrics
+  Search: Discovery Mining Ltd. DSVSF investor relations latest results guidance pricing margins demand operating metrics
+Grounding citation chunks exposed [stock batch containing 7 stocks, spanning QVM ranks 35-49]: 9
+Recovered independently delimited stock results: FTNT, CF, VCTR, DAVE, HNGE, INCY, DSVSF
+Gemini classification request 4/8: stock judgment for 7 stocks (gemini-3.5-flash, attempt 1/2)
+Stock response coverage: 7/7 returned; 0 missing.
+Research searches requested this call: 7 total; 7 first, 0 repeated.
+Validated JSON sources [FTNT]: 3 distinct URLs
+Normalized continuation_outlook for CF: 'CONTINUATION_MORE_LATER' -> 'CONTINUATION_MORE_LIKELY'.
+Applied cautious temporary-dependence floor to CF: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [CF]: 4 distinct URLs
+Validated JSON sources [VCTR]: 3 distinct URLs
+Validated JSON sources [DAVE]: 4 distinct URLs
+Validated JSON sources [HNGE]: 4 distinct URLs
+Trimmed INCY sources to the 5 most relevant distinct entries.
+Validated JSON sources [INCY]: 3 distinct URLs
+Applied cautious temporary-dependence floor to DSVSF: MODERATE->MODERATE without another Gemini call.
+Validated JSON sources [DSVSF]: 4 distinct URLs
+Batch research summary:
+  candidates sent: 7
+  company searches exposed: 7
+  results returned: 7
+  results validated: 7
+  incomplete research: 0
+  structural repairs needed: 0
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 0
+Risk-adjusted selection order: FTNT, VCTR, DAVE, HNGE, AYA, CF, SBLK, WCPRF, NMM, PARR, PBR-A, PBR, PARXF, SGYEF, DINO, CVE
+Research efficiency: 39 unique stocks, 48 requested searches, 9 repeated searches.
+
+CONTEXT REVIEW
+
+|   QVM Rank | Symbol   | Sector Group           | Reversal Risk / Status                |   Sector Selected After |   Total Selected After | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|-----------:|:---------|:-----------------------|:--------------------------------------|------------------------:|-----------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|          3 | SLDE     | Financial Services     | SELECTED — LOW                        |                       1 |                      1 | Slide Insurance reported robust Q2 2026 results, with net income up 92.4% and gross written premiums growing 16.7%, driven by policy growth and expansion into new coastal markets. The company's technology-enabled underwriting and disciplined approach have led to an improved combined ratio. With strong guidance reaffirmed for 2026 and no identified material temporary drivers, the continuation outlook is favorable.                                                                                                                                                              |
+|          1 | INSW     | Energy                 | SELECTED — MODERATE                   |                       1 |                      2 | International Seaways reported record Q2 2026 net income of $295 million, driven by blended spot TCE rates surging to $79,000/day due to Middle East geopolitical disruptions. While the company benefits from a strong balance sheet and fleet optimization, its current performance is materially supported by these unusually elevated rates. Normalization of these temporary market conditions would significantly impact recurring revenue and earnings within 6-12 months.                                                                                                             |
+|         11 | DAC      | Industrials            | SELECTED — LOW                        |                       1 |                      3 | Danaos Corporation reported strong Q2 2026 results, with net income up 16% and revenue increasing 4.7%. The company benefits from a substantial $3.7 billion charter backlog, providing significant stability. With a business model focused on long-term fixed-rate charters and no identified material temporary operating drivers, the continuation outlook is favorable.                                                                                                                                                                                                                  |
+|          2 | TNK      | Energy                 | SELECTED — MODERATE                   |                       2 |                      4 | Teekay Tankers reported record Q2 2026 adjusted net income of $194 million, with revenue beating estimates due to strong tanker rates. The CEO explicitly cited geopolitical disruptions supporting these record rates. While the company boasts a strong balance sheet and fleet renewal, its current exceptional performance is materially reliant on these temporary, elevated market conditions. Normalization of these rates would significantly impact recurring revenue and earnings within 6-12 months.                                                                               |
+|         12 | WDOFF    | Basic Materials        | SELECTED — MODERATE                   |                       1 |                      5 | Wesdome Gold Mines reported strong Q2 2026 results, benefiting from elevated realized gold prices. While the company has high-grade assets, a material decline in gold prices could negatively impact recurring revenue within 6-12 months, leading to a moderate reversal risk.                                                                                                                                                                                                                                                                                                              |
+|          4 | ECO      | Industrials            | NOT SELECTED — MODERATE-RISK CAPACITY |                       1 |                      5 | The portfolio already contains 3 MODERATE-risk selections. Okeanis Eco Tankers reported exceptional Q2 2026 results, with net profit of $230.3 million and fleetwide TCE rates of $191,700/day, driven by exceptionally strong tanker market conditions. While the company benefits from a young, expanded fleet, its current profitability is materially supported by these unusually high spot rates. Anticipated earnings decline post-2026 suggests that normalization of these temporary market conditions would significantly impact recurring revenue and earnings within 6-12 months. |
+|          5 | DHT      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      5 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|          6 | TEN      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      5 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|          7 | LPG      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      5 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|          8 | TRMD     | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      5 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         15 | HAFN     | Industrials            | NOT SELECTED — MODERATE-RISK CAPACITY |                       1 |                      5 | The portfolio already contains 3 MODERATE-risk selections. Hafnia Limited reported strong Q2 2026 net profit of $277.8 million, with average TCE rates of $44,093/day, driven by geopolitical disruptions and inventory draws. While Hafnia operates one of the largest product and chemical tanker fleets, its current strong performance is materially supported by these elevated rates. Management expects Q3 rates to be below Q2 peaks, indicating that normalization of these temporary market conditions would moderately impact recurring earnings within 6-12 months.               |
+|         20 | DDI      | Communication Services | SELECTED — LOW                        |                       1 |                      6 | DoubleDown Interactive reported strong Q2 2026 revenue and significantly increased EPS, outperforming a declining global social casino market. The company's successful direct-to-consumer strategy and robust net cash position are key drivers. With no identified material temporary operating drivers or probable reversal mechanisms, the continuation outlook is favorable.                                                                                                                                                                                                             |
+|         21 | GSL      | Industrials            | SELECTED — LOW                        |                       2 |                      7 | Global Ship Lease reported strong Q2 2026 results, with robust revenue and net income. The company benefits from a substantial $3.2 billion contracted revenue backlog, providing significant stability. With strategic investments in newbuilds and no identified material temporary operating drivers, the continuation outlook is favorable.                                                                                                                                                                                                                                               |
+|         19 | MAKO     | Basic Materials        | NOT SELECTED — MODERATE-RISK CAPACITY |                       1 |                      7 | The portfolio already contains 3 MODERATE-risk selections. Mako Mining Corp. achieved record Q2 2026 revenue and net income, driven by high realized gold prices. While the company has profitable operations, a material decline in gold prices could negatively impact recurring revenue within 6-12 months, leading to a moderate reversal risk.                                                                                                                                                                                                                                           |
+|         22 | SHIP     | Industrials            | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Industrials were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|         25 | CGAU     | Basic Materials        | NOT SELECTED — MODERATE-RISK CAPACITY |                       1 |                      7 | The portfolio already contains 3 MODERATE-risk selections. Centerra Gold reported strong Q2 2026 results and raised gold guidance, benefiting from elevated gold prices. While diversified, a material decline in gold prices could negatively impact recurring revenue within 6-12 months, leading to a moderate reversal risk.                                                                                                                                                                                                                                                              |
+|         26 | ASC      | Industrials            | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Industrials were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|          9 | NAT      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         10 | FRO      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         13 | TK       | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         14 | STNG     | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         16 | PBT      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         17 | SM       | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         18 | REPX     | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         23 | ARREF    | Basic Materials        | SKIPPED — RESEARCH INVALID            |                       1 |                      7 | Research did not pass validation: ARREF research incomplete: Missing current operating evidence for Q2 2026.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|         24 | NUTX     | Healthcare             | SKIPPED — RESEARCH INVALID            |                       0 |                      7 | Research did not pass validation: NUTX research incomplete: Missing current operating evidence for Q2 2026.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         27 | APA      | Energy                 | SKIPPED — SECTOR CAPACITY             |                       2 |                      7 | 2 stocks from Energy were already selected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|         28 | MGTX     | Healthcare             | NOT SELECTED — ELEVATED               |                       0 |                      7 | Reported Q2 2026 net income of $162.8 million and GAAP license and collaboration revenue of $213.5 million. Proprietary manufacturing platform and gene regulation technology (riboswitch platform). Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                                                                    |
+|         30 | PTGX     | Healthcare             | NOT SELECTED — ELEVATED               |                       0 |                      7 | Reported Q2 2026 GAAP license and collaboration revenue of $213.5 million and GAAP net income of $162.8 million. Peptide-based drug discovery platform. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                                                                                                                 |
+|         35 | FTNT     | Technology             | SELECTED — LOW                        |                       1 |                      8 | Fortinet reported strong Q2 2026 results with 26% revenue growth and 38% non-GAAP operating margin, driven by AI-driven security innovation. The company provided positive full-year 2026 guidance, indicating continued strong demand and operational execution.                                                                                                                                                                                                                                                                                                                             |
+|         40 | VCTR     | Financial Services     | SELECTED — LOW                        |                       2 |                      9 | Victory Capital reported record Q2 2026 revenue and strong net inflows, demonstrating robust operational performance. The company's diversified strategies and excellent investment performance support a positive continuation outlook, with no immediate reversal mechanisms identified.                                                                                                                                                                                                                                                                                                    |
+|         44 | DAVE     | Technology             | SELECTED — LOW                        |                       2 |                     10 | Dave Inc. reported strong Q2 2026 results with 30% revenue growth and expanding adjusted EBITDA margins, driven by its AI underwriting model. The company raised its full-year guidance, indicating sustained momentum in member acquisition and product expansion.                                                                                                                                                                                                                                                                                                                           |
+
+CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN
+  No comparable classification fields changed.
+PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN
+  No prior diagnostics snapshot is available; baseline created.
+NO-CALL NORMALIZATION SUMMARY
+  cautious_temporary_dependence_floor: 24
+  enum_alias_normalization: 2
+  risk_downgrade: 2
+Gemini logical request 7/7: final HTML summary (gemini-2.5-flash, attempt 1) (API attempt 8; stock API attempts 6)
+Gemini usage [final HTML summary]: prompt_tokens=13301, tool_tokens=0, cached_tokens=None, thinking_tokens=4093, output_tokens=2076, total_tokens=19470
+Google searches performed [final HTML summary]: 0
+Grounding citation chunks exposed [final HTML summary]: 0
+Using Gemini-written HTML summary.
+GEMINI EFFICIENCY SUMMARY
+  requests used: 7/7
+  stock research calls: 5/5
+  newly validated stocks: 35
+  newly validated stocks per completed stock response: 7.00
+  newly validated stocks per attempted stock request: 7.00
+  exposed searches per newly validated stock: 1.54
+  duplicate extra result blocks: 0
+  tokens: prompt=180435, tool=706606, thinking=54402, output=157663, total=1099106
+Saved comprehensive run report: run_reports/stock_run_report.json
+Generated research with model(s): gemini-2.5-flash, gemini-3.5-flash
+Selected symbols: SLDE, INSW, DAC, TNK, WDOFF, DDI, GSL, FTNT, VCTR, DAVE
+Elapsed time: 1108 seconds
+
+

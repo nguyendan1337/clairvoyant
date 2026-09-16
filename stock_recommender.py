@@ -53,7 +53,7 @@ sys.stderr = TeeStream(sys.stderr, _stock_run_log)
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
-TOTAL_RUNTIME_TIMEOUT_SECONDS = 45 * 60
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
 GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
 
 

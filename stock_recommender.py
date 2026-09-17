@@ -1998,6 +1998,13 @@ def downgrade_unproven_material_risk(result, symbol, reason):
         field: str(result.get(field) or prior_risk).upper()
         for field in ("business_reversal_risk", "entry_reversal_risk")
     }
+    evidence_fields = (
+        "mechanism_status", "normalization_probability", "risk_materiality",
+        "current_fact", "probability_evidence", "material_effect",
+        "risk_time_horizon", "probability_indicator_type", "probability_basis",
+        "catalyst_dependence", "temporary_drivers", "continuation_strength",
+    )
+    evidence_before = {field: result.get(field) for field in evidence_fields}
     result["reversal_risk"] = "LOW"
     component_changes = align_component_risks_to_authoritative(result, "LOW")
     result["mechanism_status"] = "HYPOTHETICAL"
@@ -2043,6 +2050,8 @@ def downgrade_unproven_material_risk(result, symbol, reason):
         f"Reconciled {symbol} {prior_risk} to LOW without another Gemini call: "
         f"{reason}."
     )
+    evidence_after = {field: result.get(field) for field in evidence_fields}
+    print(f"  Reconciliation evidence: before={evidence_before}; after={evidence_after}")
     runtime_reconciliation_diagnostics.append({
         "symbol": symbol,
         "type": "risk_downgrade",
@@ -2050,6 +2059,8 @@ def downgrade_unproven_material_risk(result, symbol, reason):
         "to": "LOW",
         "component_risks_before": prior_components,
         "component_risk_changes": component_changes,
+        "evidence_before": evidence_before,
+        "evidence_after": evidence_after,
         "reason": reason,
     })
 
@@ -4917,8 +4928,8 @@ def final_candidate_adjustment(research):
         research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
     ).upper()
     adjustment += {
-        "LIKELY": 3.0,
-        "UNCERTAIN": -2.0,
+        "LIKELY": benchmark_likely_bonus,
+        "UNCERTAIN": benchmark_uncertain_penalty,
         "UNLIKELY": -1000.0,
     }.get(benchmark_outlook, -2.0)
 
@@ -4942,8 +4953,11 @@ def final_candidate_adjustment(research):
             level, -1.0
         )
 
-    if str(research.get("mechanism_status") or "").upper() == "NONE":
+    mechanism = str(research.get("mechanism_status") or "").upper()
+    if mechanism == "NONE":
         adjustment += 1.0
+    elif mechanism == "ACTIVE":
+        adjustment += active_mechanism_penalty
     return adjustment
 
 
@@ -5077,6 +5091,26 @@ qvm_weights = {
 }
 if not np.isclose(sum(qvm_weights.values()), 1.0):
     raise ValueError("Configured QVM weights must sum to 1.0.")
+minimum_final_selection_score = float(config.get("minimum_final_selection_score", 72.0))
+minimum_uncertain_moderate_score = float(config.get("minimum_uncertain_moderate_score", 75.0))
+minimum_uncertain_low_score = float(config.get("minimum_uncertain_low_score", 72.0))
+second_event_minimum_score = float(config.get("second_event_minimum_score", 78.0))
+benchmark_likely_bonus = float(config.get("benchmark_likely_bonus", 5.0))
+benchmark_uncertain_penalty = float(config.get("benchmark_uncertain_penalty", -4.0))
+active_mechanism_penalty = float(config.get("active_mechanism_penalty", -5.0))
+second_event_score_penalty = float(config.get("second_event_score_penalty", -3.0))
+for name, value in (
+    ("minimum_final_selection_score", minimum_final_selection_score),
+    ("minimum_uncertain_moderate_score", minimum_uncertain_moderate_score),
+    ("minimum_uncertain_low_score", minimum_uncertain_low_score),
+    ("second_event_minimum_score", second_event_minimum_score),
+    ("benchmark_likely_bonus", benchmark_likely_bonus),
+    ("benchmark_uncertain_penalty", benchmark_uncertain_penalty),
+    ("active_mechanism_penalty", active_mechanism_penalty),
+    ("second_event_score_penalty", second_event_score_penalty),
+):
+    if not np.isfinite(value):
+        raise ValueError(f"{name} must be finite.")
 continuation_strength_adjustments = {
     "STRONG": float(config.get("continuation_strong_bonus", 3.0)),
     "ADEQUATE": float(config.get("continuation_adequate_bonus", 0.0)),
@@ -5590,6 +5624,36 @@ if cache_consistency_changed:
 
 initial_validated_cache_symbols = set(validated_cached_research)
 
+def final_selection_rejection(score, research, event_count):
+    """Use one quality bar for provisional stopping and final portfolio selection."""
+    continuation = str(research.get("continuation_strength") or "").upper()
+    benchmark = str(research.get("benchmark_outperformance_outlook") or "").upper()
+    risk = combined_reversal_risk(research)
+    mechanism = str(research.get("mechanism_status") or "").upper()
+    if continuation not in {"STRONG", "ADEQUATE"}:
+        return "NOT SELECTED — WEAK CONTINUATION"
+    if score < minimum_final_selection_score:
+        return "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
+    if benchmark == "UNCERTAIN":
+        if risk in {"MINIMAL", "LOW"}:
+            if continuation != "STRONG" or score < minimum_uncertain_low_score:
+                return "NOT SELECTED — UNCERTAIN BENCHMARK CASE"
+        elif risk == "MODERATE":
+            if continuation != "STRONG" or score < minimum_uncertain_moderate_score:
+                return "NOT SELECTED — UNCERTAIN MODERATE-RISK CASE"
+            if mechanism == "ACTIVE":
+                return "NOT SELECTED — ACTIVE ADVERSE MECHANISM"
+        else:
+            return "NOT SELECTED — UNCERTAIN BENCHMARK CASE"
+    if event_count and (
+        score + second_event_score_penalty < second_event_minimum_score
+        or (benchmark != "LIKELY" and
+            (continuation != "STRONG" or risk not in {"MINIMAL", "LOW"}))
+    ):
+        return "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR"
+    return None
+
+
 def build_stock_portfolio(candidate_records, validated_cached_research, verbose=False):
     selected = []
     decision_ledger = []
@@ -5620,7 +5684,9 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             f"qvm={float(candidate.get('QVMScore') or 0):.2f}, "
             f"risk={combined_reversal_risk(research)}, "
             f"continuation={research.get('continuation_strength')}, "
-            f"benchmark={research.get('benchmark_outperformance_outlook')}"
+            f"benchmark={research.get('benchmark_outperformance_outlook')}, "
+            f"mechanism={research.get('mechanism_status')}, "
+            f"risk_event={normalized_risk_event_key(research)}"
         )
     
     for score, _, candidate, research in scored_validated_candidates:
@@ -5657,6 +5723,10 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             and benchmark_outlook == "UNLIKELY"
         ):
             status = "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY"
+        elif (quality_rejection := final_selection_rejection(
+            score, research, risk_event_counts.get(event_key, 0) if event_key else 0
+        )):
+            status = quality_rejection
         elif sector_count >= max_stocks_per_sector:
             status = "SKIPPED — SECTOR CAPACITY"
         elif (
@@ -5874,7 +5944,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         candidate_records, validated_cached_research
     )
     if len(provisional) >= target_selected_stocks:
-        print(f"Portfolio fillable: {len(provisional)}/{target_selected_stocks}; freezing research.")
+        print(f"Portfolio meeting final quality bar: {len(provisional)}/{target_selected_stocks}; freezing research.")
         break
     optimistic_capacity = optimistic_portfolio_capacity(
         provisional, pending_classification, candidate_by_symbol,
@@ -5891,7 +5961,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             candidate_records, validated_cached_research
         )
         if len(provisional) >= target_selected_stocks:
-            print(f"Portfolio fillable: {len(provisional)}/{target_selected_stocks}; freezing research.")
+            print(f"Portfolio meeting final quality bar: {len(provisional)}/{target_selected_stocks}; freezing research.")
             break
 
     if batch_start >= normal_candidate_limit and not backfill_announced:
@@ -6542,7 +6612,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 )
             if len(provisional) >= target_selected_stocks:
                 print(
-                    f"Portfolio fillable: {len(provisional)}/"
+                    f"Portfolio meeting final quality bar: {len(provisional)}/"
                     f"{target_selected_stocks}; stopping stock research."
                 )
                 break

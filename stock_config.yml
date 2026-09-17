@@ -38,7 +38,16 @@ max_stocks_per_risk_event: 2
 qvm_quality_weight: 0.45
 qvm_value_weight: 0.10
 qvm_momentum_weight: 0.45
-continuation_strong_bonus: 3.0
+# Portfolio quality bar: publish fewer than ten stocks if necessary.
+minimum_final_selection_score: 72.0
+minimum_uncertain_moderate_score: 75.0
+minimum_uncertain_low_score: 72.0
+second_event_minimum_score: 78.0
+benchmark_likely_bonus: 5.0
+benchmark_uncertain_penalty: -4.0
+active_mechanism_penalty: -5.0
+second_event_score_penalty: -3.0
+continuation_strong_bonus: 4.0
 continuation_adequate_bonus: 0.0
 continuation_weak_penalty: -4.0
 cautious_exposure_floor_enabled: true

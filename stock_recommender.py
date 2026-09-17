@@ -4951,6 +4951,13 @@ classification_attempts = max(1, int(config.get("classification_attempts", 2)))
 max_classification_calls_per_run = max(
     1, int(config.get("max_classification_calls_per_run", 8))
 )
+classification_batch_target = max(1, int(config.get("classification_batch_target", 25)))
+classification_batch_soft_max = max(
+    classification_batch_target, int(config.get("classification_batch_soft_max", 30))
+)
+classification_min_intermediate_batch = max(
+    1, int(config.get("classification_min_intermediate_batch", 15))
+)
 gemini_batch_size = int(config.get("gemini_batch_size", 5))
 max_research_candidates_per_open_sector_slot = max(
     1,
@@ -5002,17 +5009,6 @@ qvm_weights = {
 }
 if not np.isclose(sum(qvm_weights.values()), 1.0):
     raise ValueError("Configured QVM weights must sum to 1.0.")
-minimum_validated_candidates_for_final_selection = max(
-    target_selected_stocks,
-    int(config.get("minimum_validated_candidates_for_final_selection", 20)),
-)
-minimum_distinct_sectors_for_final_selection = max(
-    1,
-    int(config.get(
-        "minimum_distinct_sectors_for_final_selection",
-        int(np.ceil(target_selected_stocks / max_stocks_per_sector)),
-    )),
-)
 continuation_strength_adjustments = {
     "STRONG": float(config.get("continuation_strong_bonus", 3.0)),
     "ADEQUATE": float(config.get("continuation_adequate_bonus", 0.0)),
@@ -5390,6 +5386,7 @@ save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 # allows Python to determine whether the complete portfolio can already be
 # built from prior successful calls, including lower-ranked cached candidates.
 validated_cached_research = {}
+pending_classification = {}
 global_cache_keys_by_symbol = {}
 for candidate in candidate_records:
     symbol = str(candidate["Symbol"]).upper()
@@ -5416,7 +5413,10 @@ for candidate in candidate_records:
             ),
             allowed_risk_event_ids=allowed_risk_event_ids,
         )
-        validated_cached_research[symbol] = cached_result
+        if entry.get("judgment_model"):
+            validated_cached_research[symbol] = cached_result
+        else:
+            pending_classification[symbol] = cached_result
     except (KeyError, TypeError, ValueError) as exc:
         print(f"Ignoring invalid stock cache entry for {symbol}: {exc}")
 
@@ -5479,6 +5479,111 @@ if cache_consistency_changed:
 
 initial_validated_cache_symbols = set(validated_cached_research)
 
+def build_stock_portfolio(candidate_records, validated_cached_research, verbose=False):
+    selected = []
+    decision_ledger = []
+    sector_counts = {}
+    risk_event_counts = {}
+    moderate_selected_count = 0
+    
+    scored_validated_candidates = []
+    for candidate in candidate_records:
+        symbol = str(candidate["Symbol"]).upper()
+        research = validated_cached_research.get(symbol)
+        if research is None:
+            continue
+        scored_validated_candidates.append((
+            final_candidate_score(candidate, research),
+            -int(candidate["QVM Rank"]),
+            candidate,
+            research,
+        ))
+    scored_validated_candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    
+    if verbose:
+        print("FINAL VALIDATED CANDIDATE COMPARISON")
+    for score, _, candidate, research in scored_validated_candidates:
+        if verbose:
+            print(
+            f"  {candidate['Symbol']}: final_score={score:.2f}, "
+            f"qvm={float(candidate.get('QVMScore') or 0):.2f}, "
+            f"risk={combined_reversal_risk(research)}, "
+            f"continuation={research.get('continuation_strength')}, "
+            f"benchmark={research.get('benchmark_outperformance_outlook')}"
+        )
+    
+    for score, _, candidate, research in scored_validated_candidates:
+        symbol = str(candidate["Symbol"]).upper()
+        sector = candidate["Sector"]
+        sector_count = sector_counts.get(sector, 0)
+        reversal_risk = combined_reversal_risk(research)
+        entry_reversal_risk = str(
+            research.get("entry_reversal_risk") or reversal_risk
+        ).upper()
+        benchmark_outlook = str(
+            research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+        ).upper()
+        continuation_strength = str(
+            research.get("continuation_strength") or "WEAK"
+        ).upper()
+        explanation = str(research.get("explanation") or "").strip()
+        event_key = normalized_risk_event_key(research)
+    
+        status = None
+        if not bool(research.get("eligible", True)):
+            status = "EXCLUDED — ELIGIBILITY"
+        elif excluded_by_crypto_policy(research, excluded_crypto_dependence):
+            status = "EXCLUDED — CRYPTO DEPENDENCE"
+        elif reversal_risk in {"ELEVATED", "SEVERE"}:
+            status = f"NOT SELECTED — {reversal_risk}"
+        elif (
+            exclude_elevated_entry_risk
+            and entry_reversal_risk in {"ELEVATED", "SEVERE"}
+        ):
+            status = f"NOT SELECTED — {entry_reversal_risk} ENTRY RISK"
+        elif (
+            exclude_unlikely_benchmark_outperformance
+            and benchmark_outlook == "UNLIKELY"
+        ):
+            status = "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY"
+        elif sector_count >= max_stocks_per_sector:
+            status = "SKIPPED — SECTOR CAPACITY"
+        elif (
+            reversal_risk == "MODERATE"
+            and moderate_selected_count >= max_moderate_risk_selections
+        ):
+            status = "NOT SELECTED — MODERATE-RISK CAPACITY"
+        elif (
+            event_key
+            and risk_event_counts.get(event_key, 0) >= max_stocks_per_risk_event
+        ):
+            status = "NOT SELECTED — RISK-EVENT CAPACITY"
+        elif len(selected) >= target_selected_stocks:
+            status = "NOT SELECTED — LOWER FINAL SCORE"
+        else:
+            selected.append({"candidate": candidate, "research": research})
+            sector_counts[sector] = sector_count + 1
+            if reversal_risk == "MODERATE":
+                moderate_selected_count += 1
+            if event_key:
+                risk_event_counts[event_key] = risk_event_counts.get(event_key, 0) + 1
+            status = f"SELECTED — {reversal_risk}"
+    
+        decision_ledger.append({
+            "qvm_rank": candidate["QVM Rank"],
+            "symbol": symbol,
+            "sector_group": sector,
+            "status": status,
+            "sector_selected_after": sector_counts.get(sector, 0),
+            "total_selected_after": len(selected),
+            "final_selection_score": score,
+            "continuation_strength": continuation_strength,
+            "benchmark_outperformance_outlook": benchmark_outlook,
+            "explanation": explanation,
+        })
+    return selected, decision_ledger, sector_counts, scored_validated_candidates
+
+
 selected = []
 decision_ledger = []
 sector_counts = {}
@@ -5512,12 +5617,106 @@ def per_run_attempt_limit(symbol, needs_research):
         return max_research_attempts_per_stock
     return max_structural_repairs_per_stock
 
+candidate_by_symbol = {str(row["Symbol"]).upper(): row for row in candidate_records}
+
+
+def optimistic_portfolio_capacity(
+        provisional, pending, candidates_by_symbol, sector_limit,
+        excluded_crypto_levels):
+    """Upper bound on slots pending evidence could fill, before 3.5 judges it.
+
+    Only deterministic eligibility and sector limits reduce this bound. Risk,
+    benchmark outlook, and shared-event limits are decided after classification.
+    """
+    counts = {}
+    for item in provisional:
+        sector = item["candidate"]["Sector"]
+        counts[sector] = counts.get(sector, 0) + 1
+    capacity = len(provisional)
+    for symbol, research in pending.items():
+        if not bool(research.get("eligible", True)):
+            continue
+        if excluded_by_crypto_policy(research, excluded_crypto_levels):
+            continue
+        sector = candidates_by_symbol[symbol]["Sector"]
+        if counts.get(sector, 0) < sector_limit:
+            counts[sector] = counts.get(sector, 0) + 1
+            capacity += 1
+    return capacity
+
+
+def classify_pending(force=False):
+    """Judge validated 2.5 drafts in large batches; preserve drafts on failure."""
+    while pending_classification and (force or len(pending_classification) >= classification_batch_target):
+        symbols = list(pending_classification)[:classification_batch_soft_max]
+        tail = len(pending_classification) - len(symbols)
+        if 0 < tail < classification_min_intermediate_batch:
+            symbols = symbols[:max(
+                classification_min_intermediate_batch,
+                len(symbols) - (classification_min_intermediate_batch - tail),
+            )]
+        drafts = [pending_classification[symbol] for symbol in symbols]
+        candidates = [candidate_by_symbol[symbol] for symbol in symbols]
+        judged, judge_model = judge_stock_research_batch(
+            client, drafts, candidates, market_context,
+            previous_run_diagnostics.get("classifications", {}),
+            prior_research_decisions,
+        )
+        if not judge_model:
+            print("Judgment unavailable; leaving validated research queued for a later run.")
+            break
+        models_used.append(judge_model)
+        for candidate, result in zip(candidates, judged):
+            symbol = str(candidate["Symbol"]).upper()
+            cache_key = global_cache_keys_by_symbol[symbol]
+            entry = stock_research_cache["entries"].get(cache_key, {})
+            try:
+                validate_stock_batch(
+                    {"results": [result]}, [candidate],
+                    minimum_sources=minimum_sources_for_candidate(
+                        (entry.get("research_metadata") or {}).get("search_queries", []),
+                        candidate,
+                    ),
+                    allowed_risk_event_ids=allowed_risk_event_ids,
+                )
+                validate_shared_event_consistency(
+                    result, list(validated_cached_research.values())
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                print(f"Classification invalid for {symbol}: {exc}; preserving grounded draft.")
+                research_failures_by_symbol[symbol] = str(exc)
+                stock_research_cache["deferred_entries"][cache_key] = {
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "model": entry.get("research_model") or model_primary,
+                    "research": pending_classification[symbol],
+                    "validation_error": str(exc),
+                    "research_attempts": 0, "repair_attempts": 0,
+                    "research_metadata": entry.get("research_metadata", {}),
+                }
+                stock_research_cache["entries"].pop(cache_key, None)
+            else:
+                validated_cached_research[symbol] = result
+                entry.update({
+                    "research": result,
+                    "judgment_model": judge_model,
+                    "judgment_fallback_used": bool(
+                        judge_model and judge_model != classification_model
+                    ),
+                    "judged_at": datetime.now(UTC).isoformat() if judge_model else None,
+                })
+                stock_research_cache["entries"][cache_key] = entry
+                research_failures_by_symbol.pop(symbol, None)
+            del pending_classification[symbol]
+        save_json_object_atomic(stock_research_cache_file, stock_research_cache)
+        if not force and len(pending_classification) < classification_batch_target:
+            break
+
+
 batch_start = 0
 carried_ranked_candidates = []
 backfill_announced = False
 while batch_start < len(candidate_records) or carried_ranked_candidates:
     validated_for_pool = []
-    validated_pool_sectors = set()
     for pool_candidate in candidate_records:
         pool_symbol = str(pool_candidate["Symbol"]).upper()
         pool_research = validated_cached_research.get(pool_symbol)
@@ -5534,7 +5733,6 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         ):
             continue
         validated_for_pool.append(pool_symbol)
-        validated_pool_sectors.add(str(pool_candidate["Sector"]))
 
     if (
         request_budget.stock_maximum is not None
@@ -5546,17 +5744,29 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         )
         break
 
-    if (
-        batch_start > 0
-        and len(validated_for_pool) >= minimum_validated_candidates_for_final_selection
-        and len(validated_pool_sectors) >= minimum_distinct_sectors_for_final_selection
-    ):
-        print(
-            "Validated final-selection pool is deep enough: "
-            f"{len(validated_for_pool)} eligible candidates across "
-            f"{len(validated_pool_sectors)} sectors. Freezing research pool."
-        )
+    provisional, _, _, _ = build_stock_portfolio(
+        candidate_records, validated_cached_research
+    )
+    if len(provisional) >= target_selected_stocks:
+        print(f"Portfolio fillable: {len(provisional)}/{target_selected_stocks}; freezing research.")
         break
+    optimistic_capacity = optimistic_portfolio_capacity(
+        provisional, pending_classification, candidate_by_symbol,
+        max_stocks_per_sector, excluded_crypto_dependence,
+    )
+    if pending_classification and optimistic_capacity >= target_selected_stocks:
+        print(
+            "Classifying pending research before another 2.5 call: "
+            f"{len(provisional)} selected, {len(pending_classification)} pending, "
+            f"optimistic capacity {optimistic_capacity}/{target_selected_stocks}."
+        )
+        classify_pending(force=True)
+        provisional, _, _, _ = build_stock_portfolio(
+            candidate_records, validated_cached_research
+        )
+        if len(provisional) >= target_selected_stocks:
+            print(f"Portfolio fillable: {len(provisional)}/{target_selected_stocks}; freezing research.")
+            break
 
     if batch_start >= normal_candidate_limit and not backfill_announced:
         print(
@@ -5613,7 +5823,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         symbol = str(candidate["Symbol"]).upper()
         cache_key = global_cache_keys_by_symbol[symbol]
         cache_keys_by_symbol[symbol] = cache_key
-        if symbol in research_failures_by_symbol:
+        if symbol in research_failures_by_symbol or symbol in pending_classification:
             continue
         cached_result = validated_cached_research.get(symbol)
         if cached_result is not None:
@@ -5624,23 +5834,9 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             continue
         uncached_candidates.append(candidate)
 
-    # Keep the first ordinary stock call full. Later calls are sized to fill
-    # the broader validated comparison pool rather than merely the first ten
-    # provisional selections.
+    # Keep ordinary research calls full while the portfolio remains unfillable.
     ordinary_uncached_count = len(uncached_candidates)
-    remaining_pool_slots = max(
-        1,
-        minimum_validated_candidates_for_final_selection
-        - len(validated_for_pool),
-    )
-    desired_research_count = (
-        gemini_batch_size
-        if request_budget.stock_used == 0
-        else min(
-            gemini_batch_size,
-            max(5, remaining_pool_slots),
-        )
-    )
+    desired_research_count = gemini_batch_size
     if (
         uncached_candidates
         and len(uncached_candidates) < desired_research_count
@@ -5890,23 +6086,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             )
             models_used.append(batch_model)
 
-            # Grounded 2.5 research is evidence collection. A no-Search 3.5
-            # pass is the authoritative judgment layer. If 3.5 is unavailable,
-            # retry briefly and then fall back to 2.5 Flash without Search.
-            prior_classification_snapshot = previous_run_diagnostics.get(
-                "classifications", {}
-            )
-            judged_results, judgment_model_used = judge_stock_research_batch(
-                client=client,
-                research_results=batch_data.get("results", []),
-                candidates=pending_candidates,
-                market_context=market_context,
-                previous_classifications=prior_classification_snapshot,
-                peer_classifications=prior_research_decisions,
-            )
-            batch_data["results"] = judged_results
-            if judgment_model_used:
-                models_used.append(judgment_model_used)
+            # Classify only after per-stock research validation below.
+            judgment_model_used = None
 
             requested_research_symbols = {
                 str(candidate["Symbol"]).upper()
@@ -5953,6 +6134,8 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             exhausted_errors = {}
             batch_stats = {
                 "stage": stage,
+                "coverage_status": coverage_status,
+                "coverage_fraction": round(response_coverage, 3),
                 "candidates_sent": len(pending_candidates),
                 "fresh_research_requested": len(requested_research_symbols),
                 "company_searches_exposed": len(
@@ -6138,7 +6321,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     cache_keys_by_symbol[symbol], None
                 )
                 research_by_symbol[symbol] = result
-                validated_cached_research[symbol] = result
+                pending_classification[symbol] = result
                 stock_research_cache["entries"][
                     cache_keys_by_symbol[symbol]
                 ] = {
@@ -6184,6 +6367,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
             save_json_object_atomic(
                 stock_research_cache_file, stock_research_cache
             )
+            classify_pending()
 
             # Valid results from this response have already been cached. Stop
             # only after a stock has received its own complete allowance.
@@ -6198,6 +6382,37 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     "Skipping exhausted invalid research and continuing to "
                     "lower-ranked candidates: " + error_summary
                 )
+
+            # Check the pending evidence before spending a 2.5 call on retries
+            # or fresh candidates. A smaller 3.5 batch is worthwhile if it
+            # might already complete the actual portfolio.
+            provisional, _, _, _ = build_stock_portfolio(
+                candidate_records, validated_cached_research
+            )
+            optimistic_capacity = optimistic_portfolio_capacity(
+                provisional, pending_classification, candidate_by_symbol,
+                max_stocks_per_sector, excluded_crypto_dependence,
+            )
+            if (len(provisional) < target_selected_stocks
+                    and pending_classification
+                    and optimistic_capacity >= target_selected_stocks):
+                print(
+                    "Classifying pending research before another 2.5 call: "
+                    f"{len(provisional)} selected, "
+                    f"{len(pending_classification)} pending, "
+                    f"optimistic capacity {optimistic_capacity}/"
+                    f"{target_selected_stocks}."
+                )
+                classify_pending(force=True)
+                provisional, _, _, _ = build_stock_portfolio(
+                    candidate_records, validated_cached_research
+                )
+            if len(provisional) >= target_selected_stocks:
+                print(
+                    f"Portfolio fillable: {len(provisional)}/"
+                    f"{target_selected_stocks}; stopping stock research."
+                )
+                break
 
             if not next_pending:
                 break
@@ -6232,6 +6447,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                         or future_symbol in retry_symbols
                         or future_symbol in exhausted_symbols
                         or future_symbol in validated_cached_research
+                    or future_symbol in pending_classification
                         or future_symbol in research_failures_by_symbol
                 ):
                     continue
@@ -6356,108 +6572,14 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
         })
         known_peer_symbols.add(symbol)
 
+classify_pending(force=True)
+
 # Rebuild the portfolio from the entire frozen validated pool. Earlier batch
 # selections were provisional only and must not prevent a later, stronger LOW/
 # MODERATE candidate from displacing them.
-selected = []
-decision_ledger = []
-sector_counts = {}
-risk_event_counts = {}
-moderate_selected_count = 0
-
-scored_validated_candidates = []
-for candidate in candidate_records:
-    symbol = str(candidate["Symbol"]).upper()
-    research = validated_cached_research.get(symbol)
-    if research is None:
-        continue
-    scored_validated_candidates.append((
-        final_candidate_score(candidate, research),
-        -int(candidate["QVM Rank"]),
-        candidate,
-        research,
-    ))
-scored_validated_candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
-
-print("FINAL VALIDATED CANDIDATE COMPARISON")
-for score, _, candidate, research in scored_validated_candidates:
-    print(
-        f"  {candidate['Symbol']}: final_score={score:.2f}, "
-        f"qvm={float(candidate.get('QVMScore') or 0):.2f}, "
-        f"risk={combined_reversal_risk(research)}, "
-        f"continuation={research.get('continuation_strength')}, "
-        f"benchmark={research.get('benchmark_outperformance_outlook')}"
-    )
-
-for score, _, candidate, research in scored_validated_candidates:
-    symbol = str(candidate["Symbol"]).upper()
-    sector = candidate["Sector"]
-    sector_count = sector_counts.get(sector, 0)
-    reversal_risk = combined_reversal_risk(research)
-    entry_reversal_risk = str(
-        research.get("entry_reversal_risk") or reversal_risk
-    ).upper()
-    benchmark_outlook = str(
-        research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
-    ).upper()
-    continuation_strength = str(
-        research.get("continuation_strength") or "WEAK"
-    ).upper()
-    explanation = str(research.get("explanation") or "").strip()
-    event_key = normalized_risk_event_key(research)
-
-    status = None
-    if not bool(research.get("eligible", True)):
-        status = "EXCLUDED — ELIGIBILITY"
-    elif excluded_by_crypto_policy(research, excluded_crypto_dependence):
-        status = "EXCLUDED — CRYPTO DEPENDENCE"
-    elif reversal_risk in {"ELEVATED", "SEVERE"}:
-        status = f"NOT SELECTED — {reversal_risk}"
-    elif (
-        exclude_elevated_entry_risk
-        and entry_reversal_risk in {"ELEVATED", "SEVERE"}
-    ):
-        status = f"NOT SELECTED — {entry_reversal_risk} ENTRY RISK"
-    elif (
-        exclude_unlikely_benchmark_outperformance
-        and benchmark_outlook == "UNLIKELY"
-    ):
-        status = "NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY"
-    elif sector_count >= max_stocks_per_sector:
-        status = "SKIPPED — SECTOR CAPACITY"
-    elif (
-        reversal_risk == "MODERATE"
-        and moderate_selected_count >= max_moderate_risk_selections
-    ):
-        status = "NOT SELECTED — MODERATE-RISK CAPACITY"
-    elif (
-        event_key
-        and risk_event_counts.get(event_key, 0) >= max_stocks_per_risk_event
-    ):
-        status = "NOT SELECTED — RISK-EVENT CAPACITY"
-    elif len(selected) >= target_selected_stocks:
-        status = "NOT SELECTED — LOWER FINAL SCORE"
-    else:
-        selected.append({"candidate": candidate, "research": research})
-        sector_counts[sector] = sector_count + 1
-        if reversal_risk == "MODERATE":
-            moderate_selected_count += 1
-        if event_key:
-            risk_event_counts[event_key] = risk_event_counts.get(event_key, 0) + 1
-        status = f"SELECTED — {reversal_risk}"
-
-    decision_ledger.append({
-        "qvm_rank": candidate["QVM Rank"],
-        "symbol": symbol,
-        "sector_group": sector,
-        "status": status,
-        "sector_selected_after": sector_counts.get(sector, 0),
-        "total_selected_after": len(selected),
-        "final_selection_score": score,
-        "continuation_strength": continuation_strength,
-        "benchmark_outperformance_outlook": benchmark_outlook,
-        "explanation": explanation,
-    })
+selected, decision_ledger, sector_counts, scored_validated_candidates = (
+    build_stock_portfolio(candidate_records, validated_cached_research, verbose=True)
+)
 
 # Keep failed research visible in diagnostics even though it cannot enter the
 # frozen comparison pool.
@@ -6566,10 +6688,17 @@ if reconciliation_counts:
 else:
     print("  No Python label reconciliations were needed.")
 
-if len(selected) != target_selected_stocks:
-    raise RuntimeError(
-        f"Only {len(selected)} stocks satisfied all rules after evaluating "
-        f"{len(candidate_records)} candidates; index.html was not replaced."
+if not selected:
+    raise RuntimeError("No stocks passed the full research and classification rules.")
+if len(selected) < target_selected_stocks:
+    print(
+        f"PORTFOLIO SHORTFALL: {len(selected)}/{target_selected_stocks}; "
+        f"QVM pool={len(candidate_records)}, researched unique="
+        f"{len(researched_symbols_this_run)}, classified="
+        f"{len(validated_cached_research)}, invalid="
+        f"{len(research_failures_by_symbol)}, unresearched="
+        f"{len(candidate_records) - len(set(validated_cached_research) | set(research_failures_by_symbol) | researched_symbols_this_run)}. "
+        "Publishing qualified stocks without relaxing selection rules."
     )
 
 recommendations_table = build_recommendations_table(selected)

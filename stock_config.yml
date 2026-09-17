@@ -19,14 +19,16 @@ model_fallback: gemini-2.5-flash-lite
 classification_model: gemini-3.5-flash
 classification_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
-classification_max_output_tokens: 32768
+classification_max_output_tokens: 65536
 classification_attempts: 2
 max_classification_calls_per_run: 8
+classification_batch_target: 25
+classification_batch_soft_max: 30
+classification_min_intermediate_batch: 15
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
 # Evaluate the first 50 candidates normally, then backfill from ranks 51-75
-# only if the validated comparison pool is still too shallow or lacks enough
-# sector breadth for final portfolio construction.
+# only if the real provisional portfolio still has fewer than 10 legal picks.
 normal_candidate_limit: 50
 max_candidates: 75
 target_selected_stocks: 10
@@ -36,10 +38,6 @@ max_stocks_per_risk_event: 2
 qvm_quality_weight: 0.45
 qvm_value_weight: 0.10
 qvm_momentum_weight: 0.45
-# Research a broader validated pool before final portfolio construction so
-# later LOW-risk candidates can displace weaker earlier candidates.
-minimum_validated_candidates_for_final_selection: 20
-minimum_distinct_sectors_for_final_selection: 5
 continuation_strong_bonus: 3.0
 continuation_adequate_bonus: 0.0
 continuation_weak_penalty: -4.0
@@ -289,15 +287,19 @@ prompt_stock_batch: |
   Return every candidate exactly once and never select or omit stocks.
 
   RESEARCH EFFICIENCY
-  For each new candidate, execute exactly one focused company-specific Google
-  search using this compact pattern:
+  PHASE 1: Perform one focused company-specific search for EVERY new
+  candidate before composing any final result blocks. Use this pattern:
   "[Company Name] [Symbol] investor relations latest results guidance pricing margins demand operating metrics"
   Do not assume a calendar-quarter label; use the issuer's latest reported
-  fiscal period. One search can return multiple sources. Do not issue follow-up,
-  earnings-period, or alternative-query searches in the same response. The
-  maximum search-query count equals the number of candidates explicitly
-  requiring fresh research. If one search is insufficient, return INCOMPLETE
-  rather than issuing another query.
+  fiscal period. One search can return multiple sources.
+  PHASE 2: If the first search did not establish a concrete recent operating
+  fact or usable issuer-specific sources, use at most ONE targeted repair
+  search for that candidate inside this same call:
+  "[Company Name] [Symbol] latest earnings release revenue guidance operating metrics investor relations SEC"
+  Never repeat an identical query. At most two searches per candidate, normally
+  15-30 searches for 15 stocks. If still insufficient, return INCOMPLETE.
+  PHASE 3: Return one closed result for EVERY candidate. Prioritize coverage
+  and shorten narratives as needed. Do not silently omit a candidate.
 
   If a DEFERRED VALIDATION CORRECTIONS section is supplied, it overrides the
   preceding search rule. Search only symbols explicitly listed there as
@@ -666,7 +668,7 @@ prompt_stock_batch: |
 
 prompt_html_summary: |
   You are a financial editor. Create polished viewer-facing HTML from a frozen,
-  fully researched 10-stock portfolio.
+  portfolio of up to 10 fully researched qualified stocks.
 
   You will receive:
     1. MARKET_CONTEXT: validated current market research

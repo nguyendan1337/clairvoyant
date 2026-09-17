@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import requests
 from tqdm import tqdm
 from pathlib import Path
 from google import genai
@@ -1272,9 +1273,22 @@ def judge_stock_research_batch(
                     for item in patches if isinstance(item, dict)
                 }
                 missing = [s for s in expected if s in by_symbol and s not in patch_by_symbol]
-                if missing:
+                if not patch_by_symbol or len(patch_by_symbol) != len(patches):
                     raise ValueError(
-                        "Classification response omitted: " + ", ".join(missing)
+                        "Classification returned no distinct, symbol-keyed patches."
+                    )
+                unexpected = sorted(set(patch_by_symbol).difference(expected))
+                if unexpected:
+                    raise ValueError(
+                        "Classification returned unexpected symbols: "
+                        + ", ".join(unexpected)
+                    )
+                if missing:
+                    print(
+                        "Classification response omitted "
+                        + ", ".join(missing)
+                        + "; preserving the returned judgments and queuing only "
+                        "the missing research for later classification."
                     )
 
                 allowed = {
@@ -1294,7 +1308,7 @@ def judge_stock_research_batch(
                 merged = []
                 for symbol in expected:
                     draft = by_symbol.get(symbol)
-                    if draft is None:
+                    if draft is None or symbol not in patch_by_symbol:
                         continue
                     result = dict(draft)
                     patch = patch_by_symbol[symbol]
@@ -1307,9 +1321,11 @@ def judge_stock_research_batch(
                     "model": model_name,
                     "attempt": attempt,
                     "symbols": [x["symbol"] for x in compact_candidates],
+                    "returned_symbols": [x["symbol"] for x in merged],
+                    "missing_symbols": missing,
                     "fallback": model_index > 0,
                     "success": True,
-                    "status": "SUCCESS",
+                    "status": "PARTIAL" if missing else "SUCCESS",
                 })
                 gemini_attempt_diagnostics.append({
                     "stage": "stock_judgment",
@@ -1318,7 +1334,7 @@ def judge_stock_research_batch(
                     "category": "classification",
                     "search_enabled": False,
                     "symbols": [x["symbol"] for x in compact_candidates],
-                    "status": "SUCCESS",
+                    "status": "PARTIAL" if missing else "SUCCESS",
                 })
                 if model_index > 0:
                     print(
@@ -1690,6 +1706,58 @@ def validate_sources(sources, label, minimum=1, maximum=None):
         )
 
     return {}
+
+
+def validate_stock_research_evidence(
+        data, expected_candidates, minimum_sources=1):
+    """Validate the 2.5 evidence packet without requiring 3.5 judgment fields."""
+    results = data.get("results")
+    if not isinstance(results, list) or len(results) != len(expected_candidates):
+        raise ValueError("Research results do not match the supplied candidates.")
+    for candidate, result in zip(expected_candidates, results):
+        symbol = str(candidate["Symbol"]).upper()
+        if not isinstance(result, dict) or str(result.get("symbol") or "").upper() != symbol:
+            raise ValueError(f"Research identity/order mismatch for {symbol}.")
+        status = str(result.get("research_status") or "COMPLETE").strip().upper()
+        if status == "INCOMPLETE":
+            reason = str(result.get("research_incomplete_reason") or "").strip()
+            if incomplete_identity_conflicts_with_current_market_data(reason, candidate):
+                reason = (
+                    "issuer identity conflict: verify the current issuer using "
+                    "an official source, including possible relisting or spin-off"
+                )
+            raise ValueError(
+                f"{symbol} research incomplete: {reason or 'current evidence missing'}"
+            )
+        if status != "COMPLETE":
+            raise ValueError(f"{symbol} has invalid research_status {status!r}.")
+        result["research_status"] = status
+        result["qvm_rank"] = int(candidate["QVM Rank"])
+        result["eligible"] = True
+        result["eligibility_reason"] = None
+        for field in (
+                "business_description", "industry_context",
+                "current_operating_evidence"):
+            value = " ".join(str(result.get(field) or "").split())
+            if not value:
+                raise ValueError(f"{symbol} research incomplete: missing {field}.")
+            result[field] = value
+        drivers = result.get("durable_drivers")
+        if not isinstance(drivers, list) or not any(str(x).strip() for x in drivers):
+            raise ValueError(f"{symbol} research incomplete: missing durable drivers.")
+        result["crypto_dependence"] = normalize_crypto_dependence(result)
+        sources = result.get("sources")
+        if isinstance(sources, list):
+            result["sources"] = prioritize_stock_sources(sources, max_stock_sources)
+        validate_sources(
+            result.get("sources"), symbol,
+            minimum=max(1, minimum_sources), maximum=max_stock_sources,
+        )
+        print(
+            f"Validated grounded research [{symbol}]: "
+            f"{len({str(x['url']).strip() for x in result['sources']})} "
+            "distinct source URLs; awaiting judgment."
+        )
 
 
 def validate_market_context(data):
@@ -5399,26 +5467,69 @@ for candidate in candidate_records:
     global_cache_keys_by_symbol[symbol] = cache_key
     entry = stock_research_cache["entries"].get(cache_key)
     if not entry:
+        deferred = stock_research_cache["deferred_entries"].get(cache_key)
+        if (isinstance(deferred, dict)
+                and isinstance(deferred.get("research"), dict)
+                and "invalid continuation_strength" in str(
+                    deferred.get("validation_error") or ""
+                )):
+            # Older runs incorrectly demanded a 3.5-owned field from 2.5.
+            # Recover the grounded draft when it passes research validation.
+            draft = deferred.get("research")
+            metadata = deferred.get("research_metadata") or {}
+            try:
+                validate_stock_research_evidence(
+                    {"results": [draft]}, [candidate],
+                    minimum_sources=minimum_sources_for_candidate(
+                        metadata.get("search_queries", []), candidate
+                    ),
+                )
+            except (KeyError, TypeError, ValueError):
+                pass
+            else:
+                entry = {
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "model": deferred.get("model") or model_primary,
+                    "research_model": deferred.get("model") or model_primary,
+                    "judgment_model": None,
+                    "market_context_hash": market_context_hash,
+                    "stock_prompt_hash": stock_prompt_hash,
+                    "candidate_hash": stable_json_hash(candidate),
+                    "research": draft,
+                    "research_metadata": metadata,
+                }
+                stock_research_cache["entries"][cache_key] = entry
+                stock_research_cache["deferred_entries"].pop(cache_key, None)
+                print(f"Recovered grounded research for {symbol} for 3.5 classification.")
+    if not entry:
         continue
     try:
         cached_result = entry["research"]
         cached_search_queries = entry.get(
             "research_metadata", {}
         ).get("search_queries", [])
-        validate_stock_batch(
-            {"results": [cached_result]},
-            [candidate],
-            minimum_sources=minimum_sources_for_candidate(
-                cached_search_queries, candidate
-            ),
-            allowed_risk_event_ids=allowed_risk_event_ids,
+        cache_minimum_sources = minimum_sources_for_candidate(
+            cached_search_queries, candidate
         )
+        if entry.get("judgment_model"):
+            validate_stock_batch(
+                {"results": [cached_result]}, [candidate],
+                minimum_sources=cache_minimum_sources,
+                allowed_risk_event_ids=allowed_risk_event_ids,
+            )
+        else:
+            validate_stock_research_evidence(
+                {"results": [cached_result]}, [candidate],
+                minimum_sources=cache_minimum_sources,
+            )
         if entry.get("judgment_model"):
             validated_cached_research[symbol] = cached_result
         else:
             pending_classification[symbol] = cached_result
     except (KeyError, TypeError, ValueError) as exc:
         print(f"Ignoring invalid stock cache entry for {symbol}: {exc}")
+
+save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
 # Individual cache entries can each be structurally valid while disagreeing
 # about a shared market mechanism. Audit them together before deciding the
@@ -5594,6 +5705,8 @@ risk_event_counts = {}
 moderate_selected_count = 0
 prior_research_decisions = []
 research_failures_by_symbol = {}
+classification_failures_by_symbol = {}
+classification_unavailable_this_run = False
 models_used = [market_model]
 researched_symbols_this_run = set()
 stock_search_attempts_this_run = 0
@@ -5647,6 +5760,9 @@ def optimistic_portfolio_capacity(
 
 def classify_pending(force=False):
     """Judge validated 2.5 drafts in large batches; preserve drafts on failure."""
+    global classification_unavailable_this_run
+    if classification_unavailable_this_run:
+        return
     while pending_classification and (force or len(pending_classification) >= classification_batch_target):
         symbols = list(pending_classification)[:classification_batch_soft_max]
         tail = len(pending_classification) - len(symbols)
@@ -5664,10 +5780,15 @@ def classify_pending(force=False):
         )
         if not judge_model:
             print("Judgment unavailable; leaving validated research queued for a later run.")
+            classification_unavailable_this_run = True
             break
         models_used.append(judge_model)
-        for candidate, result in zip(candidates, judged):
-            symbol = str(candidate["Symbol"]).upper()
+        valid_count = 0
+        for result in judged:
+            symbol = str(result.get("symbol") or "").upper()
+            if symbol not in symbols or symbol not in pending_classification:
+                continue
+            candidate = candidate_by_symbol[symbol]
             cache_key = global_cache_keys_by_symbol[symbol]
             entry = stock_research_cache["entries"].get(cache_key, {})
             try:
@@ -5683,18 +5804,12 @@ def classify_pending(force=False):
                     result, list(validated_cached_research.values())
                 )
             except (KeyError, TypeError, ValueError) as exc:
-                print(f"Classification invalid for {symbol}: {exc}; preserving grounded draft.")
-                research_failures_by_symbol[symbol] = str(exc)
-                stock_research_cache["deferred_entries"][cache_key] = {
-                    "created_at": datetime.now(UTC).isoformat(),
-                    "model": entry.get("research_model") or model_primary,
-                    "research": pending_classification[symbol],
-                    "validation_error": str(exc),
-                    "research_attempts": 0, "repair_attempts": 0,
-                    "research_metadata": entry.get("research_metadata", {}),
-                }
-                stock_research_cache["entries"].pop(cache_key, None)
+                print(f"Classification invalid for {symbol}: {exc}; preserving grounded draft for a future judgment.")
+                classification_failures_by_symbol[symbol] = str(exc)
+                # Keep the previously validated 2.5 evidence in entries with
+                # judgment_model=None. It must not consume another Search call.
             else:
+                valid_count += 1
                 validated_cached_research[symbol] = result
                 entry.update({
                     "research": result,
@@ -5706,8 +5821,16 @@ def classify_pending(force=False):
                 })
                 stock_research_cache["entries"][cache_key] = entry
                 research_failures_by_symbol.pop(symbol, None)
+                classification_failures_by_symbol.pop(symbol, None)
             del pending_classification[symbol]
         save_json_object_atomic(stock_research_cache_file, stock_research_cache)
+        if valid_count == 0:
+            print(
+                "No judgments passed final validation; stopping further 2.5 "
+                "research. Grounded drafts remain cached for later classification."
+            )
+            classification_unavailable_this_run = True
+            break
         if not force and len(pending_classification) < classification_batch_target:
             break
 
@@ -5716,6 +5839,9 @@ batch_start = 0
 carried_ranked_candidates = []
 backfill_announced = False
 while batch_start < len(candidate_records) or carried_ranked_candidates:
+    if classification_unavailable_this_run:
+        print("Stopping stock research because no classification model is available.")
+        break
     validated_for_pool = []
     for pool_candidate in candidate_records:
         pool_symbol = str(pool_candidate["Symbol"]).upper()
@@ -5979,6 +6105,13 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         # batch calls. Targeted calls contain only candidates that failed the
         # preceding validation attempt.
         while pending_candidates:
+            if (request_budget.stock_maximum is not None
+                    and request_budget.stock_used >= request_budget.stock_maximum):
+                print(
+                    "Stock research-call budget exhausted with pending retries; "
+                    "keeping validated evidence and proceeding to classification."
+                )
+                break
             research_round += 1
             research_required_symbols = {
                 str(candidate["Symbol"]).upper()
@@ -6237,16 +6370,10 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     batch_metadata["search_queries"], candidate
                 )
                 try:
-                    validate_stock_batch(
+                    validate_stock_research_evidence(
                         {"results": [result]},
                         [candidate],
                         minimum_sources=minimum_sources,
-                        allowed_risk_event_ids=allowed_risk_event_ids,
-                    )
-                    validate_shared_event_consistency(
-                        result,
-                        list(research_by_symbol.values())
-                        + prior_research_decisions,
                     )
                 except (KeyError, TypeError, ValueError) as exc:
                     # Keep the normalized, otherwise usable object so the next
@@ -6419,6 +6546,9 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     f"{target_selected_stocks}; stopping stock research."
                 )
                 break
+            if classification_unavailable_this_run:
+                print("Stopping retries because no classification model is available.")
+                break
 
             if not next_pending:
                 break
@@ -6546,7 +6676,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
     }
     for candidate in ranked_batch:
         symbol = str(candidate["Symbol"]).upper()
-        research = research_by_symbol.get(symbol)
+        research = validated_cached_research.get(symbol)
         if research is None or symbol in known_peer_symbols:
             continue
         prior_research_decisions.append({
@@ -6607,6 +6737,20 @@ for candidate in candidate_records:
             "continuation_strength": None,
             "benchmark_outperformance_outlook": None,
             "explanation": "Research did not pass validation: " + failure_reason,
+        })
+    elif symbol in classification_failures_by_symbol:
+        decision_ledger.append({
+            "qvm_rank": candidate["QVM Rank"],
+            "symbol": symbol,
+            "sector_group": candidate["Sector"],
+            "status": "SKIPPED — CLASSIFICATION INVALID",
+            "sector_selected_after": sector_counts.get(candidate["Sector"], 0),
+            "total_selected_after": len(selected),
+            "final_selection_score": None,
+            "continuation_strength": None,
+            "benchmark_outperformance_outlook": None,
+            "explanation": "Judgment did not pass final validation: "
+                           + classification_failures_by_symbol[symbol],
         })
 
 validate_final_research_state(validated_cached_research)
@@ -6702,7 +6846,8 @@ if len(selected) < target_selected_stocks:
         f"QVM pool={len(candidate_records)}, researched unique="
         f"{len(researched_symbols_this_run)}, classified="
         f"{len(validated_cached_research)}, invalid="
-        f"{len(research_failures_by_symbol)}, unresearched="
+        f"{len(research_failures_by_symbol)}, judgment invalid="
+        f"{len(classification_failures_by_symbol)}, unresearched="
         f"{len(candidate_records) - len(set(validated_cached_research) | set(research_failures_by_symbol) | researched_symbols_this_run)}. "
         "Publishing qualified stocks without relaxing selection rules."
     )
@@ -6862,6 +7007,7 @@ run_report = {
     "gemini_call_ledger": gemini_attempt_diagnostics,
     "successful_gemini_metadata": gemini_call_diagnostics,
     "classification_calls": classification_call_diagnostics,
+    "classification_validation_failures": classification_failures_by_symbol,
     "token_totals": {
         field: summed_call_metric(field)
         for field in (

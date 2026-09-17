@@ -3,12 +3,12 @@ Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
 Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=7, max_stock_calls=5, research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cache_version=6, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
-Effective 52-week stock hurdle: 35.22% from VGT.
+Effective 52-week stock hurdle: 35.23% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
 Top QVM pickle loaded successfully.
-Using cached top 75 QVM stocks (1.0h old).
+Using cached top 75 QVM stocks (1.5h old).
 
 Top QVM Stocks:
    Symbol   QVMScore   3M Return   1Y Return
@@ -27,14 +27,105 @@ Top QVM Stocks:
 [75 rows x 4 columns]
 Using validated market context cache: caches/gemini_market_context_cache.json
 Dynamic market risk-event catalog: 4 canonical event(s).
+Reusing grounded research for INSW; refreshing return-driver judgment.
+Validated grounded research [INSW]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for ECO; refreshing return-driver judgment.
+Validated grounded research [ECO]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for TNK; refreshing return-driver judgment.
+Validated grounded research [TNK]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for NAT; refreshing return-driver judgment.
+Validated grounded research [NAT]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for LPG; refreshing return-driver judgment.
+Validated grounded research [LPG]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for TEN; refreshing return-driver judgment.
+Validated grounded research [TEN]: 2 distinct source URLs; awaiting judgment.
+Reusing grounded research for FRO; refreshing return-driver judgment.
+Validated grounded research [FRO]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for SLDE; refreshing return-driver judgment.
+Validated grounded research [SLDE]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for DHT; refreshing return-driver judgment.
+Validated grounded research [DHT]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for TRMD; refreshing return-driver judgment.
+Validated grounded research [TRMD]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for WDOFF; refreshing return-driver judgment.
+Validated grounded research [WDOFF]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for PBT; refreshing return-driver judgment.
+Validated grounded research [PBT]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for MAKO; refreshing return-driver judgment.
+Validated grounded research [MAKO]: 2 distinct source URLs; awaiting judgment.
+Reusing grounded research for AYA; refreshing return-driver judgment.
+Validated grounded research [AYA]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for ARREF; refreshing return-driver judgment.
+Validated grounded research [ARREF]: 2 distinct source URLs; awaiting judgment.
+Reusing grounded research for FTNT; refreshing return-driver judgment.
+Validated grounded research [FTNT]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for STNG; refreshing return-driver judgment.
+Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for SHIP; refreshing return-driver judgment.
+Validated grounded research [SHIP]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for HAFN; refreshing return-driver judgment.
+Validated grounded research [HAFN]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for DINO; refreshing return-driver judgment.
+Validated grounded research [DINO]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for SBLK; refreshing return-driver judgment.
+Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for CGAU; refreshing return-driver judgment.
+Validated grounded research [CGAU]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for PTGX; refreshing return-driver judgment.
+Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for CDNA; refreshing return-driver judgment.
+Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for NMM; refreshing return-driver judgment.
+Validated grounded research [NMM]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for RCRUY; refreshing return-driver judgment.
+Validated grounded research [RCRUY]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for NUTX; refreshing return-driver judgment.
+Validated grounded research [NUTX]: 3 distinct source URLs; awaiting judgment.
+Reusing grounded research for HNGE; refreshing return-driver judgment.
+Validated grounded research [HNGE]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for AUGO; refreshing return-driver judgment.
+Validated grounded research [AUGO]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for SB; refreshing return-driver judgment.
+Validated grounded research [SB]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for DSVSF; refreshing return-driver judgment.
+Validated grounded research [DSVSF]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for VCTR; refreshing return-driver judgment.
+Validated grounded research [VCTR]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for ETON; refreshing return-driver judgment.
+Validated grounded research [ETON]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for PAYS; refreshing return-driver judgment.
+Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for MGTX; refreshing return-driver judgment.
+Validated grounded research [MGTX]: 4 distinct source URLs; awaiting judgment.
+Reusing grounded research for KRT; refreshing return-driver judgment.
+Validated grounded research [KRT]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for PURR; refreshing return-driver judgment.
+Validated grounded research [PURR]: 5 distinct source URLs; awaiting judgment.
+Reusing grounded research for ILMN; refreshing return-driver judgment.
+Validated grounded research [ILMN]: 5 distinct source URLs; awaiting judgment.
+Classifying pending research before another 2.5 call: 0 selected, 38 pending, optimistic capacity 14/10.
+Gemini classification request 1/8: stock judgment for 23 stocks (gemini-3.5-flash, attempt 1/2)
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Applied cautious temporary-dependence floor to INSW: MODERATE->MODERATE without another Gemini call.
 Validated JSON sources [INSW]: 3 distinct URLs
+Reconciled ECO MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
+  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'HIGH', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': '6_12_MONTHS', 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Elevated TCE rates for VLCCs and Suezmax tankers'], 'continuation_strength': 'WEAK'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Elevated TCE rates for VLCCs and Suezmax tankers'], 'continuation_strength': 'WEAK'}
 Validated JSON sources [ECO]: 3 distinct URLs
+Validated JSON sources [TNK]: 4 distinct URLs
+Classification invalid for TNK: TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference.; preserving grounded draft for a future judgment.
+Reconciled NAT MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
+  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'HIGH', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': '6_12_MONTHS', 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Exceptional conditions for Suezmax vessels, with rates and values up'], 'continuation_strength': 'WEAK'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Exceptional conditions for Suezmax vessels, with rates and values up'], 'continuation_strength': 'WEAK'}
 Validated JSON sources [NAT]: 3 distinct URLs
+Reconciled LPG MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
+  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'HIGH', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': '6_12_MONTHS', 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Record TCE revenue per day driven by Strait of Hormuz closure and Middle East geopolitical disruption'], 'continuation_strength': 'WEAK'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Record TCE revenue per day driven by Strait of Hormuz closure and Middle East geopolitical disruption'], 'continuation_strength': 'WEAK'}
 Validated JSON sources [LPG]: 3 distinct URLs
+Reconciled TEN MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
+  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'HIGH', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': '6_12_MONTHS', 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Strong freight markets and higher profit-sharing income'], 'continuation_strength': 'WEAK'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Strong freight markets and higher profit-sharing income'], 'continuation_strength': 'WEAK'}
 Validated JSON sources [TEN]: 2 distinct URLs
+Reconciled FRO MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
+  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'HIGH', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': '6_12_MONTHS', 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Elevated TCE rates for VLCCs, Suezmax, and LR2/Aframax tankers driven by Strait of Hormuz risks, Red Sea and Black Sea disruptions'], 'continuation_strength': 'WEAK'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_ESTABLISHED', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'HIGH', 'temporary_drivers': ['Elevated TCE rates for VLCCs, Suezmax, and LR2/Aframax tankers driven by Strait of Hormuz risks, Red Sea and Black Sea disruptions'], 'continuation_strength': 'WEAK'}
 Validated JSON sources [FRO]: 3 distinct URLs
-Validated grounded research [SLDE]: 3 distinct source URLs; awaiting judgment.
+Validated JSON sources [SLDE]: 5 distinct URLs
 Applied cautious temporary-dependence floor to DHT: MODERATE->MODERATE without another Gemini call.
 Validated JSON sources [DHT]: 4 distinct URLs
 Applied cautious temporary-dependence floor to TRMD: MODERATE->MODERATE without another Gemini call.
@@ -52,152 +143,66 @@ Validated JSON sources [SHIP]: 3 distinct URLs
 Validated JSON sources [HAFN]: 4 distinct URLs
 Applied cautious temporary-dependence floor to DINO: MODERATE->MODERATE without another Gemini call.
 Validated JSON sources [DINO]: 5 distinct URLs
-Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+Validated JSON sources [SBLK]: 4 distinct URLs
 Validated JSON sources [CGAU]: 4 distinct URLs
-Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
+Classification invalid for PTGX: PTGX MODERATE fields violate mechanism mapping.; preserving grounded draft for a future judgment.
+Gemini classification request 2/8: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/2)
+Classification invalid for CDNA: CDNA MODERATE fields violate mechanism mapping.; preserving grounded draft for a future judgment.
 Applied cautious temporary-dependence floor to NMM: MODERATE->MODERATE without another Gemini call.
 Validated JSON sources [NMM]: 4 distinct URLs
 Validated JSON sources [RCRUY]: 4 distinct URLs
 Validated JSON sources [NUTX]: 3 distinct URLs
 Validated JSON sources [HNGE]: 5 distinct URLs
 Validated JSON sources [AUGO]: 5 distinct URLs
-Validated grounded research [SB]: 5 distinct source URLs; awaiting judgment.
+Validated JSON sources [SB]: 5 distinct URLs
 Validated JSON sources [DSVSF]: 5 distinct URLs
 Validated JSON sources [VCTR]: 4 distinct URLs
 Validated JSON sources [ETON]: 5 distinct URLs
+Validated JSON sources [PAYS]: 4 distinct URLs
+Validated JSON sources [MGTX]: 4 distinct URLs
 Validated JSON sources [KRT]: 5 distinct URLs
 Validated JSON sources [PURR]: 5 distinct URLs
 Validated JSON sources [ILMN]: 5 distinct URLs
-Cross-company similarity noted for INSW/DHT but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/NAT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/LPG but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/TEN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/FRO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/HAFN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/LPG but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/TEN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/FRO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/HAFN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for NAT/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for LPG/TEN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for LPG/FRO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for LPG/HAFN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for LPG/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for LPG/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TEN/FRO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TEN/HAFN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TEN/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TEN/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/HAFN but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HAFN/AUGO but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HAFN/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/KRT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Classifying pending research before another 2.5 call: 7 selected, 5 pending, optimistic capacity 10/10.
-Gemini classification request 1/8: stock judgment for 5 stocks (gemini-3.5-flash, attempt 1/2)
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Classification invalid for SLDE: SLDE MODERATE fields violate mechanism mapping.; preserving grounded draft for a future judgment.
-Validated JSON sources [SBLK]: 4 distinct URLs
-Classification invalid for PTGX: PTGX has invalid continuation_outlook 'UNCERTAIN'.; preserving grounded draft for a future judgment.
-Classification invalid for CDNA: CDNA MODERATE fields violate mechanism mapping.; preserving grounded draft for a future judgment.
-Validated JSON sources [SB]: 5 distinct URLs
-Deferred excess same-sector research candidates: DHT, TRMD, PBT, TK
-Using validated stock research cache for INSW.
-Using validated stock research cache for ECO.
-Using validated stock research cache for NAT.
-Using validated stock research cache for LPG.
-Using validated stock research cache for TEN.
-Using validated stock research cache for FRO.
-Using validated stock research cache for WDOFF.
-Using validated stock research cache for MAKO.
-Using validated stock research cache for AYA.
-Filled ordinary research batch with future uncached QVM candidates: TNK, SLDE, PAYS, MGTX
-Using deferred research draft for TNK; allowing a fresh per-run attempt (previous run: research=2, repair=2).
-Using deferred research draft for PAYS; allowing a fresh per-run attempt (previous run: research=1, repair=0).
-Using deferred research draft for MGTX; allowing a fresh per-run attempt (previous run: research=1, repair=0).
-
-...calling Gemini for stock batch: TNK, SLDE, PAYS, MGTX...
-
-Gemini logical request 1/7: stock batch containing 4 stocks, spanning QVM ranks 3-46 (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 1)
-Gemini usage [stock batch containing 4 stocks, spanning QVM ranks 3-46]: prompt_tokens=19878, tool_tokens=20764, cached_tokens=19054, thinking_tokens=8568, output_tokens=5711, total_tokens=54921
-Google searches performed [stock batch containing 4 stocks, spanning QVM ranks 3-46]: 4
-  Search: Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics
-  Search: Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics
-Grounding citation chunks exposed [stock batch containing 4 stocks, spanning QVM ranks 3-46]: 10
-Recovered independently delimited stock results: TNK, SLDE, PAYS, MGTX
-Stock response coverage: 4/4 returned; 0 missing; status=NORMAL.
-Research searches requested this call: 4 total; 4 first, 0 repeated.
-Cross-company similarity noted for SLDE/PAYS but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for SLDE/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for PAYS/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Validated grounded research [TNK]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [SLDE]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [MGTX]: 4 distinct source URLs; awaiting judgment.
-Batch research summary:
-  candidates sent: 4
-  company searches exposed: 4
-  results returned: 4
-  results validated: 4
-  incomplete research: 0
-  structural repairs needed: 0
-  genuine repeated searches: 0
-  missing/unsearched attempts refunded: 0
-Classifying pending research before another 2.5 call: 9 selected, 4 pending, optimistic capacity 12/10.
-Gemini classification request 2/8: stock judgment for 4 stocks (gemini-3.5-flash, attempt 1/2)
-Validated JSON sources [TNK]: 4 distinct URLs
-Classification invalid for TNK: TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference.; preserving grounded draft for a future judgment.
-Validated JSON sources [SLDE]: 5 distinct URLs
-Reconciled PAYS MODERATE to LOW without another Gemini call: no qualifying current probability indicator.
-  Reconciliation evidence: before={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_APPLICABLE', 'risk_materiality': 'LOW', 'current_fact': 'Q2 2026 revenue of $28.25 million and diluted EPS of $0.11.', 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'LOW', 'temporary_drivers': [], 'continuation_strength': 'STRONG'}; after={'mechanism_status': 'HYPOTHETICAL', 'normalization_probability': 'NOT_APPLICABLE', 'risk_materiality': 'LOW', 'current_fact': None, 'probability_evidence': None, 'material_effect': None, 'risk_time_horizon': None, 'probability_indicator_type': 'NONE', 'probability_basis': 'NONE', 'catalyst_dependence': 'LOW', 'temporary_drivers': [], 'continuation_strength': 'STRONG'}
-Validated JSON sources [PAYS]: 4 distinct URLs
-Validated JSON sources [MGTX]: 4 distinct URLs
-Portfolio meeting final quality bar: 10/10; stopping stock research.
 Portfolio meeting final quality bar: 10/10; freezing research.
 FINAL VALIDATED CANDIDATE COMPARISON
-  SLDE: final_score=88.87, qvm=77.87, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  CGAU: final_score=84.07, qvm=71.07, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None
-  SBLK: final_score=83.13, qvm=71.13, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  RCRUY: final_score=82.69, qvm=69.69, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None
-  NUTX: final_score=82.38, qvm=69.38, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None
-  HNGE: final_score=82.09, qvm=69.09, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None
-  SB: final_score=80.61, qvm=68.61, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  DSVSF: final_score=80.26, qvm=68.26, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  VCTR: final_score=79.94, qvm=67.94, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  ETON: final_score=79.48, qvm=67.48, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  ILMN: final_score=79.10, qvm=67.10, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  PAYS: final_score=78.24, qvm=67.24, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  AYA: final_score=76.31, qvm=73.31, risk=LOW, continuation=STRONG, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None
-  FTNT: final_score=75.85, qvm=72.85, risk=LOW, continuation=STRONG, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=AI_VALUATION_CONCENTRATION
-  INSW: final_score=75.76, qvm=84.76, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  MGTX: final_score=75.20, qvm=67.20, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  ECO: final_score=74.19, qvm=81.19, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  WDOFF: final_score=73.88, qvm=74.88, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None
-  MAKO: final_score=72.37, qvm=73.37, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None
-  NAT: final_score=72.01, qvm=79.01, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  LPG: final_score=72.00, qvm=79.00, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  ARREF: final_score=71.94, qvm=72.94, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None
-  TEN: final_score=71.65, qvm=78.65, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  FRO: final_score=71.59, qvm=78.59, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  DHT: final_score=68.79, qvm=77.79, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  AUGO: final_score=66.82, qvm=68.82, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None
-  TRMD: final_score=66.57, qvm=75.57, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  HAFN: final_score=64.74, qvm=71.74, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  SHIP: final_score=64.17, qvm=72.17, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GLOBAL_FREIGHT_CONSTRAINTS
-  STNG: final_score=63.20, qvm=72.20, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  DINO: final_score=63.18, qvm=71.18, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  NMM: final_score=61.58, qvm=70.58, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION
-  PBT: final_score=61.25, qvm=74.25, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=ACTIVE, risk_event=None
-  KRT: final_score=-935.85, qvm=67.15, risk=LOW, continuation=WEAK, benchmark=UNLIKELY, mechanism=HYPOTHETICAL, risk_event=None
-  PURR: final_score=-942.87, qvm=67.13, risk=ELEVATED, continuation=WEAK, benchmark=UNCERTAIN, mechanism=UNUSUALLY_PROBABLE, risk_event=None
-Research efficiency: 4 unique stocks, 4 requested searches, 0 repeated searches.
+  SLDE: final_score=88.87, qvm=77.87, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=None
+  CGAU: final_score=84.07, qvm=71.07, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
+  SBLK: final_score=83.13, qvm=71.13, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=DRY_BULK_SHIPPING_CYCLE
+  RCRUY: final_score=82.69, qvm=69.69, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=GLOBAL_LABOR_MARKET_DEMAND
+  NUTX: final_score=82.38, qvm=69.38, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=HEALTHCARE_SERVICES_DEMAND
+  HNGE: final_score=82.09, qvm=69.09, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=DIGITAL_HEALTHCARE_ADOPTION
+  SB: final_score=80.61, qvm=68.61, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=DRY_BULK_SHIPPING_CYCLE
+  DSVSF: final_score=80.26, qvm=68.26, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
+  VCTR: final_score=79.94, qvm=67.94, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=ASSET_MANAGEMENT_AUM
+  ETON: final_score=79.48, qvm=67.48, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=RARE_DISEASE_THERAPEUTICS
+  ILMN: final_score=79.10, qvm=67.10, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GENOMIC_SEQUENCING_MARKET
+  PAYS: final_score=78.24, qvm=67.24, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=PLASMA_DONOR_COPAYMENT_PROCESSING
+  AYA: final_score=76.31, qvm=73.31, risk=LOW, continuation=STRONG, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=SILVER_GOLD_PRICE_VOLATILITY
+  FTNT: final_score=75.85, qvm=72.85, risk=LOW, continuation=STRONG, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=AI_VALUATION_CONCENTRATION, return_driver=TECHNOLOGY_VALUATION_SHIFTS
+  INSW: final_score=75.76, qvm=84.76, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  MGTX: final_score=75.20, qvm=67.20, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GENETIC_MEDICINES_DEVELOPMENT
+  ECO: final_score=74.19, qvm=81.19, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  WDOFF: final_score=73.88, qvm=74.88, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICE_VOLATILITY
+  MAKO: final_score=72.37, qvm=73.37, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICE_VOLATILITY
+  NAT: final_score=72.01, qvm=79.01, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  LPG: final_score=72.00, qvm=79.00, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=LPG_TANKER_SPOT_RATES
+  ARREF: final_score=71.94, qvm=72.94, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=COPPER_PRICE_VOLATILITY
+  TEN: final_score=71.65, qvm=78.65, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  FRO: final_score=71.59, qvm=78.59, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  DHT: final_score=68.79, qvm=77.79, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
+  AUGO: final_score=66.82, qvm=68.82, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
+  TRMD: final_score=66.57, qvm=75.57, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
+  HAFN: final_score=64.74, qvm=71.74, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
+  SHIP: final_score=64.17, qvm=72.17, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GLOBAL_FREIGHT_CONSTRAINTS, return_driver=DRY_BULK_FREIGHT_RATES
+  STNG: final_score=63.20, qvm=72.20, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
+  DINO: final_score=63.18, qvm=71.18, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
+  NMM: final_score=61.58, qvm=70.58, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_ENERGY_DISRUPTION, return_driver=DRY_BULK_AND_TANKER_SPOT_RATES
+  PBT: final_score=61.25, qvm=74.25, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=ACTIVE, risk_event=None, return_driver=OIL_AND_GAS_ROYALTY_INCOME
+  KRT: final_score=-935.85, qvm=67.15, risk=LOW, continuation=WEAK, benchmark=UNLIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=NONRECURRING_TARIFF_REFUNDS
+  PURR: final_score=-942.87, qvm=67.13, risk=ELEVATED, continuation=WEAK, benchmark=UNCERTAIN, mechanism=UNUSUALLY_PROBABLE, risk_event=None, return_driver=CRYPTOCURRENCY_ASSET_VALUATION
+  Return-driver comparison [SB, DRY_BULK_SHIPPING_CYCLE]: 80.61 vs independent VCTR 79.94; minimum lead 2.00; NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR
+  Return-driver comparison [DSVSF, GOLD_AND_COPPER_PRICES]: 80.26 vs independent VCTR 79.94; minimum lead 2.00; NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR
+Research efficiency: 0 unique stocks, 0 requested searches, 0 repeated searches.
 
 CONTEXT REVIEW
 
@@ -209,17 +214,17 @@ CONTEXT REVIEW
 |         28 | RCRUY    | Communication Services | SELECTED — LOW                                   |       82.6857 | STRONG         | LIKELY              |                       1 |                      4 | Recruit Holdings reported strong Q1 FY2026 revenue, exceeding expectations, and analysts anticipate significant EPS growth. With a diversified business model and no identified temporary drivers or probable reversal mechanisms, the company exhibits a low reversal risk.                                                                                                                                                                                                    |
 |         31 | NUTX     | Healthcare             | SELECTED — LOW                                   |       82.3797 | STRONG         | LIKELY              |                       1 |                      5 | Nutex Health reported a significant increase in Q2 2026 net income and growing hospital visits, driven by its integrated healthcare model. With no identified temporary operating drivers or probable reversal mechanisms, the company exhibits a low reversal risk.                                                                                                                                                                                                            |
 |         33 | HNGE     | Healthcare             | SELECTED — LOW                                   |       82.0928 | STRONG         | LIKELY              |                       2 |                      6 | Hinge Health reported strong Q2 2026 revenue growth and raised full-year guidance, driven by strong member conversion and expansion into new care areas. With no identified temporary drivers or probable reversal mechanisms, the company exhibits a low reversal risk.                                                                                                                                                                                                        |
-|         36 | SB       | Industrials            | SELECTED — LOW                                   |       80.6053 | STRONG         | LIKELY              |                       2 |                      7 | Safe Bulkers reported Q2 2026 GAAP EPS of $0.33 and revenue of $91.22 million, exceeding analyst expectations. The company maintains consistent dividend payments. While the drybulk shipping industry is cyclical, there is no current evidence of a probable material reversal in operating conditions within the next 6-12 months.                                                                                                                                           |
-|         38 | DSVSF    | Basic Materials        | SELECTED — LOW                                   |       80.2616 | STRONG         | LIKELY              |                       2 |                      8 | Discovery Mining reported record Q2 2026 revenue and strong gold production, significantly increasing year-over-year. The company is expanding processing capacity through acquisitions and has ongoing exploration success. While commodity prices are inherently volatile, there is no current evidence suggesting a probable material business reversal within 6-12 months.                                                                                                  |
-|         39 | VCTR     | Financial Services     | SELECTED — LOW                                   |       79.9356 | STRONG         | LIKELY              |                       2 |                      9 | Victory Capital reported record Q2 2026 revenue and significant long-term net inflows, driven by strong investment performance and broad distribution. The company's consistent fee rate and industry-leading margins support continuation. No current evidence suggests a probable material business reversal within 6-12 months.                                                                                                                                              |
-|         43 | ETON     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       79.478  | STRONG         | LIKELY              |                       2 |                      9 | Eton Pharmaceuticals reported strong Q2 2026 revenue growth of 99% year-over-year, driven by its rare disease portfolio, and raised full-year guidance. The company's diversified pipeline and successful product relaunches are key drivers. No current evidence suggests a probable material business reversal within 6-12 months.                                                                                                                                            |
-|         49 | ILMN     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       79.0954 | STRONG         | LIKELY              |                       2 |                      9 | Illumina reported strong Q2 2026 revenue growth, driven by clinical demand and NovaSeq X placements, and raised full-year guidance. Innovation in multi-omics and AI-enabled offerings are durable drivers. While competitive pressures exist, there is no current evidence establishing a probable material business reversal within 6-12 months.                                                                                                                              |
-|         45 | PAYS     | Technology             | SELECTED — LOW                                   |       78.2394 | STRONG         | LIKELY              |                       1 |                     10 | Reported Q2 2026 revenue of $28.25 million and diluted EPS of $0.11, exceeding analyst estimates. Strong market share in plasma payments. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                 |
-|         14 | AYA      | Basic Materials        | SKIPPED — SECTOR CAPACITY                        |       76.3144 | STRONG         | UNCERTAIN           |                       2 |                     10 | Aya Gold & Silver reported strong Q2 2026 revenue and production growth, driven by the Zgounder mine. Its expansion projects and diversification are durable drivers. While commodity prices can be volatile, no current adverse indicators suggest a probable reversal, leading to a low reversal risk within 6-12 months.                                                                                                                                                     |
-|         17 | FTNT     | Technology             | NOT SELECTED — LOWER FINAL SCORE                 |       75.851  | STRONG         | UNCERTAIN           |                       1 |                     10 | Fortinet reported strong Q2 2026 revenue and billings growth, driven by demand for its cybersecurity solutions. Its market leadership and focus on SASE are durable drivers. With raised full-year guidance and no current adverse indicators, reversal risk is low, despite broader technology valuation concerns, consistent with the prior classification.                                                                                                                   |
+|         36 | SB       | Industrials            | NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR  |       80.6053 | STRONG         | LIKELY              |                       1 |                      6 | Safe Bulkers reported Q2 2026 GAAP EPS of $0.33 and revenue of $91.22 million, exceeding analyst expectations. The company maintains consistent dividend payments. While the drybulk shipping industry is cyclical, there is no current evidence of a probable material reversal in operating conditions within the next 6-12 months.                                                                                                                                           |
+|         38 | DSVSF    | Basic Materials        | NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR  |       80.2616 | STRONG         | LIKELY              |                       1 |                      6 | Discovery Mining reported record Q2 2026 revenue and strong gold production, significantly increasing year-over-year. The company is expanding processing capacity through acquisitions and has ongoing exploration success. While commodity prices are inherently volatile, there is no current evidence suggesting a probable material business reversal within 6-12 months.                                                                                                  |
+|         39 | VCTR     | Financial Services     | SELECTED — LOW                                   |       79.9356 | STRONG         | LIKELY              |                       2 |                      7 | Victory Capital reported record Q2 2026 revenue and significant long-term net inflows, driven by strong investment performance and broad distribution. The company's consistent fee rate and industry-leading margins support continuation. No current evidence suggests a probable material business reversal within 6-12 months.                                                                                                                                              |
+|         43 | ETON     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       79.478  | STRONG         | LIKELY              |                       2 |                      7 | Eton Pharmaceuticals reported strong Q2 2026 revenue growth of 99% year-over-year, driven by its rare disease portfolio, and raised full-year guidance. The company's diversified pipeline and successful product relaunches are key drivers. No current evidence suggests a probable material business reversal within 6-12 months.                                                                                                                                            |
+|         49 | ILMN     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       79.0954 | STRONG         | LIKELY              |                       2 |                      7 | Illumina reported strong Q2 2026 revenue growth, driven by clinical demand and NovaSeq X placements, and raised full-year guidance. Innovation in multi-omics and AI-enabled offerings are durable drivers. While competitive pressures exist, there is no current evidence establishing a probable material business reversal within 6-12 months.                                                                                                                              |
+|         45 | PAYS     | Technology             | SELECTED — LOW                                   |       78.2394 | STRONG         | LIKELY              |                       1 |                      8 | Reported Q2 2026 revenue of $28.25 million and diluted EPS of $0.11, exceeding analyst estimates. Strong market share in plasma payments. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                 |
+|         14 | AYA      | Basic Materials        | SELECTED — LOW                                   |       76.3144 | STRONG         | UNCERTAIN           |                       2 |                      9 | Aya Gold & Silver reported strong Q2 2026 revenue and production growth, driven by the Zgounder mine. Its expansion projects and diversification are durable drivers. While commodity prices can be volatile, no current adverse indicators suggest a probable reversal, leading to a low reversal risk within 6-12 months.                                                                                                                                                     |
+|         17 | FTNT     | Technology             | SELECTED — LOW                                   |       75.851  | STRONG         | UNCERTAIN           |                       2 |                     10 | Fortinet reported strong Q2 2026 revenue and billings growth, driven by demand for its cybersecurity solutions. Its market leadership and focus on SASE are durable drivers. With raised full-year guidance and no current adverse indicators, reversal risk is low, despite broader technology valuation concerns, consistent with the prior classification.                                                                                                                   |
 |          1 | INSW     | Energy                 | NOT SELECTED — UNCERTAIN MODERATE-RISK CASE      |       75.7621 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | International Seaways reported record Q2 2026 net income of $295 million, driven by strong tanker rates. While global energy demand is a durable driver, current elevated rates are materially supported by geopolitical disruptions. No current indicators establish a probable reversal, but the high dependence on temporary drivers leads to a moderate reversal risk, consistent with the previous classification.                                                         |
 |         46 | MGTX     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       75.2017 | STRONG         | LIKELY              |                       2 |                     10 | MeiraGTx reported a significant Q2 2026 net income of $160.7 million, driven by service revenue from collaboration agreements. The company's vertically integrated platform and late-stage clinical programs are key durable drivers, supporting its continued development in genetic medicines. Although clinical-stage biotechnology carries high inherent binary event risk, there is no current evidence of a developing reversal mechanism.                                |
-|          2 | ECO      | Industrials            | NOT SELECTED — WEAK CONTINUATION                 |       74.1928 | WEAK           | UNCERTAIN           |                       2 |                     10 | Reported profit of $230.3 million in Q2 2026, with revenues of $318.9 million. Modern, eco-friendly tanker fleet. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                                         |
+|          2 | ECO      | Industrials            | NOT SELECTED — WEAK CONTINUATION                 |       74.1928 | WEAK           | UNCERTAIN           |                       1 |                     10 | Reported profit of $230.3 million in Q2 2026, with revenues of $318.9 million. Modern, eco-friendly tanker fleet. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                                         |
 |         11 | WDOFF    | Basic Materials        | NOT SELECTED — UNCERTAIN BENCHMARK CASE          |       73.8753 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Wesdome Gold Mines reported strong Q2 2026 revenue and gold production, reaffirming full-year guidance. Its high-grade mines and strong balance sheet are durable drivers. While gold prices can be volatile, no current adverse indicators suggest a probable reversal, leading to a low reversal risk within 6-12 months, consistent with the prior classification.                                                                                                           |
 |         13 | MAKO     | Basic Materials        | NOT SELECTED — UNCERTAIN BENCHMARK CASE          |       72.3709 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Mako Mining achieved record Q2 2026 revenue of $62.6 million, driven by strong gold sales. Its debt-free balance sheet and growth projects are durable drivers. While gold prices can be volatile, no current adverse indicators suggest a probable reversal, leading to a low reversal risk within 6-12 months, consistent with the prior classification.                                                                                                                      |
 |          4 | NAT      | Energy                 | NOT SELECTED — WEAK CONTINUATION                 |       72.012  | WEAK           | UNCERTAIN           |                       0 |                     10 | Reported Q2 2026 EPS of $0.32, exceeding analyst estimates, with a declared cash dividend of $0.27 per share. Suezmax-only fleet specialization. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                          |
@@ -230,51 +235,58 @@ CONTEXT REVIEW
 |          9 | DHT      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       68.7937 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | DHT Holdings reported record Q2 2026 TCE revenue and net income, driven by strong tanker markets due to geopolitical disruptions. While global demand is a durable driver, current elevated rates are materially temporary. No current indicators establish a probable reversal, but high dependence on temporary drivers leads to moderate reversal risk, consistent with the prior classification.                                                                            |
 |         34 | AUGO     | Basic Materials        | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       66.821  | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Reported Q2 2026 net revenue of $336 million and net income of $218 million, though revenue was impacted by lower gold prices and production. Production growth initiatives (e.g., Borborema Mine, MSG project, Era Dorada construction). Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely. |
 |         10 | TRMD     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       66.5716 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | TORM reported record Q2 2026 TCE earnings and net profit, driven by unprecedented freight rates due to geopolitical disruptions. While integrated management is a durable driver, current elevated rates are materially temporary. No current indicators establish a probable reversal, but high dependence on temporary drivers leads to moderate reversal risk.                                                                                                               |
-|         20 | HAFN     | Industrials            | NOT SELECTED — WEAK CONTINUATION                 |       64.7367 | WEAK           | UNCERTAIN           |                       2 |                     10 | Recorded net profit of $277.8 million or $0.56 per share in Q2 2026, with TCE earnings of $372.9 million. Diversified and modern fleet. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                   |
-|         19 | SHIP     | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       64.1732 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Seanergy Maritime reported record Q2 2026 net revenue and adjusted EBITDA, driven by a strong Capesize freight market. Its fleet renewal and long-term charters are durable drivers. While the market outlook is constructive, reliance on freight rates, even with some fixed charters, presents a moderate reversal risk if conditions normalize, consistent with the prior classification.                                                                                   |
+|         20 | HAFN     | Industrials            | NOT SELECTED — WEAK CONTINUATION                 |       64.7367 | WEAK           | UNCERTAIN           |                       1 |                     10 | Recorded net profit of $277.8 million or $0.56 per share in Q2 2026, with TCE earnings of $372.9 million. Diversified and modern fleet. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                                   |
+|         19 | SHIP     | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       64.1732 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Seanergy Maritime reported record Q2 2026 net revenue and adjusted EBITDA, driven by a strong Capesize freight market. Its fleet renewal and long-term charters are durable drivers. While the market outlook is constructive, reliance on freight rates, even with some fixed charters, presents a moderate reversal risk if conditions normalize, consistent with the prior classification.                                                                                   |
 |         18 | STNG     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       63.2031 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Scorpio Tankers reported record Q2 2026 adjusted net income and historically high TCE rates, driven by strong demand and geopolitical disruptions. The company's strong balance sheet and fleet optimization are durable drivers. However, a material reversal is possible if elevated product tanker rates normalize due to easing geopolitical tensions, significantly impacting cash flow.                                                                                   |
 |         21 | DINO     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       63.1822 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | HF Sinclair reported strong Q2 2026 results with significantly increased adjusted net income and EBITDA, driven by robust refining margins and product demand. The planned segment separation and shareholder returns are positive. However, the current strong performance is materially supported by tight refining markets, and a reversal is possible if these conditions normalize, impacting profitability.                                                               |
-|         26 | NMM      | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       61.5757 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Navios Maritime Partners reported strong Q2 2026 net income, benefiting from elevated freight rates due to geopolitical disruptions. While a significant backlog is a durable driver, current rates are materially temporary. No current indicators establish a probable reversal, but high dependence on temporary drivers leads to moderate reversal risk.                                                                                                                    |
+|         26 | NMM      | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       61.5757 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Navios Maritime Partners reported strong Q2 2026 net income, benefiting from elevated freight rates due to geopolitical disruptions. While a significant backlog is a durable driver, current rates are materially temporary. No current indicators establish a probable reversal, but high dependence on temporary drivers leads to moderate reversal risk.                                                                                                                    |
 |         12 | PBT      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       61.2487 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Permian Basin Royalty Trust's August 2026 distribution came solely from Texas Royalty Properties, as Waddell Ranch consistently remains in an 'excess cost position.' This ongoing operational underperformance of a key asset, a company-reported change, indicates an active reversal mechanism, leading to a moderate reversal risk, consistent with the prior classification.                                                                                               |
 |         47 | KRT      | Consumer Cyclical      | NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY |     -935.848  | WEAK           | UNLIKELY            |                       0 |                     10 | Record Q2 2026 net sales of $136.3 million, up 9.9% year-over-year, driven by volume and online sales growth. Growth in online sales channels. Potential reversal exposure exists, but the available current evidence does not establish a measurable adverse indicator making a material business reversal probable within 6-12 months. Continuation therefore remains more likely.                                                                                            |
 |         48 | PURR     | Financial Services     | EXCLUDED — CRYPTO DEPENDENCE                     |     -942.872  | WEAK           | UNCERTAIN           |                       2 |                     10 | Hyperliquid Strategies reported substantial fiscal year 2026 treasury income, primarily from unrealized HYPE token gains, and holds over $2 billion in assets. The business model is primarily dependent on cryptocurrency. A material reversal is unusually probable within 6-12 months due to the inherent volatility of HYPE tokens, which could lead to significant unrealized losses and impact financial results.                                                         |
 |          3 | TNK      | Energy                 | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       0 |                     10 | Judgment did not pass final validation: TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference.                                                                                                                                                                                                                                                                  |
-|         24 | PTGX     | Healthcare             | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       2 |                     10 | Judgment did not pass final validation: PTGX has invalid continuation_outlook 'UNCERTAIN'.                                                                                                                                                                                                                                                                                                                                                                                      |
+|         24 | PTGX     | Healthcare             | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       2 |                     10 | Judgment did not pass final validation: PTGX MODERATE fields violate mechanism mapping.                                                                                                                                                                                                                                                                                                                                                                                         |
 |         25 | CDNA     | Healthcare             | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       2 |                     10 | Judgment did not pass final validation: CDNA MODERATE fields violate mechanism mapping.                                                                                                                                                                                                                                                                                                                                                                                         |
 
 CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN
-  No comparable classification fields changed.
+  ETON: risk_exposure_group
+    risk_exposure_group: null -> "RARE_DISEASE_THERAPEUTICS"
+  HNGE: risk_exposure_group
+    risk_exposure_group: null -> "DIGITAL_HEALTHCARE_ADOPTION"
+  ILMN: risk_exposure_group
+    risk_exposure_group: null -> "GENOMIC_SEQUENCING_MARKET"
+  MGTX: risk_exposure_group
+    risk_exposure_group: null -> "GENETIC_MEDICINES_DEVELOPMENT"
+  NUTX: risk_exposure_group
+    risk_exposure_group: null -> "HEALTHCARE_SERVICES_DEMAND"
+  PAYS: risk_exposure_group
+    risk_exposure_group: null -> "PLASMA_DONOR_COPAYMENT_PROCESSING"
+  RCRUY: risk_exposure_group
+    risk_exposure_group: null -> "GLOBAL_LABOR_MARKET_DEMAND"
+  VCTR: risk_exposure_group
+    risk_exposure_group: null -> "ASSET_MANAGEMENT_AUM"
 PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN
-  Added SLDE: SKIPPED — CLASSIFICATION INVALID -> SELECTED — LOW
-  Added SBLK: SKIPPED — CLASSIFICATION INVALID -> SELECTED — LOW
-  Added SB: SKIPPED — CLASSIFICATION INVALID -> SELECTED — LOW
-  Added DSVSF: SKIPPED — SECTOR CAPACITY -> SELECTED — LOW
-  Added PAYS: not present -> SELECTED — LOW
-  Removed INSW: SELECTED — MODERATE -> NOT SELECTED — UNCERTAIN MODERATE-RISK CASE
-  Removed AYA: SELECTED — LOW -> SKIPPED — SECTOR CAPACITY
-  Removed FTNT: SELECTED — LOW -> NOT SELECTED — LOWER FINAL SCORE
-  Removed ECO: SELECTED — LOW -> NOT SELECTED — WEAK CONTINUATION
-  Removed PBT: SELECTED — MODERATE -> NOT SELECTED — BELOW BENCHMARK FALLBACK BAR
+  Added AYA: SKIPPED — SECTOR CAPACITY -> SELECTED — LOW
+  Added FTNT: NOT SELECTED — LOWER FINAL SCORE -> SELECTED — LOW
+  Removed SB: SELECTED — LOW -> NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR
+  Removed DSVSF: SELECTED — LOW -> NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR
 NO-CALL NORMALIZATION SUMMARY
   cautious_temporary_dependence_floor: 7
-  risk_downgrade: 1
-Gemini logical request 2/7: final HTML summary (gemini-2.5-flash, attempt 1) (API attempt 2; stock API attempts 1)
-Gemini usage [final HTML summary]: prompt_tokens=12669, tool_tokens=0, cached_tokens=None, thinking_tokens=3249, output_tokens=1837, total_tokens=17755
+  risk_downgrade: 5
+Gemini logical request 1/7: final HTML summary (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
+Gemini usage [final HTML summary]: prompt_tokens=12746, tool_tokens=0, cached_tokens=None, thinking_tokens=4094, output_tokens=2177, total_tokens=19017
 Google searches performed [final HTML summary]: 0
 Grounding citation chunks exposed [final HTML summary]: 0
 Using Gemini-written HTML summary.
 GEMINI EFFICIENCY SUMMARY
-  requests used: 2/7
-  stock research calls: 1/5
-  newly validated stocks: 3
-  newly validated stocks per completed stock response: 3.00
-  newly validated stocks per attempted stock request: 3.00
-  exposed searches per newly validated stock: 1.33
+  requests used: 1/7
+  stock research calls: 0/5
+  newly validated stocks: 0
+  exposed searches per newly validated stock: 0.00
   duplicate extra result blocks: 0
-  tokens: prompt=32547, tool=20764, thinking=11817, output=7548, total=72676
+  tokens: prompt=12746, tool=0, thinking=4094, output=2177, total=19017
 Saved comprehensive run report: run_reports/stock_run_report.json
 Generated research with model(s): gemini-2.5-flash, gemini-3.5-flash
-Selected symbols: SLDE, CGAU, SBLK, RCRUY, NUTX, HNGE, SB, DSVSF, VCTR, PAYS
-Elapsed time: 151 seconds
+Selected symbols: SLDE, CGAU, SBLK, RCRUY, NUTX, HNGE, VCTR, PAYS, AYA, FTNT
+Elapsed time: 166 seconds
 
 

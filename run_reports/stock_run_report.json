@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "created_at": "2026-09-17T18:26:20.286665+00:00",
-  "elapsed_seconds": 151,
+  "created_at": "2026-09-17T19:00:53.262652+00:00",
+  "elapsed_seconds": 166,
   "models": {
     "research_primary": "gemini-2.5-flash",
     "research_fallback": "gemini-2.5-flash-lite",
@@ -20,22 +20,22 @@
     ],
     "returns": {
       "SPMO": {
-        "1M Return": -1.1998643114681187,
-        "3M Return": -8.195791898233324,
-        "6M Return": 27.03679210017718,
-        "9M Return": 24.321397902137278,
-        "1Y Return": 22.474516117824322
+        "1M Return": -1.2133488221778777,
+        "3M Return": -8.208321585755726,
+        "6M Return": 27.01946217328461,
+        "9M Return": 24.30443018028366,
+        "1Y Return": 22.457800463409967
       },
       "VGT": {
-        "1M Return": 2.2011765964603995,
-        "3M Return": 1.2658528291378985,
-        "6M Return": 34.88433453666687,
-        "9M Return": 30.50773762003348,
-        "1Y Return": 35.218210169523786
+        "1M Return": 2.213802344998399,
+        "3M Return": 1.2783630294690909,
+        "6M Return": 34.900997903433165,
+        "9M Return": 30.523849605986413,
+        "1Y Return": 35.23492627325743
       }
     },
     "hurdle_symbol": "VGT",
-    "hurdle_52_week_return": 35.218210169523786,
+    "hurdle_52_week_return": 35.23492627325743,
     "used_fallback": false
   },
   "yfinance_fundamentals": {
@@ -48,12 +48,12 @@
     "pipeline_used": false
   },
   "request_budget": {
-    "used": 2,
+    "used": 1,
     "maximum": 7,
-    "stock_used": 1,
+    "stock_used": 0,
     "stock_maximum": 5,
-    "api_attempts": 2,
-    "stock_api_attempts": 1,
+    "api_attempts": 1,
+    "stock_api_attempts": 0,
     "classification_api_attempts_used": 2,
     "classification_api_attempts_maximum": 8
   },
@@ -65,34 +65,31 @@
       "category": "classification",
       "search_enabled": false,
       "symbols": [
+        "INSW",
+        "ECO",
+        "TNK",
+        "NAT",
+        "LPG",
+        "TEN",
+        "FRO",
         "SLDE",
+        "DHT",
+        "TRMD",
+        "WDOFF",
+        "PBT",
+        "MAKO",
+        "AYA",
+        "ARREF",
+        "FTNT",
+        "STNG",
+        "SHIP",
+        "HAFN",
+        "DINO",
         "SBLK",
-        "PTGX",
-        "CDNA",
-        "SB"
+        "CGAU",
+        "PTGX"
       ],
       "status": "SUCCESS"
-    },
-    {
-      "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
-      "model": "gemini-2.5-flash",
-      "attempt": 1,
-      "category": "stock",
-      "search_enabled": true,
-      "status": "SUCCESS",
-      "prompt_tokens": 19878,
-      "tool_tokens": 20764,
-      "cached_tokens": 19054,
-      "thinking_tokens": 8568,
-      "output_tokens": 5711,
-      "total_tokens": 54921,
-      "search_queries": [
-        "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
-        "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-        "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-        "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
-      ],
-      "grounding_chunks_exposed": 10
     },
     {
       "stage": "stock_judgment",
@@ -101,10 +98,21 @@
       "category": "classification",
       "search_enabled": false,
       "symbols": [
-        "TNK",
-        "SLDE",
+        "CDNA",
+        "NMM",
+        "RCRUY",
+        "NUTX",
+        "HNGE",
+        "AUGO",
+        "SB",
+        "DSVSF",
+        "VCTR",
+        "ETON",
         "PAYS",
-        "MGTX"
+        "MGTX",
+        "KRT",
+        "PURR",
+        "ILMN"
       ],
       "status": "SUCCESS"
     },
@@ -115,36 +123,25 @@
       "category": "summary",
       "search_enabled": false,
       "status": "SUCCESS",
-      "prompt_tokens": 12669,
+      "prompt_tokens": 12746,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 3249,
-      "output_tokens": 1837,
-      "total_tokens": 17755,
+      "thinking_tokens": 4094,
+      "output_tokens": 2177,
+      "total_tokens": 19017,
       "search_queries": [],
       "grounding_chunks_exposed": 0
     }
   ],
   "successful_gemini_metadata": [
     {
-      "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
-      "prompt_tokens": 19878,
-      "tool_tokens": 20764,
-      "cached_tokens": 19054,
-      "thinking_tokens": 8568,
-      "output_tokens": 5711,
-      "total_tokens": 54921,
-      "searches_exposed": 4,
-      "grounding_chunks_exposed": 10
-    },
-    {
       "stage": "final HTML summary",
-      "prompt_tokens": 12669,
+      "prompt_tokens": 12746,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 3249,
-      "output_tokens": 1837,
-      "total_tokens": 17755,
+      "thinking_tokens": 4094,
+      "output_tokens": 2177,
+      "total_tokens": 19017,
       "searches_exposed": 0,
       "grounding_chunks_exposed": 0
     }
@@ -155,18 +152,54 @@
       "model": "gemini-3.5-flash",
       "attempt": 1,
       "symbols": [
+        "INSW",
+        "ECO",
+        "TNK",
+        "NAT",
+        "LPG",
+        "TEN",
+        "FRO",
         "SLDE",
+        "DHT",
+        "TRMD",
+        "WDOFF",
+        "PBT",
+        "MAKO",
+        "AYA",
+        "ARREF",
+        "FTNT",
+        "STNG",
+        "SHIP",
+        "HAFN",
+        "DINO",
         "SBLK",
-        "PTGX",
-        "CDNA",
-        "SB"
+        "CGAU",
+        "PTGX"
       ],
       "returned_symbols": [
+        "INSW",
+        "ECO",
+        "TNK",
+        "NAT",
+        "LPG",
+        "TEN",
+        "FRO",
         "SLDE",
+        "DHT",
+        "TRMD",
+        "WDOFF",
+        "PBT",
+        "MAKO",
+        "AYA",
+        "ARREF",
+        "FTNT",
+        "STNG",
+        "SHIP",
+        "HAFN",
+        "DINO",
         "SBLK",
-        "PTGX",
-        "CDNA",
-        "SB"
+        "CGAU",
+        "PTGX"
       ],
       "missing_symbols": [],
       "fallback": false,
@@ -178,16 +211,38 @@
       "model": "gemini-3.5-flash",
       "attempt": 1,
       "symbols": [
-        "TNK",
-        "SLDE",
+        "CDNA",
+        "NMM",
+        "RCRUY",
+        "NUTX",
+        "HNGE",
+        "AUGO",
+        "SB",
+        "DSVSF",
+        "VCTR",
+        "ETON",
         "PAYS",
-        "MGTX"
+        "MGTX",
+        "KRT",
+        "PURR",
+        "ILMN"
       ],
       "returned_symbols": [
-        "TNK",
-        "SLDE",
+        "CDNA",
+        "NMM",
+        "RCRUY",
+        "NUTX",
+        "HNGE",
+        "AUGO",
+        "SB",
+        "DSVSF",
+        "VCTR",
+        "ETON",
         "PAYS",
-        "MGTX"
+        "MGTX",
+        "KRT",
+        "PURR",
+        "ILMN"
       ],
       "missing_symbols": [],
       "fallback": false,
@@ -196,62 +251,27 @@
     }
   ],
   "classification_validation_failures": {
-    "PTGX": "PTGX has invalid continuation_outlook 'UNCERTAIN'.",
-    "CDNA": "CDNA MODERATE fields violate mechanism mapping.",
-    "TNK": "TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference."
+    "TNK": "TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference.",
+    "PTGX": "PTGX MODERATE fields violate mechanism mapping.",
+    "CDNA": "CDNA MODERATE fields violate mechanism mapping."
   },
   "token_totals": {
-    "prompt_tokens": 32547,
-    "tool_tokens": 20764,
-    "cached_tokens": 19054,
-    "thinking_tokens": 11817,
-    "output_tokens": 7548,
-    "total_tokens": 72676
+    "prompt_tokens": 12746,
+    "tool_tokens": 0,
+    "cached_tokens": 0,
+    "thinking_tokens": 4094,
+    "output_tokens": 2177,
+    "total_tokens": 19017
   },
   "research": {
-    "unique_symbols_requested": 4,
-    "charged_search_attempts": 4,
-    "attempted_stock_requests": 1,
-    "completed_stock_responses": 1,
-    "newly_validated_symbols": [
-      "MGTX",
-      "PAYS",
-      "SLDE"
-    ],
-    "initial_validated_cache_symbols": [
-      "ARREF",
-      "AUGO",
-      "AYA",
-      "CGAU",
-      "DHT",
-      "DINO",
-      "DSVSF",
-      "ECO",
-      "ETON",
-      "FRO",
-      "FTNT",
-      "HAFN",
-      "HNGE",
-      "ILMN",
-      "INSW",
-      "KRT",
-      "LPG",
-      "MAKO",
-      "NAT",
-      "NMM",
-      "NUTX",
-      "PBT",
-      "PURR",
-      "RCRUY",
-      "SHIP",
-      "STNG",
-      "TEN",
-      "TRMD",
-      "VCTR",
-      "WDOFF"
-    ],
-    "cached_research_records_used": 32,
-    "cached_judgment_records_used": 30,
+    "unique_symbols_requested": 0,
+    "charged_search_attempts": 0,
+    "attempted_stock_requests": 0,
+    "completed_stock_responses": 0,
+    "newly_validated_symbols": [],
+    "initial_validated_cache_symbols": [],
+    "cached_research_records_used": 35,
+    "cached_judgment_records_used": 0,
     "source_counts": {
       "INSW": 3,
       "ECO": 3,
@@ -259,6 +279,7 @@
       "LPG": 3,
       "TEN": 2,
       "FRO": 3,
+      "SLDE": 5,
       "DHT": 4,
       "TRMD": 4,
       "WDOFF": 3,
@@ -271,41 +292,24 @@
       "SHIP": 3,
       "HAFN": 4,
       "DINO": 5,
+      "SBLK": 4,
       "CGAU": 4,
       "NMM": 4,
       "RCRUY": 4,
       "NUTX": 3,
       "HNGE": 5,
       "AUGO": 5,
+      "SB": 5,
       "DSVSF": 5,
       "VCTR": 4,
       "ETON": 5,
+      "PAYS": 4,
+      "MGTX": 4,
       "KRT": 5,
       "PURR": 5,
-      "ILMN": 5,
-      "SBLK": 4,
-      "SB": 5,
-      "SLDE": 5,
-      "PAYS": 4,
-      "MGTX": 4
+      "ILMN": 5
     },
-    "batches": [
-      {
-        "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
-        "coverage_status": "NORMAL",
-        "coverage_fraction": 1.0,
-        "candidates_sent": 4,
-        "fresh_research_requested": 4,
-        "company_searches_exposed": 4,
-        "results_returned": 4,
-        "validated": 4,
-        "missing": 0,
-        "incomplete": 0,
-        "structural_repairs_needed": 0,
-        "genuine_repeated_searches": 0,
-        "missing_unsearched_attempts_refunded": 0
-      }
-    ]
+    "batches": []
   },
   "stocks": {
     "INSW": {
@@ -371,9 +375,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.936792+00:00",
+        "judged_at": "2026-09-17T18:59:40.151362+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -461,9 +465,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.936946+00:00",
+        "judged_at": "2026-09-17T18:59:40.151537+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -551,9 +555,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937076+00:00",
+        "judged_at": "2026-09-17T18:59:40.151834+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -641,9 +645,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937205+00:00",
+        "judged_at": "2026-09-17T18:59:40.152046+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -731,9 +735,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937359+00:00",
+        "judged_at": "2026-09-17T18:59:40.152266+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -821,9 +825,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937511+00:00",
+        "judged_at": "2026-09-17T18:59:40.152492+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -848,6 +852,85 @@
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
       "decision": "NOT SELECTED — WEAK CONTINUATION"
+    },
+    "SLDE": {
+      "qvm_rank": 8,
+      "qvm_score": 77.87009075734244,
+      "quality_score": 84.61894634921285,
+      "value_score": 82.24246186918214,
+      "momentum_score": 70.14959714061877,
+      "quantitative_entry_risk": 57.727272727272734,
+      "overextension_penalty": 0.0,
+      "sector": "Financial Services",
+      "market_cap": null,
+      "price": 25.260000228881836,
+      "returns": {
+        "1m": 12.366551348999488,
+        "3m": 52.84780641400306,
+        "6m": 46.48651763665368,
+        "9m": 39.16621630042425,
+        "1y": 73.211876
+      },
+      "price_path": {
+        "annualized_volatility": 44.164021376905936,
+        "downside_volatility": 24.840547369511842,
+        "max_drawdown": -20.010127096171736,
+        "positive_day_pct": 50.99601593625498,
+        "trend_r2": 0.6659940280722222,
+        "distance_50dma": 13.738089228270312,
+        "distance_200dma": 33.16507648936495,
+        "distance_52w_high": -4.607248241861028,
+        "largest_5d_move": 17.663354750787263,
+        "momentum_acceleration": -4.263664431965621
+      },
+      "benchmark_excess_returns": {
+        "1m": 10.178000501077088,
+        "3m": 51.59446378519637,
+        "6m": 11.618846466753105,
+        "9m": 8.674612071589024,
+        "1y": 63.71660106262749
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181604+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 5
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:59:40.152717+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "MODERATE",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null
+      },
+      "decision": "SELECTED — LOW"
     },
     "DHT": {
       "qvm_rank": 9,
@@ -912,9 +995,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937720+00:00",
+        "judged_at": "2026-09-17T18:59:40.152947+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1003,9 +1086,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937839+00:00",
+        "judged_at": "2026-09-17T18:59:40.153127+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1093,9 +1176,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.937961+00:00",
+        "judged_at": "2026-09-17T18:59:40.153321+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1184,9 +1267,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938072+00:00",
+        "judged_at": "2026-09-17T18:59:40.153504+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1274,9 +1357,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938224+00:00",
+        "judged_at": "2026-09-17T18:59:40.153731+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1364,9 +1447,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938406+00:00",
+        "judged_at": "2026-09-17T18:59:40.153999+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1390,7 +1473,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "SILVER_GOLD_PRICE_VOLATILITY"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "SELECTED — LOW"
     },
     "ARREF": {
       "qvm_rank": 16,
@@ -1454,9 +1537,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938537+00:00",
+        "judged_at": "2026-09-17T18:59:40.154207+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1544,9 +1627,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938686+00:00",
+        "judged_at": "2026-09-17T18:59:40.154449+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1570,7 +1653,7 @@
         "primary_risk_event_id": "AI_VALUATION_CONCENTRATION",
         "risk_exposure_group": "TECHNOLOGY_VALUATION_SHIFTS"
       },
-      "decision": "NOT SELECTED — LOWER FINAL SCORE"
+      "decision": "SELECTED — LOW"
     },
     "STNG": {
       "qvm_rank": 18,
@@ -1628,9 +1711,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938828+00:00",
+        "judged_at": "2026-09-17T18:59:40.154678+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1718,9 +1801,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.938970+00:00",
+        "judged_at": "2026-09-17T18:59:40.154918+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1808,9 +1891,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.939137+00:00",
+        "judged_at": "2026-09-17T18:59:40.155135+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1892,9 +1975,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:56:14.939301+00:00",
+        "judged_at": "2026-09-17T18:59:40.155366+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1919,6 +2002,97 @@
         "risk_exposure_group": "REFINING_CRACK_SPREADS"
       },
       "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
+    },
+    "SBLK": {
+      "qvm_rank": 22,
+      "qvm_score": 71.1315483260134,
+      "quality_score": 68.6749373816104,
+      "value_score": 64.70624454707507,
+      "momentum_score": 75.01600455462491,
+      "quantitative_entry_risk": 47.04545454545455,
+      "overextension_penalty": 0.0,
+      "sector": "Industrials",
+      "market_cap": null,
+      "price": 32.060001373291016,
+      "returns": {
+        "1m": 9.544274856471668,
+        "3m": 28.04923877825751,
+        "6m": 48.1283550172106,
+        "9m": 89.07943560116817,
+        "1y": 55.594753
+      },
+      "price_path": {
+        "annualized_volatility": 32.957555735849326,
+        "downside_volatility": 20.742995937289297,
+        "max_drawdown": -17.48990008108692,
+        "positive_day_pct": 57.76892430278885,
+        "trend_r2": 0.8313047788592846,
+        "distance_50dma": 12.373069084831734,
+        "distance_200dma": 33.95058146613514,
+        "distance_52w_high": -1.1104158420315202,
+        "largest_5d_move": 13.012048649433595,
+        "momentum_acceleration": 1.4273566141324014
+      },
+      "benchmark_excess_returns": {
+        "1m": 7.355724008549268,
+        "3m": 26.79589614945082,
+        "6m": 13.260683847310027,
+        "9m": 58.58783137233294,
+        "1y": 38.56807310548655
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T17:55:15.650678+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "DHT Holdings, Inc. DHT investor relations latest results guidance pricing margins demand operating metrics",
+          "TORM plc TRMD investor relations latest results guidance pricing margins demand operating metrics",
+          "Permian Basin Royalty Trust PBT investor relations latest results guidance pricing margins demand operating metrics",
+          "Teekay Corporation Ltd. TK investor relations latest results guidance pricing margins demand operating metrics",
+          "Star Bulk Carriers Corp. SBLK investor relations latest results guidance pricing margins demand operating metrics",
+          "Centerra Gold Inc. CGAU investor relations latest results guidance pricing margins demand operating metrics",
+          "Protagonist Therapeutics, Inc. PTGX investor relations latest results guidance pricing margins demand operating metrics",
+          "CareDx, Inc. CDNA investor relations latest results guidance pricing margins demand operating metrics",
+          "Navios Maritime Partners L.P. NMM investor relations latest results guidance pricing margins demand operating metrics",
+          "Recruit Holdings Co., Ltd. RCRUY investor relations latest results guidance pricing margins demand operating metrics",
+          "Nutex Health Inc. NUTX investor relations latest results guidance pricing margins demand operating metrics",
+          "Hinge Health, Inc. HNGE investor relations latest results guidance pricing margins demand operating metrics",
+          "Aura Minerals Inc. AUGO investor relations latest results guidance pricing margins demand operating metrics",
+          "Permian Basin Royalty Trust PBT latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Centerra Gold Inc. CGAU latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Recruit Holdings Co., Ltd. RCRUY latest earnings release revenue guidance operating metrics investor relations SEC"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:59:40.155637+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": "6_12_MONTHS",
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
+      },
+      "decision": "SELECTED — LOW"
     },
     "CGAU": {
       "qvm_rank": 23,
@@ -1983,9 +2157,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.168277+00:00",
+        "judged_at": "2026-09-17T18:59:40.155940+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2074,9 +2248,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.168578+00:00",
+        "judged_at": "2026-09-17T19:00:26.286353+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2165,9 +2339,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.168750+00:00",
+        "judged_at": "2026-09-17T19:00:26.286541+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2189,7 +2363,7 @@
         "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "GLOBAL_LABOR_MARKET_DEMAND"
       },
       "decision": "SELECTED — LOW"
     },
@@ -2256,9 +2430,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.168921+00:00",
+        "judged_at": "2026-09-17T19:00:26.286721+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2280,7 +2454,7 @@
         "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "HEALTHCARE_SERVICES_DEMAND"
       },
       "decision": "SELECTED — LOW"
     },
@@ -2347,9 +2521,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.169091+00:00",
+        "judged_at": "2026-09-17T19:00:26.286925+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2371,7 +2545,7 @@
         "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "DIGITAL_HEALTHCARE_ADOPTION"
       },
       "decision": "SELECTED — LOW"
     },
@@ -2438,9 +2612,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.169282+00:00",
+        "judged_at": "2026-09-17T19:00:26.287079+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2465,6 +2639,90 @@
         "risk_exposure_group": "GOLD_AND_COPPER_PRICES"
       },
       "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
+    },
+    "SB": {
+      "qvm_rank": 36,
+      "qvm_score": 68.60533020031369,
+      "quality_score": 61.34981265724196,
+      "value_score": 57.336908720721524,
+      "momentum_score": 78.36494140551699,
+      "quantitative_entry_risk": 48.33333333333333,
+      "overextension_penalty": 0.0,
+      "sector": "Industrials",
+      "market_cap": null,
+      "price": 8.989999771118164,
+      "returns": {
+        "1m": 10.03671587719477,
+        "3m": 36.83266717141689,
+        "6m": 45.983889688579914,
+        "9m": 89.30739429011167,
+        "1y": 89.393936
+      },
+      "price_path": {
+        "annualized_volatility": 35.61266778565394,
+        "downside_volatility": 20.5099512249169,
+        "max_drawdown": -14.733970031609356,
+        "positive_day_pct": 54.18326693227091,
+        "trend_r2": 0.7407058494885441,
+        "distance_50dma": 13.564679501924948,
+        "distance_200dma": 39.444355853647316,
+        "distance_52w_high": -1.9629258852583154,
+        "largest_5d_move": 13.052620329262732,
+        "momentum_acceleration": -1.476434715876728
+      },
+      "benchmark_excess_returns": {
+        "1m": 7.848165029272369,
+        "3m": 35.579324542610195,
+        "6m": 11.11621851867934,
+        "9m": 58.815790061276445,
+        "1y": 67.39062636591966
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T17:55:15.652084+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "Scorpio Tankers Inc. STNG investor relations latest results guidance pricing margins demand operating metrics",
+          "HF Sinclair Corporation DINO investor relations latest results guidance pricing margins demand operating metrics",
+          "Safe Bulkers, Inc. SB investor relations latest results guidance pricing margins demand operating metrics",
+          "Discovery Mining Ltd. DSVSF investor relations latest results guidance pricing margins demand operating metrics",
+          "Victory Capital Holdings, Inc. VCTR investor relations latest results guidance pricing margins demand operating metrics",
+          "Eton Pharmaceuticals, Inc. ETON investor relations latest results guidance pricing margins demand operating metrics",
+          "Karat Packaging Inc. KRT investor relations latest results guidance pricing margins demand operating metrics",
+          "Hyperliquid Strategies Inc. PURR investor relations latest results guidance pricing margins demand operating metrics",
+          "Illumina, Inc. ILMN investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 5
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T19:00:26.287252+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": "6_12_MONTHS",
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
+      },
+      "decision": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR"
     },
     "DSVSF": {
       "qvm_rank": 38,
@@ -2522,9 +2780,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.169624+00:00",
+        "judged_at": "2026-09-17T19:00:26.287429+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2548,7 +2806,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "GOLD_AND_COPPER_PRICES"
       },
-      "decision": "SELECTED — LOW"
+      "decision": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR"
     },
     "VCTR": {
       "qvm_rank": 39,
@@ -2606,9 +2864,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.169814+00:00",
+        "judged_at": "2026-09-17T19:00:26.287626+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2630,7 +2888,7 @@
         "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "ASSET_MANAGEMENT_AUM"
       },
       "decision": "SELECTED — LOW"
     },
@@ -2690,9 +2948,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.169997+00:00",
+        "judged_at": "2026-09-17T19:00:26.287843+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2714,7 +2972,165 @@
         "risk_time_horizon": "6_12_MONTHS",
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "RARE_DISEASE_THERAPEUTICS"
+      },
+      "decision": "SKIPPED — SECTOR CAPACITY"
+    },
+    "PAYS": {
+      "qvm_rank": 45,
+      "qvm_score": 67.23942237364999,
+      "quality_score": 69.764308651426,
+      "value_score": 15.351757976130125,
+      "momentum_score": 76.24512818421171,
+      "quantitative_entry_risk": 64.54545454545455,
+      "overextension_penalty": 0.0,
+      "sector": "Technology",
+      "market_cap": null,
+      "price": 12.475000381469727,
+      "returns": {
+        "1m": -9.601447760520498,
+        "3m": 68.58108406349021,
+        "6m": 292.29560124478485,
+        "9m": 128.89909757908455,
+        "1y": 100.0
+      },
+      "price_path": {
+        "annualized_volatility": 70.32973987880901,
+        "downside_volatility": 34.269550207061464,
+        "max_drawdown": -49.84227144759335,
+        "positive_day_pct": 50.99601593625498,
+        "trend_r2": 0.8809450090582497,
+        "distance_50dma": 9.715666392173961,
+        "distance_200dma": 80.15156357249286,
+        "distance_52w_high": -11.77510552635368,
+        "largest_5d_move": 73.99380347902161,
+        "momentum_acceleration": -46.16150292331023
+      },
+      "benchmark_excess_returns": {
+        "1m": -11.789998608442898,
+        "3m": 67.32774143468352,
+        "6m": 257.4279300748843,
+        "9m": 98.40749335024933,
+        "1y": 82.89291470674682
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181738+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T19:00:26.288050+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "MODERATE",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "PLASMA_DONOR_COPAYMENT_PROCESSING"
+      },
+      "decision": "SELECTED — LOW"
+    },
+    "MGTX": {
+      "qvm_rank": 46,
+      "qvm_score": 67.20166233082799,
+      "quality_score": 80.89596388844164,
+      "value_score": 53.730871029697624,
+      "momentum_score": 56.500869951243274,
+      "quantitative_entry_risk": 41.36363636363636,
+      "overextension_penalty": 0.0,
+      "sector": "Healthcare",
+      "market_cap": null,
+      "price": 13.0600004196167,
+      "returns": {
+        "1m": -12.758849788525751,
+        "3m": 15.371031552130265,
+        "6m": 77.68708284452117,
+        "9m": 51.860463259476795,
+        "1y": 59.69962
+      },
+      "price_path": {
+        "annualized_volatility": 59.71134351977684,
+        "downside_volatility": 36.33047346505283,
+        "max_drawdown": -24.51404321442203,
+        "positive_day_pct": 49.00398406374502,
+        "trend_r2": 0.7762715610587588,
+        "distance_50dma": -0.3205593272016527,
+        "distance_200dma": 31.544493353600878,
+        "distance_52w_high": -12.758849788525751,
+        "largest_5d_move": 24.934391085823314,
+        "momentum_acceleration": -27.756163747804276
+      },
+      "benchmark_excess_returns": {
+        "1m": -14.947400636448151,
+        "3m": 14.117688923323573,
+        "6m": 42.819411674620596,
+        "9m": 21.368859030641566,
+        "1y": 42.970398339283435
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181851+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T19:00:26.288262+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "HIGH",
+        "binary_event_risk": "HIGH",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "GENETIC_MEDICINES_DEVELOPMENT"
       },
       "decision": "SKIPPED — SECTOR CAPACITY"
     },
@@ -2774,9 +3190,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.170177+00:00",
+        "judged_at": "2026-09-17T19:00:26.288430+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2858,9 +3274,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.170375+00:00",
+        "judged_at": "2026-09-17T19:00:26.288622+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2942,9 +3358,9 @@
       },
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T17:57:35.170569+00:00",
+        "judged_at": "2026-09-17T19:00:26.288845+00:00",
         "fallback_used": false,
-        "fresh_this_run": false
+        "fresh_this_run": true
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2966,419 +3382,7 @@
         "risk_time_horizon": "6_12_MONTHS",
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": null
-      },
-      "decision": "SKIPPED — SECTOR CAPACITY"
-    },
-    "SBLK": {
-      "qvm_rank": 22,
-      "qvm_score": 71.1315483260134,
-      "quality_score": 68.6749373816104,
-      "value_score": 64.70624454707507,
-      "momentum_score": 75.01600455462491,
-      "quantitative_entry_risk": 47.04545454545455,
-      "overextension_penalty": 0.0,
-      "sector": "Industrials",
-      "market_cap": null,
-      "price": 32.060001373291016,
-      "returns": {
-        "1m": 9.544274856471668,
-        "3m": 28.04923877825751,
-        "6m": 48.1283550172106,
-        "9m": 89.07943560116817,
-        "1y": 55.594753
-      },
-      "price_path": {
-        "annualized_volatility": 32.957555735849326,
-        "downside_volatility": 20.742995937289297,
-        "max_drawdown": -17.48990008108692,
-        "positive_day_pct": 57.76892430278885,
-        "trend_r2": 0.8313047788592846,
-        "distance_50dma": 12.373069084831734,
-        "distance_200dma": 33.95058146613514,
-        "distance_52w_high": -1.1104158420315202,
-        "largest_5d_move": 13.012048649433595,
-        "momentum_acceleration": 1.4273566141324014
-      },
-      "benchmark_excess_returns": {
-        "1m": 7.355724008549268,
-        "3m": 26.79589614945082,
-        "6m": 13.260683847310027,
-        "9m": 58.58783137233294,
-        "1y": 38.56807310548655
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-17T17:55:15.650678+00:00",
-        "fresh_this_run": false,
-        "search_queries": [
-          "DHT Holdings, Inc. DHT investor relations latest results guidance pricing margins demand operating metrics",
-          "TORM plc TRMD investor relations latest results guidance pricing margins demand operating metrics",
-          "Permian Basin Royalty Trust PBT investor relations latest results guidance pricing margins demand operating metrics",
-          "Teekay Corporation Ltd. TK investor relations latest results guidance pricing margins demand operating metrics",
-          "Star Bulk Carriers Corp. SBLK investor relations latest results guidance pricing margins demand operating metrics",
-          "Centerra Gold Inc. CGAU investor relations latest results guidance pricing margins demand operating metrics",
-          "Protagonist Therapeutics, Inc. PTGX investor relations latest results guidance pricing margins demand operating metrics",
-          "CareDx, Inc. CDNA investor relations latest results guidance pricing margins demand operating metrics",
-          "Navios Maritime Partners L.P. NMM investor relations latest results guidance pricing margins demand operating metrics",
-          "Recruit Holdings Co., Ltd. RCRUY investor relations latest results guidance pricing margins demand operating metrics",
-          "Nutex Health Inc. NUTX investor relations latest results guidance pricing margins demand operating metrics",
-          "Hinge Health, Inc. HNGE investor relations latest results guidance pricing margins demand operating metrics",
-          "Aura Minerals Inc. AUGO investor relations latest results guidance pricing margins demand operating metrics",
-          "Permian Basin Royalty Trust PBT latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Centerra Gold Inc. CGAU latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Recruit Holdings Co., Ltd. RCRUY latest earnings release revenue guidance operating metrics investor relations SEC"
-        ],
-        "source_count": 4
-      },
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T18:24:35.931423+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "LOW",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": "6_12_MONTHS",
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
-      },
-      "decision": "SELECTED — LOW"
-    },
-    "SB": {
-      "qvm_rank": 36,
-      "qvm_score": 68.60533020031369,
-      "quality_score": 61.34981265724196,
-      "value_score": 57.336908720721524,
-      "momentum_score": 78.36494140551699,
-      "quantitative_entry_risk": 48.33333333333333,
-      "overextension_penalty": 0.0,
-      "sector": "Industrials",
-      "market_cap": null,
-      "price": 8.989999771118164,
-      "returns": {
-        "1m": 10.03671587719477,
-        "3m": 36.83266717141689,
-        "6m": 45.983889688579914,
-        "9m": 89.30739429011167,
-        "1y": 89.393936
-      },
-      "price_path": {
-        "annualized_volatility": 35.61266778565394,
-        "downside_volatility": 20.5099512249169,
-        "max_drawdown": -14.733970031609356,
-        "positive_day_pct": 54.18326693227091,
-        "trend_r2": 0.7407058494885441,
-        "distance_50dma": 13.564679501924948,
-        "distance_200dma": 39.444355853647316,
-        "distance_52w_high": -1.9629258852583154,
-        "largest_5d_move": 13.052620329262732,
-        "momentum_acceleration": -1.476434715876728
-      },
-      "benchmark_excess_returns": {
-        "1m": 7.848165029272369,
-        "3m": 35.579324542610195,
-        "6m": 11.11621851867934,
-        "9m": 58.815790061276445,
-        "1y": 67.39062636591966
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-17T17:55:15.652084+00:00",
-        "fresh_this_run": false,
-        "search_queries": [
-          "Scorpio Tankers Inc. STNG investor relations latest results guidance pricing margins demand operating metrics",
-          "HF Sinclair Corporation DINO investor relations latest results guidance pricing margins demand operating metrics",
-          "Safe Bulkers, Inc. SB investor relations latest results guidance pricing margins demand operating metrics",
-          "Discovery Mining Ltd. DSVSF investor relations latest results guidance pricing margins demand operating metrics",
-          "Victory Capital Holdings, Inc. VCTR investor relations latest results guidance pricing margins demand operating metrics",
-          "Eton Pharmaceuticals, Inc. ETON investor relations latest results guidance pricing margins demand operating metrics",
-          "Karat Packaging Inc. KRT investor relations latest results guidance pricing margins demand operating metrics",
-          "Hyperliquid Strategies Inc. PURR investor relations latest results guidance pricing margins demand operating metrics",
-          "Illumina, Inc. ILMN investor relations latest results guidance pricing margins demand operating metrics"
-        ],
-        "source_count": 5
-      },
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T18:24:35.931744+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "LOW",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": "6_12_MONTHS",
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
-      },
-      "decision": "SELECTED — LOW"
-    },
-    "SLDE": {
-      "qvm_rank": 8,
-      "qvm_score": 77.87009075734244,
-      "quality_score": 84.61894634921285,
-      "value_score": 82.24246186918214,
-      "momentum_score": 70.14959714061877,
-      "quantitative_entry_risk": 57.727272727272734,
-      "overextension_penalty": 0.0,
-      "sector": "Financial Services",
-      "market_cap": null,
-      "price": 25.260000228881836,
-      "returns": {
-        "1m": 12.366551348999488,
-        "3m": 52.84780641400306,
-        "6m": 46.48651763665368,
-        "9m": 39.16621630042425,
-        "1y": 73.211876
-      },
-      "price_path": {
-        "annualized_volatility": 44.164021376905936,
-        "downside_volatility": 24.840547369511842,
-        "max_drawdown": -20.010127096171736,
-        "positive_day_pct": 50.99601593625498,
-        "trend_r2": 0.6659940280722222,
-        "distance_50dma": 13.738089228270312,
-        "distance_200dma": 33.16507648936495,
-        "distance_52w_high": -4.607248241861028,
-        "largest_5d_move": 17.663354750787263,
-        "momentum_acceleration": -4.263664431965621
-      },
-      "benchmark_excess_returns": {
-        "1m": 10.178000501077088,
-        "3m": 51.59446378519637,
-        "6m": 11.618846466753105,
-        "9m": 8.674612071589024,
-        "1y": 63.71660106262749
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-17T18:25:31.181604+00:00",
-        "fresh_this_run": true,
-        "search_queries": [
-          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
-          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
-        ],
-        "source_count": 5
-      },
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T18:25:59.805646+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "MODERATE",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": null,
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": null
-      },
-      "decision": "SELECTED — LOW"
-    },
-    "PAYS": {
-      "qvm_rank": 45,
-      "qvm_score": 67.23942237364999,
-      "quality_score": 69.764308651426,
-      "value_score": 15.351757976130125,
-      "momentum_score": 76.24512818421171,
-      "quantitative_entry_risk": 64.54545454545455,
-      "overextension_penalty": 0.0,
-      "sector": "Technology",
-      "market_cap": null,
-      "price": 12.475000381469727,
-      "returns": {
-        "1m": -9.601447760520498,
-        "3m": 68.58108406349021,
-        "6m": 292.29560124478485,
-        "9m": 128.89909757908455,
-        "1y": 100.0
-      },
-      "price_path": {
-        "annualized_volatility": 70.32973987880901,
-        "downside_volatility": 34.269550207061464,
-        "max_drawdown": -49.84227144759335,
-        "positive_day_pct": 50.99601593625498,
-        "trend_r2": 0.8809450090582497,
-        "distance_50dma": 9.715666392173961,
-        "distance_200dma": 80.15156357249286,
-        "distance_52w_high": -11.77510552635368,
-        "largest_5d_move": 73.99380347902161,
-        "momentum_acceleration": -46.16150292331023
-      },
-      "benchmark_excess_returns": {
-        "1m": -11.789998608442898,
-        "3m": 67.32774143468352,
-        "6m": 257.4279300748843,
-        "9m": 98.40749335024933,
-        "1y": 82.89291470674682
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-17T18:25:31.181738+00:00",
-        "fresh_this_run": true,
-        "search_queries": [
-          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
-          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
-        ],
-        "source_count": 4
-      },
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T18:25:59.805918+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "MODERATE",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": null,
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": null
-      },
-      "decision": "SELECTED — LOW"
-    },
-    "MGTX": {
-      "qvm_rank": 46,
-      "qvm_score": 67.20166233082799,
-      "quality_score": 80.89596388844164,
-      "value_score": 53.730871029697624,
-      "momentum_score": 56.500869951243274,
-      "quantitative_entry_risk": 41.36363636363636,
-      "overextension_penalty": 0.0,
-      "sector": "Healthcare",
-      "market_cap": null,
-      "price": 13.0600004196167,
-      "returns": {
-        "1m": -12.758849788525751,
-        "3m": 15.371031552130265,
-        "6m": 77.68708284452117,
-        "9m": 51.860463259476795,
-        "1y": 59.69962
-      },
-      "price_path": {
-        "annualized_volatility": 59.71134351977684,
-        "downside_volatility": 36.33047346505283,
-        "max_drawdown": -24.51404321442203,
-        "positive_day_pct": 49.00398406374502,
-        "trend_r2": 0.7762715610587588,
-        "distance_50dma": -0.3205593272016527,
-        "distance_200dma": 31.544493353600878,
-        "distance_52w_high": -12.758849788525751,
-        "largest_5d_move": 24.934391085823314,
-        "momentum_acceleration": -27.756163747804276
-      },
-      "benchmark_excess_returns": {
-        "1m": -14.947400636448151,
-        "3m": 14.117688923323573,
-        "6m": 42.819411674620596,
-        "9m": 21.368859030641566,
-        "1y": 42.970398339283435
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-17T18:25:31.181851+00:00",
-        "fresh_this_run": true,
-        "search_queries": [
-          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
-          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
-        ],
-        "source_count": 4
-      },
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-17T18:25:59.806137+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "HIGH",
-        "binary_event_risk": "HIGH",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": null,
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": null
+        "risk_exposure_group": "GENOMIC_SEQUENCING_MARKET"
       },
       "decision": "SKIPPED — SECTOR CAPACITY"
     }
@@ -3533,6 +3537,31 @@
       "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
       "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES",
       "source_count": 3
+    },
+    "SLDE": {
+      "qvm_rank": 8,
+      "qvm_score": 77.87009075734244,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "MODERATE",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "source_count": 5
     },
     "DHT": {
       "qvm_rank": 9,
@@ -3834,6 +3863,31 @@
       "risk_exposure_group": "REFINING_CRACK_SPREADS",
       "source_count": 5
     },
+    "SBLK": {
+      "qvm_rank": 22,
+      "qvm_score": 71.1315483260134,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": "6_12_MONTHS",
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
+      "source_count": 4
+    },
     "CGAU": {
       "qvm_rank": 23,
       "qvm_score": 71.07003320491474,
@@ -3906,7 +3960,7 @@
       "risk_time_horizon": null,
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "GLOBAL_LABOR_MARKET_DEMAND",
       "source_count": 4
     },
     "NUTX": {
@@ -3931,7 +3985,7 @@
       "risk_time_horizon": null,
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "HEALTHCARE_SERVICES_DEMAND",
       "source_count": 3
     },
     "HNGE": {
@@ -3956,7 +4010,7 @@
       "risk_time_horizon": null,
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "DIGITAL_HEALTHCARE_ADOPTION",
       "source_count": 5
     },
     "AUGO": {
@@ -3982,6 +4036,31 @@
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
       "risk_exposure_group": "GOLD_AND_COPPER_PRICES",
+      "source_count": 5
+    },
+    "SB": {
+      "qvm_rank": 36,
+      "qvm_score": 68.60533020031369,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": "6_12_MONTHS",
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
       "source_count": 5
     },
     "DSVSF": {
@@ -4031,7 +4110,7 @@
       "risk_time_horizon": null,
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "ASSET_MANAGEMENT_AUM",
       "source_count": 4
     },
     "ETON": {
@@ -4056,8 +4135,58 @@
       "risk_time_horizon": "6_12_MONTHS",
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "RARE_DISEASE_THERAPEUTICS",
       "source_count": 5
+    },
+    "PAYS": {
+      "qvm_rank": 45,
+      "qvm_score": 67.23942237364999,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "MODERATE",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "PLASMA_DONOR_COPAYMENT_PROCESSING",
+      "source_count": 4
+    },
+    "MGTX": {
+      "qvm_rank": 46,
+      "qvm_score": 67.20166233082799,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "HIGH",
+      "binary_event_risk": "HIGH",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "GENETIC_MEDICINES_DEVELOPMENT",
+      "source_count": 4
     },
     "KRT": {
       "qvm_rank": 47,
@@ -4131,136 +4260,108 @@
       "risk_time_horizon": "6_12_MONTHS",
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": null,
+      "risk_exposure_group": "GENOMIC_SEQUENCING_MARKET",
       "source_count": 5
-    },
-    "SBLK": {
-      "qvm_rank": 22,
-      "qvm_score": 71.1315483260134,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "LOW",
-      "binary_event_risk": "LOW",
-      "benchmark_outperformance_outlook": "LIKELY",
-      "continuation_strength": "STRONG",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": "6_12_MONTHS",
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
-      "source_count": 4
-    },
-    "SB": {
-      "qvm_rank": 36,
-      "qvm_score": 68.60533020031369,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "LOW",
-      "binary_event_risk": "LOW",
-      "benchmark_outperformance_outlook": "LIKELY",
-      "continuation_strength": "STRONG",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": "6_12_MONTHS",
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
-      "source_count": 5
-    },
-    "SLDE": {
-      "qvm_rank": 8,
-      "qvm_score": 77.87009075734244,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "MODERATE",
-      "binary_event_risk": "LOW",
-      "benchmark_outperformance_outlook": "LIKELY",
-      "continuation_strength": "STRONG",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": null,
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": null,
-      "source_count": 5
-    },
-    "PAYS": {
-      "qvm_rank": 45,
-      "qvm_score": 67.23942237364999,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "MODERATE",
-      "binary_event_risk": "LOW",
-      "benchmark_outperformance_outlook": "LIKELY",
-      "continuation_strength": "STRONG",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": null,
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": null,
-      "source_count": 4
-    },
-    "MGTX": {
-      "qvm_rank": 46,
-      "qvm_score": 67.20166233082799,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "HIGH",
-      "binary_event_risk": "HIGH",
-      "benchmark_outperformance_outlook": "LIKELY",
-      "continuation_strength": "STRONG",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": null,
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": null,
-      "source_count": 4
     }
   },
-  "classification_drift": [],
+  "classification_drift": [
+    {
+      "symbol": "ETON",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "RARE_DISEASE_THERAPEUTICS"
+        }
+      }
+    },
+    {
+      "symbol": "HNGE",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "DIGITAL_HEALTHCARE_ADOPTION"
+        }
+      }
+    },
+    {
+      "symbol": "ILMN",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "GENOMIC_SEQUENCING_MARKET"
+        }
+      }
+    },
+    {
+      "symbol": "MGTX",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "GENETIC_MEDICINES_DEVELOPMENT"
+        }
+      }
+    },
+    {
+      "symbol": "NUTX",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "HEALTHCARE_SERVICES_DEMAND"
+        }
+      }
+    },
+    {
+      "symbol": "PAYS",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "PLASMA_DONOR_COPAYMENT_PROCESSING"
+        }
+      }
+    },
+    {
+      "symbol": "RCRUY",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "GLOBAL_LABOR_MARKET_DEMAND"
+        }
+      }
+    },
+    {
+      "symbol": "VCTR",
+      "changed_fields": [
+        "risk_exposure_group"
+      ],
+      "changes": {
+        "risk_exposure_group": {
+          "previous": null,
+          "current": "ASSET_MANAGEMENT_AUM"
+        }
+      }
+    }
+  ],
   "raw_to_final_normalizations": [],
   "runtime_reconciliations": [
     {
@@ -4268,6 +4369,271 @@
       "type": "cautious_temporary_dependence_floor",
       "from": "MODERATE",
       "to": "MODERATE"
+    },
+    {
+      "symbol": "ECO",
+      "type": "risk_downgrade",
+      "from": "MODERATE",
+      "to": "LOW",
+      "component_risks_before": {
+        "business_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE"
+      },
+      "component_risk_changes": {
+        "business_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        },
+        "entry_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "HIGH",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": "6_12_MONTHS",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Elevated TCE rates for VLCCs and Suezmax tankers"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Elevated TCE rates for VLCCs and Suezmax tankers"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "reason": "no qualifying current probability indicator"
+    },
+    {
+      "symbol": "NAT",
+      "type": "risk_downgrade",
+      "from": "MODERATE",
+      "to": "LOW",
+      "component_risks_before": {
+        "business_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE"
+      },
+      "component_risk_changes": {
+        "business_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        },
+        "entry_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "HIGH",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": "6_12_MONTHS",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Exceptional conditions for Suezmax vessels, with rates and values up"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Exceptional conditions for Suezmax vessels, with rates and values up"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "reason": "no qualifying current probability indicator"
+    },
+    {
+      "symbol": "LPG",
+      "type": "risk_downgrade",
+      "from": "MODERATE",
+      "to": "LOW",
+      "component_risks_before": {
+        "business_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE"
+      },
+      "component_risk_changes": {
+        "business_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        },
+        "entry_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "HIGH",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": "6_12_MONTHS",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Record TCE revenue per day driven by Strait of Hormuz closure and Middle East geopolitical disruption"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Record TCE revenue per day driven by Strait of Hormuz closure and Middle East geopolitical disruption"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "reason": "no qualifying current probability indicator"
+    },
+    {
+      "symbol": "TEN",
+      "type": "risk_downgrade",
+      "from": "MODERATE",
+      "to": "LOW",
+      "component_risks_before": {
+        "business_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE"
+      },
+      "component_risk_changes": {
+        "business_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        },
+        "entry_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "HIGH",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": "6_12_MONTHS",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Strong freight markets and higher profit-sharing income"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Strong freight markets and higher profit-sharing income"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "reason": "no qualifying current probability indicator"
+    },
+    {
+      "symbol": "FRO",
+      "type": "risk_downgrade",
+      "from": "MODERATE",
+      "to": "LOW",
+      "component_risks_before": {
+        "business_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE"
+      },
+      "component_risk_changes": {
+        "business_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        },
+        "entry_reversal_risk": {
+          "from": "MODERATE",
+          "to": "LOW"
+        }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "HIGH",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": "6_12_MONTHS",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Elevated TCE rates for VLCCs, Suezmax, and LR2/Aframax tankers driven by Strait of Hormuz risks, Red Sea and Black Sea disruptions"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_ESTABLISHED",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "HIGH",
+        "temporary_drivers": [
+          "Elevated TCE rates for VLCCs, Suezmax, and LR2/Aframax tankers driven by Strait of Hormuz risks, Red Sea and Black Sea disruptions"
+        ],
+        "continuation_strength": "WEAK"
+      },
+      "reason": "no qualifying current probability indicator"
     },
     {
       "symbol": "DHT",
@@ -4304,56 +4670,11 @@
       "type": "cautious_temporary_dependence_floor",
       "from": "MODERATE",
       "to": "MODERATE"
-    },
-    {
-      "symbol": "PAYS",
-      "type": "risk_downgrade",
-      "from": "MODERATE",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "MODERATE"
-      },
-      "component_risk_changes": {
-        "entry_reversal_risk": {
-          "from": "MODERATE",
-          "to": "LOW"
-        }
-      },
-      "evidence_before": {
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "risk_materiality": "LOW",
-        "current_fact": "Q2 2026 revenue of $28.25 million and diluted EPS of $0.11.",
-        "probability_evidence": null,
-        "material_effect": null,
-        "risk_time_horizon": null,
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "temporary_drivers": [],
-        "continuation_strength": "STRONG"
-      },
-      "evidence_after": {
-        "mechanism_status": "HYPOTHETICAL",
-        "normalization_probability": "NOT_APPLICABLE",
-        "risk_materiality": "LOW",
-        "current_fact": null,
-        "probability_evidence": null,
-        "material_effect": null,
-        "risk_time_horizon": null,
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "temporary_drivers": [],
-        "continuation_strength": "STRONG"
-      },
-      "reason": "no qualifying current probability indicator"
     }
   ],
   "reconciliation_counts": {
     "cautious_temporary_dependence_floor": 7,
-    "risk_downgrade": 1
+    "risk_downgrade": 5
   },
   "duplicate_results": [],
   "duplicate_extra_block_count": 0,
@@ -4409,7 +4730,7 @@
     "SB": {
       "qvm_rank": 36,
       "sector_group": "Industrials",
-      "status": "SELECTED — LOW",
+      "status": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR",
       "final_selection_score": 80.60533020031369,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
@@ -4417,7 +4738,7 @@
     "DSVSF": {
       "qvm_rank": 38,
       "sector_group": "Basic Materials",
-      "status": "SELECTED — LOW",
+      "status": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR",
       "final_selection_score": 80.26157379784752,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
@@ -4457,7 +4778,7 @@
     "AYA": {
       "qvm_rank": 14,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
+      "status": "SELECTED — LOW",
       "final_selection_score": 76.31436020487908,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "UNCERTAIN"
@@ -4465,7 +4786,7 @@
     "FTNT": {
       "qvm_rank": 17,
       "sector_group": "Technology",
-      "status": "NOT SELECTED — LOWER FINAL SCORE",
+      "status": "SELECTED — LOW",
       "final_selection_score": 75.85096662345225,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "UNCERTAIN"
@@ -4670,73 +4991,37 @@
     "RCRUY",
     "NUTX",
     "HNGE",
-    "SB",
-    "DSVSF",
     "VCTR",
-    "PAYS"
+    "PAYS",
+    "AYA",
+    "FTNT"
   ],
   "portfolio_changes": {
     "added": [
       {
-        "symbol": "SLDE",
-        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "SBLK",
-        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "SB",
-        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "DSVSF",
+        "symbol": "AYA",
         "previous_status": "SKIPPED — SECTOR CAPACITY",
         "current_status": "SELECTED — LOW",
         "classification_fields_changed": []
       },
       {
-        "symbol": "PAYS",
-        "previous_status": "not present",
+        "symbol": "FTNT",
+        "previous_status": "NOT SELECTED — LOWER FINAL SCORE",
         "current_status": "SELECTED — LOW",
         "classification_fields_changed": []
       }
     ],
     "removed": [
       {
-        "symbol": "INSW",
-        "previous_status": "SELECTED — MODERATE",
-        "current_status": "NOT SELECTED — UNCERTAIN MODERATE-RISK CASE",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "AYA",
+        "symbol": "SB",
         "previous_status": "SELECTED — LOW",
-        "current_status": "SKIPPED — SECTOR CAPACITY",
+        "current_status": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR",
         "classification_fields_changed": []
       },
       {
-        "symbol": "FTNT",
+        "symbol": "DSVSF",
         "previous_status": "SELECTED — LOW",
-        "current_status": "NOT SELECTED — LOWER FINAL SCORE",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "ECO",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "NOT SELECTED — WEAK CONTINUATION",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "PBT",
-        "previous_status": "SELECTED — MODERATE",
-        "current_status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+        "current_status": "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR",
         "classification_fields_changed": []
       }
     ]

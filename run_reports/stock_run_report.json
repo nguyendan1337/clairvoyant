@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "created_at": "2026-09-17T17:57:56.870066+00:00",
-  "elapsed_seconds": 162,
+  "created_at": "2026-09-17T18:26:20.286665+00:00",
+  "elapsed_seconds": 151,
   "models": {
     "research_primary": "gemini-2.5-flash",
     "research_fallback": "gemini-2.5-flash-lite",
@@ -20,22 +20,22 @@
     ],
     "returns": {
       "SPMO": {
-        "1M Return": -1.2835896487506062,
-        "3M Return": -8.27358873761726,
-        "6M Return": 26.92913841942311,
-        "9M Return": 24.216045304205622,
-        "1Y Return": 22.370728606815234
+        "1M Return": -1.1998643114681187,
+        "3M Return": -8.195791898233324,
+        "6M Return": 27.03679210017718,
+        "9M Return": 24.321397902137278,
+        "1Y Return": 22.474516117824322
       },
       "VGT": {
-        "1M Return": 2.2095959028354315,
-        "3M Return": 1.2741950837839937,
-        "6M Return": 34.895446273101584,
-        "9M Return": 30.518488813551272,
-        "1Y Return": 35.22933792044577
+        "1M Return": 2.2011765964603995,
+        "3M Return": 1.2658528291378985,
+        "6M Return": 34.88433453666687,
+        "9M Return": 30.50773762003348,
+        "1Y Return": 35.218210169523786
       }
     },
     "hurdle_symbol": "VGT",
-    "hurdle_52_week_return": 35.22933792044577,
+    "hurdle_52_week_return": 35.218210169523786,
     "used_fallback": false
   },
   "yfinance_fundamentals": {
@@ -48,12 +48,12 @@
     "pipeline_used": false
   },
   "request_budget": {
-    "used": 1,
+    "used": 2,
     "maximum": 7,
-    "stock_used": 0,
+    "stock_used": 1,
     "stock_maximum": 5,
-    "api_attempts": 1,
-    "stock_api_attempts": 0,
+    "api_attempts": 2,
+    "stock_api_attempts": 1,
     "classification_api_attempts_used": 2,
     "classification_api_attempts_maximum": 8
   },
@@ -65,28 +65,34 @@
       "category": "classification",
       "search_enabled": false,
       "symbols": [
-        "INSW",
-        "ECO",
-        "NAT",
-        "LPG",
-        "TEN",
-        "FRO",
         "SLDE",
-        "DHT",
-        "TRMD",
-        "WDOFF",
-        "PBT",
-        "MAKO",
-        "AYA",
-        "ARREF",
-        "FTNT",
-        "STNG",
-        "SHIP",
-        "HAFN",
-        "DINO",
-        "SBLK"
+        "SBLK",
+        "PTGX",
+        "CDNA",
+        "SB"
       ],
       "status": "SUCCESS"
+    },
+    {
+      "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
+      "model": "gemini-2.5-flash",
+      "attempt": 1,
+      "category": "stock",
+      "search_enabled": true,
+      "status": "SUCCESS",
+      "prompt_tokens": 19878,
+      "tool_tokens": 20764,
+      "cached_tokens": 19054,
+      "thinking_tokens": 8568,
+      "output_tokens": 5711,
+      "total_tokens": 54921,
+      "search_queries": [
+        "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+        "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+        "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+        "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+      ],
+      "grounding_chunks_exposed": 10
     },
     {
       "stage": "stock_judgment",
@@ -95,21 +101,10 @@
       "category": "classification",
       "search_enabled": false,
       "symbols": [
-        "CGAU",
-        "PTGX",
-        "CDNA",
-        "NMM",
-        "RCRUY",
-        "NUTX",
-        "HNGE",
-        "AUGO",
-        "SB",
-        "DSVSF",
-        "VCTR",
-        "ETON",
-        "KRT",
-        "PURR",
-        "ILMN"
+        "TNK",
+        "SLDE",
+        "PAYS",
+        "MGTX"
       ],
       "status": "SUCCESS"
     },
@@ -120,25 +115,36 @@
       "category": "summary",
       "search_enabled": false,
       "status": "SUCCESS",
-      "prompt_tokens": 12818,
+      "prompt_tokens": 12669,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 4093,
-      "output_tokens": 1795,
-      "total_tokens": 18706,
+      "thinking_tokens": 3249,
+      "output_tokens": 1837,
+      "total_tokens": 17755,
       "search_queries": [],
       "grounding_chunks_exposed": 0
     }
   ],
   "successful_gemini_metadata": [
     {
+      "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
+      "prompt_tokens": 19878,
+      "tool_tokens": 20764,
+      "cached_tokens": 19054,
+      "thinking_tokens": 8568,
+      "output_tokens": 5711,
+      "total_tokens": 54921,
+      "searches_exposed": 4,
+      "grounding_chunks_exposed": 10
+    },
+    {
       "stage": "final HTML summary",
-      "prompt_tokens": 12818,
+      "prompt_tokens": 12669,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 4093,
-      "output_tokens": 1795,
-      "total_tokens": 18706,
+      "thinking_tokens": 3249,
+      "output_tokens": 1837,
+      "total_tokens": 17755,
       "searches_exposed": 0,
       "grounding_chunks_exposed": 0
     }
@@ -149,48 +155,18 @@
       "model": "gemini-3.5-flash",
       "attempt": 1,
       "symbols": [
-        "INSW",
-        "ECO",
-        "NAT",
-        "LPG",
-        "TEN",
-        "FRO",
         "SLDE",
-        "DHT",
-        "TRMD",
-        "WDOFF",
-        "PBT",
-        "MAKO",
-        "AYA",
-        "ARREF",
-        "FTNT",
-        "STNG",
-        "SHIP",
-        "HAFN",
-        "DINO",
-        "SBLK"
+        "SBLK",
+        "PTGX",
+        "CDNA",
+        "SB"
       ],
       "returned_symbols": [
-        "INSW",
-        "ECO",
-        "NAT",
-        "LPG",
-        "TEN",
-        "FRO",
         "SLDE",
-        "DHT",
-        "TRMD",
-        "WDOFF",
-        "PBT",
-        "MAKO",
-        "AYA",
-        "ARREF",
-        "FTNT",
-        "STNG",
-        "SHIP",
-        "HAFN",
-        "DINO",
-        "SBLK"
+        "SBLK",
+        "PTGX",
+        "CDNA",
+        "SB"
       ],
       "missing_symbols": [],
       "fallback": false,
@@ -202,38 +178,16 @@
       "model": "gemini-3.5-flash",
       "attempt": 1,
       "symbols": [
-        "CGAU",
-        "PTGX",
-        "CDNA",
-        "NMM",
-        "RCRUY",
-        "NUTX",
-        "HNGE",
-        "AUGO",
-        "SB",
-        "DSVSF",
-        "VCTR",
-        "ETON",
-        "KRT",
-        "PURR",
-        "ILMN"
+        "TNK",
+        "SLDE",
+        "PAYS",
+        "MGTX"
       ],
       "returned_symbols": [
-        "CGAU",
-        "PTGX",
-        "CDNA",
-        "NMM",
-        "RCRUY",
-        "NUTX",
-        "HNGE",
-        "AUGO",
-        "SB",
-        "DSVSF",
-        "VCTR",
-        "ETON",
-        "KRT",
-        "PURR",
-        "ILMN"
+        "TNK",
+        "SLDE",
+        "PAYS",
+        "MGTX"
       ],
       "missing_symbols": [],
       "fallback": false,
@@ -242,29 +196,62 @@
     }
   ],
   "classification_validation_failures": {
-    "SLDE": "SLDE MODERATE fields violate mechanism mapping.",
-    "SBLK": "SBLK omits documented shared event GLOBAL_FREIGHT_CONSTRAINTS for comparable exposure DRY_BULK_FREIGHT_RATES; current research must establish the event treatment or a sourced company_difference.",
-    "PTGX": "PTGX MODERATE fields violate mechanism mapping.",
+    "PTGX": "PTGX has invalid continuation_outlook 'UNCERTAIN'.",
     "CDNA": "CDNA MODERATE fields violate mechanism mapping.",
-    "SB": "SB omits documented shared event MIDDLE_EAST_ENERGY_DISRUPTION for comparable exposure DRY_BULK_AND_TANKER_SPOT_RATES; current research must establish the event treatment or a sourced company_difference."
+    "TNK": "TNK differs from INSW on shared event MIDDLE_EAST_ENERGY_DISRUPTION (mechanism_status, normalization_probability, reversal_risk) without a sourced company_difference."
   },
   "token_totals": {
-    "prompt_tokens": 12818,
-    "tool_tokens": 0,
-    "cached_tokens": 0,
-    "thinking_tokens": 4093,
-    "output_tokens": 1795,
-    "total_tokens": 18706
+    "prompt_tokens": 32547,
+    "tool_tokens": 20764,
+    "cached_tokens": 19054,
+    "thinking_tokens": 11817,
+    "output_tokens": 7548,
+    "total_tokens": 72676
   },
   "research": {
-    "unique_symbols_requested": 0,
-    "charged_search_attempts": 0,
-    "attempted_stock_requests": 0,
-    "completed_stock_responses": 0,
-    "newly_validated_symbols": [],
-    "initial_validated_cache_symbols": [],
-    "cached_research_records_used": 30,
-    "cached_judgment_records_used": 0,
+    "unique_symbols_requested": 4,
+    "charged_search_attempts": 4,
+    "attempted_stock_requests": 1,
+    "completed_stock_responses": 1,
+    "newly_validated_symbols": [
+      "MGTX",
+      "PAYS",
+      "SLDE"
+    ],
+    "initial_validated_cache_symbols": [
+      "ARREF",
+      "AUGO",
+      "AYA",
+      "CGAU",
+      "DHT",
+      "DINO",
+      "DSVSF",
+      "ECO",
+      "ETON",
+      "FRO",
+      "FTNT",
+      "HAFN",
+      "HNGE",
+      "ILMN",
+      "INSW",
+      "KRT",
+      "LPG",
+      "MAKO",
+      "NAT",
+      "NMM",
+      "NUTX",
+      "PBT",
+      "PURR",
+      "RCRUY",
+      "SHIP",
+      "STNG",
+      "TEN",
+      "TRMD",
+      "VCTR",
+      "WDOFF"
+    ],
+    "cached_research_records_used": 32,
+    "cached_judgment_records_used": 30,
     "source_counts": {
       "INSW": 3,
       "ECO": 3,
@@ -295,9 +282,30 @@
       "ETON": 5,
       "KRT": 5,
       "PURR": 5,
-      "ILMN": 5
+      "ILMN": 5,
+      "SBLK": 4,
+      "SB": 5,
+      "SLDE": 5,
+      "PAYS": 4,
+      "MGTX": 4
     },
-    "batches": []
+    "batches": [
+      {
+        "stage": "stock batch containing 4 stocks, spanning QVM ranks 3-46",
+        "coverage_status": "NORMAL",
+        "coverage_fraction": 1.0,
+        "candidates_sent": 4,
+        "fresh_research_requested": 4,
+        "company_searches_exposed": 4,
+        "results_returned": 4,
+        "validated": 4,
+        "missing": 0,
+        "incomplete": 0,
+        "structural_repairs_needed": 0,
+        "genuine_repeated_searches": 0,
+        "missing_unsearched_attempts_refunded": 0
+      }
+    ]
   },
   "stocks": {
     "INSW": {
@@ -365,7 +373,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.936792+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -389,7 +397,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "SELECTED — MODERATE"
+      "decision": "NOT SELECTED — UNCERTAIN MODERATE-RISK CASE"
     },
     "ECO": {
       "qvm_rank": 2,
@@ -455,7 +463,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.936946+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -479,7 +487,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "SELECTED — LOW"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "NAT": {
       "qvm_rank": 4,
@@ -545,7 +553,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937076+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -569,7 +577,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "LPG": {
       "qvm_rank": 5,
@@ -635,7 +643,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937205+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -659,7 +667,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "LPG_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "TEN": {
       "qvm_rank": 6,
@@ -725,7 +733,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937359+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -749,7 +757,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "FRO": {
       "qvm_rank": 7,
@@ -815,7 +823,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937511+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -839,7 +847,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "DHT": {
       "qvm_rank": 9,
@@ -906,7 +914,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937720+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -930,7 +938,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "TRMD": {
       "qvm_rank": 10,
@@ -997,7 +1005,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937839+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1021,7 +1029,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "PRODUCT_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "WDOFF": {
       "qvm_rank": 11,
@@ -1087,7 +1095,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.937961+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1111,7 +1119,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "GOLD_PRICE_VOLATILITY"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — UNCERTAIN BENCHMARK CASE"
     },
     "PBT": {
       "qvm_rank": 12,
@@ -1178,7 +1186,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938072+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1202,7 +1210,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "OIL_AND_GAS_ROYALTY_INCOME"
       },
-      "decision": "SELECTED — MODERATE"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "MAKO": {
       "qvm_rank": 13,
@@ -1268,7 +1276,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938224+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1292,7 +1300,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "GOLD_PRICE_VOLATILITY"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — UNCERTAIN BENCHMARK CASE"
     },
     "AYA": {
       "qvm_rank": 14,
@@ -1358,7 +1366,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938406+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1382,7 +1390,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "SILVER_GOLD_PRICE_VOLATILITY"
       },
-      "decision": "SELECTED — LOW"
+      "decision": "SKIPPED — SECTOR CAPACITY"
     },
     "ARREF": {
       "qvm_rank": 16,
@@ -1448,7 +1456,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938537+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1472,7 +1480,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "COPPER_PRICE_VOLATILITY"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "FTNT": {
       "qvm_rank": 17,
@@ -1538,7 +1546,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938686+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1562,7 +1570,7 @@
         "primary_risk_event_id": "AI_VALUATION_CONCENTRATION",
         "risk_exposure_group": "TECHNOLOGY_VALUATION_SHIFTS"
       },
-      "decision": "SELECTED — LOW"
+      "decision": "NOT SELECTED — LOWER FINAL SCORE"
     },
     "STNG": {
       "qvm_rank": 18,
@@ -1622,7 +1630,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938828+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1646,7 +1654,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "PRODUCT_TANKER_SPOT_RATES"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "SHIP": {
       "qvm_rank": 19,
@@ -1712,7 +1720,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.938970+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1736,7 +1744,7 @@
         "primary_risk_event_id": "GLOBAL_FREIGHT_CONSTRAINTS",
         "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"
       },
-      "decision": "NOT SELECTED — LOWER FINAL SCORE"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "HAFN": {
       "qvm_rank": 20,
@@ -1802,7 +1810,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.939137+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1826,7 +1834,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "PRODUCT_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — WEAK CONTINUATION"
     },
     "DINO": {
       "qvm_rank": 21,
@@ -1886,7 +1894,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:56:14.939301+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -1910,7 +1918,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "REFINING_CRACK_SPREADS"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "CGAU": {
       "qvm_rank": 23,
@@ -1977,7 +1985,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.168277+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2068,7 +2076,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.168578+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2092,7 +2100,7 @@
         "primary_risk_event_id": "MIDDLE_EAST_ENERGY_DISRUPTION",
         "risk_exposure_group": "DRY_BULK_AND_TANKER_SPOT_RATES"
       },
-      "decision": "NOT SELECTED — RISK-EVENT CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "RCRUY": {
       "qvm_rank": 28,
@@ -2159,7 +2167,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.168750+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2250,7 +2258,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.168921+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2341,7 +2349,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.169091+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2432,7 +2440,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.169282+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2456,7 +2464,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "GOLD_AND_COPPER_PRICES"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR"
     },
     "DSVSF": {
       "qvm_rank": 38,
@@ -2516,7 +2524,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.169624+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2540,7 +2548,7 @@
         "primary_risk_event_id": null,
         "risk_exposure_group": "GOLD_AND_COPPER_PRICES"
       },
-      "decision": "SKIPPED — SECTOR CAPACITY"
+      "decision": "SELECTED — LOW"
     },
     "VCTR": {
       "qvm_rank": 39,
@@ -2600,7 +2608,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.169814+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2684,7 +2692,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.169997+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2768,7 +2776,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.170177+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2852,7 +2860,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.170375+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2936,7 +2944,7 @@
         "model": "gemini-3.5-flash",
         "judged_at": "2026-09-17T17:57:35.170569+00:00",
         "fallback_used": false,
-        "fresh_this_run": true
+        "fresh_this_run": false
       },
       "classification": {
         "research_status": "COMPLETE",
@@ -2956,6 +2964,418 @@
         "probability_indicator_type": "NONE",
         "probability_basis": "EXTERNAL_EXPECTATION_ONLY",
         "risk_time_horizon": "6_12_MONTHS",
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null
+      },
+      "decision": "SKIPPED — SECTOR CAPACITY"
+    },
+    "SBLK": {
+      "qvm_rank": 22,
+      "qvm_score": 71.1315483260134,
+      "quality_score": 68.6749373816104,
+      "value_score": 64.70624454707507,
+      "momentum_score": 75.01600455462491,
+      "quantitative_entry_risk": 47.04545454545455,
+      "overextension_penalty": 0.0,
+      "sector": "Industrials",
+      "market_cap": null,
+      "price": 32.060001373291016,
+      "returns": {
+        "1m": 9.544274856471668,
+        "3m": 28.04923877825751,
+        "6m": 48.1283550172106,
+        "9m": 89.07943560116817,
+        "1y": 55.594753
+      },
+      "price_path": {
+        "annualized_volatility": 32.957555735849326,
+        "downside_volatility": 20.742995937289297,
+        "max_drawdown": -17.48990008108692,
+        "positive_day_pct": 57.76892430278885,
+        "trend_r2": 0.8313047788592846,
+        "distance_50dma": 12.373069084831734,
+        "distance_200dma": 33.95058146613514,
+        "distance_52w_high": -1.1104158420315202,
+        "largest_5d_move": 13.012048649433595,
+        "momentum_acceleration": 1.4273566141324014
+      },
+      "benchmark_excess_returns": {
+        "1m": 7.355724008549268,
+        "3m": 26.79589614945082,
+        "6m": 13.260683847310027,
+        "9m": 58.58783137233294,
+        "1y": 38.56807310548655
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T17:55:15.650678+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "DHT Holdings, Inc. DHT investor relations latest results guidance pricing margins demand operating metrics",
+          "TORM plc TRMD investor relations latest results guidance pricing margins demand operating metrics",
+          "Permian Basin Royalty Trust PBT investor relations latest results guidance pricing margins demand operating metrics",
+          "Teekay Corporation Ltd. TK investor relations latest results guidance pricing margins demand operating metrics",
+          "Star Bulk Carriers Corp. SBLK investor relations latest results guidance pricing margins demand operating metrics",
+          "Centerra Gold Inc. CGAU investor relations latest results guidance pricing margins demand operating metrics",
+          "Protagonist Therapeutics, Inc. PTGX investor relations latest results guidance pricing margins demand operating metrics",
+          "CareDx, Inc. CDNA investor relations latest results guidance pricing margins demand operating metrics",
+          "Navios Maritime Partners L.P. NMM investor relations latest results guidance pricing margins demand operating metrics",
+          "Recruit Holdings Co., Ltd. RCRUY investor relations latest results guidance pricing margins demand operating metrics",
+          "Nutex Health Inc. NUTX investor relations latest results guidance pricing margins demand operating metrics",
+          "Hinge Health, Inc. HNGE investor relations latest results guidance pricing margins demand operating metrics",
+          "Aura Minerals Inc. AUGO investor relations latest results guidance pricing margins demand operating metrics",
+          "Permian Basin Royalty Trust PBT latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Centerra Gold Inc. CGAU latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Recruit Holdings Co., Ltd. RCRUY latest earnings release revenue guidance operating metrics investor relations SEC"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:24:35.931423+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": "6_12_MONTHS",
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
+      },
+      "decision": "SELECTED — LOW"
+    },
+    "SB": {
+      "qvm_rank": 36,
+      "qvm_score": 68.60533020031369,
+      "quality_score": 61.34981265724196,
+      "value_score": 57.336908720721524,
+      "momentum_score": 78.36494140551699,
+      "quantitative_entry_risk": 48.33333333333333,
+      "overextension_penalty": 0.0,
+      "sector": "Industrials",
+      "market_cap": null,
+      "price": 8.989999771118164,
+      "returns": {
+        "1m": 10.03671587719477,
+        "3m": 36.83266717141689,
+        "6m": 45.983889688579914,
+        "9m": 89.30739429011167,
+        "1y": 89.393936
+      },
+      "price_path": {
+        "annualized_volatility": 35.61266778565394,
+        "downside_volatility": 20.5099512249169,
+        "max_drawdown": -14.733970031609356,
+        "positive_day_pct": 54.18326693227091,
+        "trend_r2": 0.7407058494885441,
+        "distance_50dma": 13.564679501924948,
+        "distance_200dma": 39.444355853647316,
+        "distance_52w_high": -1.9629258852583154,
+        "largest_5d_move": 13.052620329262732,
+        "momentum_acceleration": -1.476434715876728
+      },
+      "benchmark_excess_returns": {
+        "1m": 7.848165029272369,
+        "3m": 35.579324542610195,
+        "6m": 11.11621851867934,
+        "9m": 58.815790061276445,
+        "1y": 67.39062636591966
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T17:55:15.652084+00:00",
+        "fresh_this_run": false,
+        "search_queries": [
+          "Scorpio Tankers Inc. STNG investor relations latest results guidance pricing margins demand operating metrics",
+          "HF Sinclair Corporation DINO investor relations latest results guidance pricing margins demand operating metrics",
+          "Safe Bulkers, Inc. SB investor relations latest results guidance pricing margins demand operating metrics",
+          "Discovery Mining Ltd. DSVSF investor relations latest results guidance pricing margins demand operating metrics",
+          "Victory Capital Holdings, Inc. VCTR investor relations latest results guidance pricing margins demand operating metrics",
+          "Eton Pharmaceuticals, Inc. ETON investor relations latest results guidance pricing margins demand operating metrics",
+          "Karat Packaging Inc. KRT investor relations latest results guidance pricing margins demand operating metrics",
+          "Hyperliquid Strategies Inc. PURR investor relations latest results guidance pricing margins demand operating metrics",
+          "Illumina, Inc. ILMN investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 5
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:24:35.931744+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": "6_12_MONTHS",
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE"
+      },
+      "decision": "SELECTED — LOW"
+    },
+    "SLDE": {
+      "qvm_rank": 8,
+      "qvm_score": 77.87009075734244,
+      "quality_score": 84.61894634921285,
+      "value_score": 82.24246186918214,
+      "momentum_score": 70.14959714061877,
+      "quantitative_entry_risk": 57.727272727272734,
+      "overextension_penalty": 0.0,
+      "sector": "Financial Services",
+      "market_cap": null,
+      "price": 25.260000228881836,
+      "returns": {
+        "1m": 12.366551348999488,
+        "3m": 52.84780641400306,
+        "6m": 46.48651763665368,
+        "9m": 39.16621630042425,
+        "1y": 73.211876
+      },
+      "price_path": {
+        "annualized_volatility": 44.164021376905936,
+        "downside_volatility": 24.840547369511842,
+        "max_drawdown": -20.010127096171736,
+        "positive_day_pct": 50.99601593625498,
+        "trend_r2": 0.6659940280722222,
+        "distance_50dma": 13.738089228270312,
+        "distance_200dma": 33.16507648936495,
+        "distance_52w_high": -4.607248241861028,
+        "largest_5d_move": 17.663354750787263,
+        "momentum_acceleration": -4.263664431965621
+      },
+      "benchmark_excess_returns": {
+        "1m": 10.178000501077088,
+        "3m": 51.59446378519637,
+        "6m": 11.618846466753105,
+        "9m": 8.674612071589024,
+        "1y": 63.71660106262749
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181604+00:00",
+        "fresh_this_run": true,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 5
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:25:59.805646+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "MODERATE",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null
+      },
+      "decision": "SELECTED — LOW"
+    },
+    "PAYS": {
+      "qvm_rank": 45,
+      "qvm_score": 67.23942237364999,
+      "quality_score": 69.764308651426,
+      "value_score": 15.351757976130125,
+      "momentum_score": 76.24512818421171,
+      "quantitative_entry_risk": 64.54545454545455,
+      "overextension_penalty": 0.0,
+      "sector": "Technology",
+      "market_cap": null,
+      "price": 12.475000381469727,
+      "returns": {
+        "1m": -9.601447760520498,
+        "3m": 68.58108406349021,
+        "6m": 292.29560124478485,
+        "9m": 128.89909757908455,
+        "1y": 100.0
+      },
+      "price_path": {
+        "annualized_volatility": 70.32973987880901,
+        "downside_volatility": 34.269550207061464,
+        "max_drawdown": -49.84227144759335,
+        "positive_day_pct": 50.99601593625498,
+        "trend_r2": 0.8809450090582497,
+        "distance_50dma": 9.715666392173961,
+        "distance_200dma": 80.15156357249286,
+        "distance_52w_high": -11.77510552635368,
+        "largest_5d_move": 73.99380347902161,
+        "momentum_acceleration": -46.16150292331023
+      },
+      "benchmark_excess_returns": {
+        "1m": -11.789998608442898,
+        "3m": 67.32774143468352,
+        "6m": 257.4279300748843,
+        "9m": 98.40749335024933,
+        "1y": 82.89291470674682
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181738+00:00",
+        "fresh_this_run": true,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:25:59.805918+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "MODERATE",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": null
+      },
+      "decision": "SELECTED — LOW"
+    },
+    "MGTX": {
+      "qvm_rank": 46,
+      "qvm_score": 67.20166233082799,
+      "quality_score": 80.89596388844164,
+      "value_score": 53.730871029697624,
+      "momentum_score": 56.500869951243274,
+      "quantitative_entry_risk": 41.36363636363636,
+      "overextension_penalty": 0.0,
+      "sector": "Healthcare",
+      "market_cap": null,
+      "price": 13.0600004196167,
+      "returns": {
+        "1m": -12.758849788525751,
+        "3m": 15.371031552130265,
+        "6m": 77.68708284452117,
+        "9m": 51.860463259476795,
+        "1y": 59.69962
+      },
+      "price_path": {
+        "annualized_volatility": 59.71134351977684,
+        "downside_volatility": 36.33047346505283,
+        "max_drawdown": -24.51404321442203,
+        "positive_day_pct": 49.00398406374502,
+        "trend_r2": 0.7762715610587588,
+        "distance_50dma": -0.3205593272016527,
+        "distance_200dma": 31.544493353600878,
+        "distance_52w_high": -12.758849788525751,
+        "largest_5d_move": 24.934391085823314,
+        "momentum_acceleration": -27.756163747804276
+      },
+      "benchmark_excess_returns": {
+        "1m": -14.947400636448151,
+        "3m": 14.117688923323573,
+        "6m": 42.819411674620596,
+        "9m": 21.368859030641566,
+        "1y": 42.970398339283435
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-17T18:25:31.181851+00:00",
+        "fresh_this_run": true,
+        "search_queries": [
+          "Teekay Tankers TNK investor relations latest results guidance pricing margins demand operating metrics",
+          "Paysign, Inc. PAYS investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX investor relations latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Slide Insurance Holdings, Inc. SLDE investor relations latest results guidance pricing margins demand operating metrics"
+        ],
+        "source_count": 4
+      },
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-17T18:25:59.806137+00:00",
+        "fallback_used": false,
+        "fresh_this_run": true
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "HIGH",
+        "binary_event_risk": "HIGH",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
         "risk_exposure_group": null
@@ -3713,883 +4133,134 @@
       "primary_risk_event_id": null,
       "risk_exposure_group": null,
       "source_count": 5
+    },
+    "SBLK": {
+      "qvm_rank": 22,
+      "qvm_score": 71.1315483260134,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": "6_12_MONTHS",
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
+      "source_count": 4
+    },
+    "SB": {
+      "qvm_rank": 36,
+      "qvm_score": 68.60533020031369,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": "6_12_MONTHS",
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "DRY_BULK_SHIPPING_CYCLE",
+      "source_count": 5
+    },
+    "SLDE": {
+      "qvm_rank": 8,
+      "qvm_score": 77.87009075734244,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "MODERATE",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "source_count": 5
+    },
+    "PAYS": {
+      "qvm_rank": 45,
+      "qvm_score": 67.23942237364999,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "MODERATE",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "source_count": 4
+    },
+    "MGTX": {
+      "qvm_rank": 46,
+      "qvm_score": 67.20166233082799,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "HIGH",
+      "binary_event_risk": "HIGH",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": null,
+      "source_count": 4
     }
   },
-  "classification_drift": [
-    {
-      "symbol": "AYA",
-      "changed_fields": [
-        "business_reversal_risk",
-        "catalyst_dependence",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "normalization_probability",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_basis",
-        "risk_exposure_group",
-        "risk_materiality"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 33,
-          "current": 14
-        },
-        "qvm_score": {
-          "previous": 69.09132502258018,
-          "current": 73.31436020487908
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        },
-        "risk_basis": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": "NONE"
-        },
-        "catalyst_dependence": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "normalization_probability": {
-          "previous": "NOT_ESTABLISHED",
-          "current": "NOT_APPLICABLE"
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "risk_exposure_group": {
-          "previous": "GOLD_AND_SILVER_PRICES",
-          "current": "SILVER_GOLD_PRICE_VOLATILITY"
-        }
-      }
-    },
-    {
-      "symbol": "CGAU",
-      "changed_fields": [
-        "benchmark_outperformance_outlook",
-        "business_reversal_risk",
-        "catalyst_dependence",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "mechanism_status",
-        "normalization_probability",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_basis",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 25,
-          "current": 23
-        },
-        "qvm_score": {
-          "previous": 70.32298161907416,
-          "current": 71.07003320491474
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": "LIKELY"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        },
-        "risk_basis": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": "NONE"
-        },
-        "catalyst_dependence": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "mechanism_status": {
-          "previous": "HYPOTHETICAL",
-          "current": "NONE"
-        },
-        "normalization_probability": {
-          "previous": "NOT_ESTABLISHED",
-          "current": "NOT_APPLICABLE"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        }
-      }
-    },
-    {
-      "symbol": "DHT",
-      "changed_fields": [
-        "continuation_strength",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 5,
-          "current": 9
-        },
-        "qvm_score": {
-          "previous": 78.56788251068794,
-          "current": 77.79365875650635
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "DSVSF",
-      "changed_fields": [
-        "benchmark_outperformance_outlook",
-        "continuation_strength",
-        "mechanism_status",
-        "qvm_rank",
-        "qvm_score",
-        "risk_exposure_group",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 49,
-          "current": 38
-        },
-        "qvm_score": {
-          "previous": 66.70899712527223,
-          "current": 68.26157379784752
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": "LIKELY"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        },
-        "mechanism_status": {
-          "previous": "NONE",
-          "current": "HYPOTHETICAL"
-        },
-        "risk_time_horizon": {
-          "previous": null,
-          "current": "6_12_MONTHS"
-        },
-        "risk_exposure_group": {
-          "previous": null,
-          "current": "GOLD_AND_COPPER_PRICES"
-        }
-      }
-    },
-    {
-      "symbol": "ECO",
-      "changed_fields": [
-        "business_reversal_risk",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 4,
-          "current": 2
-        },
-        "qvm_score": {
-          "previous": 78.5986875216894,
-          "current": 81.19275345860166
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "WEAK"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "FRO",
-      "changed_fields": [
-        "business_reversal_risk",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "mechanism_status",
-        "normalization_probability",
-        "primary_risk_event_id",
-        "probability_basis",
-        "probability_indicator_type",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 10,
-          "current": 7
-        },
-        "qvm_score": {
-          "previous": 76.42206379140879,
-          "current": 78.58669249154909
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "WEAK"
-        },
-        "mechanism_status": {
-          "previous": "UNUSUALLY_PROBABLE",
-          "current": "HYPOTHETICAL"
-        },
-        "normalization_probability": {
-          "previous": "REASONABLY_PROBABLE",
-          "current": "NOT_ESTABLISHED"
-        },
-        "probability_indicator_type": {
-          "previous": "OTHER_CURRENT_INDICATOR",
-          "current": "NONE"
-        },
-        "probability_basis": {
-          "previous": "COMPANY_REPORTED_CHANGE",
-          "current": "NONE"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "FTNT",
-      "changed_fields": [
-        "continuation_strength",
-        "mechanism_status",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "risk_exposure_group",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 34,
-          "current": 17
-        },
-        "qvm_score": {
-          "previous": 69.07000033825042,
-          "current": 72.85096662345225
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        },
-        "mechanism_status": {
-          "previous": "NONE",
-          "current": "HYPOTHETICAL"
-        },
-        "risk_time_horizon": {
-          "previous": null,
-          "current": "6_12_MONTHS"
-        },
-        "primary_risk_event_id": {
-          "previous": null,
-          "current": "AI_VALUATION_CONCENTRATION"
-        },
-        "risk_exposure_group": {
-          "previous": null,
-          "current": "TECHNOLOGY_VALUATION_SHIFTS"
-        }
-      }
-    },
-    {
-      "symbol": "HNGE",
-      "changed_fields": [
-        "benchmark_outperformance_outlook",
-        "continuation_strength",
-        "qvm_rank",
-        "qvm_score"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 45,
-          "current": 33
-        },
-        "qvm_score": {
-          "previous": 67.26000155283991,
-          "current": 69.09284530873137
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": "LIKELY"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        }
-      }
-    },
-    {
-      "symbol": "INSW",
-      "changed_fields": [
-        "continuation_strength",
-        "primary_risk_event_id",
-        "qvm_score"
-      ],
-      "changes": {
-        "qvm_score": {
-          "previous": 83.5866395332786,
-          "current": 84.76205440502798
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "LPG",
-      "changed_fields": [
-        "business_reversal_risk",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_exposure_group",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 7,
-          "current": 5
-        },
-        "qvm_score": {
-          "previous": 77.80002721508949,
-          "current": 79.00321588876639
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "WEAK"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        },
-        "risk_exposure_group": {
-          "previous": "LPG_FREIGHT_RATES",
-          "current": "LPG_TANKER_SPOT_RATES"
-        }
-      }
-    },
-    {
-      "symbol": "MAKO",
-      "changed_fields": [
-        "continuation_strength",
-        "mechanism_status",
-        "qvm_rank",
-        "qvm_score",
-        "risk_exposure_group",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 18,
-          "current": 13
-        },
-        "qvm_score": {
-          "previous": 72.08096862458919,
-          "current": 73.37086330806346
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "mechanism_status": {
-          "previous": "NONE",
-          "current": "HYPOTHETICAL"
-        },
-        "risk_time_horizon": {
-          "previous": null,
-          "current": "6_12_MONTHS"
-        },
-        "risk_exposure_group": {
-          "previous": null,
-          "current": "GOLD_PRICE_VOLATILITY"
-        }
-      }
-    },
-    {
-      "symbol": "NAT",
-      "changed_fields": [
-        "business_reversal_risk",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 9,
-          "current": 4
-        },
-        "qvm_score": {
-          "previous": 76.70360056315307,
-          "current": 79.0119558695752
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "WEAK"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "LOW"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "NMM",
-      "changed_fields": [
-        "business_reversal_risk",
-        "catalyst_dependence",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "mechanism_status",
-        "normalization_probability",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "reversal_risk",
-        "risk_basis",
-        "risk_exposure_group",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 30,
-          "current": 26
-        },
-        "qvm_score": {
-          "previous": 69.40247521141326,
-          "current": 70.57572700249301
-        },
-        "business_reversal_risk": {
-          "previous": "LOW",
-          "current": "MODERATE"
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": "MODERATE"
-        },
-        "reversal_risk": {
-          "previous": "LOW",
-          "current": "MODERATE"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "risk_basis": {
-          "previous": "NONE",
-          "current": "TEMPORARY_DRIVER_NORMALIZATION"
-        },
-        "catalyst_dependence": {
-          "previous": "LOW",
-          "current": "HIGH"
-        },
-        "mechanism_status": {
-          "previous": "NONE",
-          "current": "HYPOTHETICAL"
-        },
-        "normalization_probability": {
-          "previous": "NOT_APPLICABLE",
-          "current": "NOT_ESTABLISHED"
-        },
-        "risk_time_horizon": {
-          "previous": null,
-          "current": "6_12_MONTHS"
-        },
-        "risk_materiality": {
-          "previous": "LOW",
-          "current": "HIGH"
-        },
-        "primary_risk_event_id": {
-          "previous": null,
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        },
-        "risk_exposure_group": {
-          "previous": null,
-          "current": "DRY_BULK_AND_TANKER_SPOT_RATES"
-        }
-      }
-    },
-    {
-      "symbol": "NUTX",
-      "changed_fields": [
-        "benchmark_outperformance_outlook",
-        "continuation_strength",
-        "qvm_rank",
-        "qvm_score"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 23,
-          "current": 31
-        },
-        "qvm_score": {
-          "previous": 70.5616935721728,
-          "current": 69.37974204112405
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": "LIKELY"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        }
-      }
-    },
-    {
-      "symbol": "PBT",
-      "changed_fields": [
-        "catalyst_dependence",
-        "continuation_strength",
-        "mechanism_status",
-        "primary_risk_event_id",
-        "probability_basis",
-        "probability_indicator_type",
-        "qvm_rank",
-        "qvm_score",
-        "risk_basis",
-        "risk_exposure_group",
-        "risk_materiality"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 15,
-          "current": 12
-        },
-        "qvm_score": {
-          "previous": 72.44042916234488,
-          "current": 74.24867388659209
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "risk_basis": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": "NORMALIZED_OPERATING_DETERIORATION"
-        },
-        "catalyst_dependence": {
-          "previous": "HIGH",
-          "current": "MODERATE"
-        },
-        "mechanism_status": {
-          "previous": "HYPOTHETICAL",
-          "current": "ACTIVE"
-        },
-        "probability_indicator_type": {
-          "previous": "NONE",
-          "current": "OTHER_CURRENT_INDICATOR"
-        },
-        "probability_basis": {
-          "previous": "NONE",
-          "current": "COMPANY_REPORTED_CHANGE"
-        },
-        "risk_materiality": {
-          "previous": "HIGH",
-          "current": "MODERATE"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "CRUDE_OIL_AND_NATURAL_GAS_PRICES",
-          "current": "OIL_AND_GAS_ROYALTY_INCOME"
-        }
-      }
-    },
-    {
-      "symbol": "SHIP",
-      "changed_fields": [
-        "continuation_strength",
-        "primary_risk_event_id",
-        "qvm_rank",
-        "qvm_score",
-        "risk_exposure_group"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 22,
-          "current": 19
-        },
-        "qvm_score": {
-          "previous": 70.59440614689845,
-          "current": 72.17317353551493
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "primary_risk_event_id": {
-          "previous": "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS",
-          "current": "GLOBAL_FREIGHT_CONSTRAINTS"
-        },
-        "risk_exposure_group": {
-          "previous": "DRY_BULK_SPOT_RATES",
-          "current": "DRY_BULK_FREIGHT_RATES"
-        }
-      }
-    },
-    {
-      "symbol": "TEN",
-      "changed_fields": [
-        "business_reversal_risk",
-        "catalyst_dependence",
-        "continuation_strength",
-        "entry_reversal_risk",
-        "primary_risk_event_id",
-        "qvm_score",
-        "reversal_risk",
-        "risk_materiality",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_score": {
-          "previous": 78.52467106679097,
-          "current": 78.65057145752866
-        },
-        "business_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "reversal_risk": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "WEAK"
-        },
-        "catalyst_dependence": {
-          "previous": "MODERATE",
-          "current": "HIGH"
-        },
-        "risk_time_horizon": {
-          "previous": "6_12_MONTHS",
-          "current": null
-        },
-        "risk_materiality": {
-          "previous": "MODERATE",
-          "current": "LOW"
-        },
-        "primary_risk_event_id": {
-          "previous": "IRAN_MIDDLE_EAST_CONFLICT",
-          "current": "MIDDLE_EAST_ENERGY_DISRUPTION"
-        }
-      }
-    },
-    {
-      "symbol": "VCTR",
-      "changed_fields": [
-        "benchmark_outperformance_outlook",
-        "continuation_strength",
-        "qvm_score"
-      ],
-      "changes": {
-        "qvm_score": {
-          "previous": 68.42223191711032,
-          "current": 67.93558292664306
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": "LIKELY"
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "STRONG"
-        }
-      }
-    },
-    {
-      "symbol": "WDOFF",
-      "changed_fields": [
-        "continuation_strength",
-        "mechanism_status",
-        "qvm_rank",
-        "qvm_score",
-        "risk_exposure_group",
-        "risk_time_horizon"
-      ],
-      "changes": {
-        "qvm_rank": {
-          "previous": 12,
-          "current": 11
-        },
-        "qvm_score": {
-          "previous": 75.30587383383595,
-          "current": 74.87525126092564
-        },
-        "continuation_strength": {
-          "previous": null,
-          "current": "ADEQUATE"
-        },
-        "mechanism_status": {
-          "previous": "NONE",
-          "current": "HYPOTHETICAL"
-        },
-        "risk_time_horizon": {
-          "previous": null,
-          "current": "6_12_MONTHS"
-        },
-        "risk_exposure_group": {
-          "previous": null,
-          "current": "GOLD_PRICE_VOLATILITY"
-        }
-      }
-    }
-  ],
+  "classification_drift": [],
   "raw_to_final_normalizations": [],
   "runtime_reconciliations": [
     {
@@ -4597,111 +4268,6 @@
       "type": "cautious_temporary_dependence_floor",
       "from": "MODERATE",
       "to": "MODERATE"
-    },
-    {
-      "symbol": "ECO",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
-    },
-    {
-      "symbol": "NAT",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
-    },
-    {
-      "symbol": "LPG",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
-    },
-    {
-      "symbol": "TEN",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
-    },
-    {
-      "symbol": "FRO",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
     },
     {
       "symbol": "DHT",
@@ -4728,27 +4294,6 @@
       "to": "MODERATE"
     },
     {
-      "symbol": "HAFN",
-      "type": "risk_downgrade",
-      "from": "ELEVATED",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "ELEVATED",
-        "entry_reversal_risk": "ELEVATED"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "ELEVATED",
-          "to": "LOW"
-        }
-      },
-      "reason": "mechanism is not active or unusually probable"
-    },
-    {
       "symbol": "DINO",
       "type": "cautious_temporary_dependence_floor",
       "from": "MODERATE",
@@ -4761,60 +4306,79 @@
       "to": "MODERATE"
     },
     {
-      "symbol": "AUGO",
+      "symbol": "PAYS",
       "type": "risk_downgrade",
       "from": "MODERATE",
       "to": "LOW",
       "component_risks_before": {
-        "business_reversal_risk": "MODERATE",
+        "business_reversal_risk": "LOW",
         "entry_reversal_risk": "MODERATE"
       },
       "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "MODERATE",
-          "to": "LOW"
-        },
         "entry_reversal_risk": {
           "from": "MODERATE",
           "to": "LOW"
         }
+      },
+      "evidence_before": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "risk_materiality": "LOW",
+        "current_fact": "Q2 2026 revenue of $28.25 million and diluted EPS of $0.11.",
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "temporary_drivers": [],
+        "continuation_strength": "STRONG"
+      },
+      "evidence_after": {
+        "mechanism_status": "HYPOTHETICAL",
+        "normalization_probability": "NOT_APPLICABLE",
+        "risk_materiality": "LOW",
+        "current_fact": null,
+        "probability_evidence": null,
+        "material_effect": null,
+        "risk_time_horizon": null,
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "temporary_drivers": [],
+        "continuation_strength": "STRONG"
       },
       "reason": "no qualifying current probability indicator"
-    },
-    {
-      "symbol": "KRT",
-      "type": "risk_downgrade",
-      "from": "MODERATE",
-      "to": "LOW",
-      "component_risks_before": {
-        "business_reversal_risk": "MODERATE",
-        "entry_reversal_risk": "MODERATE"
-      },
-      "component_risk_changes": {
-        "business_reversal_risk": {
-          "from": "MODERATE",
-          "to": "LOW"
-        },
-        "entry_reversal_risk": {
-          "from": "MODERATE",
-          "to": "LOW"
-        }
-      },
-      "reason": "risk is based only on a nonrecurring comparison"
     }
   ],
   "reconciliation_counts": {
     "cautious_temporary_dependence_floor": 7,
-    "risk_downgrade": 8
+    "risk_downgrade": 1
   },
   "duplicate_results": [],
   "duplicate_extra_block_count": 0,
   "decisions": {
+    "SLDE": {
+      "qvm_rank": 8,
+      "sector_group": "Financial Services",
+      "status": "SELECTED — LOW",
+      "final_selection_score": 88.87009075734244,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
     "CGAU": {
       "qvm_rank": 23,
       "sector_group": "Basic Materials",
       "status": "SELECTED — LOW",
-      "final_selection_score": 81.07003320491474,
+      "final_selection_score": 84.07003320491474,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
+    "SBLK": {
+      "qvm_rank": 22,
+      "sector_group": "Industrials",
+      "status": "SELECTED — LOW",
+      "final_selection_score": 83.1315483260134,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
@@ -4822,7 +4386,7 @@
       "qvm_rank": 28,
       "sector_group": "Communication Services",
       "status": "SELECTED — LOW",
-      "final_selection_score": 79.68570445200453,
+      "final_selection_score": 82.68570445200453,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
@@ -4830,7 +4394,7 @@
       "qvm_rank": 31,
       "sector_group": "Healthcare",
       "status": "SELECTED — LOW",
-      "final_selection_score": 79.37974204112405,
+      "final_selection_score": 82.37974204112405,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
@@ -4838,31 +4402,23 @@
       "qvm_rank": 33,
       "sector_group": "Healthcare",
       "status": "SELECTED — LOW",
-      "final_selection_score": 79.09284530873137,
+      "final_selection_score": 82.09284530873137,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
-    "INSW": {
-      "qvm_rank": 1,
-      "sector_group": "Energy",
-      "status": "SELECTED — MODERATE",
-      "final_selection_score": 77.76205440502798,
-      "continuation_strength": "ADEQUATE",
-      "benchmark_outperformance_outlook": "UNCERTAIN"
-    },
-    "AYA": {
-      "qvm_rank": 14,
-      "sector_group": "Basic Materials",
+    "SB": {
+      "qvm_rank": 36,
+      "sector_group": "Industrials",
       "status": "SELECTED — LOW",
-      "final_selection_score": 77.31436020487908,
+      "final_selection_score": 80.60533020031369,
       "continuation_strength": "STRONG",
-      "benchmark_outperformance_outlook": "UNCERTAIN"
+      "benchmark_outperformance_outlook": "LIKELY"
     },
     "DSVSF": {
       "qvm_rank": 38,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 77.26157379784752,
+      "status": "SELECTED — LOW",
+      "final_selection_score": 80.26157379784752,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
@@ -4870,167 +4426,199 @@
       "qvm_rank": 39,
       "sector_group": "Financial Services",
       "status": "SELECTED — LOW",
-      "final_selection_score": 76.93558292664306,
+      "final_selection_score": 79.93558292664306,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
-    },
-    "FTNT": {
-      "qvm_rank": 17,
-      "sector_group": "Technology",
-      "status": "SELECTED — LOW",
-      "final_selection_score": 76.85096662345225,
-      "continuation_strength": "STRONG",
-      "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "ETON": {
       "qvm_rank": 43,
       "sector_group": "Healthcare",
       "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 76.47799542655387,
+      "final_selection_score": 79.47799542655387,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
+    "ILMN": {
+      "qvm_rank": 49,
+      "sector_group": "Healthcare",
+      "status": "SKIPPED — SECTOR CAPACITY",
+      "final_selection_score": 79.09535130430234,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
+    "PAYS": {
+      "qvm_rank": 45,
+      "sector_group": "Technology",
+      "status": "SELECTED — LOW",
+      "final_selection_score": 78.23942237364999,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
+    "AYA": {
+      "qvm_rank": 14,
+      "sector_group": "Basic Materials",
+      "status": "SKIPPED — SECTOR CAPACITY",
+      "final_selection_score": 76.31436020487908,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "UNCERTAIN"
+    },
+    "FTNT": {
+      "qvm_rank": 17,
+      "sector_group": "Technology",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
+      "final_selection_score": 75.85096662345225,
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "UNCERTAIN"
+    },
+    "INSW": {
+      "qvm_rank": 1,
+      "sector_group": "Energy",
+      "status": "NOT SELECTED — UNCERTAIN MODERATE-RISK CASE",
+      "final_selection_score": 75.76205440502798,
+      "continuation_strength": "ADEQUATE",
+      "benchmark_outperformance_outlook": "UNCERTAIN"
+    },
+    "MGTX": {
+      "qvm_rank": 46,
+      "sector_group": "Healthcare",
+      "status": "SKIPPED — SECTOR CAPACITY",
+      "final_selection_score": 75.20166233082799,
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
     "ECO": {
       "qvm_rank": 2,
       "sector_group": "Industrials",
-      "status": "SELECTED — LOW",
-      "final_selection_score": 76.19275345860166,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 74.19275345860166,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
-    },
-    "ILMN": {
-      "qvm_rank": 49,
-      "sector_group": "Healthcare",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 76.09535130430234,
-      "continuation_strength": "STRONG",
-      "benchmark_outperformance_outlook": "LIKELY"
     },
     "WDOFF": {
       "qvm_rank": 11,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 75.87525126092564,
+      "status": "NOT SELECTED — UNCERTAIN BENCHMARK CASE",
+      "final_selection_score": 73.87525126092564,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "MAKO": {
       "qvm_rank": 13,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 74.37086330806346,
+      "status": "NOT SELECTED — UNCERTAIN BENCHMARK CASE",
+      "final_selection_score": 72.37086330806346,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "NAT": {
       "qvm_rank": 4,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 74.0119558695752,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 72.0119558695752,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "LPG": {
       "qvm_rank": 5,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 74.00321588876639,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 72.00321588876639,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "ARREF": {
       "qvm_rank": 16,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 73.93756244881624,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 71.93756244881624,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "TEN": {
       "qvm_rank": 6,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 73.65057145752866,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 71.65057145752866,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "FRO": {
       "qvm_rank": 7,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 73.58669249154909,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 71.58669249154909,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "DHT": {
       "qvm_rank": 9,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 70.79365875650635,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 68.79365875650635,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "AUGO": {
       "qvm_rank": 34,
       "sector_group": "Basic Materials",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 68.82098654691168,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 66.82098654691168,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "TRMD": {
       "qvm_rank": 10,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 68.5716495359903,
-      "continuation_strength": "ADEQUATE",
-      "benchmark_outperformance_outlook": "UNCERTAIN"
-    },
-    "PBT": {
-      "qvm_rank": 12,
-      "sector_group": "Energy",
-      "status": "SELECTED — MODERATE",
-      "final_selection_score": 68.24867388659209,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 66.5716495359903,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "HAFN": {
       "qvm_rank": 20,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 66.73670732465162,
+      "status": "NOT SELECTED — WEAK CONTINUATION",
+      "final_selection_score": 64.73670732465162,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "SHIP": {
       "qvm_rank": 19,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — LOWER FINAL SCORE",
-      "final_selection_score": 66.17317353551493,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 64.17317353551493,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "STNG": {
       "qvm_rank": 18,
       "sector_group": "Energy",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 65.20312271781287,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 63.203122717812874,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "DINO": {
       "qvm_rank": 21,
       "sector_group": "Energy",
-      "status": "SKIPPED — SECTOR CAPACITY",
-      "final_selection_score": 65.18222727238417,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 63.18222727238417,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
     "NMM": {
       "qvm_rank": 26,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — RISK-EVENT CAPACITY",
-      "final_selection_score": 63.57572700249301,
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 61.57572700249301,
+      "continuation_strength": "ADEQUATE",
+      "benchmark_outperformance_outlook": "UNCERTAIN"
+    },
+    "PBT": {
+      "qvm_rank": 12,
+      "sector_group": "Energy",
+      "status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_selection_score": 61.24867388659209,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
@@ -5046,21 +4634,13 @@
       "qvm_rank": 48,
       "sector_group": "Financial Services",
       "status": "EXCLUDED — CRYPTO DEPENDENCE",
-      "final_selection_score": -940.8716129668773,
+      "final_selection_score": -942.8716129668773,
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN"
     },
-    "SLDE": {
-      "qvm_rank": 8,
-      "sector_group": "Financial Services",
-      "status": "SKIPPED — CLASSIFICATION INVALID",
-      "final_selection_score": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null
-    },
-    "SBLK": {
-      "qvm_rank": 22,
-      "sector_group": "Industrials",
+    "TNK": {
+      "qvm_rank": 3,
+      "sector_group": "Energy",
       "status": "SKIPPED — CLASSIFICATION INVALID",
       "final_selection_score": null,
       "continuation_strength": null,
@@ -5081,220 +4661,82 @@
       "final_selection_score": null,
       "continuation_strength": null,
       "benchmark_outperformance_outlook": null
-    },
-    "SB": {
-      "qvm_rank": 36,
-      "sector_group": "Industrials",
-      "status": "SKIPPED — CLASSIFICATION INVALID",
-      "final_selection_score": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null
     }
   },
   "selected_symbols": [
+    "SLDE",
     "CGAU",
+    "SBLK",
     "RCRUY",
     "NUTX",
     "HNGE",
-    "INSW",
-    "AYA",
+    "SB",
+    "DSVSF",
     "VCTR",
-    "FTNT",
-    "ECO",
-    "PBT"
+    "PAYS"
   ],
   "portfolio_changes": {
     "added": [
       {
-        "symbol": "CGAU",
-        "previous_status": "SKIPPED — SECTOR CAPACITY",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "benchmark_outperformance_outlook",
-          "business_reversal_risk",
-          "catalyst_dependence",
-          "continuation_strength",
-          "entry_reversal_risk",
-          "mechanism_status",
-          "normalization_probability",
-          "qvm_rank",
-          "qvm_score",
-          "reversal_risk",
-          "risk_basis",
-          "risk_materiality",
-          "risk_time_horizon"
-        ]
-      },
-      {
-        "symbol": "RCRUY",
-        "previous_status": "not present",
+        "symbol": "SLDE",
+        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
         "current_status": "SELECTED — LOW",
         "classification_fields_changed": []
       },
       {
-        "symbol": "HNGE",
-        "previous_status": "not present",
+        "symbol": "SBLK",
+        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
         "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "benchmark_outperformance_outlook",
-          "continuation_strength",
-          "qvm_rank",
-          "qvm_score"
-        ]
+        "classification_fields_changed": []
       },
       {
-        "symbol": "AYA",
-        "previous_status": "not present",
+        "symbol": "SB",
+        "previous_status": "SKIPPED — CLASSIFICATION INVALID",
         "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "business_reversal_risk",
-          "catalyst_dependence",
-          "continuation_strength",
-          "entry_reversal_risk",
-          "normalization_probability",
-          "qvm_rank",
-          "qvm_score",
-          "reversal_risk",
-          "risk_basis",
-          "risk_exposure_group",
-          "risk_materiality"
-        ]
+        "classification_fields_changed": []
       },
       {
-        "symbol": "VCTR",
-        "previous_status": "not present",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "benchmark_outperformance_outlook",
-          "continuation_strength",
-          "qvm_score"
-        ]
-      },
-      {
-        "symbol": "FTNT",
-        "previous_status": "not present",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "continuation_strength",
-          "mechanism_status",
-          "primary_risk_event_id",
-          "qvm_rank",
-          "qvm_score",
-          "risk_exposure_group",
-          "risk_time_horizon"
-        ]
-      },
-      {
-        "symbol": "ECO",
-        "previous_status": "NOT SELECTED — MODERATE-RISK CAPACITY",
-        "current_status": "SELECTED — LOW",
-        "classification_fields_changed": [
-          "business_reversal_risk",
-          "continuation_strength",
-          "entry_reversal_risk",
-          "primary_risk_event_id",
-          "qvm_rank",
-          "qvm_score",
-          "reversal_risk",
-          "risk_materiality",
-          "risk_time_horizon"
-        ]
-      },
-      {
-        "symbol": "PBT",
+        "symbol": "DSVSF",
         "previous_status": "SKIPPED — SECTOR CAPACITY",
-        "current_status": "SELECTED — MODERATE",
-        "classification_fields_changed": [
-          "catalyst_dependence",
-          "continuation_strength",
-          "mechanism_status",
-          "primary_risk_event_id",
-          "probability_basis",
-          "probability_indicator_type",
-          "qvm_rank",
-          "qvm_score",
-          "risk_basis",
-          "risk_exposure_group",
-          "risk_materiality"
-        ]
+        "current_status": "SELECTED — LOW",
+        "classification_fields_changed": []
+      },
+      {
+        "symbol": "PAYS",
+        "previous_status": "not present",
+        "current_status": "SELECTED — LOW",
+        "classification_fields_changed": []
       }
     ],
     "removed": [
       {
-        "symbol": "DAC",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "not present",
+        "symbol": "INSW",
+        "previous_status": "SELECTED — MODERATE",
+        "current_status": "NOT SELECTED — UNCERTAIN MODERATE-RISK CASE",
         "classification_fields_changed": []
       },
       {
-        "symbol": "WDOFF",
+        "symbol": "AYA",
         "previous_status": "SELECTED — LOW",
         "current_status": "SKIPPED — SECTOR CAPACITY",
-        "classification_fields_changed": [
-          "continuation_strength",
-          "mechanism_status",
-          "qvm_rank",
-          "qvm_score",
-          "risk_exposure_group",
-          "risk_time_horizon"
-        ]
+        "classification_fields_changed": []
       },
       {
-        "symbol": "SLDE",
+        "symbol": "FTNT",
+        "previous_status": "SELECTED — LOW",
+        "current_status": "NOT SELECTED — LOWER FINAL SCORE",
+        "classification_fields_changed": []
+      },
+      {
+        "symbol": "ECO",
+        "previous_status": "SELECTED — LOW",
+        "current_status": "NOT SELECTED — WEAK CONTINUATION",
+        "classification_fields_changed": []
+      },
+      {
+        "symbol": "PBT",
         "previous_status": "SELECTED — MODERATE",
-        "current_status": "SKIPPED — CLASSIFICATION INVALID",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "TNK",
-        "previous_status": "SELECTED — MODERATE",
-        "current_status": "not present",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "MAKO",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "SKIPPED — SECTOR CAPACITY",
-        "classification_fields_changed": [
-          "continuation_strength",
-          "mechanism_status",
-          "qvm_rank",
-          "qvm_score",
-          "risk_exposure_group",
-          "risk_time_horizon"
-        ]
-      },
-      {
-        "symbol": "DDI",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "not present",
-        "classification_fields_changed": []
-      },
-      {
-        "symbol": "NMM",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "NOT SELECTED — RISK-EVENT CAPACITY",
-        "classification_fields_changed": [
-          "business_reversal_risk",
-          "catalyst_dependence",
-          "continuation_strength",
-          "entry_reversal_risk",
-          "mechanism_status",
-          "normalization_probability",
-          "primary_risk_event_id",
-          "qvm_rank",
-          "qvm_score",
-          "reversal_risk",
-          "risk_basis",
-          "risk_exposure_group",
-          "risk_materiality",
-          "risk_time_horizon"
-        ]
-      },
-      {
-        "symbol": "PTGX",
-        "previous_status": "SELECTED — LOW",
-        "current_status": "SKIPPED — CLASSIFICATION INVALID",
+        "current_status": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
         "classification_fields_changed": []
       }
     ]

@@ -34,6 +34,10 @@ max_candidates: 75
 target_selected_stocks: 10
 max_stocks_per_sector: 2
 max_stocks_per_risk_event: 2
+# Apply an additional portfolio check to shared operating drivers assigned
+# dynamically by the Gemini classification stage.
+max_stocks_per_return_driver: 2
+second_return_driver_minimum_lead: 2.0
 # QVM emphasizes durable quality and benchmark-beating continuation equally.
 qvm_quality_weight: 0.45
 qvm_value_weight: 0.10
@@ -251,6 +255,20 @@ prompt_stock_judgment: |
   Compare candidates sharing the same economic driver/risk event. Similar
   exposures should normally receive compatible atomic judgments. Preserve a
   difference only when supplied company-specific evidence explains it.
+
+  RETURN DRIVER GROUPING
+  For each candidate, independently assign risk_exposure_group to the material
+  shared operating or market condition most likely to affect its forward
+  results, even when primary_risk_event_id is null. Use a stable UPPER_SNAKE_CASE
+  economic mechanism label consistently across comparable companies and
+  sectors. Identify the operating transmission, not a ticker, company name,
+  generic sector, or speculative event. Examples of mechanisms include freight
+  rates for the same vessel market and realized metal prices for the same
+  commodity. Different vessel markets or commodities need different groups.
+  A durable company-specific thesis can coexist with a shared exposure; group
+  by the material common downside driver. Set null only when grounded research
+  does not establish a material common driver. Return this field explicitly
+  for every candidate, including when its value is null.
 
   REJECTIONS
   Judge evidence, not portfolio policy. Python owns sector caps, crypto-policy

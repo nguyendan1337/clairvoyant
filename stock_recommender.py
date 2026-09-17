@@ -841,6 +841,12 @@ def normalized_risk_event_key(research):
     return event_id
 
 
+def normalized_return_driver_key(research):
+    """Identify material shared operating exposure, independently of events."""
+    raw = research.get("risk_exposure_group")
+    return re.sub(r"[^A-Z0-9]+", "_", str(raw or "").upper()).strip("_") or None
+
+
 def combined_reversal_risk(research):
     """Return the most conservative overall, business, or entry-risk label."""
     levels = [
@@ -1315,6 +1321,8 @@ def judge_stock_research_batch(
                     for field in allowed:
                         if field in patch:
                             result[field] = patch[field]
+                    if "risk_exposure_group" not in patch:
+                        result["_missing_return_driver_group"] = True
                     merged.append(result)
                 classification_call_diagnostics.append({
                     "stage": "stock_judgment",
@@ -5063,6 +5071,14 @@ max_stocks_per_risk_event = int(
 )
 if max_stocks_per_risk_event < 1:
     raise ValueError("max_stocks_per_risk_event must be at least 1.")
+max_stocks_per_return_driver = int(config.get("max_stocks_per_return_driver", 2))
+if max_stocks_per_return_driver < 1:
+    raise ValueError("max_stocks_per_return_driver must be at least 1.")
+second_return_driver_minimum_lead = float(
+    config.get("second_return_driver_minimum_lead", 2.0)
+)
+if not np.isfinite(second_return_driver_minimum_lead) or second_return_driver_minimum_lead < 0:
+    raise ValueError("second_return_driver_minimum_lead must be finite and nonnegative.")
 risk_adjusted_selection_enabled = bool(
     config.get("risk_adjusted_selection_enabled", True)
 )
@@ -5463,6 +5479,16 @@ stock_prompt_hash = stable_json_hash({
     "judgment_prompt": config["prompt_stock_judgment"],
     "classification_model": classification_model,
 })
+# The prior v6 cache key included the former judgment instructions. Reuse its
+# still-fresh grounded evidence once, then require a new 3.5 judgment for the
+# dynamically assigned return-driver group. This saves 2.5 Search quota.
+previous_judgment_stock_prompt_hash = (
+    "9523141ba91b41acb469b70c9af4ec13a10c1c95f08c25c03eeefebfaddc7d77"
+    if cache_version == 6
+    and model_primary == "gemini-2.5-flash"
+    and classification_model == "gemini-3.5-flash"
+    else None
+)
 stock_research_cache = load_json_object(stock_research_cache_file)
 if stock_research_cache.get("version") != cache_version:
     stock_research_cache = {
@@ -5500,6 +5526,33 @@ for candidate in candidate_records:
     })
     global_cache_keys_by_symbol[symbol] = cache_key
     entry = stock_research_cache["entries"].get(cache_key)
+    if not entry and previous_judgment_stock_prompt_hash:
+        previous_cache_key = stable_json_hash({
+            "market_context_hash": market_context_hash,
+            "stock_prompt_hash": previous_judgment_stock_prompt_hash,
+            "model": model_primary,
+            "candidate": candidate,
+        })
+        previous_entry = stock_research_cache["entries"].get(previous_cache_key)
+        if (
+            isinstance(previous_entry, dict)
+            and previous_entry.get("market_context_hash") == market_context_hash
+            and previous_entry.get("candidate_hash") == stable_json_hash(candidate)
+            and previous_entry.get("stock_prompt_hash")
+            == previous_judgment_stock_prompt_hash
+            and isinstance(previous_entry.get("research"), dict)
+        ):
+            # Keep all original grounded facts and sources. The old judgment
+            # fields are ignored until the new classifier overwrites them.
+            entry = {
+                **previous_entry,
+                "research": dict(previous_entry["research"]),
+                "judgment_model": None,
+                "judged_at": None,
+                "stock_prompt_hash": stock_prompt_hash,
+            }
+            stock_research_cache["entries"][cache_key] = entry
+            print(f"Reusing grounded research for {symbol}; refreshing return-driver judgment.")
     if not entry:
         deferred = stock_research_cache["deferred_entries"].get(cache_key)
         if (isinstance(deferred, dict)
@@ -5654,11 +5707,49 @@ def final_selection_rejection(score, research, event_count):
     return None
 
 
+def best_independent_alternative(
+        remaining, current_driver, sector_counts, event_counts,
+        driver_counts, moderate_count):
+    """Find a still-selectable candidate with a different return driver."""
+    for alt_score, _, alt_candidate, alt_research in remaining:
+        symbol = str(alt_candidate["Symbol"]).upper()
+        driver = normalized_return_driver_key(alt_research)
+        # Compare against a candidate that can enter without itself consuming
+        # a second driver slot; otherwise a later rejection can make the
+        # supposed alternative disappear.
+        if driver == current_driver or (driver and driver_counts.get(driver, 0)):
+            continue
+        risk = combined_reversal_risk(alt_research)
+        event = normalized_risk_event_key(alt_research)
+        benchmark = str(
+            alt_research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
+        ).upper()
+        entry_risk = str(alt_research.get("entry_reversal_risk") or risk).upper()
+        if (
+            not bool(alt_research.get("eligible", True))
+            or excluded_by_crypto_policy(alt_research, excluded_crypto_dependence)
+            or risk in {"ELEVATED", "SEVERE"}
+            or (exclude_elevated_entry_risk and entry_risk in {"ELEVATED", "SEVERE"})
+            or (exclude_unlikely_benchmark_outperformance and benchmark == "UNLIKELY")
+            or sector_counts.get(alt_candidate["Sector"], 0) >= max_stocks_per_sector
+            or (risk == "MODERATE" and moderate_count >= max_moderate_risk_selections)
+            or (event and event_counts.get(event, 0) >= max_stocks_per_risk_event)
+            or (driver and driver_counts.get(driver, 0) >= max_stocks_per_return_driver)
+            or final_selection_rejection(
+                alt_score, alt_research, event_counts.get(event, 0) if event else 0
+            )
+        ):
+            continue
+        return symbol, alt_score
+    return None
+
+
 def build_stock_portfolio(candidate_records, validated_cached_research, verbose=False):
     selected = []
     decision_ledger = []
     sector_counts = {}
     risk_event_counts = {}
+    return_driver_counts = {}
     moderate_selected_count = 0
     
     scored_validated_candidates = []
@@ -5686,10 +5777,11 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             f"continuation={research.get('continuation_strength')}, "
             f"benchmark={research.get('benchmark_outperformance_outlook')}, "
             f"mechanism={research.get('mechanism_status')}, "
-            f"risk_event={normalized_risk_event_key(research)}"
+            f"risk_event={normalized_risk_event_key(research)}, "
+            f"return_driver={normalized_return_driver_key(research)}"
         )
     
-    for score, _, candidate, research in scored_validated_candidates:
+    for position, (score, _, candidate, research) in enumerate(scored_validated_candidates):
         symbol = str(candidate["Symbol"]).upper()
         sector = candidate["Sector"]
         sector_count = sector_counts.get(sector, 0)
@@ -5705,6 +5797,8 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
         ).upper()
         explanation = str(research.get("explanation") or "").strip()
         event_key = normalized_risk_event_key(research)
+        driver_key = normalized_return_driver_key(research)
+        independent_alternative = None
     
         status = None
         if not bool(research.get("eligible", True)):
@@ -5739,6 +5833,24 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             and risk_event_counts.get(event_key, 0) >= max_stocks_per_risk_event
         ):
             status = "NOT SELECTED — RISK-EVENT CAPACITY"
+        elif (
+            driver_key
+            and return_driver_counts.get(driver_key, 0) >= max_stocks_per_return_driver
+        ):
+            status = "NOT SELECTED — RETURN-DRIVER CAPACITY"
+        elif (
+            driver_key
+            and return_driver_counts.get(driver_key, 0) == 1
+            and (
+                independent_alternative := best_independent_alternative(
+                    scored_validated_candidates[position + 1:], driver_key,
+                    sector_counts, risk_event_counts, return_driver_counts,
+                    moderate_selected_count,
+                )
+            )
+            and score - independent_alternative[1] < second_return_driver_minimum_lead
+        ):
+            status = "NOT SELECTED — SECOND RETURN-DRIVER QUALITY BAR"
         elif len(selected) >= target_selected_stocks:
             status = "NOT SELECTED — LOWER FINAL SCORE"
         else:
@@ -5748,7 +5860,17 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
                 moderate_selected_count += 1
             if event_key:
                 risk_event_counts[event_key] = risk_event_counts.get(event_key, 0) + 1
+            if driver_key:
+                return_driver_counts[driver_key] = return_driver_counts.get(driver_key, 0) + 1
             status = f"SELECTED — {reversal_risk}"
+
+        if verbose and independent_alternative:
+            print(
+                f"  Return-driver comparison [{symbol}, {driver_key}]: "
+                f"{score:.2f} vs independent {independent_alternative[0]} "
+                f"{independent_alternative[1]:.2f}; minimum lead "
+                f"{second_return_driver_minimum_lead:.2f}; {status}"
+            )
     
         decision_ledger.append({
             "qvm_rank": candidate["QVM Rank"],
@@ -5758,6 +5880,13 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             "sector_selected_after": sector_counts.get(sector, 0),
             "total_selected_after": len(selected),
             "final_selection_score": score,
+            "return_driver_group": driver_key,
+            "independent_alternative": (
+                independent_alternative[0] if independent_alternative else None
+            ),
+            "independent_alternative_score": (
+                independent_alternative[1] if independent_alternative else None
+            ),
             "continuation_strength": continuation_strength,
             "benchmark_outperformance_outlook": benchmark_outlook,
             "explanation": explanation,
@@ -5862,6 +5991,11 @@ def classify_pending(force=False):
             cache_key = global_cache_keys_by_symbol[symbol]
             entry = stock_research_cache["entries"].get(cache_key, {})
             try:
+                if result.pop("_missing_return_driver_group", False):
+                    raise ValueError(
+                        f"{symbol} judgment omitted risk_exposure_group; "
+                        "grounded research remains cached for reclassification."
+                    )
                 validate_stock_batch(
                     {"results": [result]}, [candidate],
                     minimum_sources=minimum_sources_for_candidate(

@@ -212,6 +212,15 @@ prompt_stock_judgment: |
      moving averages, chart patterns, or other short-term technical indicators
      as the primary evidence.
 
+  MATERIAL COMPANY EVENTS
+  Examine any material issuer-specific transaction, financing, dilution,
+  regulatory or legal action, large contract, guidance change, or other
+  recent event documented in the supplied grounded research. Account for its
+  plausible effect on the next 6-12 months before judging LOW reversal risk
+  or LIKELY benchmark outperformance. A potentially beneficial event can
+  still carry material financing, approval, or execution risk. If the research
+  lacks evidence about a material event, do not infer that no event exists.
+
   CLASSIFICATION STANDARD
   - MINIMAL: unusually strong evidence of durable continuation and no meaningful
     supported 6-12 month reversal mechanism.
@@ -281,13 +290,19 @@ prompt_stock_judgment: |
   benchmark_outperformance_outlook as LIKELY, UNCERTAIN, or UNLIKELY based on
   the supplied quantitative benchmark-excess data plus grounded continuation
   evidence. Do not call benchmark outperformance LIKELY merely because reversal
-  risk is LOW.
+  risk is LOW. Provide benchmark_outperformance_basis: one concise explanation
+  using the supplied benchmark-excess periods and company-specific durable
+  operating evidence. For LIKELY, explain why the operating driver may support
+  continued excess returns over the configured benchmarks. A positive trailing
+  return, analyst price target, or LOW risk alone is insufficient. Use UNCERTAIN
+  when that affirmative case is not supported; do not invent missing evidence.
 
   OUTPUT
   Return exactly one JSON object with a results array in candidate order. Each
   result must include: symbol, business_reversal_risk, entry_reversal_risk,
   reversal_risk, business_concentration, binary_event_risk,
-  benchmark_outperformance_outlook, continuation_strength,
+  benchmark_outperformance_outlook, benchmark_outperformance_basis,
+  continuation_strength,
   primary_reversal_channel, reversal_mechanism, continuation_outlook,
   mechanism_status, normalization_probability, catalyst_dependence,
   probability_indicator_type, probability_basis, risk_time_horizon,
@@ -316,7 +331,7 @@ prompt_stock_batch: |
   RESEARCH EFFICIENCY
   PHASE 1: Perform one focused company-specific search for EVERY new
   candidate before composing any final result blocks. Use this pattern:
-  "[Company Name] [Symbol] investor relations latest results guidance pricing margins demand operating metrics"
+  "[Company Name] [Symbol] investor relations latest results guidance operating metrics acquisition financing material announcement"
   Do not assume a calendar-quarter label; use the issuer's latest reported
   fiscal period. One search can return multiple sources.
   PHASE 2: If the first search did not establish a concrete recent operating
@@ -342,6 +357,19 @@ prompt_stock_batch: |
   prioritizing an official earnings release, SEC filing, or investor-relations
   page plus a credible forward-industry source when relevant. Never return more
   than 5 sources. Do not invent, duplicate, or include unused URLs.
+
+  MATERIAL COMPANY EVENT REVIEW
+  In the same issuer-specific search, inspect current official issuer news or
+  filings for a material acquisition, divestiture, financing, dilution, large
+  contract, regulatory action, litigation, or guidance change that still
+  affects the 6-12 month outlook, especially events since the latest earnings
+  release. Report the most decision-relevant event in
+  material_company_event with the announcement date and its possible operating
+  or financing consequence. Set it to null when no such event is established
+  by the searched evidence. Null means none found in this research, not proof
+  that no event exists. Include its real source among the existing sources;
+  never invent an event or search URL. Discuss an identified event in existing
+  risk or continuation fields when it materially affects the stock thesis.
 
   CROSS-COMPANY EVIDENCE ISOLATION
   Treat every candidate's issuer-specific evidence as isolated. Facts for one
@@ -662,6 +690,7 @@ prompt_stock_batch: |
     "industry_context": "Current company-specific operating-industry condition",
     "crypto_dependence": "NONE | INCIDENTAL | MATERIAL | PRIMARY",
     "current_operating_evidence": "Concrete current operating fact",
+    "material_company_event": "Dated, sourced material event and consequence | null when none found",
     "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE | null only when INCOMPLETE",
     "risk_basis": "NONE | NORMALIZED_OPERATING_DETERIORATION | TEMPORARY_DRIVER_NORMALIZATION | NONRECURRING_COMPARISON_ONLY | null only when INCOMPLETE",
     "catalyst_dependence": "LOW | MODERATE | HIGH | null only when INCOMPLETE",

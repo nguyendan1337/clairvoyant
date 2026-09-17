@@ -109,6 +109,7 @@ DECISION_DIAGNOSTIC_FIELDS = (
 )
 EVIDENCE_DIAGNOSTIC_FIELDS = (
     "current_operating_evidence",
+    "material_company_event",
     "durable_drivers",
     "temporary_drivers",
     "reversal_mechanism",
@@ -711,6 +712,18 @@ def parse_utc_timestamp(value):
     return timestamp.astimezone(UTC)
 
 
+def cache_age_hours(created_at):
+    """Report an age only when the cached timestamp is usable."""
+    if not created_at:
+        return None
+    try:
+        return round(max(0.0, (datetime.now(UTC) - parse_utc_timestamp(
+            created_at
+        )).total_seconds() / 3600), 2)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
 def cache_entry_is_fresh(entry, ttl_hours):
     try:
         created_at = parse_utc_timestamp(entry["created_at"])
@@ -1301,7 +1314,8 @@ def judge_stock_research_batch(
                     "business_reversal_risk", "entry_reversal_risk",
                     "reversal_risk", "risk_basis", "catalyst_dependence",
                     "business_concentration", "binary_event_risk",
-                    "benchmark_outperformance_outlook", "continuation_strength",
+                    "benchmark_outperformance_outlook", "benchmark_outperformance_basis",
+                    "continuation_strength",
                     "mechanism_status", "normalization_probability",
                     "continuation_outlook", "probability_indicator_type",
                     "probability_basis", "risk_time_horizon",
@@ -4610,10 +4624,26 @@ def build_stock_analysis_snapshots(candidate_records, research_by_symbol, cache_
             "research_provenance": {
                 "model": cache_entry.get("research_model") or cache_entry.get("model"),
                 "created_at": cache_entry.get("created_at"),
+                "age_hours_at_report": cache_age_hours(cache_entry.get("created_at")),
                 "fresh_this_run": symbol in researched_symbols_this_run,
                 "search_queries": (cache_entry.get("research_metadata") or {}).get("search_queries", []),
                 "source_count": len(research.get("sources") or []),
+                "source_publication_dates": [
+                    {"url": source.get("url"), "published_at": next(
+                        (source[key] for key in (
+                            "published_at", "publication_date", "published_date", "date"
+                        ) if source.get(key)), None
+                    )}
+                    for source in research.get("sources") or []
+                    if isinstance(source, dict)
+                ],
             },
+            "material_company_event": research.get("material_company_event"),
+            "material_company_event_review": (
+                "REPORTED" if research.get("material_company_event") else
+                "NONE_FOUND_IN_RESEARCH" if "material_company_event" in research else
+                "NOT_RECORDED"
+            ),
             "judgment_provenance": {
                 "model": cache_entry.get("judgment_model"),
                 "judged_at": cache_entry.get("judged_at"),
@@ -4628,7 +4658,11 @@ def build_stock_analysis_snapshots(candidate_records, research_by_symbol, cache_
                 field: research.get(field)
                 for field in DECISION_DIAGNOSTIC_FIELDS
             },
+            "benchmark_outperformance_basis": research.get(
+                "benchmark_outperformance_basis"
+            ),
             "decision": decision.get("status"),
+            "final_score_components": decision.get("final_score_components"),
         }
     return snapshots
 
@@ -4661,6 +4695,11 @@ def build_decision_snapshots(decision_ledger):
             "sector_group": decision["sector_group"],
             "status": decision["status"],
             "final_selection_score": decision.get("final_selection_score"),
+            "final_score_components": decision.get("final_score_components"),
+            "benchmark_outperformance_basis": decision.get(
+                "benchmark_outperformance_basis"
+            ),
+            "material_company_event": decision.get("material_company_event"),
             "continuation_strength": decision.get("continuation_strength"),
             "benchmark_outperformance_outlook": decision.get(
                 "benchmark_outperformance_outlook"
@@ -4921,10 +4960,11 @@ def validate_summary_response(data, selected):
 
 
 
-def final_candidate_adjustment(research):
-    """Small deterministic post-research adjustment; QVM remains dominant."""
+def final_candidate_components(research):
+    """Named parts of the existing deterministic post-research adjustment."""
     risk = combined_reversal_risk(research)
-    adjustment = {
+    components = {}
+    components["reversal_risk"] = {
         "MINIMAL": 5.0,
         "LOW": 3.0,
         "MODERATE": -3.0,
@@ -4935,7 +4975,7 @@ def final_candidate_adjustment(research):
     benchmark_outlook = str(
         research.get("benchmark_outperformance_outlook") or "UNCERTAIN"
     ).upper()
-    adjustment += {
+    components["benchmark_outlook"] = {
         "LIKELY": benchmark_likely_bonus,
         "UNCERTAIN": benchmark_uncertain_penalty,
         "UNLIKELY": -1000.0,
@@ -4944,29 +4984,34 @@ def final_candidate_adjustment(research):
     continuation_strength = str(
         research.get("continuation_strength") or "WEAK"
     ).upper()
-    adjustment += continuation_strength_adjustments.get(
+    components["continuation_strength"] = continuation_strength_adjustments.get(
         continuation_strength, continuation_strength_adjustments["WEAK"]
     )
 
     catalyst_dependence = str(
         research.get("catalyst_dependence") or "LOW"
     ).upper()
-    adjustment += {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
+    components["catalyst_dependence"] = {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
         catalyst_dependence, -1.0
     )
 
     for field in ("business_concentration", "binary_event_risk"):
         level = str(research.get(field) or "LOW").upper()
-        adjustment += {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
+        components[field] = {"LOW": 0.0, "MODERATE": -1.0, "HIGH": -2.0}.get(
             level, -1.0
         )
 
     mechanism = str(research.get("mechanism_status") or "").upper()
-    if mechanism == "NONE":
-        adjustment += 1.0
-    elif mechanism == "ACTIVE":
-        adjustment += active_mechanism_penalty
-    return adjustment
+    components["mechanism_status"] = (
+        1.0 if mechanism == "NONE" else
+        active_mechanism_penalty if mechanism == "ACTIVE" else 0.0
+    )
+    return components
+
+
+def final_candidate_adjustment(research):
+    """Small deterministic post-research adjustment; QVM remains dominant."""
+    return sum(final_candidate_components(research).values())
 
 
 def final_candidate_score(candidate, research):
@@ -5773,6 +5818,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             print(
             f"  {candidate['Symbol']}: final_score={score:.2f}, "
             f"qvm={float(candidate.get('QVMScore') or 0):.2f}, "
+            f"adjustments={final_candidate_components(research)}, "
             f"risk={combined_reversal_risk(research)}, "
             f"continuation={research.get('continuation_strength')}, "
             f"benchmark={research.get('benchmark_outperformance_outlook')}, "
@@ -5880,6 +5926,14 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             "sector_selected_after": sector_counts.get(sector, 0),
             "total_selected_after": len(selected),
             "final_selection_score": score,
+            "final_score_components": {
+                "qvm": float(candidate.get("QVMScore") or 0.0),
+                **final_candidate_components(research),
+            },
+            "benchmark_outperformance_basis": research.get(
+                "benchmark_outperformance_basis"
+            ),
+            "material_company_event": research.get("material_company_event"),
             "return_driver_group": driver_key,
             "independent_alternative": (
                 independent_alternative[0] if independent_alternative else None
@@ -5905,6 +5959,7 @@ moderate_selected_count = 0
 prior_research_decisions = []
 research_failures_by_symbol = {}
 classification_failures_by_symbol = {}
+classification_failure_details_by_symbol = {}
 classification_unavailable_this_run = False
 models_used = [market_model]
 researched_symbols_this_run = set()
@@ -5990,6 +6045,19 @@ def classify_pending(force=False):
             candidate = candidate_by_symbol[symbol]
             cache_key = global_cache_keys_by_symbol[symbol]
             entry = stock_research_cache["entries"].get(cache_key, {})
+            # Capture the model's values before validation can normalize or
+            # mutate them. This record has no effect on eligibility or scores.
+            judgment_fields = {
+                field: result.get(field)
+                for field in DECISION_DIAGNOSTIC_FIELDS
+            }
+            evidence_fields = {
+                field: compact_diagnostic_value(result.get(field), maximum=300)
+                for field in (
+                    "temporary_drivers", "reversal_mechanism", "current_fact",
+                    "probability_evidence", "material_effect",
+                )
+            }
             try:
                 if result.pop("_missing_return_driver_group", False):
                     raise ValueError(
@@ -6010,6 +6078,16 @@ def classify_pending(force=False):
             except (KeyError, TypeError, ValueError) as exc:
                 print(f"Classification invalid for {symbol}: {exc}; preserving grounded draft for a future judgment.")
                 classification_failures_by_symbol[symbol] = str(exc)
+                classification_failure_details_by_symbol[symbol] = {
+                    "error": str(exc),
+                    "judgment_model": judge_model,
+                    "fields_before_validation": judgment_fields,
+                    "evidence_excerpt": evidence_fields,
+                }
+                print(
+                    f"  Invalid judgment fields for {symbol}: "
+                    f"{json.dumps(classification_failure_details_by_symbol[symbol], default=str)}"
+                )
                 # Keep the previously validated 2.5 evidence in entries with
                 # judgment_model=None. It must not consume another Search call.
             else:
@@ -6026,6 +6104,7 @@ def classify_pending(force=False):
                 stock_research_cache["entries"][cache_key] = entry
                 research_failures_by_symbol.pop(symbol, None)
                 classification_failures_by_symbol.pop(symbol, None)
+                classification_failure_details_by_symbol.pop(symbol, None)
             del pending_classification[symbol]
         save_json_object_atomic(stock_research_cache_file, stock_research_cache)
         if valid_count == 0:
@@ -7184,6 +7263,37 @@ stock_analysis = build_stock_analysis_snapshots(
     current_decisions,
 )
 
+# Keep the evidence behind a selected label visible in the plain run log.
+# Missing fields on older cached research are marked unknown, not "no event".
+selected_evidence_audit = []
+for symbol in current_selected_symbols:
+    snapshot = stock_analysis[symbol]
+    provenance = snapshot["research_provenance"]
+    source_dates = provenance["source_publication_dates"]
+    audit = {
+        "symbol": symbol,
+        "benchmark_outlook": snapshot["classification"].get(
+            "benchmark_outperformance_outlook"
+        ),
+        "benchmark_excess_returns": snapshot["benchmark_excess_returns"],
+        "benchmark_outperformance_basis": snapshot[
+            "benchmark_outperformance_basis"
+        ],
+        "material_company_event_review": snapshot[
+            "material_company_event_review"
+        ],
+        "material_company_event": snapshot["material_company_event"],
+        "research_age_hours": provenance["age_hours_at_report"],
+        "sources_with_publication_date": sum(
+            bool(source.get("published_at")) for source in source_dates
+        ),
+        "source_count": provenance["source_count"],
+    }
+    selected_evidence_audit.append(audit)
+print("SELECTED EVIDENCE AUDIT (missing event/date fields are unknown)")
+for audit in selected_evidence_audit:
+    print("  " + json.dumps(audit, ensure_ascii=False, default=str))
+
 run_report = {
     "schema_version": 2,
     "created_at": datetime.now(UTC).isoformat(),
@@ -7212,6 +7322,7 @@ run_report = {
     "successful_gemini_metadata": gemini_call_diagnostics,
     "classification_calls": classification_call_diagnostics,
     "classification_validation_failures": classification_failures_by_symbol,
+    "classification_failure_details": classification_failure_details_by_symbol,
     "token_totals": {
         field: summed_call_metric(field)
         for field in (
@@ -7239,6 +7350,7 @@ run_report = {
         "batches": batch_research_diagnostics,
     },
     "stocks": stock_analysis,
+    "selected_evidence_audit": selected_evidence_audit,
     "classifications": current_classifications,
     "classification_drift": classification_drift,
     "raw_to_final_normalizations": sorted(

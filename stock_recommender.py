@@ -6109,10 +6109,16 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 for candidate in pending_candidates
                 if str(candidate["Symbol"]).upper() not in results_by_symbol
             ]
+            response_coverage = len(results_by_symbol) / len(pending_candidates)
+            coverage_status = (
+                "SEVERE_UNDERCOVERAGE" if response_coverage < 0.50 else
+                "DEGRADED" if response_coverage < 0.80 else "NORMAL"
+            )
             print(
                 f"Stock response coverage: {len(results_by_symbol)}/"
                 f"{len(pending_candidates)} returned; "
-                f"{len(missing_response_symbols)} missing."
+                f"{len(missing_response_symbols)} missing; "
+                f"status={coverage_status}."
             )
             print(
                 f"Research searches requested this call: "

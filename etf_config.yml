@@ -148,6 +148,7 @@ max_moderate_per_risk_event: 2
 minimum_final_selection_score: 60.0
 minimum_uncertain_selection_score: 66.0
 minimum_moderate_selection_score: 66.0
+score_comparison_epsilon: 0.25
 # If an ETF's QVM is materially below the weaker configured benchmark, it may
 # still qualify, but only with authoritative LIKELY benchmark outperformance
 # and STRONG continuation. The margin avoids treating tiny QVM differences as
@@ -156,6 +157,15 @@ benchmark_qvm_override_margin: 3.0
 require_likely_strong_below_benchmark_qvm: true
 benchmark_likely_bonus: 5.0
 benchmark_uncertain_penalty: -4.0
+benchmark_unlikely_medium_penalty: -8.0
+benchmark_unlikely_low_penalty: -4.0
+# A quantitatively strong ETF with UNCERTAIN (not UNLIKELY) forward evidence may
+# receive a small rescue rather than being discarded solely by the uncertainty penalty.
+benchmark_relative_rescue_enabled: true
+benchmark_relative_rescue_min_qvm: 66.0
+benchmark_relative_rescue_min_relative_score: 90.0
+benchmark_relative_rescue_bonus: 1.0
+benchmark_relative_rescue_floor: 60.0
 continuation_strong_bonus: 4.0
 continuation_adequate_bonus: 0.0
 continuation_weak_penalty: -4.0
@@ -692,8 +702,12 @@ prompt_etf_judgment: |
     outperforming the configured benchmarks is insufficient.
 
   BENCHMARK OUTPERFORMANCE
-  benchmark_outperformance_outlook must be LIKELY, UNCERTAIN or UNLIKELY. Use the
-  supplied excess-return matrix versus EACH benchmark plus grounded continuation
+  benchmark_outperformance_outlook must be LIKELY, UNCERTAIN or UNLIKELY. Also return
+  benchmark_outperformance_confidence as LOW, MEDIUM or HIGH. HIGH confidence on
+  UNLIKELY requires explicit ETF-specific evidence that the current holdings/exposure
+  drivers are materially less favorable than the configured benchmarks over the next
+  6-12 months; generic style rotation risk or absence of proof of outperformance is not
+  enough. Use the supplied excess-return matrix versus EACH benchmark plus grounded continuation
   evidence. Do not use LIKELY merely because reversal risk is LOW. For LIKELY,
   benchmark_outperformance_basis must explain why the current holdings/exposure
   driver can plausibly support continued excess returns. A positive trailing
@@ -736,6 +750,7 @@ prompt_etf_judgment: |
     "holdings_concentration": "LOW | MODERATE | HIGH",
     "construction_concentration": "LOW | MODERATE | HIGH",
     "benchmark_outperformance_outlook": "LIKELY | UNCERTAIN | UNLIKELY",
+    "benchmark_outperformance_confidence": "LOW | MEDIUM | HIGH",
     "benchmark_outperformance_basis": "Concise basis using benchmark excess returns plus durable exposure evidence",
     "continuation_strength": "STRONG | ADEQUATE | WEAK",
     "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION | EXPOSURE_DETERIORATION | CATALYST_EXHAUSTION | VALUATION_RERATING | CONCENTRATION | MOMENTUM_FRAGILITY | NONE",

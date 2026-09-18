@@ -2858,9 +2858,17 @@ def etf_final_score(candidate, research):
     score += {'MINIMAL': 5.0, 'LOW': 3.0, 'MODERATE': -3.0,
               'ELEVATED': -1000.0, 'SEVERE': -1000.0}.get(risk, -1000.0)
     outlook = str(research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
-    score += {'LIKELY': benchmark_likely_bonus,
-              'UNCERTAIN': benchmark_uncertain_penalty,
-              'UNLIKELY': -1000.0}.get(outlook, benchmark_uncertain_penalty)
+    confidence = str(research.get('benchmark_outperformance_confidence') or 'MEDIUM').upper()
+    if outlook == 'LIKELY':
+        score += benchmark_likely_bonus
+    elif outlook == 'UNCERTAIN':
+        score += benchmark_uncertain_penalty
+    elif outlook == 'UNLIKELY' and confidence == 'HIGH':
+        score += -1000.0
+    elif outlook == 'UNLIKELY' and confidence == 'LOW':
+        score += benchmark_unlikely_low_penalty
+    else:
+        score += benchmark_unlikely_medium_penalty
     continuation = str(research.get('continuation_strength') or 'ADEQUATE').upper()
     score += continuation_adjustments.get(continuation, continuation_adjustments['WEAK'])
 
@@ -2872,10 +2880,28 @@ def etf_final_score(candidate, research):
         level = str(research.get(field) or 'LOW').upper()
         concentration_penalty += concentration_adjustments.get(level, -1.0)
     score += max(max_concentration_penalty, concentration_penalty)
+    if etf_benchmark_relative_rescue(candidate, research):
+        score += benchmark_relative_rescue_bonus
     return score
 
 
-def etf_required_final_score(research):
+def etf_benchmark_relative_rescue(candidate, research):
+    """Bounded rescue for quantitatively strong ETFs with uncertain, not negative, forward evidence."""
+    if not benchmark_relative_rescue_enabled or not research or not research.get('judgment_model'):
+        return False
+    if str(research.get('benchmark_outperformance_outlook') or '').upper() != 'UNCERTAIN':
+        return False
+    if str(research.get('continuation_strength') or '').upper() not in {'STRONG', 'ADEQUATE'}:
+        return False
+    if combined_etf_reversal_risk(research) not in {'MINIMAL', 'LOW', 'MODERATE'}:
+        return False
+    return (
+        float(candidate.get('QVMScore') or 0.0) >= benchmark_relative_rescue_min_qvm
+        and float(candidate.get('BenchmarkRelativeScore') or 0.0) >= benchmark_relative_rescue_min_relative_score
+    )
+
+
+def etf_required_final_score(research, candidate=None):
     """Return the calibrated ETF-specific score floor for this judgment."""
     required = minimum_final_selection_score
     if not research or not research.get('judgment_model'):
@@ -2886,6 +2912,8 @@ def etf_required_final_score(research):
         required = max(required, minimum_uncertain_selection_score)
     if risk == 'MODERATE':
         required = max(required, minimum_moderate_selection_score)
+    if candidate is not None and etf_benchmark_relative_rescue(candidate, research):
+        required = min(required, benchmark_relative_rescue_floor)
     return required
 
 
@@ -2954,7 +2982,7 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
         symbol: {
             key: research.get(key) for key in (
                 'reversal_risk', 'continuation_strength',
-                'benchmark_outperformance_outlook', 'risk_exposure_group'
+                'benchmark_outperformance_outlook', 'benchmark_outperformance_confidence', 'risk_exposure_group'
             )
         }
         for symbol, research in judged.items()
@@ -3104,12 +3132,15 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
             overall = max((overall, exposure_risk, entry_risk), key=order.get)
             continuation = str(patch.get('continuation_strength') or 'ADEQUATE').upper()
             benchmark_outlook = str(patch.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
+            benchmark_confidence = str(patch.get('benchmark_outperformance_confidence') or 'MEDIUM').upper()
             holdings_conc = str(patch.get('holdings_concentration') or 'LOW').upper()
             construction_conc = str(patch.get('construction_concentration') or 'LOW').upper()
             if continuation not in {'STRONG','ADEQUATE','WEAK'}:
                 raise ValueError(f'{symbol} judgment returned invalid continuation_strength.')
             if benchmark_outlook not in {'LIKELY','UNCERTAIN','UNLIKELY'}:
                 raise ValueError(f'{symbol} judgment returned invalid benchmark outlook.')
+            if benchmark_confidence not in {'LOW','MEDIUM','HIGH'}:
+                raise ValueError(f'{symbol} judgment returned invalid benchmark confidence.')
             if holdings_conc not in concentration_levels or construction_conc not in concentration_levels:
                 raise ValueError(f'{symbol} judgment returned invalid concentration level.')
             research.update({
@@ -3120,6 +3151,7 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                 'holdings_concentration': holdings_conc,
                 'construction_concentration': construction_conc,
                 'benchmark_outperformance_outlook': benchmark_outlook,
+                'benchmark_outperformance_confidence': benchmark_confidence,
                 'benchmark_outperformance_basis': patch.get('benchmark_outperformance_basis'),
                 'continuation_strength': continuation,
                 'primary_reversal_channel': patch.get('primary_reversal_channel'),
@@ -3134,14 +3166,14 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
             if overall in {'ELEVATED','SEVERE'}:
                 research['eligible'] = False
                 research['eligibility_reason'] = f'Excluded by authoritative ETF judgment because reversal risk is {overall}.'
-            elif benchmark_outlook == 'UNLIKELY':
+            elif benchmark_outlook == 'UNLIKELY' and benchmark_confidence == 'HIGH':
                 research['eligible'] = False
-                research['eligibility_reason'] = 'Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.'
+                research['eligibility_reason'] = 'Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.'
             judged[symbol] = research
             prior_peer_patches[symbol] = {
                 key: research.get(key) for key in (
                     'reversal_risk','continuation_strength',
-                    'benchmark_outperformance_outlook','risk_exposure_group'
+                    'benchmark_outperformance_outlook','benchmark_outperformance_confidence','risk_exposure_group'
                 )
             }
     return judged
@@ -3182,7 +3214,7 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
         # but it cannot be treated as though missing 3.5 fields were UNCERTAIN.
         if (
             research.get('judgment_model')
-            and etf_final_score(candidate, research) < etf_required_final_score(research)
+            and etf_final_score(candidate, research) + score_comparison_epsilon < etf_required_final_score(research, candidate)
         ):
             continue
         sector = candidate_sector_group(candidate)
@@ -3399,13 +3431,13 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
                     'selection therefore requires authoritative benchmark=LIKELY and '
                     'continuation=STRONG.'
                 )
-            elif final_score < etf_required_final_score(research):
-                required_score = etf_required_final_score(research)
+            elif final_score + score_comparison_epsilon < etf_required_final_score(research, candidate):
+                required_score = etf_required_final_score(research, candidate)
                 status = 'NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM'
                 reason = (
                     f'Final continuation score {final_score:.2f} is below the '
                     f'calibrated ETF floor {required_score:.2f}; '
-                    f'continuation={continuation}, benchmark={benchmark_outlook}, risk={risk}.'
+                    f'continuation={continuation}, benchmark={benchmark_outlook}, confidence={str(research.get("benchmark_outperformance_confidence") or "MEDIUM").upper()}, risk={risk}.'
                 )
             elif sector_counts.get(sector_key, 0) >= max_per_sector:
                 status = 'SKIPPED — SECTOR CAPACITY'
@@ -3563,6 +3595,7 @@ def build_summary_input(selected):
             'entry_reversal_risk': research.get('entry_reversal_risk'),
             'continuation_strength': research.get('continuation_strength'),
             'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook'),
+            'benchmark_outperformance_confidence': research.get('benchmark_outperformance_confidence'),
             'benchmark_outperformance_basis': research.get('benchmark_outperformance_basis'),
             'holdings_concentration': research.get('holdings_concentration'),
             'construction_concentration': research.get('construction_concentration'),
@@ -3714,11 +3747,19 @@ max_etfs_per_return_driver = max(1, int(config.get('max_etfs_per_return_driver',
 minimum_final_selection_score = float(config.get('minimum_final_selection_score', 60.0))
 minimum_uncertain_selection_score = float(config.get('minimum_uncertain_selection_score', 66.0))
 minimum_moderate_selection_score = float(config.get('minimum_moderate_selection_score', 66.0))
+score_comparison_epsilon = max(0.0, float(config.get('score_comparison_epsilon', 0.25)))
 benchmark_qvm_override_margin = float(config.get('benchmark_qvm_override_margin', 3.0))
 require_likely_strong_below_benchmark_qvm = bool(config.get('require_likely_strong_below_benchmark_qvm', True))
 benchmark_qvm_floor = None
 benchmark_likely_bonus = float(config.get('benchmark_likely_bonus', 5.0))
 benchmark_uncertain_penalty = float(config.get('benchmark_uncertain_penalty', -4.0))
+benchmark_unlikely_medium_penalty = float(config.get('benchmark_unlikely_medium_penalty', -8.0))
+benchmark_unlikely_low_penalty = float(config.get('benchmark_unlikely_low_penalty', -4.0))
+benchmark_relative_rescue_enabled = bool(config.get('benchmark_relative_rescue_enabled', True))
+benchmark_relative_rescue_min_qvm = float(config.get('benchmark_relative_rescue_min_qvm', 66.0))
+benchmark_relative_rescue_min_relative_score = float(config.get('benchmark_relative_rescue_min_relative_score', 90.0))
+benchmark_relative_rescue_bonus = float(config.get('benchmark_relative_rescue_bonus', 1.0))
+benchmark_relative_rescue_floor = float(config.get('benchmark_relative_rescue_floor', 60.0))
 concentration_adjustments = {
     'LOW': float(config.get('concentration_low_adjustment', 0.0)),
     'MODERATE': float(config.get('concentration_moderate_adjustment', 0.0)),
@@ -4519,19 +4560,57 @@ while (
             else:
                 remaining_deferred.append(candidate)
         deferred_excess_candidates = remaining_deferred
+    if not batch and len(selected) < target_selected_etfs:
+        # Final ranked catch-up pass. Re-scan the whole reserve against the CURRENT
+        # authoritative portfolio so a candidate skipped behind a once-full sector
+        # is not permanently lost if later judgment reopened that sector.
+        for candidate in candidate_records:
+            if len(batch) >= gemini_batch_size:
+                break
+            symbol = str(candidate['Symbol']).upper()
+            if symbol in research_by_symbol or symbol in {str(x['Symbol']).upper() for x in batch}:
+                continue
+            if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
+                quantitative_floor_skipped_symbols_this_run.add(symbol)
+                continue
+            if lower_ranked_candidate_blocked_by_sector_capacity(
+                candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+            ):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
+            batch.append(candidate)
+        if batch:
+            print(
+                'ETF reserve catch-up reopened ranked candidates after authoritative '
+                'portfolio changes: ' + ', '.join(str(item['Symbol']) for item in batch)
+            )
     if not batch:
-        remaining_calls = (
-            request_budget.research_limit - request_budget.research_used
-        )
+        remaining_calls = request_budget.research_limit - request_budget.research_used
+        actionable_remaining = []
+        blocked_remaining = []
+        for candidate in candidate_records:
+            symbol = str(candidate['Symbol']).upper()
+            if symbol in research_by_symbol:
+                continue
+            if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
+                continue
+            if lower_ranked_candidate_blocked_by_sector_capacity(
+                candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+            ):
+                blocked_remaining.append(symbol)
+            else:
+                actionable_remaining.append(symbol)
         print(
             'ETF candidate reserve exhausted: '
             f'{len(candidate_records)} total candidates, '
             f'{len(research_by_symbol)} with validated research, '
             f'{len(selected)}/{target_selected_etfs} selectable, '
-            f'{len(sector_capacity_skipped_symbols_this_run)} lower-ranked '
-            'candidates skipped behind full sectors, '
+            f'{len(blocked_remaining)} remaining candidates blocked by full sectors, '
+            f'{len(actionable_remaining)} actionable unresearched candidates, '
             f'{remaining_calls} research calls still available.'
         )
+        if actionable_remaining and remaining_calls > 0:
+            print('WARNING — actionable ETF candidates remain despite an empty batch: ' + ', '.join(actionable_remaining[:20]))
         break
 
     fresh_symbols = [
@@ -5050,16 +5129,30 @@ remaining_unresearched = sum(
     1 for candidate in candidate_records
     if str(candidate['Symbol']).upper() not in research_by_symbol
 )
+actionable_unresearched = []
+capacity_blocked_unresearched = []
+for candidate in candidate_records:
+    symbol = str(candidate['Symbol']).upper()
+    if symbol in research_by_symbol:
+        continue
+    if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
+        continue
+    if lower_ranked_candidate_blocked_by_sector_capacity(
+        candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+    ):
+        capacity_blocked_unresearched.append(symbol)
+    else:
+        actionable_unresearched.append(symbol)
 if (
     len(selected) < target_selected_etfs
-    and remaining_unresearched > 0
+    and actionable_unresearched
     and request_budget.can_reserve('research')
     and not research_quota_exhausted
 ):
     print(
-        'WARNING — ETF backfill invariant: portfolio is short while unresearched '
-        f'candidates ({remaining_unresearched}) and research-call capacity remain. '
-        'The run should normally remain inside the research loop in this state.'
+        'WARNING — ETF backfill invariant: portfolio is short while actionable '
+        f'unresearched candidates ({len(actionable_unresearched)}) and research-call '
+        'capacity remain. Candidates: ' + ', '.join(actionable_unresearched[:20])
     )
 
 research_budget_exhausted = (
@@ -5240,6 +5333,7 @@ current_classifications = {
         'entry_reversal_risk': research.get('entry_reversal_risk'),
         'continuation_strength': research.get('continuation_strength'),
         'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook'),
+            'benchmark_outperformance_confidence': research.get('benchmark_outperformance_confidence'),
         'benchmark_outperformance_basis': research.get('benchmark_outperformance_basis'),
         'holdings_concentration': research.get('holdings_concentration'),
         'construction_concentration': research.get('construction_concentration'),
@@ -5377,7 +5471,7 @@ diagnostics = {
                 if str(candidate['Symbol']).upper() in research_by_symbol else None
             ),
             'required_selection_score': (
-                etf_required_final_score(research_by_symbol[str(candidate['Symbol']).upper()])
+                etf_required_final_score(research_by_symbol[str(candidate['Symbol']).upper()], candidate)
                 if str(candidate['Symbol']).upper() in research_by_symbol else None
             ),
         }
@@ -5394,7 +5488,7 @@ print(
     f'  provisional portfolio peak: {provisional_portfolio_peak}/{target_selected_etfs}\n'
     f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
     f'  authoritative backfill batches: {authoritative_backfill_batches}\n'
-    f'  remaining unresearched candidates: {remaining_unresearched}'
+    f'  remaining unresearched candidates: {remaining_unresearched}' + '\n' + f'  actionable unresearched candidates: {len(actionable_unresearched)}' + '\n' + f'  capacity-blocked unresearched candidates: {len(capacity_blocked_unresearched)}'
 )
 print(
     'Gemini request budget:\n'

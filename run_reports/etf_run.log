@@ -1,9 +1,9 @@
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run.log
 Checking top ETF QVM cache: caches/top_qvm_etfs_cache.pkl
-Using cached top 102 ETF QVM candidates (1.1h old).
+Using cached top 102 ETF QVM candidates (1.4h old).
 Fetching structured fund data for 102 ETF research candidates...
-  0%|          | 0/102 [00:00<?, ?it/s]100%|██████████| 102/102 [00:00<00:00, 685607.38it/s]
+  0%|          | 0/102 [00:00<?, ?it/s]100%|██████████| 102/102 [00:00<00:00, 1064226.39it/s]
 Excluded ETFs below 80% equity assets: ETHB, IALT, ZCSH
 
 Top ETF QVM candidates:
@@ -108,7 +108,7 @@ CANDIDATE   QQQJ 42.685346     36.900086   59.073280      43.387250             
 CANDIDATE   AVSC 42.582463     36.306721   72.703613      41.099544               36.936937  -0.676308  17.646746  21.495785
 CANDIDATE   BLCR 42.508531     49.869767   36.520208      38.912895               46.126126  -2.853000  18.195678  22.443879
 Benchmark-QVM override floor: 54.32 (weaker benchmark QVM 57.32 minus 3.00 margin).
-Using validated shared market context cache (8.8h old).
+Using validated shared market context cache (9.1h old).
 Using validated ETF research cache for XLE.
 Using validated ETF research cache for VFLO.
 Using validated ETF research cache for DIVB.
@@ -119,6 +119,7 @@ Using validated ETF research cache for IWD.
 Using validated ETF research cache for SCHD.
 Using validated ETF research cache for VDE.
 Using validated ETF research cache for AVLV.
+Using validated ETF research cache for FNDX.
 Using validated ETF research cache for FENY.
 Using validated ETF research cache for IWX.
 Using validated ETF research cache for SEIV.
@@ -143,10 +144,13 @@ Using validated ETF research cache for IHE.
 Using validated ETF research cache for IBB.
 Using validated ETF research cache for PWV.
 Using validated ETF research cache for XLV.
+Using validated ETF research cache for WTV.
 Using validated ETF research cache for RWL.
 Using validated ETF research cache for VOE.
 Using validated ETF research cache for GARP.
 Using validated ETF research cache for AVUS.
+Using validated ETF research cache for RPV.
+Using validated ETF research cache for IGE.
 Using validated ETF research cache for DFAC.
 Using validated ETF research cache for COWZ.
 Using validated ETF research cache for FXN.
@@ -154,6 +158,7 @@ Using validated ETF research cache for FTXN.
 Using validated ETF research cache for NULV.
 Using validated ETF research cache for VHT.
 Using validated ETF research cache for AVUV.
+Using validated ETF research cache for DFSV.
 Using validated ETF research cache for SCHV.
 Using validated ETF research cache for FHLC.
 Using validated ETF research cache for SNPE.
@@ -166,6 +171,7 @@ Using validated ETF research cache for OIH.
 Using validated ETF research cache for SPHB.
 Using validated ETF research cache for DSI.
 Using validated ETF research cache for JAVA.
+Using validated ETF research cache for BHYP.
 Using validated ETF research cache for QLTY.
 Using validated ETF research cache for DFAT.
 Using validated ETF research cache for APUE.
@@ -180,89 +186,16 @@ Using validated ETF research cache for AVSC.
 Using validated ETF research cache for BLCR.
 Gemini ETF classification logical call 1/8; API attempt 1/20: ETF judgment 1-25 (gemini-3.5-flash, attempt 1/2)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Gemini usage [ETF judgment 1-25 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=57994, tool_tokens=0, cached_tokens=0, thinking_tokens=10061, output_tokens=6575, total_tokens=74630
-Gemini response [ETF judgment 1-25 (gemini-3.5-flash, attempt 1/2)]: chars=24147, finish=['FinishReason.STOP'], grounding_urls=0
+Gemini usage [ETF judgment 1-25 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=57776, tool_tokens=0, cached_tokens=0, thinking_tokens=11278, output_tokens=6406, total_tokens=75460
+Gemini response [ETF judgment 1-25 (gemini-3.5-flash, attempt 1/2)]: chars=23413, finish=['FinishReason.STOP'], grounding_urls=0
 Gemini ETF classification logical call 2/8; API attempt 2/20: ETF judgment 26-50 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment 26-50 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=67292, tool_tokens=0, cached_tokens=0, thinking_tokens=8081, output_tokens=6319, total_tokens=81692
-Gemini response [ETF judgment 26-50 (gemini-3.5-flash, attempt 1/2)]: chars=22501, finish=['FinishReason.STOP'], grounding_urls=0
-Gemini ETF classification logical call 3/8; API attempt 3/20: ETF judgment 51-57 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment 51-57 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=24622, tool_tokens=0, cached_tokens=0, thinking_tokens=7026, output_tokens=1925, total_tokens=33573
-Gemini response [ETF judgment 51-57 (gemini-3.5-flash, attempt 1/2)]: chars=7183, finish=['FinishReason.STOP'], grounding_urls=0
-Authoritative ETF judgment reopened 3 cached/provisional portfolio slot(s); continuing research/backfill.
-
-...calling Gemini for ETF batch: FNDX, WTV, RPV, IGE, DFSV, BHYP...
-
-Gemini logical request 1/7: ETF batch ranks 11-84 (gemini-2.5-flash, API attempt 1/3; total API attempts=1)
-Gemini usage [ETF batch ranks 11-84]: prompt_tokens=16825, tool_tokens=17561, cached_tokens=0, thinking_tokens=10099, output_tokens=7184, total_tokens=51669
-Google searches performed [ETF batch ranks 11-84]: 6
-  Search: Schwab Fundamental U.S. Large Company ETF FNDX factsheet holdings sector weights index performance outlook
-  Search: WisdomTree U.S. Value Fund WTV factsheet holdings sector weights index performance outlook
-  Search: Invesco S&P 500 Pure Value ETF RPV factsheet holdings sector weights index performance outlook
-  Search: iShares North American Natural Resources ETF IGE factsheet holdings sector weights index performance outlook
-  Search: Dimensional US Small Cap Value ETF DFSV factsheet holdings sector weights index performance outlook
-  Search: Bitwise Hyperliquid ETF BHYP factsheet holdings sector weights index performance outlook
-Gemini response [ETF batch ranks 11-84]: chars=21513, finish=['FinishReason.STOP'], grounding_urls=22
-ETF response-shape inspection:
-  FNDX: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=99.93, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=FUND_SPECIFIC, adverse_observed=False, mechanism_chars=137, probability=POSSIBLE, materiality=MODERATE
-  WTV: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=99.83, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=FUND_SPECIFIC, adverse_observed=False, mechanism_chars=191, probability=POSSIBLE, materiality=MODERATE
-  RPV: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=99.72, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=FUND_SPECIFIC, adverse_observed=False, mechanism_chars=146, probability=POSSIBLE, materiality=MODERATE
-  BHYP: present=True, fields=32, sources=list[4], benchmark=FAIL, mandate=NOT_US_EQUITY, us_equity_weight=0.0, mandate_basis=OTHER, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=208, probability=POSSIBLE, materiality=HIGH
-Deferred ETF research [FNDX]: FNDX has invalid probability_basis.
-Deferred ETF research [WTV]: WTV has invalid probability_basis.
-Deferred ETF research [RPV]: RPV has invalid probability_basis.
-Validated ETF research [IGE]: 4 distinct URLs
-Validated ETF research [DFSV]: 4 distinct URLs
-Deferred ETF research [BHYP]: BHYP missing continuation_outlook.
-Batch research summary:
-  candidates: 6
-  fresh research requested: 6
-  fresh-search retries: 0
-  repair-only candidates: 0
-  validated: 2
-  deferred: 4
-Validated ETF classification inspection:
-  IGE: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=True, portfolio_group=Energy, canonical_sector=Energy, style=Natural Resources, exposure=NORTH_AMERICAN_NATURAL_RESOURCES; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-    reversal evidence: A resolution to the Middle East conflict and normalization of commodity flows could reduce inflationary pressures and reverse gains in energy and related sectors. [cite: MARKET_CONTEXT]; probability: The 'MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK' is an active risk event with a stated normalization risk if the conflict resolves. [cite: MARKET_CONTEXT]; effect: A resolution to the Middle East conflict would likely lead to a decrease in commodity prices, directly hurting the profitability and stock performance of IGE's heavily weighted energy and basic materials holdings. [cite: MARKET_CONTEXT]
-  DFSV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Small Value, canonical_sector=N/A, style=Small Value, exposure=US_SMALL_CAP_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-Gemini ETF classification logical call 4/8; API attempt 4/20: ETF judgment 1-2 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment 1-2 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=11521, tool_tokens=0, cached_tokens=0, thinking_tokens=2730, output_tokens=576, total_tokens=14827
-Gemini response [ETF judgment 1-2 (gemini-3.5-flash, attempt 1/2)]: chars=2169, finish=['FinishReason.STOP'], grounding_urls=0
-Authoritative ETF judgment reopened 2 portfolio slot(s) (9->7); research remains open until 10 authoritative/effective selections are restored or the research budget is exhausted.
-Portfolio preview after batch: provisional=9/10, authoritative/effective=7/10, newly_judged=2.
-
-...calling Gemini for ETF batch: FNDX, WTV, RPV, BHYP...
-
-Gemini logical request 2/7: ETF batch ranks 11-84 (gemini-2.5-flash, API attempt 1/3; total API attempts=2)
-Gemini usage [ETF batch ranks 11-84]: prompt_tokens=20866, tool_tokens=0, cached_tokens=0, thinking_tokens=2302, output_tokens=178, total_tokens=23346
-Gemini response [ETF batch ranks 11-84]: chars=580, finish=['FinishReason.STOP'], grounding_urls=0
-ETF structural-repair response inspection:
-  BHYP: GENERAL compact patch merged; fields=continuation_outlook
-  FNDX: GENERAL compact patch merged; fields=probability_basis
-  RPV: GENERAL compact patch merged; fields=probability_basis
-  WTV: GENERAL compact patch merged; fields=probability_basis
-Validated ETF research [FNDX]: 4 distinct URLs
-Validated ETF research [WTV]: 4 distinct URLs
-Validated ETF research [RPV]: 4 distinct URLs
-Validated ETF research [BHYP]: 4 distinct URLs
-Batch research summary:
-  candidates: 4
-  fresh research requested: 0
-  fresh-search retries: 0
-  repair-only candidates: 4
-  validated: 4
-  deferred: 0
-Validated ETF classification inspection:
-  FNDX: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=LARGE_CAP_FUNDAMENTAL_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  WTV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Mid-Cap Value, canonical_sector=N/A, style=Mid-Cap Value, exposure=US_VALUE_HIGH_SHAREHOLDER_YIELD; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  RPV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=S&P_500_PURE_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  BHYP: admission=BACKFILL, benchmark=FAIL, mandate=NOT_US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=False, portfolio_group=nan, canonical_sector=N/A, style=nan, exposure=CRYPTOCURRENCY_HYPERLIQUID; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests directly in Hyperliquid, a cryptocurrency, which is not a U.S.-listed operating-company equity.
-    reversal evidence: The value of Hyperliquid, like other cryptocurrencies, is highly volatile and subject to rapid and significant price declines due to market sentiment, regulatory changes, technological risks, and competition.; probability: Cryptocurrencies are inherently volatile, and past performance does not guarantee future results. Regulatory scrutiny or shifts in investor sentiment could lead to significant price corrections.; effect: A decline in the price of Hyperliquid would directly and significantly reduce the fund's NAV and overall returns, potentially leading to substantial losses for investors.
-Gemini ETF classification logical call 5/8; API attempt 5/20: ETF judgment 1-4 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment 1-4 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=15368, tool_tokens=0, cached_tokens=4070, thinking_tokens=4628, output_tokens=1087, total_tokens=21083
-Gemini response [ETF judgment 1-4 (gemini-3.5-flash, attempt 1/2)]: chars=4006, finish=['FinishReason.STOP'], grounding_urls=0
-Authoritative ETF judgment reopened 1 portfolio slot(s) (9->8); research remains open until 10 authoritative/effective selections are restored or the research budget is exhausted.
-Portfolio preview after batch: provisional=9/10, authoritative/effective=8/10, newly_judged=4.
-ETF candidate reserve exhausted: 97 total candidates, 75 with validated research, 8/10 selectable, 21 lower-ranked candidates skipped behind full sectors, 4 research calls still available.
+Gemini usage [ETF judgment 26-50 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=67530, tool_tokens=0, cached_tokens=0, thinking_tokens=9799, output_tokens=6620, total_tokens=83949
+Gemini response [ETF judgment 26-50 (gemini-3.5-flash, attempt 1/2)]: chars=23430, finish=['FinishReason.STOP'], grounding_urls=0
+Gemini ETF classification logical call 3/8; API attempt 3/20: ETF judgment 51-63 (gemini-3.5-flash, attempt 1/2)
+Gemini usage [ETF judgment 51-63 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=39763, tool_tokens=0, cached_tokens=0, thinking_tokens=6766, output_tokens=3517, total_tokens=50046
+Gemini response [ETF judgment 51-63 (gemini-3.5-flash, attempt 1/2)]: chars=12342, finish=['FinishReason.STOP'], grounding_urls=0
+Authoritative ETF judgment reopened 2 cached/provisional portfolio slot(s); continuing research/backfill.
+ETF candidate reserve exhausted: 97 total candidates, 75 with validated research, 8/10 selectable, 21 lower-ranked candidates skipped behind full sectors, 6 research calls still available.
 WARNING — ETF backfill invariant: portfolio is short while unresearched candidates (22) and research-call capacity remain. The run should normally remain inside the research loop in this state.
 ETF portfolio shortfall: 8 of 10 requested ETFs passed validated research and portfolio rules. Publishing the validated selections without adding unresearched or ineligible ETFs.
 ETF cross-candidate consistency warnings:
@@ -283,6 +216,8 @@ ETF cross-candidate consistency warnings:
   - IHE: normalized Health to Healthcare.
   - IBB: normalized Health to Healthcare.
   - XLV: normalized Health to Healthcare.
+  - RPV: normalized Mid-Cap Value to Large Value.
+  - IGE: normalized Natural Resources to Energy.
   - FXN: normalized Equity Energy to Energy.
   - FTXN: normalized Equity Energy to Energy.
   - VHT: normalized Health to Healthcare.
@@ -293,17 +228,15 @@ ETF cross-candidate consistency warnings:
   - QLTY: normalized Large Blend to Quality.
   - KBWB: normalized Financial to Financials.
   - FCG: normalized Equity Energy to Energy.
-  - IGE: normalized Natural Resources to Energy.
-  - RPV: normalized Mid-Cap Value to Large Value.
 ETF portfolio-rule inspection:
-  rank=2 VFLO: SELECTED — LOW; portfolio_group=Free Cash Flow; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE; VFLO's dual focus on high free cash flow yield and growth metrics provides a robust, cycle-resilient exposure. With low reversal risk and strong continuation potential, it is well-positioned to continue outperforming growth and momentum benchmarks.
-  rank=3 DIVB: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE; DIVB offers stable, diversified exposure to U.S. companies returning capital via dividends and buybacks. While its downside protection is strong, its ability to consistently beat tech-heavy benchmarks like VGT over the next 6-12 months remains uncertain.
-  rank=15 XLK: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; XLK offers highly concentrated exposure to U.S. mega-cap technology. Driven by robust AI capital expenditure, its continuation thesis remains strong, though lofty valuations and concentration in top holdings present moderate valuation rerating risks.
-  rank=20 FTEC: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; FTEC offers broad, market-cap-weighted exposure to U.S. technology, heavily concentrated in mega-cap AI leaders. Its continuation thesis remains strong due to robust AI spending, though lofty valuations present moderate valuation rerating risks.
-  rank=8 SCHD: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE; SCHD's high-quality dividend-growth methodology provides excellent defensive characteristics and stable income. However, its structural underweight in mega-cap technology makes outperforming VGT or SPMO highly uncertain in growth-led market environments.
-  rank=1 XLE: SELECTED — MODERATE; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK; XLE's recent gains are heavily supported by elevated oil prices driven by Middle East tensions. While momentum remains adequate, a resolution to the conflict poses a material normalization risk that could quickly reverse performance.
-  rank=10 AVLV: SELECTED — LOW; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; AVLV's active, profitability-focused value strategy has historically outperformed passive value peers. However, its ability to beat growth-heavy benchmarks like VGT over the next 6-12 months remains uncertain and dependent on a sustained value rotation.
-  rank=11 FNDX: SELECTED — LOW; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; FNDX provides fundamentally weighted large-cap U.S. equity exposure with a value tilt. While offering resilience in a mixed market, its ability to consistently beat growth and momentum benchmarks remains uncertain if growth-led rallies resume.
+  rank=2 VFLO: SELECTED — LOW; portfolio_group=Free Cash Flow; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE; VFLO's dual focus on high free cash flow yield and growth metrics provides a robust, cycle-resilient strategy. Low reversal risk and strong fundamental drivers support continued outperformance against growth and momentum benchmarks.
+  rank=3 DIVB: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE; DIVB offers stable, diversified exposure to dividend-paying and buyback-heavy U.S. companies. While downside risk is low, its ability to consistently beat growth-dominated benchmarks like VGT remains uncertain in tech-led environments.
+  rank=15 XLK: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; XLK remains a dominant vehicle for U.S. technology leadership, driven by robust AI capital expenditure. Despite lofty valuations and moderate concentration risks, its strong momentum supports continued benchmark outperformance.
+  rank=20 FTEC: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; FTEC offers highly concentrated exposure to mega-cap U.S. tech. Driven by secular AI spending, its continuation thesis remains strong, though lofty valuations and high concentration present moderate reversal risks.
+  rank=8 SCHD: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE; SCHD's high-quality dividend-growth methodology offers excellent defensive characteristics and competitive yields. However, its value tilt makes outperformance against VGT and SPMO uncertain during growth-led market cycles.
+  rank=1 XLE: SELECTED — MODERATE; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK; XLE's performance is heavily supported by elevated oil prices and geopolitical tensions. However, a resolution to the Middle East conflict poses a material normalization risk that could quickly reverse recent gains.
+  rank=10 AVLV: SELECTED — LOW; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; AVLV's active, profitability-screened value strategy has historically outperformed passive value peers. However, its ability to beat growth-heavy benchmarks remains highly dependent on a sustained market rotation toward value.
+  rank=11 FNDX: SELECTED — LOW; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; FNDX's fundamental weighting scheme provides a resilient alternative to market-cap indexing. While it mitigates overvaluation risks, its value tilt makes outperformance uncertain unless growth-heavy benchmarks experience a prolonged slowdown.
   rank=13 IWX: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Final continuation score 65.98 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.
   rank=14 SEIV: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Final continuation score 65.91 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.
   rank=17 DFLV: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Final continuation score 65.19 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.
@@ -380,37 +313,37 @@ ETF portfolio-rule inspection:
   rank=61 NULV: NOT SELECTED — INELIGIBLE; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=69 SCHV: NOT SELECTED — INELIGIBLE; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=71 SNPE: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
-  rank=75 IWN: NOT SELECTED — INELIGIBLE; portfolio_group=Small Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
-  rank=76 IWS: NOT SELECTED — INELIGIBLE; portfolio_group=Mid-Cap Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
-  rank=77 DCOR: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
-  rank=81 DSI: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=63 VHT: NOT SELECTED — INELIGIBLE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
-  rank=82 JAVA: NOT SELECTED — INELIGIBLE; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=67 AVUV: NOT SELECTED — INELIGIBLE; portfolio_group=Small Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=68 DFSV: NOT SELECTED — INELIGIBLE; portfolio_group=Small Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=70 FHLC: NOT SELECTED — INELIGIBLE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=73 JMOM: NOT SELECTED — INELIGIBLE; portfolio_group=Momentum; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
+  rank=75 IWN: NOT SELECTED — INELIGIBLE; portfolio_group=Small Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
+  rank=76 IWS: NOT SELECTED — INELIGIBLE; portfolio_group=Mid-Cap Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
+  rank=77 DCOR: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
+  rank=81 DSI: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=78 THRO: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
+  rank=82 JAVA: NOT SELECTED — INELIGIBLE; portfolio_group=Large Value; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=79 OIH: NOT SELECTED — INELIGIBLE; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK; Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.
   rank=84 BHYP: NOT SELECTED — INELIGIBLE; portfolio_group=nan; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded by authoritative ETF judgment because reversal risk is ELEVATED.
 
 Final ETF selections: VFLO, DIVB, XLK, FTEC, SCHD, XLE, AVLV, FNDX
-Research efficiency: 6 unique ETFs, 6 requested searches, 6 charged search attempts, 0 repeated searches.
+Research efficiency: 0 unique ETFs, 0 requested searches, 0 charged search attempts, 0 repeated searches.
 
 CONTEXT REVIEW
 
-Research summary: 75 ETFs have validated research (6 researched and validated this run, 69 supplied by validated cache); 6 charged ETF search attempts, 4 structural repair attempts, 2 research batches, 0 accepted exclusion-only evidence warnings.
+Research summary: 75 ETFs have validated research (0 researched and validated this run, 75 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.
 Selected ETFs: VFLO, DIVB, XLK, FTEC, SCHD, XLE, AVLV, FNDX
 |   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                              |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                          | Explanation                                                                                                                                                                                                                                                                                                     |
 |-----------:|:---------|:----------------|:----------------------------------------------------|------------------------:|-----------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE                                                                           | VFLO's dual focus on high free cash flow yield and growth metrics provides a robust, cycle-resilient exposure. With low reversal risk and strong continuation potential, it is well-positioned to continue outperforming growth and momentum benchmarks.                                                        |
-|          3 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | DIVB offers stable, diversified exposure to U.S. companies returning capital via dividends and buybacks. While its downside protection is strong, its ability to consistently beat tech-heavy benchmarks like VGT over the next 6-12 months remains uncertain.                                                  |
-|         15 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | XLK offers highly concentrated exposure to U.S. mega-cap technology. Driven by robust AI capital expenditure, its continuation thesis remains strong, though lofty valuations and concentration in top holdings present moderate valuation rerating risks.                                                      |
-|         20 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | FTEC offers broad, market-cap-weighted exposure to U.S. technology, heavily concentrated in mega-cap AI leaders. Its continuation thesis remains strong due to robust AI spending, though lofty valuations present moderate valuation rerating risks.                                                           |
-|          8 | SCHD     | Dividend        | SELECTED — LOW                                      |                       2 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | SCHD's high-quality dividend-growth methodology provides excellent defensive characteristics and stable income. However, its structural underweight in mega-cap technology makes outperforming VGT or SPMO highly uncertain in growth-led market environments.                                                  |
-|          1 | XLE      | Energy          | SELECTED — MODERATE                                 |                       1 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | XLE's recent gains are heavily supported by elevated oil prices driven by Middle East tensions. While momentum remains adequate, a resolution to the conflict poses a material normalization risk that could quickly reverse performance.                                                                       |
-|         10 | AVLV     | Large Value     | SELECTED — LOW                                      |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | AVLV's active, profitability-focused value strategy has historically outperformed passive value peers. However, its ability to beat growth-heavy benchmarks like VGT over the next 6-12 months remains uncertain and dependent on a sustained value rotation.                                                   |
-|         11 | FNDX     | Large Value     | SELECTED — LOW                                      |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | FNDX provides fundamentally weighted large-cap U.S. equity exposure with a value tilt. While offering resilience in a mixed market, its ability to consistently beat growth and momentum benchmarks remains uncertain if growth-led rallies resume.                                                             |
+|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE                                                                           | VFLO's dual focus on high free cash flow yield and growth metrics provides a robust, cycle-resilient strategy. Low reversal risk and strong fundamental drivers support continued outperformance against growth and momentum benchmarks.                                                                        |
+|          3 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | DIVB offers stable, diversified exposure to dividend-paying and buyback-heavy U.S. companies. While downside risk is low, its ability to consistently beat growth-dominated benchmarks like VGT remains uncertain in tech-led environments.                                                                     |
+|         15 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | XLK remains a dominant vehicle for U.S. technology leadership, driven by robust AI capital expenditure. Despite lofty valuations and moderate concentration risks, its strong momentum supports continued benchmark outperformance.                                                                             |
+|         20 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | FTEC offers highly concentrated exposure to mega-cap U.S. tech. Driven by secular AI spending, its continuation thesis remains strong, though lofty valuations and high concentration present moderate reversal risks.                                                                                          |
+|          8 | SCHD     | Dividend        | SELECTED — LOW                                      |                       2 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | SCHD's high-quality dividend-growth methodology offers excellent defensive characteristics and competitive yields. However, its value tilt makes outperformance against VGT and SPMO uncertain during growth-led market cycles.                                                                                 |
+|          1 | XLE      | Energy          | SELECTED — MODERATE                                 |                       1 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | XLE's performance is heavily supported by elevated oil prices and geopolitical tensions. However, a resolution to the Middle East conflict poses a material normalization risk that could quickly reverse recent gains.                                                                                         |
+|         10 | AVLV     | Large Value     | SELECTED — LOW                                      |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | AVLV's active, profitability-screened value strategy has historically outperformed passive value peers. However, its ability to beat growth-heavy benchmarks remains highly dependent on a sustained market rotation toward value.                                                                              |
+|         11 | FNDX     | Large Value     | SELECTED — LOW                                      |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | FNDX's fundamental weighting scheme provides a resilient alternative to market-cap indexing. While it mitigates overvaluation risks, its value tilt makes outperformance uncertain unless growth-heavy benchmarks experience a prolonged slowdown.                                                              |
 |         13 | IWX      | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | Final continuation score 65.98 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.                                                                                                                                                                                   |
 |         14 | SEIV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | Final continuation score 65.91 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.                                                                                                                                                                                   |
 |         17 | DFLV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Final continuation score 65.19 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, risk=LOW.                                                                                                                                                                                   |
@@ -487,56 +420,52 @@ Selected ETFs: VFLO, DIVB, XLK, FTEC, SCHD, XLE, AVLV, FNDX
 |         61 | NULV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         69 | SCHV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         71 | SNPE     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
-|         75 | IWN      | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
-|         76 | IWS      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
-|         77 | DCOR     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
-|         81 | DSI      | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         63 | VHT      | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
-|         82 | JAVA     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         67 | AVUV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         68 | DFSV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE    | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         70 | FHLC     | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         73 | JMOM     | Momentum        | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
+|         75 | IWN      | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
+|         76 | IWS      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
+|         77 | DCOR     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
+|         81 | DSI      | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         78 | THRO     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
+|         82 | JAVA     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         79 | OIH      | Energy          | NOT SELECTED — INELIGIBLE                           |                       1 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.                                                                                                                                                                                                               |
 |         84 | BHYP     | nan             | NOT SELECTED — INELIGIBLE                           |                       0 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded by authoritative ETF judgment because reversal risk is ELEVATED.                                                                                                                                                                                                                                       |
 
-Gemini logical request 3/7: ETF HTML summary (gemini-2.5-flash, API attempt 1/1; total API attempts=3)
-Gemini usage [ETF HTML summary]: prompt_tokens=6497, tool_tokens=0, cached_tokens=0, thinking_tokens=4075, output_tokens=1917, total_tokens=12489
-Gemini response [ETF HTML summary]: chars=8724, finish=['FinishReason.STOP'], grounding_urls=0
+Gemini logical request 1/7: ETF HTML summary (gemini-2.5-flash, API attempt 1/1; total API attempts=1)
+Gemini usage [ETF HTML summary]: prompt_tokens=6451, tool_tokens=0, cached_tokens=0, thinking_tokens=3821, output_tokens=1993, total_tokens=12265
+Gemini response [ETF HTML summary]: chars=9173, finish=['FinishReason.STOP'], grounding_urls=0
 Using Gemini-written ETF HTML summary.
 Generated by model(s): gemini-3.5-flash, gemini-2.5-flash
 Classification changes versus prior ETF run:
-  AVSC: python_eligible, reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  BLCR: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  FCG: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  FNDB: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  IJR: python_eligible, reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  IYE: entry_reversal_risk
-  KBWB: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  MGV: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  PRF: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  PWV: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  QLTY: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  QQQJ: python_eligible, reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  RWL: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  SCHA: python_eligible, reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  SCHV: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  SPSM: python_eligible, reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  VOE: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model
-  VTV: python_eligible, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  VTWO: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
+  AVUS: risk_exposure_group
+  DCOR: reversal_risk, exposure_reversal_risk
+  DSI: reversal_risk, exposure_reversal_risk
+  FHLC: primary_reversal_channel
+  FNDB: risk_exposure_group
+  IWN: reversal_risk, exposure_reversal_risk
+  IWS: reversal_risk, exposure_reversal_risk
+  IYE: risk_exposure_group
+  JAVA: reversal_risk, exposure_reversal_risk
+  JMOM: holdings_concentration
+  MGV: risk_exposure_group
+  PWV: risk_exposure_group
+  RWL: risk_exposure_group
+  SCHV: risk_exposure_group
+  VOE: risk_exposure_group
 ETF selection-control summary:
   provisional portfolio peak: 10/10
-  slots reopened by authoritative judgment: 6
-  authoritative backfill batches: 2
+  slots reopened by authoritative judgment: 2
+  authoritative backfill batches: 0
   remaining unresearched candidates: 22
 Gemini request budget:
-  logical calls: 3/7
-  ETF research logical calls: 2/6
+  logical calls: 1/7
+  ETF research logical calls: 0/6
   summary logical calls: 1
-  ETF judgment logical calls: 5/8
-  ETF judgment API attempts: 5/20
-  actual API attempts: 3 (research=2, context=0, summary=1)
-Elapsed time: 283 seconds
+  ETF judgment logical calls: 3/8
+  ETF judgment API attempts: 3/20
+  actual API attempts: 1 (research=0, context=0, summary=1)
+Elapsed time: 174 seconds
 

@@ -155,6 +155,9 @@ challenger_relative_bonus_start: 80.0
 challenger_relative_bonus_per_point: 0.15
 challenger_relative_bonus_cap: 3.0
 challenger_score_epsilon: 0.25
+# Replacement audit is diagnostic only: it never lowers eligibility floors.
+replacement_merit_epsilon: 0.25
+replacement_diagnostics_top_n: 12
 
 # These bonuses affect only ordering among ETFs that ALREADY pass all eligibility
 # and calibrated score floors. They do not rescue otherwise ineligible ETFs.

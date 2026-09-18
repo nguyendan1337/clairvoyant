@@ -2828,6 +2828,72 @@ def quantitative_challenger_score(candidate):
     return qvm + min(challenger_relative_bonus_cap, bonus)
 
 
+def capacity_challenge_dimensions(candidate, selected):
+    """Return full portfolio constraints that this candidate is strong enough to challenge."""
+    dimensions = []
+    sector_key = candidate_sector_group(candidate).casefold()
+    same_sector = [
+        item for item in selected
+        if candidate_sector_group(item['candidate']).casefold() == sector_key
+    ]
+    if len(same_sector) >= max_etfs_per_sector_group:
+        candidate_score = quantitative_challenger_score(candidate)
+        weakest = min(
+            same_sector,
+            key=lambda item: quantitative_challenger_score(item['candidate'])
+        )
+        weakest_score = quantitative_challenger_score(weakest['candidate'])
+        if candidate_score + challenger_score_epsilon >= weakest_score:
+            dimensions.append({
+                'dimension': 'SECTOR',
+                'group': candidate_sector_group(candidate),
+                'incumbent': str(weakest['candidate']['Symbol']).upper(),
+                'challenger_score': candidate_score,
+                'incumbent_score': weakest_score,
+            })
+    family = etf_factor_family(candidate)
+    same_family = [
+        item for item in selected
+        if etf_factor_family(item['candidate'], item.get('research')) == family
+    ]
+    if len(same_family) >= max_etfs_per_factor_family:
+        candidate_score = quantitative_challenger_score(candidate)
+        weakest = min(
+            same_family,
+            key=lambda item: quantitative_challenger_score(item['candidate'])
+        )
+        weakest_score = quantitative_challenger_score(weakest['candidate'])
+        if candidate_score + challenger_score_epsilon >= weakest_score:
+            dimensions.append({
+                'dimension': 'FACTOR_FAMILY',
+                'group': family,
+                'incumbent': str(weakest['candidate']['Symbol']).upper(),
+                'challenger_score': candidate_score,
+                'incumbent_score': weakest_score,
+            })
+    return dimensions
+
+
+def record_capacity_challenger(candidate, selected, tracker):
+    symbol = str(candidate['Symbol']).upper()
+    dimensions = capacity_challenge_dimensions(candidate, selected)
+    if not dimensions:
+        return
+    prior = tracker.setdefault(symbol, [])
+    seen = {(item['dimension'], item['group'], item['incumbent']) for item in prior}
+    for item in dimensions:
+        key = (item['dimension'], item['group'], item['incumbent'])
+        if key not in seen:
+            prior.append(item)
+            seen.add(key)
+            print(
+                f'ETF capacity challenger admitted [{symbol}] against '
+                f'{item["incumbent"]} ({item["dimension"]}={item["group"]}): '
+                f'quantitative challenger score {item["challenger_score"]:.2f} vs '
+                f'{item["incumbent_score"]:.2f}.'
+            )
+
+
 def etf_factor_family(candidate, research=None):
     """Group economically similar categories so labels cannot bypass diversification."""
     group = candidate_sector_group(candidate).upper()
@@ -2895,6 +2961,124 @@ def pending_candidate_can_improve_full_portfolio(
         return True
     worst_score = min(quantitative_challenger_score(item['candidate']) for item in comparison_pool)
     return candidate_score + challenger_score_epsilon >= worst_score
+
+
+def replacement_comparison_record(candidate, research, incumbent_item, dimension):
+    """Build a stable audit record for a blocked candidate versus the weakest incumbent."""
+    incumbent_candidate = incumbent_item['candidate']
+    incumbent_research = incumbent_item['research']
+    return {
+        'dimension': dimension,
+        'challenger_symbol': str(candidate['Symbol']).upper(),
+        'incumbent_symbol': str(incumbent_candidate['Symbol']).upper(),
+        'challenger_qvm': float(candidate.get('QVMScore') or 0.0),
+        'incumbent_qvm': float(incumbent_candidate.get('QVMScore') or 0.0),
+        'challenger_benchmark_relative': float(candidate.get('BenchmarkRelativeScore') or 0.0),
+        'incumbent_benchmark_relative': float(incumbent_candidate.get('BenchmarkRelativeScore') or 0.0),
+        'challenger_final_score': etf_final_score(candidate, research),
+        'incumbent_final_score': etf_final_score(incumbent_candidate, incumbent_research),
+        'challenger_required_score': etf_required_final_score(research, candidate),
+        'incumbent_required_score': etf_required_final_score(incumbent_research, incumbent_candidate),
+        'challenger_selection_merit': etf_selection_merit(candidate, research),
+        'incumbent_selection_merit': etf_selection_merit(incumbent_candidate, incumbent_research),
+        'challenger_risk': combined_etf_reversal_risk(research),
+        'incumbent_risk': combined_etf_reversal_risk(incumbent_research),
+        'challenger_continuation': str(research.get('continuation_strength') or 'ADEQUATE').upper(),
+        'incumbent_continuation': str(incumbent_research.get('continuation_strength') or 'ADEQUATE').upper(),
+        'challenger_benchmark_outlook': str(research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper(),
+        'incumbent_benchmark_outlook': str(incumbent_research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper(),
+        'challenger_benchmark_confidence': str(research.get('benchmark_outperformance_confidence') or 'MEDIUM').upper(),
+        'incumbent_benchmark_confidence': str(incumbent_research.get('benchmark_outperformance_confidence') or 'MEDIUM').upper(),
+    }
+
+
+def build_replacement_diagnostics(candidate_records, research_by_symbol, selected):
+    """Explain full-sector/family replacement tests after authoritative selection."""
+    selected_symbols = {
+        str(item['candidate']['Symbol']).upper() for item in selected
+    }
+    selected_by_sector = {}
+    selected_by_family = {}
+    for item in selected:
+        sector = candidate_sector_group(item['candidate']).casefold()
+        family = etf_factor_family(item['candidate'], item.get('research'))
+        selected_by_sector.setdefault(sector, []).append(item)
+        selected_by_family.setdefault(family, []).append(item)
+
+    records = []
+    for candidate in candidate_records:
+        symbol = str(candidate['Symbol']).upper()
+        if symbol in selected_symbols:
+            continue
+        research = research_by_symbol.get(symbol)
+        if not research or not research.get('judgment_model'):
+            continue
+        if not research.get('eligible', True):
+            continue
+        risk = combined_etf_reversal_risk(research)
+        if risk not in SELECTABLE_RISKS:
+            continue
+        if not etf_passes_benchmark_override(candidate, research):
+            continue
+        final_score = etf_final_score(candidate, research)
+        if final_score + score_comparison_epsilon < etf_required_final_score(research, candidate):
+            continue
+
+        sector_key = candidate_sector_group(candidate).casefold()
+        family = etf_factor_family(candidate, research)
+        pools = []
+        if len(selected_by_sector.get(sector_key, [])) >= max_etfs_per_sector_group:
+            pools.append(('SECTOR', selected_by_sector[sector_key]))
+        if len(selected_by_family.get(family, [])) >= max_etfs_per_factor_family:
+            pools.append(('FACTOR_FAMILY', selected_by_family[family]))
+        for dimension, pool in pools:
+            incumbent = min(
+                pool,
+                key=lambda item: etf_selection_merit(item['candidate'], item['research'])
+            )
+            record = replacement_comparison_record(
+                candidate, research, incumbent, dimension
+            )
+            gap = (
+                record['challenger_selection_merit']
+                - record['incumbent_selection_merit']
+            )
+            record['selection_merit_gap'] = gap
+            record['result'] = (
+                'CHALLENGER_WOULD_WIN'
+                if gap > replacement_merit_epsilon
+                else 'INCUMBENT_RETAINED'
+            )
+            records.append(record)
+
+    records.sort(
+        key=lambda row: row['selection_merit_gap'], reverse=True
+    )
+    return records[:replacement_diagnostics_top_n]
+
+
+def print_replacement_diagnostics(records):
+    if not records:
+        print('ETF replacement audit: no qualified blocked candidates required a head-to-head test.')
+        return
+    print('ETF replacement audit:')
+    for row in records:
+        print(
+            f'  {row["challenger_symbol"]} vs {row["incumbent_symbol"]} '
+            f'[{row["dimension"]}]: {row["result"]}; '
+            f'merit={row["challenger_selection_merit"]:.2f} vs '
+            f'{row["incumbent_selection_merit"]:.2f} '
+            f'(gap={row["selection_merit_gap"]:+.2f}); '
+            f'QVM={row["challenger_qvm"]:.2f} vs {row["incumbent_qvm"]:.2f}; '
+            f'benchmark_relative={row["challenger_benchmark_relative"]:.2f} vs '
+            f'{row["incumbent_benchmark_relative"]:.2f}; '
+            f'final={row["challenger_final_score"]:.2f}/{row["challenger_required_score"]:.2f} vs '
+            f'{row["incumbent_final_score"]:.2f}/{row["incumbent_required_score"]:.2f}; '
+            f'continuation={row["challenger_continuation"]} vs {row["incumbent_continuation"]}; '
+            f'benchmark={row["challenger_benchmark_outlook"]}/{row["challenger_benchmark_confidence"]} vs '
+            f'{row["incumbent_benchmark_outlook"]}/{row["incumbent_benchmark_confidence"]}; '
+            f'risk={row["challenger_risk"]} vs {row["incumbent_risk"]}.'
+        )
 
 
 def queue_portfolio_challengers(candidate_records, research_by_symbol, selected, pending_retries, queued_symbols):
@@ -4033,6 +4217,8 @@ challenger_relative_bonus_start = float(config.get('challenger_relative_bonus_st
 challenger_relative_bonus_per_point = float(config.get('challenger_relative_bonus_per_point', 0.15))
 challenger_relative_bonus_cap = float(config.get('challenger_relative_bonus_cap', 3.0))
 challenger_score_epsilon = float(config.get('challenger_score_epsilon', 0.25))
+replacement_merit_epsilon = float(config.get('replacement_merit_epsilon', 0.25))
+replacement_diagnostics_top_n = max(1, int(config.get('replacement_diagnostics_top_n', 12)))
 selection_relative_good_threshold = float(config.get('selection_relative_good_threshold', 80.0))
 selection_relative_high_threshold = float(config.get('selection_relative_high_threshold', 90.0))
 selection_relative_good_bonus = float(config.get('selection_relative_good_bonus', 1.0))
@@ -4573,6 +4759,9 @@ judgment_reopened_slots = 0
 authoritative_backfill_batches = 0
 provisional_portfolio_peak = 0
 challenger_queued_symbols = set()
+challenger_researched_symbols = set()
+challenger_judged_symbols = set()
+capacity_challenger_tests = {}
 rank_by_symbol = {
     str(candidate['Symbol']).upper(): rank
     for rank, candidate in enumerate(candidate_records, start=1)
@@ -4731,6 +4920,8 @@ while (
             >= max_structural_repairs_per_etf
         ):
             continue
+        if retry.get('portfolio_challenger'):
+            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
         batch.append(candidate)
         retry_symbols.add(symbol)
         if retry['needs_research']:
@@ -4787,6 +4978,7 @@ while (
             deferred_excess_candidates.append(candidate)
             deferred_excess_symbols_this_run.add(symbol)
             continue
+        record_capacity_challenger(candidate, selected, capacity_challenger_tests)
         batch.append(candidate)
         provisional_counts[provisional] = provisional_counts.get(provisional, 0) + 1
     if (
@@ -4818,6 +5010,7 @@ while (
             if provisional_counts.get(provisional, 0) >= max_candidates_per_provisional_group:
                 deferred_excess_candidates.append(candidate)
                 continue
+            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
             batch.append(candidate)
             provisional_counts[provisional] = provisional_counts.get(provisional, 0) + 1
     if (
@@ -4846,6 +5039,7 @@ while (
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
+            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
             batch.append(candidate)
     if (
         len(selected) < target_selected_etfs
@@ -4869,6 +5063,7 @@ while (
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if len(batch) < gemini_batch_size:
+                record_capacity_challenger(candidate, selected, capacity_challenger_tests)
                 batch.append(candidate)
             else:
                 remaining_deferred.append(candidate)
@@ -4894,6 +5089,7 @@ while (
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
+            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
             batch.append(candidate)
         if batch:
             print(
@@ -5160,6 +5356,8 @@ while (
                 }
                 research_cache['deferred_entries'].pop(cache_keys[symbol], None)
                 print(f'Validated ETF research [{symbol}]: {len(valid[symbol]["sources"])} distinct URLs')
+                if symbol in challenger_queued_symbols:
+                    challenger_researched_symbols.add(symbol)
             else:
                 error = errors.get(symbol, 'Invalid ETF research.')
                 print(f'Deferred ETF research [{symbol}]: {error}')
@@ -5381,6 +5579,10 @@ while (
     judged_after = sum(
         1 for research in research_by_symbol.values() if research.get('judgment_model')
     )
+    challenger_judged_symbols.update(
+        symbol for symbol in challenger_queued_symbols
+        if research_by_symbol.get(symbol, {}).get('judgment_model')
+    )
     for call in classification_call_diagnostics:
         if call.get('success') and call.get('model') and call['model'] not in models_used:
             models_used.append(call['model'])
@@ -5525,6 +5727,10 @@ selected, decision_ledger = build_decision_ledger(
     max_moderate_per_risk_event,
     research_disposition,
 )
+replacement_diagnostics = build_replacement_diagnostics(
+    candidate_records, research_by_symbol, selected
+)
+print_replacement_diagnostics(replacement_diagnostics)
 print_decision_ledger(decision_ledger)
 selected = selected[:target_selected_etfs]
 print('\nFinal ETF selections: ' + ', '.join(item['candidate']['Symbol'] for item in selected))
@@ -5801,6 +6007,17 @@ diagnostics = {
         }
         for candidate in candidate_records
     },
+    'replacement_diagnostics': replacement_diagnostics,
+    'challenger_summary': {
+        'queued': sorted(challenger_queued_symbols),
+        'researched': sorted(challenger_researched_symbols),
+        'judged': sorted(challenger_judged_symbols),
+        'displaced_incumbents': sorted({
+            row['incumbent_symbol'] for row in replacement_diagnostics
+            if row.get('result') == 'CHALLENGER_WOULD_WIN'
+        }),
+        'capacity_challenger_tests': capacity_challenger_tests,
+    },
     'calls': call_diagnostics,
 }
 save_json_object_atomic(
@@ -5812,6 +6029,13 @@ print(
     f'  provisional portfolio peak: {provisional_portfolio_peak}/{target_selected_etfs}\n'
     f'  portfolio challengers queued: {len(challenger_queued_symbols)}'
     + (f' ({", ".join(sorted(challenger_queued_symbols))})\n' if challenger_queued_symbols else '\n')
+    + f'  portfolio challengers researched: {len(challenger_researched_symbols)}'
+    + (f' ({", ".join(sorted(challenger_researched_symbols))})\n' if challenger_researched_symbols else '\n')
+    + f'  portfolio challengers judged: {len(challenger_judged_symbols)}'
+    + (f' ({", ".join(sorted(challenger_judged_symbols))})\n' if challenger_judged_symbols else '\n')
+    + f'  capacity challengers evaluated: {len(capacity_challenger_tests)}'
+    + (f' ({", ".join(sorted(capacity_challenger_tests))})\n' if capacity_challenger_tests else '\n')
+    + f'  replacement head-to-head tests logged: {len(replacement_diagnostics)}\n'
     + f'  max factor-family exposure: {max_etfs_per_factor_family}\n'
     f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
     f'  authoritative backfill batches: {authoritative_backfill_batches}\n'

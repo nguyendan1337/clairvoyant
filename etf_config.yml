@@ -140,6 +140,30 @@ target_selected_etfs: 10
 # This is a ceiling, not a requirement for five exact pairs.
 max_etfs_per_sector_group: 2
 max_etfs_per_return_driver: 2
+# Economic-family cap prevents category aliases (for example Dividend + Large Value)
+# from quietly concentrating the final portfolio in the same factor regime.
+max_etfs_per_factor_family: 3
+
+# After 10/10 is reached, permit a small challenger round for lower-QVM ETFs
+# whose benchmark-relative strength is exceptional enough to plausibly displace
+# an incumbent. This is intentionally bounded to protect Gemini cost/runtime.
+challenger_research_enabled: true
+max_challenger_candidates_per_run: 4
+challenger_min_qvm: 60.0
+challenger_min_relative_score: 90.0
+challenger_relative_bonus_start: 80.0
+challenger_relative_bonus_per_point: 0.15
+challenger_relative_bonus_cap: 3.0
+challenger_score_epsilon: 0.25
+
+# These bonuses affect only ordering among ETFs that ALREADY pass all eligibility
+# and calibrated score floors. They do not rescue otherwise ineligible ETFs.
+selection_relative_good_threshold: 80.0
+selection_relative_high_threshold: 90.0
+selection_relative_good_bonus: 1.0
+selection_relative_high_bonus: 2.0
+selection_likely_bonus: 2.0
+selection_strong_bonus: 1.0
 max_candidates_per_provisional_group: 4
 max_moderate_per_risk_event: 2
 # ETF QVM scores live on a different distribution than stock QVM scores.

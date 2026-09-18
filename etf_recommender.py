@@ -2787,6 +2787,7 @@ def lower_ranked_candidate_blocked_by_sector_capacity(
     rank_by_symbol,
     max_per_sector,
 ):
+    """Block a full-sector candidate unless its quantitative challenger score can beat an incumbent."""
     sector_key = candidate_sector_group(candidate).casefold()
     selected_in_sector = [
         item for item in selected
@@ -2794,46 +2795,143 @@ def lower_ranked_candidate_blocked_by_sector_capacity(
     ]
     if len(selected_in_sector) < max_per_sector:
         return False
-    candidate_rank = rank_by_symbol.get(str(candidate['Symbol']).upper(), float('inf'))
-    worst_selected_rank = max(
-        rank_by_symbol.get(
-            str(item['candidate']['Symbol']).upper(), float('inf')
-        )
+    candidate_score = quantitative_challenger_score(candidate)
+    worst_selected_score = min(
+        quantitative_challenger_score(item['candidate'])
         for item in selected_in_sector
     )
-    return candidate_rank > worst_selected_rank
+    return candidate_score + challenger_score_epsilon < worst_selected_score
+
+
+def lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+    """Apply the same challenger exception to an already-full economic factor family."""
+    family = etf_factor_family(candidate)
+    selected_in_family = [
+        item for item in selected
+        if etf_factor_family(item['candidate'], item.get('research')) == family
+    ]
+    if len(selected_in_family) < max_etfs_per_factor_family:
+        return False
+    candidate_score = quantitative_challenger_score(candidate)
+    worst_selected_score = min(
+        quantitative_challenger_score(item['candidate'])
+        for item in selected_in_family
+    )
+    return candidate_score + challenger_score_epsilon < worst_selected_score
+
+
+def quantitative_challenger_score(candidate):
+    """Pre-research score: QVM dominates; exceptional relative strength may bridge a small QVM gap."""
+    qvm = float(candidate.get('QVMScore') or 0.0)
+    relative = float(candidate.get('BenchmarkRelativeScore') or 0.0)
+    bonus = max(0.0, relative - challenger_relative_bonus_start) * challenger_relative_bonus_per_point
+    return qvm + min(challenger_relative_bonus_cap, bonus)
+
+
+def etf_factor_family(candidate, research=None):
+    """Group economically similar categories so labels cannot bypass diversification."""
+    group = candidate_sector_group(candidate).upper()
+    style = str(candidate.get('StyleCategory') or '').upper()
+    driver = normalized_return_driver_key(research or {}) or ''
+    text = ' '.join((group, style, driver))
+    if 'FREE CASH FLOW' in text or 'QUALITY' in text:
+        return 'QUALITY_CASHFLOW'
+    if any(token in text for token in ('DIVIDEND', 'LARGE VALUE', 'VALUE')):
+        return 'VALUE_INCOME'
+    if any(token in text for token in ('TECHNOLOGY', 'MEGA_CAP_TECH', 'AI_CAPEX', 'SEMICONDUCTOR')):
+        return 'GROWTH_TECH'
+    if any(token in text for token in ('ENERGY', 'OIL', 'GAS')):
+        return 'ENERGY_COMMODITY'
+    if any(token in text for token in ('HEALTHCARE', 'BIOTECH', 'PHARMA')):
+        return 'HEALTHCARE'
+    if any(token in text for token in ('MATERIAL', 'METAL', 'MINING')):
+        return 'MATERIALS'
+    if 'MOMENTUM' in text:
+        return 'MOMENTUM'
+    return re.sub(r'[^A-Z0-9]+', '_', group).strip('_') or 'OTHER'
+
+
+def etf_selection_merit(candidate, research):
+    """Rank already-qualified ETFs by benchmark ambition without changing eligibility floors."""
+    score = etf_final_score(candidate, research)
+    relative = float(candidate.get('BenchmarkRelativeScore') or 0.0)
+    if relative >= selection_relative_high_threshold:
+        score += selection_relative_high_bonus
+    elif relative >= selection_relative_good_threshold:
+        score += selection_relative_good_bonus
+    outlook = str(research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
+    continuation = str(research.get('continuation_strength') or 'ADEQUATE').upper()
+    if outlook == 'LIKELY':
+        score += selection_likely_bonus
+    if continuation == 'STRONG':
+        score += selection_strong_bonus
+    return score
 
 
 def pending_candidate_can_improve_full_portfolio(
     candidate, selected, rank_by_symbol, max_per_sector
 ):
-    """After 10/10, only keep unresolved candidates that can displace a selection."""
+    """Keep bounded benchmark-relative challengers even when raw QVM rank is lower."""
     if not selected:
         return True
-    symbol = str(candidate['Symbol']).upper()
-    candidate_rank = rank_by_symbol.get(symbol, float('inf'))
-    selected_ranks = [
-        rank_by_symbol.get(str(item['candidate']['Symbol']).upper(), float('inf'))
-        for item in selected
-    ]
-    worst_selected_rank = max(selected_ranks, default=float('inf'))
-    if candidate_rank >= worst_selected_rank:
-        return False
-
+    candidate_score = quantitative_challenger_score(candidate)
     sector_key = candidate_sector_group(candidate).casefold()
     same_sector = [
         item for item in selected
         if candidate_sector_group(item['candidate']).casefold() == sector_key
     ]
-    if len(same_sector) < max_per_sector:
+    family = etf_factor_family(candidate)
+    same_family = [
+        item for item in selected
+        if etf_factor_family(item['candidate'], item.get('research')) == family
+    ]
+    if len(same_sector) >= max_per_sector:
+        comparison_pool = same_sector
+    elif len(same_family) >= max_etfs_per_factor_family:
+        comparison_pool = same_family
+    else:
+        comparison_pool = selected
+    if not comparison_pool:
         return True
-    worst_same_sector_rank = max(
-        rank_by_symbol.get(
-            str(item['candidate']['Symbol']).upper(), float('inf')
-        )
-        for item in same_sector
-    )
-    return candidate_rank < worst_same_sector_rank
+    worst_score = min(quantitative_challenger_score(item['candidate']) for item in comparison_pool)
+    return candidate_score + challenger_score_epsilon >= worst_score
+
+
+def queue_portfolio_challengers(candidate_records, research_by_symbol, selected, pending_retries, queued_symbols):
+    """Queue only a few exceptional unresearched alternatives after the portfolio fills."""
+    if not challenger_research_enabled or len(selected) < target_selected_etfs:
+        return []
+    pending_symbols = {str(item['candidate']['Symbol']).upper() for item in pending_retries}
+    candidates = []
+    for candidate in candidate_records:
+        symbol = str(candidate['Symbol']).upper()
+        if symbol in research_by_symbol or symbol in pending_symbols or symbol in queued_symbols:
+            continue
+        qvm = float(candidate.get('QVMScore') or 0.0)
+        relative = float(candidate.get('BenchmarkRelativeScore') or 0.0)
+        if qvm < challenger_min_qvm or relative < challenger_min_relative_score:
+            continue
+        if not pending_candidate_can_improve_full_portfolio(
+            candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+        ):
+            continue
+        candidates.append(candidate)
+    candidates.sort(key=quantitative_challenger_score, reverse=True)
+    remaining_slots = max(0, max_challenger_candidates_per_run - len(queued_symbols))
+    if remaining_slots <= 0:
+        return []
+    queued = []
+    for candidate in candidates[:remaining_slots]:
+        symbol = str(candidate['Symbol']).upper()
+        pending_retries.append({
+            'candidate': candidate, 'needs_research': True,
+            'portfolio_challenger': True,
+        })
+        queued_symbols.add(symbol)
+        queued.append(symbol)
+    if queued:
+        print('Queued benchmark-relative portfolio challengers: ' + ', '.join(queued))
+    return queued
 
 
 def combined_etf_reversal_risk(research):
@@ -3345,11 +3443,11 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
 
 
 def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, max_moderate_event, require_judgment=False):
-    selected, sector_counts, event_counts, driver_counts = [], {}, {}, {}
+    selected, sector_counts, event_counts, driver_counts, family_counts = [], {}, {}, {}, {}
     ranked_candidates = sorted(
         candidates,
         key=lambda candidate: (
-            etf_final_score(
+            etf_selection_merit(
                 candidate,
                 research_by_symbol.get(str(candidate['Symbol']).upper(), {}),
             )
@@ -3384,7 +3482,10 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
             continue
         sector = candidate_sector_group(candidate)
         sector_key = sector.casefold()
+        family = etf_factor_family(candidate, research)
         if sector_counts.get(sector_key, 0) >= max_per_sector:
+            continue
+        if family_counts.get(family, 0) >= max_etfs_per_factor_family:
             continue
         event_key = normalized_risk_event_key(research)
         if risk == 'MODERATE' and event_key and event_counts.get(event_key, 0) >= max_moderate_event:
@@ -3394,6 +3495,7 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
             continue
         selected.append({'candidate': candidate, 'research': research})
         sector_counts[sector_key] = sector_counts.get(sector_key, 0) + 1
+        family_counts[family] = family_counts.get(family, 0) + 1
         if risk == 'MODERATE' and event_key:
             event_counts[event_key] = event_counts.get(event_key, 0) + 1
         if driver_key:
@@ -3510,11 +3612,11 @@ def build_context_review(
 
 def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector,
                           max_moderate_event, research_disposition=None):
-    selected, ledger, sector_counts, event_counts, driver_counts = [], [], {}, {}, {}
+    selected, ledger, sector_counts, event_counts, driver_counts, family_counts = [], [], {}, {}, {}, {}
     research_disposition = research_disposition or {}
     ranked_candidates = sorted(
         list(candidates),
-        key=lambda candidate: etf_final_score(
+        key=lambda candidate: etf_selection_merit(
             candidate,
             research_by_symbol.get(str(candidate['Symbol']).upper(), {}),
         ) if str(candidate['Symbol']).upper() in research_by_symbol else float(candidate.get('QVMScore') or 0.0),
@@ -3532,6 +3634,7 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
         status, reason = None, None
         sector = candidate_sector_group(candidate)
         sector_key = sector.casefold()
+        family = etf_factor_family(candidate, research) if research else etf_factor_family(candidate)
         final_score = None
         if not research:
             disposition = research_disposition.get(symbol, 'NOT_NEEDED')
@@ -3607,6 +3710,12 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             elif sector_counts.get(sector_key, 0) >= max_per_sector:
                 status = 'SKIPPED — SECTOR CAPACITY'
                 reason = f'{max_per_sector} selected ETFs already use the {sector} sector/category.'
+            elif family_counts.get(family, 0) >= max_etfs_per_factor_family:
+                status = 'SKIPPED — FACTOR-FAMILY CAPACITY'
+                reason = (
+                    f'{max_etfs_per_factor_family} selected ETFs already use the {family} '
+                    'factor family; avoid hidden concentration across differently named categories.'
+                )
             elif (
                 risk == 'MODERATE' and event_key
                 and event_counts.get(event_key, 0) >= max_moderate_event
@@ -3619,6 +3728,7 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             else:
                 selected.append({'candidate': candidate, 'research': research})
                 sector_counts[sector_key] = sector_counts.get(sector_key, 0) + 1
+                family_counts[family] = family_counts.get(family, 0) + 1
                 if risk == 'MODERATE' and event_key:
                     event_counts[event_key] = event_counts.get(event_key, 0) + 1
                 if driver_key:
@@ -3634,6 +3744,11 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             'continuation_strength': research.get('continuation_strength') if research else None,
             'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook') if research else None,
             'return_driver_group': normalized_return_driver_key(research) if research else None,
+            'factor_family': family,
+            'selection_merit_score': (
+                etf_selection_merit(candidate, research)
+                if research and research.get('judgment_model') else None
+            ),
             'sector_selected_after': sector_counts.get(sector_key, 0),
             'total_selected_after': len(selected),
             'risk_derivation': risk_derivation_summary(research) if research else None,
@@ -3909,6 +4024,21 @@ gemini_batch_size = config.get('gemini_batch_size', 15)
 target_selected_etfs = config.get('target_selected_etfs', 10)
 max_etfs_per_sector_group = config.get('max_etfs_per_sector_group', 2)
 max_etfs_per_return_driver = max(1, int(config.get('max_etfs_per_return_driver', 2)))
+max_etfs_per_factor_family = max(1, int(config.get('max_etfs_per_factor_family', 3)))
+challenger_research_enabled = bool(config.get('challenger_research_enabled', True))
+max_challenger_candidates_per_run = max(0, int(config.get('max_challenger_candidates_per_run', 4)))
+challenger_min_qvm = float(config.get('challenger_min_qvm', 60.0))
+challenger_min_relative_score = float(config.get('challenger_min_relative_score', 90.0))
+challenger_relative_bonus_start = float(config.get('challenger_relative_bonus_start', 80.0))
+challenger_relative_bonus_per_point = float(config.get('challenger_relative_bonus_per_point', 0.15))
+challenger_relative_bonus_cap = float(config.get('challenger_relative_bonus_cap', 3.0))
+challenger_score_epsilon = float(config.get('challenger_score_epsilon', 0.25))
+selection_relative_good_threshold = float(config.get('selection_relative_good_threshold', 80.0))
+selection_relative_high_threshold = float(config.get('selection_relative_high_threshold', 90.0))
+selection_relative_good_bonus = float(config.get('selection_relative_good_bonus', 1.0))
+selection_relative_high_bonus = float(config.get('selection_relative_high_bonus', 2.0))
+selection_likely_bonus = float(config.get('selection_likely_bonus', 2.0))
+selection_strong_bonus = float(config.get('selection_strong_bonus', 1.0))
 minimum_final_selection_score = float(config.get('minimum_final_selection_score', 60.0))
 minimum_uncertain_selection_score = float(config.get('minimum_uncertain_selection_score', 66.0))
 minimum_moderate_selection_score = float(config.get('minimum_moderate_selection_score', 66.0))
@@ -4442,6 +4572,7 @@ research_budget_exhausted = False
 judgment_reopened_slots = 0
 authoritative_backfill_batches = 0
 provisional_portfolio_peak = 0
+challenger_queued_symbols = set()
 rank_by_symbol = {
     str(candidate['Symbol']).upper(): rank
     for rank, candidate in enumerate(candidate_records, start=1)
@@ -4504,8 +4635,13 @@ if research_by_symbol:
             f'Authoritative ETF judgment reopened {reopened} cached/provisional '
             f'portfolio slot(s); continuing research/backfill.'
         )
+if len(selected) >= target_selected_etfs:
+    queue_portfolio_challengers(
+        candidate_records, research_by_symbol, selected, pending_retries,
+        challenger_queued_symbols,
+    )
 if len(selected) >= target_selected_etfs and not pending_retries:
-    print('Validated and judged ETF research cache already supports the full portfolio.')
+    print('Validated and judged ETF research cache already supports the full portfolio after challenger review.')
 
 request_budget.release_summary_for_research = (
     summary_reservation_releasable_on_shortfall
@@ -4627,6 +4763,9 @@ while (
         ):
             sector_capacity_skipped_symbols_this_run.add(symbol)
             continue
+        if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+            sector_capacity_skipped_symbols_this_run.add(symbol)
+            continue
         provisional = provisional_exposure_group(candidate)
         selectable_in_provisional = 0
         for researched_symbol, researched in research_by_symbol.items():
@@ -4672,6 +4811,9 @@ while (
             ):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
+            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
             provisional = provisional_exposure_group(candidate)
             if provisional_counts.get(provisional, 0) >= max_candidates_per_provisional_group:
                 deferred_excess_candidates.append(candidate)
@@ -4701,6 +4843,9 @@ while (
             ):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
+            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
             batch.append(candidate)
     if (
         len(selected) < target_selected_etfs
@@ -4718,6 +4863,9 @@ while (
                 rank_by_symbol,
                 max_etfs_per_sector_group,
             ):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
+            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if len(batch) < gemini_batch_size:
@@ -4741,6 +4889,9 @@ while (
             if lower_ranked_candidate_blocked_by_sector_capacity(
                 candidate, selected, rank_by_symbol, max_etfs_per_sector_group
             ):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
+            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             batch.append(candidate)
@@ -5257,6 +5408,11 @@ while (
         f'{target_selected_etfs}, authoritative/effective={len(selected)}/'
         f'{target_selected_etfs}, newly_judged={max(0, judged_after - judged_before)}.'
     )
+    if len(selected) >= target_selected_etfs:
+        queue_portfolio_challengers(
+            candidate_records, research_by_symbol, selected, pending_retries,
+            challenger_queued_symbols,
+        )
     request_budget.release_summary_for_research = (
         summary_reservation_releasable_on_shortfall
         and len(selected) < target_selected_etfs
@@ -5302,8 +5458,11 @@ for candidate in candidate_records:
         continue
     if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
         continue
-    if lower_ranked_candidate_blocked_by_sector_capacity(
-        candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+    if (
+        lower_ranked_candidate_blocked_by_sector_capacity(
+            candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+        )
+        or lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected)
     ):
         capacity_blocked_unresearched.append(symbol)
     else:
@@ -5651,6 +5810,9 @@ save_json_object_atomic(
 print(
     'ETF selection-control summary:\n'
     f'  provisional portfolio peak: {provisional_portfolio_peak}/{target_selected_etfs}\n'
+    f'  portfolio challengers queued: {len(challenger_queued_symbols)}'
+    + (f' ({", ".join(sorted(challenger_queued_symbols))})\n' if challenger_queued_symbols else '\n')
+    + f'  max factor-family exposure: {max_etfs_per_factor_family}\n'
     f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
     f'  authoritative backfill batches: {authoritative_backfill_batches}\n'
     f'  remaining unresearched candidates: {remaining_unresearched}' + '\n' + f'  actionable unresearched candidates: {len(actionable_unresearched)}' + '\n' + f'  capacity-blocked unresearched candidates: {len(capacity_blocked_unresearched)}'

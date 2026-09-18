@@ -58,7 +58,8 @@ _etf_run_log = open(ETF_RUN_LOG_FILE, 'w', encoding='utf-8', buffering=1)
 sys.stdout = TeeStream(sys.stdout, _etf_run_log)
 sys.stderr = TeeStream(sys.stderr, _etf_run_log)
 classification_call_diagnostics = []
-classification_calls_used = 0
+classification_logical_calls_used = 0
+classification_api_attempts_used = 0
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -2888,9 +2889,52 @@ def etf_required_final_score(research):
     return required
 
 
+def normalize_etf_judgment_results(data):
+    """Normalize a few harmless JSON envelope variants without weakening field validation."""
+    if isinstance(data, list):
+        return data
+    if not isinstance(data, dict):
+        return None
+    for key in ('results', 'classifications', 'judgments', 'items'):
+        value = data.get(key)
+        if isinstance(value, list):
+            return value
+    list_values = [value for value in data.values() if isinstance(value, list)]
+    if len(list_values) == 1:
+        return list_values[0]
+    return None
+
+
+def etf_optimistic_final_score(candidate):
+    """Upper bound used to avoid researching ETFs that cannot clear even the baseline floor."""
+    return (
+        float(candidate.get('QVMScore') or 0.0)
+        + 5.0  # best reversal-risk adjustment: MINIMAL
+        + max(0.0, benchmark_likely_bonus)
+        + max(0.0, continuation_adjustments.get('STRONG', 0.0))
+    )
+
+
+def etf_benchmark_override_required(candidate):
+    return (
+        require_likely_strong_below_benchmark_qvm
+        and benchmark_qvm_floor is not None
+        and float(candidate.get('QVMScore') or 0.0) < benchmark_qvm_floor
+    )
+
+
+def etf_passes_benchmark_override(candidate, research):
+    if not etf_benchmark_override_required(candidate):
+        return True
+    return (
+        str(research.get('benchmark_outperformance_outlook') or '').upper() == 'LIKELY'
+        and str(research.get('continuation_strength') or '').upper() == 'STRONG'
+    )
+
+
 def judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
-    global classification_calls_used
+    global classification_logical_calls_used, classification_api_attempts_used
     candidate_by_symbol = {
         str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
     }
@@ -2900,6 +2944,7 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
         if (
             str(candidate['Symbol']).upper() in research_by_symbol
             and not research_by_symbol[str(candidate['Symbol']).upper()].get('judgment_model')
+            and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
         )
     ]
     if not symbols:
@@ -2917,9 +2962,13 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
     }
     for start in range(0, len(symbols), batch_size):
         batch_symbols = symbols[start:start + batch_size]
-        if classification_calls_used >= max_classification_calls_per_run:
-            print('ETF classification-call budget exhausted; retaining grounded 2.5 provisional judgments for remaining ETFs.')
+        if classification_logical_calls_used >= max_classification_logical_calls_per_run:
+            print('ETF logical classification-call budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
             break
+        if classification_api_attempts_used >= max_classification_api_attempts_per_run:
+            print('ETF classification API-attempt budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
+            break
+        classification_logical_calls_used += 1
         compact = []
         for symbol in batch_symbols:
             candidate = candidate_by_symbol[symbol]
@@ -2975,11 +3024,15 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
         for model_index, model_name in enumerate(models):
             attempts = classification_attempts if model_index == 0 else 1
             for attempt in range(1, attempts + 1):
-                if classification_calls_used >= max_classification_calls_per_run:
+                if classification_api_attempts_used >= max_classification_api_attempts_per_run:
                     break
-                classification_calls_used += 1
+                classification_api_attempts_used += 1
                 stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
-                print(f'Gemini ETF classification request {classification_calls_used}/{max_classification_calls_per_run}: {stage}')
+                print(
+                    f'Gemini ETF classification logical call '
+                    f'{classification_logical_calls_used}/{max_classification_logical_calls_per_run}; '
+                    f'API attempt {classification_api_attempts_used}/{max_classification_api_attempts_per_run}: {stage}'
+                )
                 try:
                     response = client.models.generate_content(
                         model=model_name,
@@ -2995,9 +3048,9 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                     metadata['response_text_chars'] = len(getattr(response, 'text', '') or '')
                     print_gemini_metadata(stage, metadata)
                     data = parse_json_response(getattr(response, 'text', None))
-                    patches = data.get('results') if isinstance(data, dict) else None
+                    patches = normalize_etf_judgment_results(data)
                     if not isinstance(patches, list):
-                        raise ValueError('ETF judgment response lacks results array.')
+                        raise ValueError('ETF judgment response lacks a usable results/classifications list.')
                     patch_by_symbol = {
                         str(item.get('symbol') or '').upper(): item
                         for item in patches if isinstance(item, dict)
@@ -3008,7 +3061,8 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                     used_model = model_name
                     classification_call_diagnostics.append({
                         'stage': 'etf_judgment', 'model': model_name,
-                        'attempt': attempt, 'symbols': list(batch_symbols),
+                        'attempt': attempt, 'logical_call': classification_logical_calls_used,
+                        'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
                         'success': True, 'fallback': model_index > 0,
                         'metadata': metadata,
                     })
@@ -3018,17 +3072,23 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                     last_error = exc
                     classification_call_diagnostics.append({
                         'stage': 'etf_judgment', 'model': model_name,
-                        'attempt': attempt, 'symbols': list(batch_symbols),
+                        'attempt': attempt, 'logical_call': classification_logical_calls_used,
+                        'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
                         'success': False, 'fallback': model_index > 0,
                         'error': str(exc),
                     })
                     print(f'Warning: {stage} failed: {exc}')
+                    # A valid JSON response with the wrong schema is structural, not
+                    # transient. Repeating the same model/prompt usually reproduces it,
+                    # so move directly to the fallback model instead of burning budget.
+                    if isinstance(exc, ValueError):
+                        break
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
             if patches is not None:
                 break
         if patches is None:
-            print(f'Warning: ETF judgment unavailable for batch; preserving validated 2.5 provisional classifications: {last_error}')
+            print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
             continue
         allowed_risks = {'MINIMAL','LOW','MODERATE','ELEVATED','SEVERE'}
         concentration_levels = {'LOW','MODERATE','HIGH'}
@@ -3087,7 +3147,7 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
     return judged
 
 
-def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, max_moderate_event):
+def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, max_moderate_event, require_judgment=False):
     selected, sector_counts, event_counts, driver_counts = [], {}, {}, {}
     ranked_candidates = sorted(
         candidates,
@@ -3108,9 +3168,18 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
         research = research_by_symbol.get(symbol)
         if not research or not research.get('eligible', True):
             continue
+        if etf_optimistic_final_score(candidate) < minimum_final_selection_score:
+            continue
+        if require_judgment and not research.get('judgment_model'):
+            continue
+        if research.get('judgment_model') and not etf_passes_benchmark_override(candidate, research):
+            continue
         risk = combined_etf_reversal_risk(research)
         if risk not in SELECTABLE_RISKS:
             continue
+        # Apply the calibrated continuation score only after authoritative
+        # judgment exists. Provisional 2.5 research can guide backfill order,
+        # but it cannot be treated as though missing 3.5 fields were UNCERTAIN.
         if (
             research.get('judgment_model')
             and etf_final_score(candidate, research) < etf_required_final_score(research)
@@ -3269,7 +3338,14 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
         final_score = None
         if not research:
             disposition = research_disposition.get(symbol, 'NOT_NEEDED')
-            if disposition == 'VALIDATION_FAILED':
+            if disposition == 'QUANTITATIVE_FLOOR':
+                status = 'NOT RESEARCHED — CANNOT CLEAR FINAL SCORE FLOOR'
+                reason = (
+                    f'Even the optimistic maximum continuation score '
+                    f'{etf_optimistic_final_score(candidate):.2f} is below the baseline '
+                    f'ETF floor {minimum_final_selection_score:.2f}.'
+                )
+            elif disposition == 'VALIDATION_FAILED':
                 status = 'NOT SELECTED — RESEARCH VALIDATION FAILED'
                 reason = 'Research was attempted but did not validate.'
             elif disposition == 'SECTOR_CAPACITY':
@@ -3302,7 +3378,28 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             elif risk not in SELECTABLE_RISKS:
                 status = f'NOT SELECTED — {risk}'
                 reason = research.get('explanation')
-            elif research.get('judgment_model') and final_score < etf_required_final_score(research):
+            elif etf_optimistic_final_score(candidate) < minimum_final_selection_score:
+                status = 'NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR'
+                reason = (
+                    f'Even the optimistic maximum continuation score '
+                    f'{etf_optimistic_final_score(candidate):.2f} is below the baseline '
+                    f'ETF floor {minimum_final_selection_score:.2f}.'
+                )
+            elif not research.get('judgment_model'):
+                status = 'NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED'
+                reason = (
+                    'Grounded 2.5 research validated, but no authoritative no-Search '
+                    'judgment completed before the classification budget ended.'
+                )
+            elif not etf_passes_benchmark_override(candidate, research):
+                status = 'NOT SELECTED — BENCHMARK OVERRIDE NOT EARNED'
+                reason = (
+                    f'QVM {float(candidate.get("QVMScore") or 0.0):.2f} is materially below '
+                    f'the weaker configured benchmark threshold {benchmark_qvm_floor:.2f}; '
+                    'selection therefore requires authoritative benchmark=LIKELY and '
+                    'continuation=STRONG.'
+                )
+            elif final_score < etf_required_final_score(research):
                 required_score = etf_required_final_score(research)
                 status = 'NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM'
                 reason = (
@@ -3602,7 +3699,8 @@ classification_fallback_model = str(config.get('classification_fallback_model', 
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
 classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
 classification_attempts = max(1, int(config.get('classification_attempts', 2)))
-max_classification_calls_per_run = max(1, int(config.get('max_classification_calls_per_run', 8)))
+max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
+max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
 classification_min_intermediate_batch = max(1, int(config.get('classification_min_intermediate_batch', 15)))
@@ -3616,6 +3714,9 @@ max_etfs_per_return_driver = max(1, int(config.get('max_etfs_per_return_driver',
 minimum_final_selection_score = float(config.get('minimum_final_selection_score', 60.0))
 minimum_uncertain_selection_score = float(config.get('minimum_uncertain_selection_score', 66.0))
 minimum_moderate_selection_score = float(config.get('minimum_moderate_selection_score', 66.0))
+benchmark_qvm_override_margin = float(config.get('benchmark_qvm_override_margin', 3.0))
+require_likely_strong_below_benchmark_qvm = bool(config.get('require_likely_strong_below_benchmark_qvm', True))
+benchmark_qvm_floor = None
 benchmark_likely_bonus = float(config.get('benchmark_likely_bonus', 5.0))
 benchmark_uncertain_penalty = float(config.get('benchmark_uncertain_penalty', -4.0))
 concentration_adjustments = {
@@ -3904,6 +4005,19 @@ inspection_columns += [
 with open('caches/top_qvm_etfs.md', 'w', encoding='utf-8') as f:
     f.write(top_etfs[inspection_columns].to_markdown(index=False))
 
+benchmark_qvm_values = [
+    float(value)
+    for value in top_etfs.loc[top_etfs['Role'] == 'BENCHMARK', 'QVMScore'].tolist()
+    if pd.notna(value)
+]
+if benchmark_qvm_values:
+    benchmark_qvm_floor = min(benchmark_qvm_values) - benchmark_qvm_override_margin
+    print(
+        f'Benchmark-QVM override floor: {benchmark_qvm_floor:.2f} '
+        f'(weaker benchmark QVM {min(benchmark_qvm_values):.2f} minus '
+        f'{benchmark_qvm_override_margin:.2f} margin).'
+    )
+
 gemini_columns = [
     col
     for col in [
@@ -4109,6 +4223,7 @@ pending_retries = []
 deferred_excess_candidates = []
 deferred_excess_symbols_this_run = set()
 sector_capacity_skipped_symbols_this_run = set()
+quantitative_floor_skipped_symbols_this_run = set()
 research_attempts_by_symbol = {}
 structural_repairs_by_symbol = {}
 consistency_reviewed_symbols = set()
@@ -4174,6 +4289,7 @@ if research_by_symbol:
         target_selected_etfs,
         max_etfs_per_sector_group,
         max_moderate_per_risk_event,
+        require_judgment=True,
     )
     if len(selected) < initial_provisional_count:
         reopened = initial_provisional_count - len(selected)
@@ -4293,6 +4409,9 @@ while (
         cursor += 1
         symbol = str(candidate['Symbol']).upper()
         if symbol in research_by_symbol or symbol in {str(x['Symbol']).upper() for x in batch}:
+            continue
+        if etf_optimistic_final_score(candidate) < minimum_final_selection_score:
+            quantitative_floor_skipped_symbols_this_run.add(symbol)
             continue
         if lower_ranked_candidate_blocked_by_sector_capacity(
             candidate,
@@ -4876,6 +4995,7 @@ while (
         target_selected_etfs,
         max_etfs_per_sector_group,
         max_moderate_per_risk_event,
+        require_judgment=True,
     )
     if len(selected) < provisional_count:
         reopened = provisional_count - len(selected)
@@ -4914,6 +5034,7 @@ selected = preview_portfolio(
     target_selected_etfs,
     max_etfs_per_sector_group,
     max_moderate_per_risk_event,
+    require_judgment=True,
 )
 if len(selected) < pre_final_selected_count:
     reopened = pre_final_selected_count - len(selected)
@@ -5190,6 +5311,10 @@ diagnostics = {
         'authoritative_backfill_batches': authoritative_backfill_batches,
         'remaining_unresearched_candidates': remaining_unresearched,
         'minimum_final_selection_score': minimum_final_selection_score,
+        'max_classification_logical_calls_per_run': max_classification_logical_calls_per_run,
+        'max_classification_api_attempts_per_run': max_classification_api_attempts_per_run,
+        'benchmark_qvm_floor': benchmark_qvm_floor,
+        'benchmark_qvm_override_margin': benchmark_qvm_override_margin,
         'minimum_uncertain_selection_score': minimum_uncertain_selection_score,
         'minimum_moderate_selection_score': minimum_moderate_selection_score,
     },
@@ -5276,7 +5401,8 @@ print(
     f'  logical calls: {request_budget.total_used}/{request_budget.total}\n'
     f'  ETF research logical calls: {request_budget.research_used}/{request_budget.research_limit}\n'
     f'  summary logical calls: {request_budget.summary_used}\n'
-    f'  ETF judgment calls: {classification_calls_used}/{max_classification_calls_per_run}\n'
+    f'  ETF judgment logical calls: {classification_logical_calls_used}/{max_classification_logical_calls_per_run}\n'
+    f'  ETF judgment API attempts: {classification_api_attempts_used}/{max_classification_api_attempts_per_run}\n'
     f'  actual API attempts: {request_budget.api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '

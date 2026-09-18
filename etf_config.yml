@@ -128,7 +128,10 @@ classification_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
 classification_attempts: 2
-max_classification_calls_per_run: 8
+# Logical judgment batches and transport/schema retries have separate budgets.
+# A malformed response no longer consumes multiple logical classification slots.
+max_classification_logical_calls_per_run: 8
+max_classification_api_attempts_per_run: 20
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
@@ -145,6 +148,12 @@ max_moderate_per_risk_event: 2
 minimum_final_selection_score: 60.0
 minimum_uncertain_selection_score: 66.0
 minimum_moderate_selection_score: 66.0
+# If an ETF's QVM is materially below the weaker configured benchmark, it may
+# still qualify, but only with authoritative LIKELY benchmark outperformance
+# and STRONG continuation. The margin avoids treating tiny QVM differences as
+# meaningful.
+benchmark_qvm_override_margin: 3.0
+require_likely_strong_below_benchmark_qvm: true
 benchmark_likely_bonus: 5.0
 benchmark_uncertain_penalty: -4.0
 continuation_strong_bonus: 4.0

@@ -139,12 +139,23 @@ max_etfs_per_sector_group: 2
 max_etfs_per_return_driver: 2
 max_candidates_per_provisional_group: 4
 max_moderate_per_risk_event: 2
-minimum_final_selection_score: 72.0
+# ETF QVM scores live on a different distribution than stock QVM scores.
+# Use a permissive baseline floor, then require more from UNCERTAIN or
+# MODERATE-risk candidates rather than applying one stock-style cutoff to all.
+minimum_final_selection_score: 60.0
+minimum_uncertain_selection_score: 66.0
+minimum_moderate_selection_score: 66.0
 benchmark_likely_bonus: 5.0
 benchmark_uncertain_penalty: -4.0
 continuation_strong_bonus: 4.0
 continuation_adequate_bonus: 0.0
 continuation_weak_penalty: -4.0
+# Focused ETF mandates are often intentionally concentrated. Keep this overlay
+# bounded so holdings and index-construction concentration are not double-counted.
+concentration_low_adjustment: 0.0
+concentration_moderate_adjustment: 0.0
+concentration_high_adjustment: -1.0
+max_concentration_penalty: -2.0
 repeated_return_driver_penalty: -3.0
 thinking_budget: 12288
 summary_thinking_budget: 4096

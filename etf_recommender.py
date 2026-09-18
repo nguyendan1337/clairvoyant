@@ -2862,27 +2862,59 @@ def etf_final_score(candidate, research):
               'UNLIKELY': -1000.0}.get(outlook, benchmark_uncertain_penalty)
     continuation = str(research.get('continuation_strength') or 'ADEQUATE').upper()
     score += continuation_adjustments.get(continuation, continuation_adjustments['WEAK'])
+
+    # Sector/index concentration is often intentional for ETFs. Penalize it
+    # gently and cap the combined effect so a focused mandate is not counted
+    # twice as both holdings concentration and construction concentration.
+    concentration_penalty = 0.0
     for field in ('holdings_concentration', 'construction_concentration'):
         level = str(research.get(field) or 'LOW').upper()
-        score += {'LOW': 0.0, 'MODERATE': -1.0, 'HIGH': -2.0}.get(level, -1.0)
+        concentration_penalty += concentration_adjustments.get(level, -1.0)
+    score += max(max_concentration_penalty, concentration_penalty)
     return score
+
+
+def etf_required_final_score(research):
+    """Return the calibrated ETF-specific score floor for this judgment."""
+    required = minimum_final_selection_score
+    if not research or not research.get('judgment_model'):
+        return required
+    outlook = str(research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
+    risk = combined_etf_reversal_risk(research)
+    if outlook == 'UNCERTAIN':
+        required = max(required, minimum_uncertain_selection_score)
+    if risk == 'MODERATE':
+        required = max(required, minimum_moderate_selection_score)
+    return required
 
 
 def judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_calls_used
-    symbols = [
-        str(candidate['Symbol']).upper() for candidate in candidate_records
-        if str(candidate['Symbol']).upper() in research_by_symbol
-    ]
-    if not symbols:
-        return research_by_symbol
     candidate_by_symbol = {
         str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
     }
-    batch_size = max(1, min(classification_batch_target, classification_batch_soft_max))
     judged = dict(research_by_symbol)
-    prior_peer_patches = {}
+    symbols = [
+        str(candidate['Symbol']).upper() for candidate in candidate_records
+        if (
+            str(candidate['Symbol']).upper() in research_by_symbol
+            and not research_by_symbol[str(candidate['Symbol']).upper()].get('judgment_model')
+        )
+    ]
+    if not symbols:
+        return research_by_symbol
+    batch_size = max(1, min(classification_batch_target, classification_batch_soft_max))
+    prior_peer_patches = {
+        symbol: {
+            key: research.get(key) for key in (
+                'reversal_risk', 'continuation_strength',
+                'benchmark_outperformance_outlook', 'risk_exposure_group'
+            )
+        }
+        for symbol, research in judged.items()
+        if research.get('judgment_model')
+    }
     for start in range(0, len(symbols), batch_size):
         batch_symbols = symbols[start:start + batch_size]
         if classification_calls_used >= max_classification_calls_per_run:
@@ -3081,7 +3113,7 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
             continue
         if (
             research.get('judgment_model')
-            and etf_final_score(candidate, research) < minimum_final_selection_score
+            and etf_final_score(candidate, research) < etf_required_final_score(research)
         ):
             continue
         sector = candidate_sector_group(candidate)
@@ -3270,12 +3302,13 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             elif risk not in SELECTABLE_RISKS:
                 status = f'NOT SELECTED — {risk}'
                 reason = research.get('explanation')
-            elif final_score < minimum_final_selection_score:
-                status = 'NOT SELECTED — FINAL SCORE BELOW MINIMUM'
+            elif research.get('judgment_model') and final_score < etf_required_final_score(research):
+                required_score = etf_required_final_score(research)
+                status = 'NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM'
                 reason = (
-                    f'Final continuation score {final_score:.2f} is below '
-                    f'{minimum_final_selection_score:.2f}; '
-                    f'continuation={continuation}, benchmark={benchmark_outlook}.'
+                    f'Final continuation score {final_score:.2f} is below the '
+                    f'calibrated ETF floor {required_score:.2f}; '
+                    f'continuation={continuation}, benchmark={benchmark_outlook}, risk={risk}.'
                 )
             elif sector_counts.get(sector_key, 0) >= max_per_sector:
                 status = 'SKIPPED — SECTOR CAPACITY'
@@ -3580,9 +3613,17 @@ gemini_batch_size = config.get('gemini_batch_size', 15)
 target_selected_etfs = config.get('target_selected_etfs', 10)
 max_etfs_per_sector_group = config.get('max_etfs_per_sector_group', 2)
 max_etfs_per_return_driver = max(1, int(config.get('max_etfs_per_return_driver', 2)))
-minimum_final_selection_score = float(config.get('minimum_final_selection_score', 72.0))
+minimum_final_selection_score = float(config.get('minimum_final_selection_score', 60.0))
+minimum_uncertain_selection_score = float(config.get('minimum_uncertain_selection_score', 66.0))
+minimum_moderate_selection_score = float(config.get('minimum_moderate_selection_score', 66.0))
 benchmark_likely_bonus = float(config.get('benchmark_likely_bonus', 5.0))
 benchmark_uncertain_penalty = float(config.get('benchmark_uncertain_penalty', -4.0))
+concentration_adjustments = {
+    'LOW': float(config.get('concentration_low_adjustment', 0.0)),
+    'MODERATE': float(config.get('concentration_moderate_adjustment', 0.0)),
+    'HIGH': float(config.get('concentration_high_adjustment', -1.0)),
+}
+max_concentration_penalty = float(config.get('max_concentration_penalty', -2.0))
 continuation_adjustments = {
     'STRONG': float(config.get('continuation_strong_bonus', 4.0)),
     'ADEQUATE': float(config.get('continuation_adequate_bonus', 0.0)),
@@ -4077,6 +4118,9 @@ charged_search_attempts = 0
 research_quota_exhausted = False
 transport_failed_symbols_this_run = set()
 research_budget_exhausted = False
+judgment_reopened_slots = 0
+authoritative_backfill_batches = 0
+provisional_portfolio_peak = 0
 rank_by_symbol = {
     str(candidate['Symbol']).upper(): rank
     for rank, candidate in enumerate(candidate_records, start=1)
@@ -4111,8 +4155,35 @@ if queued_initial_repairs:
         max_etfs_per_sector_group,
         max_moderate_per_risk_event,
     )
+
+# Any validated cache entries must pass the same authoritative judgment stage
+# before they are allowed to stop fresh research. The judge only processes
+# unjudged symbols, so this does not repeatedly rewrite earlier decisions.
+initial_provisional_count = len(selected)
+provisional_portfolio_peak = max(provisional_portfolio_peak, initial_provisional_count)
+if research_by_symbol:
+    research_by_symbol = judge_etf_research_pool(
+        client, candidate_records, research_by_symbol, market_context
+    )
+    for call in classification_call_diagnostics:
+        if call.get('success') and call.get('model') and call['model'] not in models_used:
+            models_used.append(call['model'])
+    selected = preview_portfolio(
+        candidate_records,
+        research_by_symbol,
+        target_selected_etfs,
+        max_etfs_per_sector_group,
+        max_moderate_per_risk_event,
+    )
+    if len(selected) < initial_provisional_count:
+        reopened = initial_provisional_count - len(selected)
+        judgment_reopened_slots += reopened
+        print(
+            f'Authoritative ETF judgment reopened {reopened} cached/provisional '
+            f'portfolio slot(s); continuing research/backfill.'
+        )
 if len(selected) >= target_selected_etfs and not pending_retries:
-    print('Validated ETF research cache already supports the full portfolio.')
+    print('Validated and judged ETF research cache already supports the full portfolio.')
 
 request_budget.release_summary_for_research = (
     summary_reservation_releasable_on_shortfall
@@ -4752,15 +4823,17 @@ while (
         if research_quota_exhausted:
             print('ETF research daily quota is exhausted; stopping research calls.')
 
-    selected = preview_portfolio(
+    provisional_selected = preview_portfolio(
         candidate_records,
         research_by_symbol,
         target_selected_etfs,
         max_etfs_per_sector_group,
         max_moderate_per_risk_event,
     )
+    provisional_count = len(provisional_selected)
+    provisional_portfolio_peak = max(provisional_portfolio_peak, provisional_count)
     consistency_conflicts = find_actionable_consistency_conflicts(
-        candidate_records, research_by_symbol, selected
+        candidate_records, research_by_symbol, provisional_selected
     )
     queued_repairs = enqueue_consistency_repairs(
         consistency_conflicts,
@@ -4775,27 +4848,65 @@ while (
     )
     if queued_repairs:
         save_json_object_atomic(research_cache_file, research_cache)
-        selected = preview_portfolio(
+        provisional_selected = preview_portfolio(
             candidate_records,
             research_by_symbol,
             target_selected_etfs,
             max_etfs_per_sector_group,
             max_moderate_per_risk_event,
         )
+        provisional_count = len(provisional_selected)
+        provisional_portfolio_peak = max(provisional_portfolio_peak, provisional_count)
+
+    judged_before = sum(
+        1 for research in research_by_symbol.values() if research.get('judgment_model')
+    )
+    research_by_symbol = judge_etf_research_pool(
+        client, candidate_records, research_by_symbol, market_context
+    )
+    judged_after = sum(
+        1 for research in research_by_symbol.values() if research.get('judgment_model')
+    )
+    for call in classification_call_diagnostics:
+        if call.get('success') and call.get('model') and call['model'] not in models_used:
+            models_used.append(call['model'])
+    selected = preview_portfolio(
+        candidate_records,
+        research_by_symbol,
+        target_selected_etfs,
+        max_etfs_per_sector_group,
+        max_moderate_per_risk_event,
+    )
+    if len(selected) < provisional_count:
+        reopened = provisional_count - len(selected)
+        judgment_reopened_slots += reopened
+        if len(selected) < target_selected_etfs:
+            authoritative_backfill_batches += 1
+        print(
+            f'Authoritative ETF judgment reopened {reopened} portfolio slot(s) '
+            f'({provisional_count}->{len(selected)}); research remains open until '
+            f'{target_selected_etfs} authoritative/effective selections are restored '
+            'or the research budget is exhausted.'
+        )
+    print(
+        f'Portfolio preview after batch: provisional={provisional_count}/'
+        f'{target_selected_etfs}, authoritative/effective={len(selected)}/'
+        f'{target_selected_etfs}, newly_judged={max(0, judged_after - judged_before)}.'
+    )
     request_budget.release_summary_for_research = (
         summary_reservation_releasable_on_shortfall
         and len(selected) < target_selected_etfs
     )
-    print(f'Portfolio preview after batch: {len(selected)}/{target_selected_etfs} selected.')
 
-# Freeze the grounded 2.5 evidence pool, then apply an authoritative
-# cross-candidate no-Search judgment before final portfolio construction.
-pre_judgment_count = len(research_by_symbol)
+# Safety catch-up: normally every validated ETF has already been judged inside
+# the loop. This pass only handles any unjudged cache/repair residue and, because
+# the judge skips judged symbols, cannot introduce repeated classification drift.
+pre_final_selected_count = len(selected)
 research_by_symbol = judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context
 )
 for call in classification_call_diagnostics:
-    if call.get('success') and call.get('model'):
+    if call.get('success') and call.get('model') and call['model'] not in models_used:
         models_used.append(call['model'])
 selected = preview_portfolio(
     candidate_records,
@@ -4804,10 +4915,31 @@ selected = preview_portfolio(
     max_etfs_per_sector_group,
     max_moderate_per_risk_event,
 )
-print(
-    f'Authoritative ETF judgment completed for {pre_judgment_count} validated '
-    f'ETFs; post-judgment preview={len(selected)}/{target_selected_etfs}.'
+if len(selected) < pre_final_selected_count:
+    reopened = pre_final_selected_count - len(selected)
+    judgment_reopened_slots += reopened
+    print(
+        f'Warning: final judgment catch-up reopened {reopened} slot(s). '
+        'This should be rare because judgment normally runs after every research batch.'
+    )
+
+# Regression invariant: do not silently claim that research was unnecessary if
+# authoritative judgment has reopened slots while candidate/call capacity remains.
+remaining_unresearched = sum(
+    1 for candidate in candidate_records
+    if str(candidate['Symbol']).upper() not in research_by_symbol
 )
+if (
+    len(selected) < target_selected_etfs
+    and remaining_unresearched > 0
+    and request_budget.can_reserve('research')
+    and not research_quota_exhausted
+):
+    print(
+        'WARNING — ETF backfill invariant: portfolio is short while unresearched '
+        f'candidates ({remaining_unresearched}) and research-call capacity remain. '
+        'The run should normally remain inside the research loop in this state.'
+    )
 
 research_budget_exhausted = (
     len(selected) < target_selected_etfs
@@ -5052,6 +5184,15 @@ diagnostics = {
     'selection_target': target_selected_etfs,
     'selection_count': len(selected),
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
+    'selection_control': {
+        'provisional_portfolio_peak': provisional_portfolio_peak,
+        'judgment_reopened_slots': judgment_reopened_slots,
+        'authoritative_backfill_batches': authoritative_backfill_batches,
+        'remaining_unresearched_candidates': remaining_unresearched,
+        'minimum_final_selection_score': minimum_final_selection_score,
+        'minimum_uncertain_selection_score': minimum_uncertain_selection_score,
+        'minimum_moderate_selection_score': minimum_moderate_selection_score,
+    },
     'models_used': list(dict.fromkeys(models_used)),
     'budget': {
         'total_used': request_budget.total_used,
@@ -5110,6 +5251,10 @@ diagnostics = {
                 etf_final_score(candidate, research_by_symbol[str(candidate['Symbol']).upper()])
                 if str(candidate['Symbol']).upper() in research_by_symbol else None
             ),
+            'required_selection_score': (
+                etf_required_final_score(research_by_symbol[str(candidate['Symbol']).upper()])
+                if str(candidate['Symbol']).upper() in research_by_symbol else None
+            ),
         }
         for candidate in candidate_records
     },
@@ -5118,6 +5263,13 @@ diagnostics = {
 save_json_object_atomic(
     config.get('run_diagnostics_file', 'caches/etf_run_diagnostics.json'),
     diagnostics,
+)
+print(
+    'ETF selection-control summary:\n'
+    f'  provisional portfolio peak: {provisional_portfolio_peak}/{target_selected_etfs}\n'
+    f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
+    f'  authoritative backfill batches: {authoritative_backfill_batches}\n'
+    f'  remaining unresearched candidates: {remaining_unresearched}'
 )
 print(
     'Gemini request budget:\n'

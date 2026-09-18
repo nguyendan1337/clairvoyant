@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T20:16:01.248075+00:00",
+  "generated_at": "2026-09-18T20:37:20.031048+00:00",
   "status": "SUCCESS_PARTIAL",
   "selection_target": 10,
   "selection_count": 9,
@@ -22,25 +22,23 @@
     "gemini-2.5-flash"
   ],
   "budget": {
-    "total_used": 2,
+    "total_used": 1,
     "total_limit": 7,
-    "research_used": 1,
+    "research_used": 0,
     "research_limit": 6,
     "summary_used": 1,
-    "api_attempts": 2,
-    "research_api_attempts": 1,
+    "api_attempts": 1,
+    "research_api_attempts": 0,
     "summary_api_attempts": 1,
     "context_api_attempts": 0,
     "summary_reservation_releasable_on_shortfall": true
   },
   "research": {
-    "unique_etfs_requested": 1,
-    "requested_searches": 1,
-    "charged_search_attempts": 1,
+    "unique_etfs_requested": 0,
+    "requested_searches": 0,
+    "charged_search_attempts": 0,
     "repeated_searches": 0,
-    "fresh_research_attempts_by_symbol": {
-      "CIBR": 1
-    },
+    "fresh_research_attempts_by_symbol": {},
     "structural_repairs_by_symbol": {},
     "sector_capacity_skipped_symbols": [
       "BUG",
@@ -153,42 +151,7 @@
       "VDE",
       "XBI"
     ],
-    "batches": [
-      {
-        "stage": "ETF batch ranks 24-24",
-        "batch_size": 1,
-        "fresh_research_requested": 1,
-        "fresh_retry_requested": 0,
-        "repair_only_requested": 0,
-        "searches_exposed": 1,
-        "search_overrun": 0,
-        "validated": 1,
-        "deferred": 0,
-        "validated_symbols": [
-          "CIBR"
-        ],
-        "deferred_symbols": [],
-        "raw_result_shapes": {
-          "CIBR": {
-            "present": true,
-            "field_count": 32,
-            "sources_shape": "list[4]",
-            "benchmark_assessment": "PASS",
-            "mandate_assessment": "US_EQUITY",
-            "us_equity_weight_estimate": 95,
-            "mandate_basis": "HOLDINGS_WEIGHT",
-            "mechanism_status": "HYPOTHETICAL",
-            "evidence_scope": "EXPOSURE_SPECIFIC",
-            "adverse_change_observed": false,
-            "normalization_probability": "POSSIBLE",
-            "risk_materiality": "MODERATE",
-            "reversal_mechanism_chars": 192
-          }
-        },
-        "grounding_url_count": 4,
-        "applied_repair_patches": {}
-      }
-    ],
+    "batches": [],
     "provisional_exposure_deferred_symbols": [],
     "transport_failed_symbols": []
   },
@@ -206,7 +169,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformance is highly dependent on elevated oil prices from geopolitical tensions, which face normalization risks.",
+      "benchmark_outperformance_basis": "Strong trailing excess returns are heavily dependent on elevated oil prices from geopolitical tensions, which face active normalization risks.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "HIGH",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -350,7 +313,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Extreme concentration in Micron and the technology sector makes future outperformance highly volatile and dependent on semiconductor cycles.",
+      "benchmark_outperformance_basis": "Extreme concentration in Micron (21.13%) and technology (41.19%) makes future outperformance highly dependent on semiconductor cycles rather than broad value factors.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "HIGH",
       "primary_reversal_channel": "CONCENTRATION",
@@ -389,7 +352,7 @@
       "benchmark_outperformance_basis": "Ineligible for U.S.-equity recommendation due to global mandate and low domestic exposure.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "HIGH",
-      "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
+      "primary_reversal_channel": "EXPOSURE_DETERIORATION",
       "judgment_model": "gemini-3.5-flash",
       "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
       "mechanism_status": "HYPOTHETICAL",
@@ -821,7 +784,7 @@
       "benchmark_outperformance_basis": "Ineligible for U.S.-equity recommendation due to global mandate and low domestic exposure.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "HIGH",
-      "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
+      "primary_reversal_channel": "EXPOSURE_DETERIORATION",
       "judgment_model": "gemini-3.5-flash",
       "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
       "mechanism_status": "HYPOTHETICAL",
@@ -985,6 +948,42 @@
       "risk_exposure_group": "US_MULTI_FACTOR",
       "evidence_warnings": []
     },
+    "CIBR": {
+      "portfolio_group": "Technology",
+      "canonical_sector": "Technology",
+      "style_category": "Technology",
+      "research_admission": "BACKFILL",
+      "python_eligible": true,
+      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
+      "reversal_risk": "MODERATE",
+      "exposure_reversal_risk": "MODERATE",
+      "entry_reversal_risk": "MODERATE",
+      "continuation_strength": "ADEQUATE",
+      "benchmark_outperformance_outlook": "UNCERTAIN",
+      "benchmark_outperformance_confidence": "MEDIUM",
+      "benchmark_outperformance_basis": "Strong near-term excess returns driven by AI threat expansion are offset by a lofty 50.95 P/E and potential enterprise spending moderation.",
+      "holdings_concentration": "MODERATE",
+      "construction_concentration": "HIGH",
+      "primary_reversal_channel": "VALUATION_RERATING",
+      "judgment_model": "gemini-3.5-flash",
+      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
+      "mechanism_status": "HYPOTHETICAL",
+      "normalization_probability": "POSSIBLE",
+      "benchmark_assessment": "PASS",
+      "mandate_assessment": "US_EQUITY",
+      "us_equity_weight_estimate": 95.0,
+      "mandate_basis": "HOLDINGS_WEIGHT",
+      "evidence_scope": "EXPOSURE_SPECIFIC",
+      "adverse_change_observed": false,
+      "adverse_change_date": null,
+      "adverse_change_indicator": null,
+      "mechanism_evidence_source": null,
+      "mechanism_evidence_source_index": null,
+      "exposure_group": "CYBERSECURITY_TECHNOLOGY",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "CYBERSECURITY_TECHNOLOGY",
+      "evidence_warnings": []
+    },
     "PVAL": {
       "portfolio_group": "Large Value",
       "canonical_sector": null,
@@ -1070,7 +1069,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Broad large-cap value exposure historically lags growth-dominated benchmarks like VGT and momentum-focused SPMO.",
+      "benchmark_outperformance_basis": "Broad large-cap value exposure historically lags growth-dominated VGT and momentum-focused SPMO over medium-to-long horizons.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1106,7 +1105,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Fundamental weighting de-emphasizes market cap, which historically lags growth-dominated benchmarks like VGT and momentum-focused SPMO.",
+      "benchmark_outperformance_basis": "Fundamental weighting de-emphasizes market cap, leading to persistent underperformance against growth-dominated VGT and momentum-focused SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1142,7 +1141,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformed VGT and SPMO over 1Y, but underperformed over 6M, reflecting high cyclicality and global economic sensitivity.",
+      "benchmark_outperformance_basis": "Electrification demand supports copper, but high cyclicality and global economic sensitivity make outperformance vs VGT and SPMO highly uncertain.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "HIGH",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -1178,7 +1177,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed both VGT and SPMO over 6-month, 9-month, and 1-year horizons due to quality factor constraints that dilute pure momentum and growth exposure.",
+      "benchmark_outperformance_basis": "Quality factor constraints dilute pure momentum and growth exposure, leading to persistent underperformance against VGT and SPMO.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "VALUATION_RERATING",
@@ -1214,7 +1213,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT and SPMO over most trailing periods due to its broad-market diversification and value tilt.",
+      "benchmark_outperformance_basis": "Broad-market diversification and value tilt lead to persistent underperformance against growth-dominated VGT and momentum-focused SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1250,7 +1249,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT and SPMO over 6M, 9M, and 1Y due to its value tilt during growth-led periods.",
+      "benchmark_outperformance_basis": "Mega-cap value tilt historically lags growth-dominated VGT and momentum-focused SPMO during growth-led market regimes.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1286,7 +1285,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformed VGT and SPMO over 1Y, but underperformed over 6M and 9M, reflecting high cyclicality.",
+      "benchmark_outperformance_basis": "Silver industrial and safe-haven demand can drive short-term outperformance, but high cyclicality makes long-term outperformance vs VGT and SPMO highly uncertain.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "HIGH",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -1322,7 +1321,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformed VGT and SPMO over 1Y, but underperformed over 6M and 9M, reflecting sector-specific dynamics.",
+      "benchmark_outperformance_basis": "Strong 1Y outperformance driven by pharmaceutical innovation, but recent 6M and 9M underperformance vs VGT and SPMO makes forward outperformance uncertain.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "NONE",
@@ -1358,7 +1357,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformed VGT and SPMO over 1Y, but underperformed over 6M and 9M, reflecting high R&D and regulatory risks.",
+      "benchmark_outperformance_basis": "Biotech innovation and M&A support outperformance, but high R&D and regulatory risks make forward returns vs VGT and SPMO uncertain.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "EXPOSURE_DETERIORATION",
@@ -1394,7 +1393,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT and SPMO over most trailing periods due to its value tilt.",
+      "benchmark_outperformance_basis": "Quant-based value strategy underperforms growth-dominated VGT and momentum-focused SPMO over medium-to-long horizons.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "NONE",
@@ -1430,7 +1429,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT over 1Y and barely outperformed SPMO, with consistent underperformance over 6M and 9M.",
+      "benchmark_outperformance_basis": "Broad defensive healthcare exposure consistently underperforms growth-dominated VGT and momentum-focused SPMO over medium-to-long horizons.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1466,7 +1465,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Significant trailing underperformance against both VGT and SPMO benchmarks over 6-month, 9-month, and 1-year horizons.",
+      "benchmark_outperformance_basis": "Focus on shareholder yield and value factors leads to persistent underperformance against growth-dominated VGT and momentum-focused SPMO.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -1502,7 +1501,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT and SPMO over most trailing periods due to its revenue-weighting de-emphasizing mega-cap growth.",
+      "benchmark_outperformance_basis": "Revenue-weighting de-emphasizes mega-cap growth, leading to persistent underperformance against VGT and SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1538,7 +1537,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed VGT and SPMO over 6M, 9M, and 1Y due to its mid-cap value tilt.",
+      "benchmark_outperformance_basis": "Mid-cap value tilt leads to persistent underperformance against growth-dominated VGT and momentum-focused SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1574,7 +1573,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "GARP's high technology concentration (53.59%) has led to underperformance against VGT over 6M and 1Y, making future excess returns uncertain.",
+      "benchmark_outperformance_basis": "High technology concentration (53.59%) has led to underperformance against VGT over 6M and 1Y, making future excess returns uncertain.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "CONCENTRATION",
@@ -1610,7 +1609,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed both VGT and SPMO across all major trailing periods due to its broad-market diversification and value/profitability tilts.",
+      "benchmark_outperformance_basis": "Broad-market diversification and value/profitability tilts lead to persistent underperformance against VGT and SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "VALUATION_RERATING",
@@ -1646,7 +1645,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Outperformed SPMO over 1 year and 3 months, but lags VGT and SPMO over 6 and 9 months due to its deep value focus.",
+      "benchmark_outperformance_basis": "Outperformed SPMO over 1Y, but deep value focus lags VGT and SPMO over 6M and 9M, making forward outperformance uncertain.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "HIGH",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -1682,7 +1681,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Positive 1Y excess returns are supported by geopolitical commodity shocks, but recent sector weakness and highly negative 6-month relative returns make forward outperformance highly uncertain.",
+      "benchmark_outperformance_basis": "Positive 1Y excess returns supported by geopolitical commodity shocks, but highly negative 6M relative returns make forward outperformance uncertain.",
       "holdings_concentration": "HIGH",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -1718,7 +1717,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Significant trailing underperformance against both VGT and SPMO over 6M, 9M, and 1Y due to its small-cap and value tilts.",
+      "benchmark_outperformance_basis": "Multi-factor approach with small-cap and value tilts leads to persistent underperformance against VGT and SPMO.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "NONE",
@@ -1754,7 +1753,7 @@
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
       "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "While free cash flow focus provides fundamental resilience, COWZ has lagged VGT and SPMO over 6M and 9M, making future outperformance uncertain.",
+      "benchmark_outperformance_basis": "Free cash flow focus provides fundamental resilience, but COWZ has lagged VGT and SPMO over 6M and 9M, making future outperformance uncertain.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "NONE",
@@ -1810,7 +1809,7 @@
       "mechanism_evidence_source_index": null,
       "exposure_group": "U.S._ENERGY_ALPHA_DEX",
       "primary_risk_event_id": "MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK",
-      "risk_exposure_group": "COMMODITY_PRICE_NORMALIZATION",
+      "risk_exposure_group": "US_ENERGY_PRODUCERS",
       "evidence_warnings": []
     },
     "FTXN": {
@@ -1846,7 +1845,7 @@
       "mechanism_evidence_source_index": null,
       "exposure_group": "U.S._OIL_GAS_FACTOR_EQUITY",
       "primary_risk_event_id": "MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK",
-      "risk_exposure_group": "COMMODITY_PRICE_NORMALIZATION",
+      "risk_exposure_group": "US_ENERGY_PRODUCERS",
       "evidence_warnings": []
     },
     "NULV": {
@@ -1858,11 +1857,11 @@
       "eligibility_reason": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.",
       "reversal_risk": "LOW",
       "exposure_reversal_risk": "LOW",
-      "entry_reversal_risk": "MINIMAL",
+      "entry_reversal_risk": "LOW",
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "NULV's value orientation has led to persistent underperformance against VGT and SPMO over most trailing periods.",
+      "benchmark_outperformance_basis": "ESG and value orientation has led to persistent underperformance against VGT and SPMO over most trailing periods.",
       "holdings_concentration": "MODERATE",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "NONE",
@@ -1892,8 +1891,8 @@
       "research_admission": "BACKFILL",
       "python_eligible": false,
       "eligibility_reason": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.",
-      "reversal_risk": "MODERATE",
-      "exposure_reversal_risk": "MODERATE",
+      "reversal_risk": "LOW",
+      "exposure_reversal_risk": "LOW",
       "entry_reversal_risk": "LOW",
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
@@ -1970,7 +1969,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Persistent trailing underperformance against both VGT and SPMO over 6 and 12 months, combined with headwinds from anticipated Federal Reserve rate hikes, makes future outperformance unlikely.",
+      "benchmark_outperformance_basis": "Persistent trailing underperformance against VGT and SPMO over 6 and 12 months, combined with headwinds from anticipated Federal Reserve rate hikes.",
       "holdings_concentration": "LOW",
       "construction_concentration": "LOW",
       "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION",
@@ -2114,7 +2113,7 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY",
       "benchmark_outperformance_confidence": "HIGH",
-      "benchmark_outperformance_basis": "Underperformed both VGT and SPMO over 6M, 9M, and 1Y horizons, showing weaker momentum capture than the benchmarks.",
+      "benchmark_outperformance_basis": "Underperformed both VGT and SPMO over 6M, 9M, and 1Y horizons, showing weaker momentum capture than the benchmarks due to sector constraints.",
       "holdings_concentration": "LOW",
       "construction_concentration": "MODERATE",
       "primary_reversal_channel": "MOMENTUM_FRAGILITY",
@@ -2892,87 +2891,64 @@
       "primary_risk_event_id": null,
       "risk_exposure_group": "GROWTH_VALUATION_COMPRESSION",
       "evidence_warnings": []
-    },
-    "CIBR": {
-      "portfolio_group": "Technology",
-      "canonical_sector": "Technology",
-      "style_category": "Technology",
-      "research_admission": "BACKFILL",
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
-      "reversal_risk": "MODERATE",
-      "exposure_reversal_risk": "MODERATE",
-      "entry_reversal_risk": "MODERATE",
-      "continuation_strength": "ADEQUATE",
-      "benchmark_outperformance_outlook": "UNCERTAIN",
-      "benchmark_outperformance_confidence": "MEDIUM",
-      "benchmark_outperformance_basis": "Strong near-term excess returns driven by AI threat expansion are offset by a lofty 50.95 P/E and potential enterprise spending moderation.",
-      "holdings_concentration": "MODERATE",
-      "construction_concentration": "HIGH",
-      "primary_reversal_channel": "VALUATION_RERATING",
-      "judgment_model": "gemini-3.5-flash",
-      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "POSSIBLE",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "us_equity_weight_estimate": 95.0,
-      "mandate_basis": "HOLDINGS_WEIGHT",
-      "evidence_scope": "EXPOSURE_SPECIFIC",
-      "adverse_change_observed": false,
-      "adverse_change_date": null,
-      "adverse_change_indicator": null,
-      "mechanism_evidence_source": null,
-      "mechanism_evidence_source_index": null,
-      "exposure_group": "CYBERSECURITY_TECHNOLOGY",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": "CYBERSECURITY_TECHNOLOGY",
-      "evidence_warnings": []
     }
   },
   "classification_changes": [
     {
-      "symbol": "AVUS",
+      "symbol": "CRAK",
       "changes": {
-        "risk_exposure_group": {
-          "previous": "US_LARGE_CAP_VALUE",
-          "current": "US_LARGE_VALUE"
+        "primary_reversal_channel": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "EXPOSURE_DETERIORATION"
         }
       }
     },
     {
-      "symbol": "IBB",
+      "symbol": "FTXN",
       "changes": {
         "risk_exposure_group": {
-          "previous": "US_BIOTECHNOLOGY",
-          "current": "US_BIOTECH"
+          "previous": "COMMODITY_PRICE_NORMALIZATION",
+          "current": "US_ENERGY_PRODUCERS"
+        }
+      }
+    },
+    {
+      "symbol": "FXN",
+      "changes": {
+        "risk_exposure_group": {
+          "previous": "COMMODITY_PRICE_NORMALIZATION",
+          "current": "US_ENERGY_PRODUCERS"
+        }
+      }
+    },
+    {
+      "symbol": "GDX",
+      "changes": {
+        "primary_reversal_channel": {
+          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
+          "current": "EXPOSURE_DETERIORATION"
         }
       }
     },
     {
       "symbol": "NULV",
       "changes": {
-        "risk_exposure_group": {
-          "previous": "US_LARGE_CAP_VALUE",
-          "current": "US_LARGE_VALUE"
+        "entry_reversal_risk": {
+          "previous": "MINIMAL",
+          "current": "LOW"
         }
       }
     },
     {
-      "symbol": "SCHV",
+      "symbol": "VHT",
       "changes": {
-        "risk_exposure_group": {
-          "previous": "US_LARGE_CAP_VALUE",
-          "current": "US_LARGE_VALUE"
-        }
-      }
-    },
-    {
-      "symbol": "XLE",
-      "changes": {
-        "risk_exposure_group": {
-          "previous": "COMMODITY_PRICE_NORMALIZATION",
-          "current": "US_ENERGY_PRODUCERS"
+        "reversal_risk": {
+          "previous": "MODERATE",
+          "current": "LOW"
+        },
+        "exposure_reversal_risk": {
+          "previous": "MODERATE",
+          "current": "LOW"
         }
       }
     }
@@ -3046,7 +3022,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 1,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE",
-      "explanation": "VFLO's unique combination of high free cash flow yield and growth metrics provides a robust framework for persistent outperformance. Low reversal risk and strong momentum across market cycles support a highly favorable outlook."
+      "explanation": "VFLO combines high free cash flow yields with robust growth metrics, driving persistent outperformance across both value and growth cycles. Low reversal risk and a recent minor pullback offer an attractive entry point."
     },
     {
       "qvm_rank": 15,
@@ -3062,7 +3038,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 2,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
-      "explanation": "XLK's concentrated exposure to mega-cap tech and AI infrastructure spending supports strong continuation potential. However, lofty valuations and high concentration in NVIDIA, Apple, and Microsoft present moderate valuation rerating risks."
+      "explanation": "XLK offers highly concentrated exposure to U.S. technology giants. Driven by massive AI capital expenditure, it is well-positioned for continued outperformance, though lofty valuations present moderate valuation rerating risks."
     },
     {
       "qvm_rank": 3,
@@ -3078,7 +3054,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 3,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE",
-      "explanation": "DIVB offers stable, diversified exposure to companies returning capital via dividends and buybacks. While it provides excellent downside protection in mixed markets, its ability to outpace tech-heavy benchmarks over 6-12 months remains uncertain."
+      "explanation": "DIVB provides stable, diversified exposure to companies returning capital via dividends and buybacks. While offering excellent downside protection in mixed markets, its ability to consistently beat growth-heavy benchmarks remains uncertain."
     },
     {
       "qvm_rank": 20,
@@ -3094,7 +3070,7 @@
       "sector_selected_after": 2,
       "total_selected_after": 4,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
-      "explanation": "FTEC offers broad exposure to U.S. technology, heavily driven by secular AI spending. While continuation strength is strong, lofty valuations and high concentration in mega-cap tech leaders present moderate valuation rerating risks."
+      "explanation": "FTEC provides broad, low-cost exposure to U.S. technology. Driven by robust AI capital expenditure, it is highly likely to continue outperforming, though lofty valuations present moderate valuation rerating risks."
     },
     {
       "qvm_rank": 1,
@@ -3110,7 +3086,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 5,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK",
-      "explanation": "XLE has delivered strong returns driven by elevated oil prices and geopolitical tensions. However, its high concentration and dependence on volatile commodity drivers make it vulnerable to a material reversal if Middle East tensions normalize."
+      "explanation": "XLE's strong momentum is supported by elevated oil prices and geopolitical tensions. However, its high concentration in mega-cap energy majors makes it highly vulnerable to a reversal if Middle East conflicts normalize."
     },
     {
       "qvm_rank": 8,
@@ -3126,7 +3102,7 @@
       "sector_selected_after": 2,
       "total_selected_after": 6,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE",
-      "explanation": "SCHD's focus on high-quality, dividend-paying companies provides excellent defensive characteristics and income. However, its value-oriented sector mix typically lags growth-heavy benchmarks during periods of tech-led market expansion."
+      "explanation": "SCHD offers high-quality defensive dividend exposure. While providing excellent stability and income in mixed markets, its value-oriented, tech-light portfolio is likely to lag during aggressive growth-led market rallies."
     },
     {
       "qvm_rank": 10,
@@ -3142,7 +3118,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 7,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION",
-      "explanation": "AVLV's active, systematic approach targeting undervalued companies with high profitability has shown strong relative performance. While structurally sound, its ability to beat growth benchmarks depends heavily on a sustained value rotation."
+      "explanation": "AVLV's active strategy combining value and profitability metrics has historically outperformed passive peers. However, its ability to beat growth-heavy benchmarks over the next 6-12 months depends heavily on a sustained value rotation."
     },
     {
       "qvm_rank": 11,
@@ -3270,7 +3246,7 @@
       "sector_selected_after": 2,
       "total_selected_after": 8,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK",
-      "explanation": "VDE provides broad exposure to U.S. energy, benefiting from high oil prices and geopolitical risks. However, its high concentration in mega-cap producers makes it vulnerable to a reversal if geopolitical tensions ease."
+      "explanation": "VDE provides broad exposure to the U.S. energy sector. While benefiting from high oil prices and geopolitical tensions, its high concentration in mega-cap producers exposes it to commodity price normalization risks."
     },
     {
       "qvm_rank": 29,
@@ -3302,7 +3278,7 @@
       "sector_selected_after": 1,
       "total_selected_after": 9,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
-      "explanation": "XBI's equal-weighted structure captures broad biotech innovation and M&A activity. While momentum has been strong, the industry's inherent regulatory, clinical trial, and funding risks keep the outlook uncertain."
+      "explanation": "XBI's equal-weighted approach captures broad biotech innovation and has delivered massive 1-year returns. However, the sector's high volatility, regulatory hurdles, and clinical trial risks make sustained outperformance uncertain."
     },
     {
       "qvm_rank": 31,
@@ -3776,7 +3752,7 @@
       "final_selection_score": 45.87765912640083,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
-      "return_driver_group": "COMMODITY_PRICE_NORMALIZATION",
+      "return_driver_group": "US_ENERGY_PRODUCERS",
       "factor_family": "ENERGY_COMMODITY",
       "selection_merit_score": 46.87765912640083,
       "sector_selected_after": 2,
@@ -3808,7 +3784,7 @@
       "final_selection_score": 45.54898893606395,
       "continuation_strength": "ADEQUATE",
       "benchmark_outperformance_outlook": "UNCERTAIN",
-      "return_driver_group": "COMMODITY_PRICE_NORMALIZATION",
+      "return_driver_group": "US_ENERGY_PRODUCERS",
       "factor_family": "ENERGY_COMMODITY",
       "selection_merit_score": 46.54898893606395,
       "sector_selected_after": 2,
@@ -4345,6 +4321,22 @@
       "explanation": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence."
     },
     {
+      "qvm_rank": 63,
+      "symbol": "VHT",
+      "sector_group": "Healthcare",
+      "status": "NOT SELECTED — INELIGIBLE",
+      "final_selection_score": -946.9470118587885,
+      "continuation_strength": "WEAK",
+      "benchmark_outperformance_outlook": "UNLIKELY",
+      "return_driver_group": "US_HEALTHCARE",
+      "factor_family": "HEALTHCARE",
+      "selection_merit_score": -946.9470118587885,
+      "sector_selected_after": 1,
+      "total_selected_after": 9,
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
+      "explanation": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence."
+    },
+    {
       "qvm_rank": 69,
       "symbol": "SCHV",
       "sector_group": "Large Value",
@@ -4422,22 +4414,6 @@
       "sector_selected_after": 0,
       "total_selected_after": 9,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION",
-      "explanation": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence."
-    },
-    {
-      "qvm_rank": 63,
-      "symbol": "VHT",
-      "sector_group": "Healthcare",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "final_selection_score": -952.9470118587885,
-      "continuation_strength": "WEAK",
-      "benchmark_outperformance_outlook": "UNLIKELY",
-      "return_driver_group": "US_HEALTHCARE",
-      "factor_family": "HEALTHCARE",
-      "selection_merit_score": -952.9470118587885,
-      "sector_selected_after": 1,
-      "total_selected_after": 9,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION",
       "explanation": "Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence."
     },
     {
@@ -4585,7 +4561,7 @@
       "explanation": "Excluded by authoritative ETF judgment because reversal risk is ELEVATED."
     }
   ],
-  "context_review": "CONTEXT REVIEW\n\nResearch summary: 76 ETFs have validated research (1 researched and validated this run, 75 supplied by validated cache); 1 charged ETF search attempts, 0 structural repair attempts, 1 research batches, 0 accepted exclusion-only evidence warnings.\nSelected ETFs: VFLO, XLK, DIVB, FTEC, XLE, SCHD, AVLV, VDE, XBI\n|   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                              |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                          | Explanation                                                                                                                                                                                                                                                                                                     |\n|-----------:|:---------|:----------------|:----------------------------------------------------|------------------------:|-----------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE                                                                           | VFLO's unique combination of high free cash flow yield and growth metrics provides a robust framework for persistent outperformance. Low reversal risk and strong momentum across market cycles support a highly favorable outlook.                                                                             |\n|         15 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | XLK's concentrated exposure to mega-cap tech and AI infrastructure spending supports strong continuation potential. However, lofty valuations and high concentration in NVIDIA, Apple, and Microsoft present moderate valuation rerating risks.                                                                 |\n|          3 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | DIVB offers stable, diversified exposure to companies returning capital via dividends and buybacks. While it provides excellent downside protection in mixed markets, its ability to outpace tech-heavy benchmarks over 6-12 months remains uncertain.                                                          |\n|         20 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | FTEC offers broad exposure to U.S. technology, heavily driven by secular AI spending. While continuation strength is strong, lofty valuations and high concentration in mega-cap tech leaders present moderate valuation rerating risks.                                                                        |\n|          1 | XLE      | Energy          | SELECTED — MODERATE                                 |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | XLE has delivered strong returns driven by elevated oil prices and geopolitical tensions. However, its high concentration and dependence on volatile commodity drivers make it vulnerable to a material reversal if Middle East tensions normalize.                                                             |\n|          8 | SCHD     | Dividend        | SELECTED — LOW                                      |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | SCHD's focus on high-quality, dividend-paying companies provides excellent defensive characteristics and income. However, its value-oriented sector mix typically lags growth-heavy benchmarks during periods of tech-led market expansion.                                                                     |\n|         10 | AVLV     | Large Value     | SELECTED — LOW                                      |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | AVLV's active, systematic approach targeting undervalued companies with high profitability has shown strong relative performance. While structurally sound, its ability to beat growth benchmarks depends heavily on a sustained value rotation.                                                                |\n|         11 | FNDX     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         13 | IWX      | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         14 | SEIV     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         17 | DFLV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Final continuation score 65.19 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|          5 | VLUE     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         22 | HDV      | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      7 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         21 | DFUV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Final continuation score 63.25 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|          9 | VDE      | Energy          | SELECTED — MODERATE                                 |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | VDE provides broad exposure to U.S. energy, benefiting from high oil prices and geopolitical risks. However, its high concentration in mega-cap producers makes it vulnerable to a reversal if geopolitical tensions ease.                                                                                      |\n|         29 | SPYG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      8 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         16 | XBI      | Healthcare      | SELECTED — MODERATE                                 |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | XBI's equal-weighted structure captures broad biotech innovation and M&A activity. While momentum has been strong, the industry's inherent regulatory, clinical trial, and funding risks keep the outlook uncertain.                                                                                            |\n|         31 | IYW      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         32 | VOOG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         33 | IUSG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         19 | XOP      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 58.11 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         12 | FENY     | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 58.54 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         37 | RSPT     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         40 | IVW      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         42 | HACK     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         44 | QQQM     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         24 | CIBR     | Technology      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 55.93 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         49 | QQQ      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         25 | PVAL     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 56.80 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         39 | IHE      | Healthcare      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 56.58 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         26 | IYE      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 54.37 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         30 | COPX     | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a global index and includes non-U.S. companies in its top holdings (e.g., BHP Group Ltd. (Australia), Glencore PLC (UK), KGHM Polska Miedz SA (Poland), Antofagasta PLC (UK)).                                        |\n|         57 | CGDV     | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         59 | SPUS     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         60 | SKYY     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         55 | COWZ     | Mid-Cap Value   | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Final continuation score 54.28 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         62 | IGM      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         52 | RPV      | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | Final continuation score 54.12 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         64 | BUG      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         65 | ONEQ     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         66 | FDL      | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         41 | IBB      | Healthcare      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 51.35 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         72 | QGRW     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         74 | IYZ      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         50 | GARP     | Quality GARP    | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 48.32 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         53 | IGE      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 47.90 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         56 | FXN      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 45.88 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         38 | SIL      | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a global index and includes non-U.S. companies in its top holdings (e.g., Industrias Peñoles, S.A.B. de C.V. (Mexico), Fresnillo plc (UK), OR Royalties Inc. (Canada), Compañía de Minas Buenaventura S.A.A. (Peru)). |\n|         58 | FTXN     | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 45.55 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         83 | RDVY     | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         87 | APUE     | Large Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                        | Even the optimistic maximum continuation score 58.78 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         85 | QLTY     | Quality         | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 59.43 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         86 | DFAT     | Small Value     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 59.42 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         93 | QTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                         |                       2 |                      9 | nan                                                                                                                                                                      | The portfolio filled before research was needed.                                                                                                                                                                                                                                                                |\n|         89 | IJR      | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.62 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         91 | SCHA     | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.36 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         92 | SPSM     | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.14 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         95 | QQQJ     | Mid-Cap Growth  | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 56.69 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         96 | AVSC     | Small Value     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 56.58 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         80 | SPHB     | Large Blend     | NOT SELECTED — BENCHMARK OVERRIDE NOT EARNED        |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | QVM 48.36 is materially below the weaker configured benchmark threshold 54.32; selection therefore requires authoritative benchmark=LIKELY and continuation=STRONG.                                                                                                                                             |\n|         88 | KBWB     | Financials      | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE     | Even the optimistic maximum continuation score 58.65 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         90 | FCG      | Energy          | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Even the optimistic maximum continuation score 58.43 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         94 | VTWO     | Small Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE         | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                                                                                                                                                                                                             |\n|         97 | BLCR     | Large Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Even the optimistic maximum continuation score 56.51 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|          4 | VONV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|          7 | IWD      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|          6 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE                           |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         27 | VTV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         28 | PRF      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         35 | FNDB     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         36 | MGV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         18 | GDX      | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         43 | PWV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         45 | XLV      | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         46 | WTV      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         47 | RWL      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         48 | VOE      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         23 | DYNF     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         51 | AVUS     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         54 | DFAC     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         34 | JQUA     | Quality         | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         61 | NULV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         69 | SCHV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         70 | FHLC     | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         71 | SNPE     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         77 | DCOR     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         81 | DSI      | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         63 | VHT      | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         82 | JAVA     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         67 | AVUV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         68 | DFSV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE    | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         73 | JMOM     | Momentum        | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         75 | IWN      | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         76 | IWS      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         78 | THRO     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         79 | OIH      | Energy          | NOT SELECTED — INELIGIBLE                           |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         84 | BHYP     | nan             | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded by authoritative ETF judgment because reversal risk is ELEVATED.                                                                                                                                                                                                                                       |",
+  "context_review": "CONTEXT REVIEW\n\nResearch summary: 76 ETFs have validated research (0 researched and validated this run, 76 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.\nSelected ETFs: VFLO, XLK, DIVB, FTEC, XLE, SCHD, AVLV, VDE, XBI\n|   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                              |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                          | Explanation                                                                                                                                                                                                                                                                                                     |\n|-----------:|:---------|:----------------|:----------------------------------------------------|------------------------:|-----------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NONE                                                                           | VFLO combines high free cash flow yields with robust growth metrics, driving persistent outperformance across both value and growth cycles. Low reversal risk and a recent minor pullback offer an attractive entry point.                                                                                      |\n|         15 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | XLK offers highly concentrated exposure to U.S. technology giants. Driven by massive AI capital expenditure, it is well-positioned for continued outperformance, though lofty valuations present moderate valuation rerating risks.                                                                             |\n|          3 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | DIVB provides stable, diversified exposure to companies returning capital via dividends and buybacks. While offering excellent downside protection in mixed markets, its ability to consistently beat growth-heavy benchmarks remains uncertain.                                                                |\n|         20 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | FTEC provides broad, low-cost exposure to U.S. technology. Driven by robust AI capital expenditure, it is highly likely to continue outperforming, though lofty valuations present moderate valuation rerating risks.                                                                                           |\n|          1 | XLE      | Energy          | SELECTED — MODERATE                                 |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | XLE's strong momentum is supported by elevated oil prices and geopolitical tensions. However, its high concentration in mega-cap energy majors makes it highly vulnerable to a reversal if Middle East conflicts normalize.                                                                                     |\n|          8 | SCHD     | Dividend        | SELECTED — LOW                                      |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NONE                                                                          | SCHD offers high-quality defensive dividend exposure. While providing excellent stability and income in mixed markets, its value-oriented, tech-light portfolio is likely to lag during aggressive growth-led market rallies.                                                                                   |\n|         10 | AVLV     | Large Value     | SELECTED — LOW                                      |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | AVLV's active strategy combining value and profitability metrics has historically outperformed passive peers. However, its ability to beat growth-heavy benchmarks over the next 6-12 months depends heavily on a sustained value rotation.                                                                     |\n|         11 | FNDX     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         13 | IWX      | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         14 | SEIV     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         17 | DFLV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Final continuation score 65.19 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|          5 | VLUE     | Large Value     | SKIPPED — FACTOR-FAMILY CAPACITY                    |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | 3 selected ETFs already use the VALUE_INCOME factor family; avoid hidden concentration across differently named categories.                                                                                                                                                                                     |\n|         22 | HDV      | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      7 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         21 | DFUV     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      7 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Final continuation score 63.25 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|          9 | VDE      | Energy          | SELECTED — MODERATE                                 |                       2 |                      8 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | VDE provides broad exposure to the U.S. energy sector. While benefiting from high oil prices and geopolitical tensions, its high concentration in mega-cap producers exposes it to commodity price normalization risks.                                                                                         |\n|         29 | SPYG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      8 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         16 | XBI      | Healthcare      | SELECTED — MODERATE                                 |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | XBI's equal-weighted approach captures broad biotech innovation and has delivered massive 1-year returns. However, the sector's high volatility, regulatory hurdles, and clinical trial risks make sustained outperformance uncertain.                                                                          |\n|         31 | IYW      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         32 | VOOG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         33 | IUSG     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         19 | XOP      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 58.11 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         12 | FENY     | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 58.54 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         37 | RSPT     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         40 | IVW      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         42 | HACK     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         44 | QQQM     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         24 | CIBR     | Technology      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 55.93 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         49 | QQQ      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         25 | PVAL     | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 56.80 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         39 | IHE      | Healthcare      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 56.58 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         26 | IYE      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 54.37 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         30 | COPX     | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a global index and includes non-U.S. companies in its top holdings (e.g., BHP Group Ltd. (Australia), Glencore PLC (UK), KGHM Polska Miedz SA (Poland), Antofagasta PLC (UK)).                                        |\n|         57 | CGDV     | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         59 | SPUS     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         60 | SKYY     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         55 | COWZ     | Mid-Cap Value   | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Final continuation score 54.28 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         62 | IGM      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         52 | RPV      | Large Value     | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | Final continuation score 54.12 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=LOW.                                                                                                                                                                |\n|         64 | BUG      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         65 | ONEQ     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         66 | FDL      | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         41 | IBB      | Healthcare      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 51.35 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         72 | QGRW     | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         74 | IYZ      | Technology      | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Technology.                                                                                                                                                                                                                                                                    |\n|         50 | GARP     | Quality GARP    | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Final continuation score 48.32 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         53 | IGE      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 47.90 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         56 | FXN      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 45.88 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         38 | SIL      | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund tracks a global index and includes non-U.S. companies in its top holdings (e.g., Industrias Peñoles, S.A.B. de C.V. (Mexico), Fresnillo plc (UK), OR Royalties Inc. (Canada), Compañía de Minas Buenaventura S.A.A. (Peru)). |\n|         58 | FTXN     | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Final continuation score 45.55 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                           |\n|         83 | RDVY     | Dividend        | NOT RESEARCHED — SECTOR CAPACITY                    |                       2 |                      9 | nan                                                                                                                                                                      | 2 higher-ranked ETFs already use Dividend.                                                                                                                                                                                                                                                                      |\n|         87 | APUE     | Large Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                        | Even the optimistic maximum continuation score 58.78 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         85 | QLTY     | Quality         | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 59.43 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         86 | DFAT     | Small Value     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 59.42 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         93 | QTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                         |                       2 |                      9 | nan                                                                                                                                                                      | The portfolio filled before research was needed.                                                                                                                                                                                                                                                                |\n|         89 | IJR      | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.62 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         91 | SCHA     | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.36 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         92 | SPSM     | Small Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 58.14 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         95 | QQQJ     | Mid-Cap Growth  | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Even the optimistic maximum continuation score 56.69 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         96 | AVSC     | Small Value     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Even the optimistic maximum continuation score 56.58 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         80 | SPHB     | Large Blend     | NOT SELECTED — BENCHMARK OVERRIDE NOT EARNED        |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | QVM 48.36 is materially below the weaker configured benchmark threshold 54.32; selection therefore requires authoritative benchmark=LIKELY and continuation=STRONG.                                                                                                                                             |\n|         88 | KBWB     | Financials      | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE     | Even the optimistic maximum continuation score 58.65 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         90 | FCG      | Energy          | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Even the optimistic maximum continuation score 58.43 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|         94 | VTWO     | Small Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE         | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                                                                                                                                                                                                             |\n|         97 | BLCR     | Large Blend     | NOT SELECTED — CANNOT CLEAR FINAL SCORE FLOOR       |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Even the optimistic maximum continuation score 56.51 is below the baseline ETF floor 60.00.                                                                                                                                                                                                                     |\n|          4 | VONV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|          7 | IWD      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|          6 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE                           |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         27 | VTV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         28 | PRF      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         35 | FNDB     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         36 | MGV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         18 | GDX      | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         43 | PWV      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         45 | XLV      | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         46 | WTV      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         47 | RWL      | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         48 | VOE      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         23 | DYNF     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         51 | AVUS     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         54 | DFAC     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         34 | JQUA     | Quality         | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         61 | NULV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         63 | VHT      | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         69 | SCHV     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         70 | FHLC     | Healthcare      | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         71 | SNPE     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=LOW, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                              | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         77 | DCOR     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         81 | DSI      | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         82 | JAVA     | Large Value     | NOT SELECTED — INELIGIBLE                           |                       1 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         67 | AVUV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                             | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         68 | DFSV     | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE    | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         73 | JMOM     | Momentum        | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         75 | IWN      | Small Value     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         76 | IWS      | Mid-Cap Value   | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=FEDERAL_RESERVE_TIGHTENING_CYCLE | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         78 | THRO     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         79 | OIH      | Energy          | NOT SELECTED — INELIGIBLE                           |                       2 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT_COMMODITY_SHOCK        | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                          |\n|         84 | BHYP     | nan             | NOT SELECTED — INELIGIBLE                           |                       0 |                      9 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                 | Excluded by authoritative ETF judgment because reversal risk is ELEVATED.                                                                                                                                                                                                                                       |",
   "classification_calls": [
     {
       "stage": "etf_judgment",
@@ -4616,25 +4592,46 @@
         "FTEC",
         "DFUV",
         "DYNF",
+        "CIBR",
         "PVAL",
-        "IYE",
-        "VTV"
+        "IYE"
       ],
       "success": true,
       "fallback": false,
       "metadata": {
-        "prompt_tokens": 58127,
+        "prompt_tokens": 58087,
         "tool_tokens": 0,
         "cached_tokens": 0,
-        "thinking_tokens": 10574,
-        "output_tokens": 6657,
-        "total_tokens": 75358,
+        "thinking_tokens": 11621,
+        "output_tokens": 6730,
+        "total_tokens": 76438,
         "search_queries": [],
         "source_urls": [],
         "finish_reasons": [
           "FinishReason.STOP"
         ],
-        "response_text_chars": 24692
+        "response_text_chars": 25543
+      }
+    },
+    {
+      "stage": "etf_judgment_field_validation",
+      "model": "gemini-3.5-flash",
+      "logical_call": 1,
+      "api_attempt": 1,
+      "symbols": [
+        "VLUE"
+      ],
+      "success": false,
+      "error": "VLUE judgment returned invalid continuation_strength='ADEATE'; expected one of ['ADEQUATE', 'STRONG', 'WEAK'].",
+      "raw_patch": {
+        "continuation_strength": "ADEATE",
+        "benchmark_outperformance_outlook": "UNCERTAIN",
+        "benchmark_outperformance_confidence": "MEDIUM",
+        "exposure_reversal_risk": "MODERATE",
+        "entry_reversal_risk": "MODERATE",
+        "reversal_risk": "MODERATE",
+        "holdings_concentration": "HIGH",
+        "construction_concentration": "HIGH"
       }
     },
     {
@@ -4644,6 +4641,7 @@
       "logical_call": 2,
       "api_attempt": 2,
       "symbols": [
+        "VTV",
         "PRF",
         "COPX",
         "JQUA",
@@ -4667,24 +4665,23 @@
         "FTXN",
         "NULV",
         "VHT",
-        "AVUV",
-        "DFSV"
+        "AVUV"
       ],
       "success": true,
       "fallback": false,
       "metadata": {
-        "prompt_tokens": 68148,
+        "prompt_tokens": 68033,
         "tool_tokens": 0,
-        "cached_tokens": 4090,
-        "thinking_tokens": 14245,
-        "output_tokens": 6960,
-        "total_tokens": 89353,
+        "cached_tokens": 0,
+        "thinking_tokens": 12615,
+        "output_tokens": 6880,
+        "total_tokens": 87528,
         "search_queries": [],
         "source_urls": [],
         "finish_reasons": [
           "FinishReason.STOP"
         ],
-        "response_text_chars": 26391
+        "response_text_chars": 26161
       }
     },
     {
@@ -4694,6 +4691,7 @@
       "logical_call": 3,
       "api_attempt": 3,
       "symbols": [
+        "DFSV",
         "SCHV",
         "FHLC",
         "SNPE",
@@ -4711,18 +4709,18 @@
       "success": true,
       "fallback": false,
       "metadata": {
-        "prompt_tokens": 40480,
+        "prompt_tokens": 43018,
         "tool_tokens": 0,
         "cached_tokens": 0,
-        "thinking_tokens": 8843,
-        "output_tokens": 3511,
-        "total_tokens": 52834,
+        "thinking_tokens": 7561,
+        "output_tokens": 3841,
+        "total_tokens": 54420,
         "search_queries": [],
         "source_urls": [],
         "finish_reasons": [
           "FinishReason.STOP"
         ],
-        "response_text_chars": 12686
+        "response_text_chars": 14195
       }
     },
     {
@@ -4732,23 +4730,23 @@
       "logical_call": 4,
       "api_attempt": 4,
       "symbols": [
-        "CIBR"
+        "VLUE"
       ],
       "success": true,
       "fallback": false,
       "metadata": {
-        "prompt_tokens": 10409,
+        "prompt_tokens": 10384,
         "tool_tokens": 0,
         "cached_tokens": 0,
-        "thinking_tokens": 2835,
-        "output_tokens": 306,
-        "total_tokens": 13550,
+        "thinking_tokens": 2136,
+        "output_tokens": 290,
+        "total_tokens": 12810,
         "search_queries": [],
         "source_urls": [],
         "finish_reasons": [
           "FinishReason.STOP"
         ],
-        "response_text_chars": 1149
+        "response_text_chars": 1073
       }
     }
   ],
@@ -6892,8 +6890,8 @@
           "1Y": 2.2472262486652888
         }
       },
-      "final_selection_score": -952.9470118587885,
-      "required_selection_score": 66.0
+      "final_selection_score": -946.9470118587885,
+      "required_selection_score": 60.0
     },
     "BUG": {
       "qvm_score": 54.00127102917746,
@@ -8052,47 +8050,132 @@
       "required_selection_score": 60.0
     }
   },
-  "calls": [
+  "replacement_diagnostics": [
     {
-      "stage": "ETF batch ranks 24-24",
-      "prompt_tokens": 9898,
-      "tool_tokens": 10431,
-      "cached_tokens": 0,
-      "thinking_tokens": 4276,
-      "output_tokens": 1248,
-      "total_tokens": 25853,
-      "search_queries": [
-        "First Trust NASDAQ Cybersecurity ETF CIBR factsheet holdings sector weights index performance drivers outlook"
-      ],
-      "source_urls": [
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHEOavYr5Rw7mnjrArr0laGVfklr1o5Dcu_B_s2J9lY-aBIQM18nPL2Ek3aC1gvgBd3Qdkxrv8D2p6iYJBYICniVQHceOQGb9tfP3Es6vHwdm7L0ncaCYoVeNhqvGIrWEdi2bEwI5XFTkhRsxUKPvHuhqQ=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGDchYvcCeR-uPeHFmeAgtiCKgz-oRZ0uUxfDhi0GQ8_HLYqtHNkMPjqIBL0wuT89p5JyEWW671lNtCkwlWXLMrPvrXuR2WqFHnpZ2uNLqEmLt0WXREQ2saTRAiMLqq",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE1Q4mJiOfb4P2CKDcMfDLxPw0_OfnFIsYa61kJxq8eyBA-WBGX767AanFFPZTFbQa_PAJtaf3687frBPRHOMe2wierfgKUIUI9D5DurJdzSK3GMwwEspv4ssPJFgXkZ7bt8A8=",
-        "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFjAWEj9lq26K_sNezODcQgYsNulB_IG7brdvcU7TiVNY-K1WXB-EFsvsJDpilcbreCCaYho70wcdzoF1I0U5fU2geO826tDCyRFABiBrF33Rr5iExEtg=="
-      ],
-      "finish_reasons": [
-        "FinishReason.STOP"
-      ],
-      "response_text_chars": 4066,
-      "api_attempts_used": 1,
-      "logical_request_number": 1
+      "dimension": "FACTOR_FAMILY",
+      "challenger_symbol": "FNDX",
+      "incumbent_symbol": "AVLV",
+      "challenger_qvm": 68.88933921373874,
+      "incumbent_qvm": 68.9880319490042,
+      "challenger_benchmark_relative": 56.57657657657658,
+      "incumbent_benchmark_relative": 61.261261261261254,
+      "challenger_final_score": 67.88933921373874,
+      "incumbent_final_score": 67.9880319490042,
+      "challenger_required_score": 66.0,
+      "incumbent_required_score": 66.0,
+      "challenger_selection_merit": 67.88933921373874,
+      "incumbent_selection_merit": 67.9880319490042,
+      "challenger_risk": "LOW",
+      "incumbent_risk": "LOW",
+      "challenger_continuation": "ADEQUATE",
+      "incumbent_continuation": "ADEQUATE",
+      "challenger_benchmark_outlook": "UNCERTAIN",
+      "incumbent_benchmark_outlook": "UNCERTAIN",
+      "challenger_benchmark_confidence": "MEDIUM",
+      "incumbent_benchmark_confidence": "MEDIUM",
+      "selection_merit_gap": -0.09869273526545896,
+      "result": "INCUMBENT_RETAINED"
     },
     {
+      "dimension": "FACTOR_FAMILY",
+      "challenger_symbol": "IWX",
+      "incumbent_symbol": "AVLV",
+      "challenger_qvm": 66.98418980426149,
+      "incumbent_qvm": 68.9880319490042,
+      "challenger_benchmark_relative": 70.990990990991,
+      "incumbent_benchmark_relative": 61.261261261261254,
+      "challenger_final_score": 65.98418980426149,
+      "incumbent_final_score": 67.9880319490042,
+      "challenger_required_score": 66.0,
+      "incumbent_required_score": 66.0,
+      "challenger_selection_merit": 65.98418980426149,
+      "incumbent_selection_merit": 67.9880319490042,
+      "challenger_risk": "LOW",
+      "incumbent_risk": "LOW",
+      "challenger_continuation": "ADEQUATE",
+      "incumbent_continuation": "ADEQUATE",
+      "challenger_benchmark_outlook": "UNCERTAIN",
+      "incumbent_benchmark_outlook": "UNCERTAIN",
+      "challenger_benchmark_confidence": "MEDIUM",
+      "incumbent_benchmark_confidence": "MEDIUM",
+      "selection_merit_gap": -2.0038421447427055,
+      "result": "INCUMBENT_RETAINED"
+    },
+    {
+      "dimension": "FACTOR_FAMILY",
+      "challenger_symbol": "SEIV",
+      "incumbent_symbol": "AVLV",
+      "challenger_qvm": 66.9076114242122,
+      "incumbent_qvm": 68.9880319490042,
+      "challenger_benchmark_relative": 73.87387387387388,
+      "incumbent_benchmark_relative": 61.261261261261254,
+      "challenger_final_score": 65.9076114242122,
+      "incumbent_final_score": 67.9880319490042,
+      "challenger_required_score": 66.0,
+      "incumbent_required_score": 66.0,
+      "challenger_selection_merit": 65.9076114242122,
+      "incumbent_selection_merit": 67.9880319490042,
+      "challenger_risk": "LOW",
+      "incumbent_risk": "LOW",
+      "challenger_continuation": "ADEQUATE",
+      "incumbent_continuation": "ADEQUATE",
+      "challenger_benchmark_outlook": "UNCERTAIN",
+      "incumbent_benchmark_outlook": "UNCERTAIN",
+      "challenger_benchmark_confidence": "MEDIUM",
+      "incumbent_benchmark_confidence": "MEDIUM",
+      "selection_merit_gap": -2.0804205247919896,
+      "result": "INCUMBENT_RETAINED"
+    },
+    {
+      "dimension": "FACTOR_FAMILY",
+      "challenger_symbol": "VLUE",
+      "incumbent_symbol": "AVLV",
+      "challenger_qvm": 70.70604917970456,
+      "incumbent_qvm": 68.9880319490042,
+      "challenger_benchmark_relative": 94.95495495495496,
+      "incumbent_benchmark_relative": 61.261261261261254,
+      "challenger_final_score": 62.706049179704564,
+      "incumbent_final_score": 67.9880319490042,
+      "challenger_required_score": 60.0,
+      "incumbent_required_score": 66.0,
+      "challenger_selection_merit": 64.70604917970456,
+      "incumbent_selection_merit": 67.9880319490042,
+      "challenger_risk": "MODERATE",
+      "incumbent_risk": "LOW",
+      "challenger_continuation": "ADEQUATE",
+      "incumbent_continuation": "ADEQUATE",
+      "challenger_benchmark_outlook": "UNCERTAIN",
+      "incumbent_benchmark_outlook": "UNCERTAIN",
+      "challenger_benchmark_confidence": "MEDIUM",
+      "incumbent_benchmark_confidence": "MEDIUM",
+      "selection_merit_gap": -3.2819827692996313,
+      "result": "INCUMBENT_RETAINED"
+    }
+  ],
+  "challenger_summary": {
+    "queued": [],
+    "researched": [],
+    "judged": [],
+    "displaced_incumbents": [],
+    "capacity_challenger_tests": {}
+  },
+  "calls": [
+    {
       "stage": "HTML summary",
-      "prompt_tokens": 6894,
+      "prompt_tokens": 6891,
       "tool_tokens": 0,
       "cached_tokens": 0,
-      "thinking_tokens": 3247,
-      "output_tokens": 2585,
-      "total_tokens": 12726,
+      "thinking_tokens": 3402,
+      "output_tokens": 2210,
+      "total_tokens": 12503,
       "search_queries": [],
       "source_urls": [],
       "finish_reasons": [
         "FinishReason.STOP"
       ],
-      "response_text_chars": 11709,
+      "response_text_chars": 10314,
       "api_attempts_used": 1,
-      "logical_request_number": 2
+      "logical_request_number": 1
     }
   ]
 }

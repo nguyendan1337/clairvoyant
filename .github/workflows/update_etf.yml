@@ -9,9 +9,8 @@ on:
 permissions:
   contents: write
 
-# Shared with the stock workflow. If both schedules overlap, the ETF workflow
-# waits for the stock workflow to finish, allowing it to restore any freshly
-# saved shared market context instead of duplicating that Gemini call.
+# Use the same concurrency group as the stock workflow so the two recommenders
+# never update main or the shared market-context cache at the same time.
 concurrency:
   group: clairvoyant-pages-${{ github.ref_name }}
   cancel-in-progress: false
@@ -37,6 +36,9 @@ jobs:
       - name: Create cache directory
         run: mkdir -p caches
 
+      # Shared by the stock and ETF workflows. A unique restore key avoids
+      # trying to overwrite an immutable cache entry; restore-keys retrieves
+      # the newest shared market cache saved by either workflow.
       - name: Restore shared market-context cache
         id: market-cache
         uses: actions/cache/restore@v4
@@ -54,7 +56,6 @@ jobs:
             caches/etf_yf_cache.json
             caches/top_qvm_etfs_cache.pkl
             caches/gemini_etf_research_cache.json
-            caches/etf_run_diagnostics.json
           key: clairvoyant-etf-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             clairvoyant-etf-${{ runner.os }}-${{ github.ref_name }}-
@@ -64,6 +65,7 @@ jobs:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python etf_recommender.py
 
+      # Save validated runtime state even if a later step fails.
       - name: Save ETF runtime cache
         if: always()
         uses: actions/cache/save@v4
@@ -72,9 +74,11 @@ jobs:
             caches/etf_yf_cache.json
             caches/top_qvm_etfs_cache.pkl
             caches/gemini_etf_research_cache.json
-            caches/etf_run_diagnostics.json
           key: ${{ steps.etf-cache.outputs.cache-primary-key }}
 
+      # Save the shared cache by content hash. If the market context did not
+      # change, GitHub can reuse the existing immutable cache instead of
+      # creating another identical shared-market entry.
       - name: Save shared market-context cache
         if: always()
         uses: actions/cache/save@v4
@@ -82,23 +86,38 @@ jobs:
           path: caches/gemini_market_context_cache.json
           key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('caches/gemini_market_context_cache.json') }}
 
-      - name: Commit and push ETF page
+      - name: Commit and push ETF page and run reports
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           echo "=== ETF page ==="
-          ls -lh etf_index.html
+          ls -lh etf_index.html || true
+
+          echo "=== Run reports ==="
+          ls -lh run_reports/ || true
 
           echo "=== Git status BEFORE staging ==="
           git status --short
 
-          git add etf_index.html
+          # etf_index.html is intentionally ignored for local development.
+          if [ -f etf_index.html ]; then
+            git add -f etf_index.html
+          fi
+
+          # Run reports are normal tracked diagnostic artifacts.
+          if [ -d run_reports ]; then
+            git add run_reports/
+          fi
+
+          echo "=== Git status AFTER staging ==="
+          git status --short
 
           if ! git diff --cached --quiet; then
-            git commit -m "Update ETF recommendations"
+            git commit -m "Update ETF recommendations and run reports"
             git pull --rebase origin main
             git push origin main
           else
-            echo "No ETF page changes to commit"
+            echo "No ETF page or run report changes to commit"
           fi

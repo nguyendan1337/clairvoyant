@@ -2960,6 +2960,121 @@ def etf_passes_benchmark_override(candidate, research):
     )
 
 
+def normalize_etf_judgment_patch(symbol, patch, research):
+    """Normalize harmless judge enum aliases and validate one ETF without affecting peers."""
+    if not isinstance(patch, dict):
+        raise ValueError(f'{symbol} judgment patch is not a JSON object.')
+
+    def enum_value(field, default, allowed, aliases=None):
+        raw = patch.get(field)
+        if raw is None or str(raw).strip() == '':
+            raw = default
+        token = normalize_enum_token(raw)
+        aliases = aliases or {}
+        normalized = aliases.get(token, token)
+        if normalized not in allowed:
+            raise ValueError(
+                f'{symbol} judgment returned invalid {field}={raw!r}; '
+                f'expected one of {sorted(allowed)}.'
+            )
+        if token != normalized:
+            print(
+                f'Normalized ETF judgment enum [{symbol}] {field}: '
+                f'{raw!r} -> {normalized}'
+            )
+        return normalized
+
+    risk_aliases = {
+        'MINIMUM': 'MINIMAL', 'VERY_LOW': 'LOW', 'MEDIUM': 'MODERATE',
+        'VERY_HIGH': 'SEVERE',
+    }
+    continuation_aliases = {
+        'HIGH': 'STRONG', 'ROBUST': 'STRONG', 'POSITIVE': 'STRONG',
+        'MODERATE': 'ADEQUATE', 'MEDIUM': 'ADEQUATE', 'NEUTRAL': 'ADEQUATE',
+        'MIXED': 'ADEQUATE', 'BASE': 'ADEQUATE', 'BASE_CASE': 'ADEQUATE',
+        'LOW': 'WEAK', 'FRAGILE': 'WEAK', 'NEGATIVE': 'WEAK',
+    }
+    outlook_aliases = {
+        'POSITIVE': 'LIKELY', 'OUTPERFORM': 'LIKELY', 'OUTPERFORMANCE_LIKELY': 'LIKELY',
+        'NEUTRAL': 'UNCERTAIN', 'MIXED': 'UNCERTAIN', 'UNCLEAR': 'UNCERTAIN',
+        'NEGATIVE': 'UNLIKELY', 'UNDERPERFORM': 'UNLIKELY', 'OUTPERFORMANCE_UNLIKELY': 'UNLIKELY',
+    }
+    confidence_aliases = {'MODERATE': 'MEDIUM'}
+    concentration_aliases = {'MINIMAL': 'LOW', 'MEDIUM': 'MODERATE', 'ELEVATED': 'HIGH'}
+
+    risk_default = research.get('reversal_risk') or 'LOW'
+    exposure_risk = enum_value(
+        'exposure_reversal_risk', risk_default,
+        {'MINIMAL', 'LOW', 'MODERATE', 'ELEVATED', 'SEVERE'}, risk_aliases,
+    )
+    entry_risk = enum_value(
+        'entry_reversal_risk', risk_default,
+        {'MINIMAL', 'LOW', 'MODERATE', 'ELEVATED', 'SEVERE'}, risk_aliases,
+    )
+    overall = enum_value(
+        'reversal_risk', risk_default,
+        {'MINIMAL', 'LOW', 'MODERATE', 'ELEVATED', 'SEVERE'}, risk_aliases,
+    )
+    order = {'MINIMAL': 0, 'LOW': 1, 'MODERATE': 2, 'ELEVATED': 3, 'SEVERE': 4}
+    overall = max((overall, exposure_risk, entry_risk), key=order.get)
+
+    continuation = enum_value(
+        'continuation_strength', 'ADEQUATE', {'STRONG', 'ADEQUATE', 'WEAK'},
+        continuation_aliases,
+    )
+    benchmark_outlook = enum_value(
+        'benchmark_outperformance_outlook', 'UNCERTAIN',
+        {'LIKELY', 'UNCERTAIN', 'UNLIKELY'}, outlook_aliases,
+    )
+    benchmark_confidence = enum_value(
+        'benchmark_outperformance_confidence', 'MEDIUM',
+        {'LOW', 'MEDIUM', 'HIGH'}, confidence_aliases,
+    )
+    holdings_conc = enum_value(
+        'holdings_concentration', 'LOW', {'LOW', 'MODERATE', 'HIGH'},
+        concentration_aliases,
+    )
+    construction_conc = enum_value(
+        'construction_concentration', 'LOW', {'LOW', 'MODERATE', 'HIGH'},
+        concentration_aliases,
+    )
+
+    normalized = dict(patch)
+    normalized.update({
+        'exposure_reversal_risk': exposure_risk,
+        'entry_reversal_risk': entry_risk,
+        'reversal_risk': overall,
+        'continuation_strength': continuation,
+        'benchmark_outperformance_outlook': benchmark_outlook,
+        'benchmark_outperformance_confidence': benchmark_confidence,
+        'holdings_concentration': holdings_conc,
+        'construction_concentration': construction_conc,
+    })
+    return normalized
+
+
+def safe_judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
+    """Contain any unexpected judge failure so one classification bug cannot abort the run."""
+    try:
+        return judge_etf_research_pool(
+            client, candidate_records, research_by_symbol, market_context
+        )
+    except BaseException as exc:
+        if isinstance(exc, (KeyboardInterrupt, SystemExit, TotalRuntimeTimeout)):
+            raise
+        print(
+            'WARNING — ETF judgment stage encountered an unexpected error; '
+            'preserving grounded research and continuing with affected ETFs '
+            f'unjudged/ineligible rather than aborting the run: {exc}'
+        )
+        classification_call_diagnostics.append({
+            'stage': 'etf_judgment_safety_wrapper',
+            'success': False,
+            'error': str(exc),
+        })
+        return research_by_symbol
+
+
 def judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
@@ -3085,7 +3200,13 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                     }
                     missing = [symbol for symbol in batch_symbols if symbol not in patch_by_symbol]
                     if missing:
-                        raise ValueError('ETF judgment omitted: ' + ', '.join(missing))
+                        print(
+                            'Warning: ETF judgment omitted symbols; preserving returned peers '
+                            'and leaving omitted ETFs unjudged for a later catch-up: '
+                            + ', '.join(missing)
+                        )
+                    if not patch_by_symbol:
+                        raise ValueError('ETF judgment returned no usable symbol patches.')
                     used_model = model_name
                     classification_call_diagnostics.append({
                         'stage': 'etf_judgment', 'model': model_name,
@@ -3118,31 +3239,58 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
         if patches is None:
             print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
             continue
-        allowed_risks = {'MINIMAL','LOW','MODERATE','ELEVATED','SEVERE'}
-        concentration_levels = {'LOW','MODERATE','HIGH'}
+        valid_patch_count = 0
+        invalid_patch_symbols = []
         for symbol in batch_symbols:
-            patch = patches[symbol]
+            patch = patches.get(symbol)
+            if patch is None:
+                invalid_patch_symbols.append(symbol)
+                research = dict(judged[symbol])
+                research['judgment_validation_error'] = 'Gemini omitted the ETF judgment patch.'
+                judged[symbol] = research
+                continue
             research = dict(judged[symbol])
-            exposure_risk = str(patch.get('exposure_reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            entry_risk = str(patch.get('entry_reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            overall = str(patch.get('reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            if not {exposure_risk, entry_risk, overall}.issubset(allowed_risks):
-                raise ValueError(f'{symbol} judgment returned invalid reversal risk.')
-            order = {'MINIMAL':0,'LOW':1,'MODERATE':2,'ELEVATED':3,'SEVERE':4}
-            overall = max((overall, exposure_risk, entry_risk), key=order.get)
-            continuation = str(patch.get('continuation_strength') or 'ADEQUATE').upper()
-            benchmark_outlook = str(patch.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
-            benchmark_confidence = str(patch.get('benchmark_outperformance_confidence') or 'MEDIUM').upper()
-            holdings_conc = str(patch.get('holdings_concentration') or 'LOW').upper()
-            construction_conc = str(patch.get('construction_concentration') or 'LOW').upper()
-            if continuation not in {'STRONG','ADEQUATE','WEAK'}:
-                raise ValueError(f'{symbol} judgment returned invalid continuation_strength.')
-            if benchmark_outlook not in {'LIKELY','UNCERTAIN','UNLIKELY'}:
-                raise ValueError(f'{symbol} judgment returned invalid benchmark outlook.')
-            if benchmark_confidence not in {'LOW','MEDIUM','HIGH'}:
-                raise ValueError(f'{symbol} judgment returned invalid benchmark confidence.')
-            if holdings_conc not in concentration_levels or construction_conc not in concentration_levels:
-                raise ValueError(f'{symbol} judgment returned invalid concentration level.')
+            try:
+                patch = normalize_etf_judgment_patch(symbol, patch, research)
+            except Exception as exc:
+                invalid_patch_symbols.append(symbol)
+                research['judgment_validation_error'] = str(exc)
+                judged[symbol] = research
+                classification_call_diagnostics.append({
+                    'stage': 'etf_judgment_field_validation',
+                    'model': used_model,
+                    'logical_call': classification_logical_calls_used,
+                    'api_attempt': classification_api_attempts_used,
+                    'symbols': [symbol],
+                    'success': False,
+                    'error': str(exc),
+                    'raw_patch': {
+                        key: patch.get(key) for key in (
+                            'continuation_strength',
+                            'benchmark_outperformance_outlook',
+                            'benchmark_outperformance_confidence',
+                            'exposure_reversal_risk', 'entry_reversal_risk',
+                            'reversal_risk', 'holdings_concentration',
+                            'construction_concentration',
+                        )
+                    } if isinstance(patch, dict) else str(patch)[:500],
+                })
+                print(
+                    f'Warning: invalid ETF judgment patch [{symbol}] was isolated '
+                    f'without discarding peer judgments: {exc}'
+                )
+                continue
+
+            valid_patch_count += 1
+            exposure_risk = patch['exposure_reversal_risk']
+            entry_risk = patch['entry_reversal_risk']
+            overall = patch['reversal_risk']
+            continuation = patch['continuation_strength']
+            benchmark_outlook = patch['benchmark_outperformance_outlook']
+            benchmark_confidence = patch['benchmark_outperformance_confidence']
+            holdings_conc = patch['holdings_concentration']
+            construction_conc = patch['construction_concentration']
+            research.pop('judgment_validation_error', None)
             research.update({
                 'judgment_model': used_model,
                 'exposure_reversal_risk': exposure_risk,
@@ -3161,8 +3309,16 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
             for field in ('risk_exposure_group', 'primary_risk_event_id', 'explanation'):
                 if field in patch:
                     research[field] = patch[field]
-            # 3.5 judgment is authoritative for continuation/entry risk; Python
-            # still owns hard mandate and portfolio-policy exclusions.
+            # Reset only judgment-owned exclusion state before applying the new
+            # authoritative patch; grounded mandate/research exclusions remain intact.
+            prior_reason = str(research.get('eligibility_reason') or '')
+            if prior_reason.startswith('Excluded by authoritative ETF judgment') or \
+                    prior_reason.startswith('Excluded because authoritative judgment'):
+                research['eligible'] = True
+                research['eligibility_reason'] = (
+                    'Python eligibility passed: authoritative judgment did not '
+                    'trigger a hard exclusion.'
+                )
             if overall in {'ELEVATED','SEVERE'}:
                 research['eligible'] = False
                 research['eligibility_reason'] = f'Excluded by authoritative ETF judgment because reversal risk is {overall}.'
@@ -3176,6 +3332,15 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                     'benchmark_outperformance_outlook','benchmark_outperformance_confidence','risk_exposure_group'
                 )
             }
+        print(
+            f'ETF judgment batch field validation: {valid_patch_count}/{len(batch_symbols)} '
+            f'usable; {len(invalid_patch_symbols)} isolated/unjudged.'
+        )
+        if invalid_patch_symbols:
+            print(
+                'ETF judgment catch-up required for: '
+                + ', '.join(invalid_patch_symbols)
+            )
     return judged
 
 
@@ -4318,7 +4483,7 @@ if queued_initial_repairs:
 initial_provisional_count = len(selected)
 provisional_portfolio_peak = max(provisional_portfolio_peak, initial_provisional_count)
 if research_by_symbol:
-    research_by_symbol = judge_etf_research_pool(
+    research_by_symbol = safe_judge_etf_research_pool(
         client, candidate_records, research_by_symbol, market_context
     )
     for call in classification_call_diagnostics:
@@ -5059,7 +5224,7 @@ while (
     judged_before = sum(
         1 for research in research_by_symbol.values() if research.get('judgment_model')
     )
-    research_by_symbol = judge_etf_research_pool(
+    research_by_symbol = safe_judge_etf_research_pool(
         client, candidate_records, research_by_symbol, market_context
     )
     judged_after = sum(
@@ -5101,7 +5266,7 @@ while (
 # the loop. This pass only handles any unjudged cache/repair residue and, because
 # the judge skips judged symbols, cannot introduce repeated classification drift.
 pre_final_selected_count = len(selected)
-research_by_symbol = judge_etf_research_pool(
+research_by_symbol = safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context
 )
 for call in classification_call_diagnostics:

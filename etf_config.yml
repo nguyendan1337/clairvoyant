@@ -740,8 +740,10 @@ prompt_etf_judgment: |
   decision-field patch that Python merges into the grounded research object.
 
   OUTPUT
-  Return exactly one JSON object with a results array in candidate order. Every
-  result must include:
+  Return exactly one JSON object with a results array in candidate order. Use ONLY
+  the exact enum tokens shown below. Never substitute synonyms such as MODERATE for
+  ADEQUATE, MEDIUM for MODERATE risk, NEUTRAL for UNCERTAIN, or similar prose labels.
+  Every result must include:
   {
     "symbol": "ETF",
     "exposure_reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE",

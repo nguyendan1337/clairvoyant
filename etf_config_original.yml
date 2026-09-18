@@ -75,9 +75,9 @@ benchmark_backfill_1y_tolerance: 10
 # selecting the top-100 QVM research stream.
 max_info_calls: 0
 qvm_weights:
-  Quality: 0.35
-  Value: 0.10
-  Momentum: 0.55
+  Quality: 0.25
+  Value: 0.15
+  Momentum: 0.60
 min_quality: 35
 
 # Applied to Name + Category + LegalType after yfinance enrichment. These are
@@ -119,33 +119,15 @@ benchmark_etfs:
   - vgt
   - spmo
 
-# Search-enabled evidence collection stays on Gemini 2.5 Flash.
+# Research uses Flash and fails closed. Flash-Lite is only a summary fallback.
 model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
-# Gemini 3.5 Flash is the authoritative no-Search ETF continuation/risk judge.
-classification_model: gemini-3.5-flash
-classification_fallback_model: gemini-2.5-flash
-classification_thinking_budget: 8192
-classification_max_output_tokens: 65536
-classification_attempts: 2
-max_classification_calls_per_run: 8
-classification_batch_target: 25
-classification_batch_soft_max: 30
-classification_min_intermediate_batch: 15
 gemini_batch_size: 15
 target_selected_etfs: 10
 # This is a ceiling, not a requirement for five exact pairs.
 max_etfs_per_sector_group: 2
-max_etfs_per_return_driver: 2
 max_candidates_per_provisional_group: 4
 max_moderate_per_risk_event: 2
-minimum_final_selection_score: 72.0
-benchmark_likely_bonus: 5.0
-benchmark_uncertain_penalty: -4.0
-continuation_strong_bonus: 4.0
-continuation_adequate_bonus: 0.0
-continuation_weak_penalty: -4.0
-repeated_return_driver_penalty: -3.0
 thinking_budget: 12288
 summary_thinking_budget: 4096
 max_gemini_calls_per_run: 7
@@ -170,8 +152,7 @@ final_summary_enabled: true
 top_qvm_cache_expiry_hours: 6
 market_context_cache_file: caches/gemini_market_context_cache.json
 etf_research_cache_file: caches/gemini_etf_research_cache.json
-run_diagnostics_file: run_reports/etf_run_report.json
-run_log_file: run_reports/etf_run.log
+run_diagnostics_file: caches/etf_run_diagnostics.json
 market_context_cache_hours: 12
 market_context_schema_version: 1
 market_context_prompt_version: 1
@@ -179,7 +160,7 @@ gemini_research_cache_hours: 12
 cache_version: 4
 # Kept separate so ETF research can be invalidated without preventing reuse of
 # the stock recommender's shared market-context cache.
-etf_research_cache_version: 13
+etf_research_cache_version: 12
 
 prompt_market_context: |
   You are the shared market-research stage for U.S. stock and ETF recommenders.
@@ -620,112 +601,6 @@ prompt_etf_batch: |
   }
   For INCOMPLETE, preserve symbol and fund_name, give a reason under 25 words,
   and use null for unsupported fields. Never fabricate a complete record.
-
-
-prompt_etf_judgment: |
-  You are the authoritative no-Search continuation and reversal-risk judge for a
-  U.S.-equity ETF recommender. Gemini 2.5 Flash has already completed grounded
-  current research. Use ONLY the supplied grounded ETF research, quantitative
-  price-path data, benchmark-relative returns, market context and peer ETF
-  classifications. Do not use Google Search and do not invent current facts or
-  URLs.
-
-  PURPOSE
-  Determine whether each ETF's recent benchmark-beating performance is supported
-  by a durable exposure/index/holdings thesis that can continue for 6-12 months,
-  and separately judge the risk of a meaningful reversal after purchase.
-
-  ATOMIC ETF RISKS
-  Return exposure_reversal_risk and entry_reversal_risk separately, then derive
-  reversal_risk conservatively from them.
-  - exposure_reversal_risk measures whether the ETF's actual holdings, factor,
-    industry, index construction or dominant economic driver is vulnerable to a
-    material 6-12 month reversal.
-  - entry_reversal_risk measures whether the current price path appears fragile
-    because recent appreciation materially outran the supplied exposure/fundamental
-    improvement. Quantitative overextension alone normally supports MODERATE at
-    most unless grounded evidence shows the exposure thesis itself is breaking.
-
-  REVERSAL-RISK SCALE
-  - MINIMAL: unusually durable continuation evidence and no meaningful supported
-    6-12 month reversal path.
-  - LOW: continuation is more likely than meaningful reversal; supported risks
-    are ordinary, weak or insufficiently material/probable.
-  - MODERATE: a concrete ETF-specific material 6-12 month reversal path is
-    credibly plausible now, including a material temporary-driver dependence or
-    an unusually fragile entry.
-  - ELEVATED: current evidence indicates that the reversal mechanism is actively
-    developing or unusually probable.
-  - SEVERE: current evidence strongly indicates the continuation thesis is broken.
-
-  CONTINUATION STRENGTH
-  Judge affirmative evidence that the ETF can continue outperforming the
-  configured benchmarks over the next 6-12 months. Absence of reversal risk is
-  not enough.
-  - STRONG: benchmark-relative momentum is persistent and current exposure,
-    holdings/index construction and durable economic drivers substantially
-    support continued excess returns.
-  - ADEQUATE: continuation remains more likely than reversal and at least one
-    durable exposure-specific driver supports further progress, but the case for
-    continued benchmark outperformance is not unusually strong.
-  - WEAK: the ETF may avoid a material reversal, but evidence that it can keep
-    outperforming the configured benchmarks is insufficient.
-
-  BENCHMARK OUTPERFORMANCE
-  benchmark_outperformance_outlook must be LIKELY, UNCERTAIN or UNLIKELY. Use the
-  supplied excess-return matrix versus EACH benchmark plus grounded continuation
-  evidence. Do not use LIKELY merely because reversal risk is LOW. For LIKELY,
-  benchmark_outperformance_basis must explain why the current holdings/exposure
-  driver can plausibly support continued excess returns. A positive trailing
-  return by itself is insufficient.
-
-  CONCENTRATION AND CONSTRUCTION
-  Return holdings_concentration and construction_concentration as LOW, MODERATE
-  or HIGH. Consider top-holding concentration, sector concentration, factor/index
-  design, narrow-industry dependence and whether several ETFs are economic
-  substitutes despite different category labels.
-
-  RETURN-DRIVER GROUPING
-  Assign risk_exposure_group to the material shared economic mechanism most
-  likely to affect forward returns. Use stable UPPER_SNAKE_CASE labels across
-  economically substitutable ETFs (examples: US_MEGA_CAP_TECH,
-  SEMICONDUCTOR_AI_CAPEX, US_BIOTECH, US_ENERGY_PRODUCERS, US_LARGE_VALUE).
-  Do not use ticker, issuer or generic broad-market labels when a more specific
-  shared mechanism is established. Set null only when no material common driver
-  can be established from the supplied research.
-
-  PEER CONSISTENCY
-  Compare ETFs with materially overlapping holdings or the same return driver.
-  Similar exposures should normally receive compatible atomic judgments.
-  Preserve differences only when the supplied fund construction, concentration,
-  valuation, holdings or exposure evidence explains them.
-
-  PRESERVE GROUNDED EVIDENCE
-  The grounded research owns sources and factual evidence. Do not return sources.
-  Do not rewrite mandate identity or fabricate holdings. Your output is a compact
-  decision-field patch that Python merges into the grounded research object.
-
-  OUTPUT
-  Return exactly one JSON object with a results array in candidate order. Every
-  result must include:
-  {
-    "symbol": "ETF",
-    "exposure_reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE",
-    "entry_reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE",
-    "reversal_risk": "MINIMAL | LOW | MODERATE | ELEVATED | SEVERE",
-    "holdings_concentration": "LOW | MODERATE | HIGH",
-    "construction_concentration": "LOW | MODERATE | HIGH",
-    "benchmark_outperformance_outlook": "LIKELY | UNCERTAIN | UNLIKELY",
-    "benchmark_outperformance_basis": "Concise basis using benchmark excess returns plus durable exposure evidence",
-    "continuation_strength": "STRONG | ADEQUATE | WEAK",
-    "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION | EXPOSURE_DETERIORATION | CATALYST_EXHAUSTION | VALUATION_RERATING | CONCENTRATION | MOMENTUM_FRAGILITY | NONE",
-    "risk_exposure_group": "UPPER_SNAKE_CASE | null",
-    "primary_risk_event_id": "EXACT MARKET_CONTEXT EVENT ID | null",
-    "classification_change_reason": "Concise reason or null",
-    "material_new_evidence": "Concise evidence summary or null",
-    "explanation": "30-45 word viewer-ready continuation/reversal balance"
-  }
-  Do not return sources, eligibility, portfolio selection or HTML.
 
 prompt_html_summary: |
   You are a financial editor. Create polished viewer-facing HTML from the frozen,

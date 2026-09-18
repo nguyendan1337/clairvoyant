@@ -5,7 +5,6 @@ context to the quantitative results and the final output is rendered to HTML.
 """
 
 import os
-import sys
 import re
 import time
 import random
@@ -30,35 +29,10 @@ YF_CACHE_FILE = 'caches/etf_yf_cache.json'
 YF_CACHE_EXPIRY_DAYS = 1
 TOP_QVM_CACHE_FILE = 'caches/top_qvm_etfs_cache.pkl'
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
-TOP_QVM_CACHE_VERSION = 14
+TOP_QVM_CACHE_VERSION = 13
 SCRIPT_DIR = Path(__file__).resolve().parent
-TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 45 * 60
 GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
-
-
-class TeeStream:
-    """Keep console output while recording a complete upload-friendly run log."""
-    def __init__(self, original, log):
-        self.original = original
-        self.log = log
-    def write(self, message):
-        self.original.write(message)
-        self.log.write(message)
-        self.log.flush()
-    def flush(self):
-        self.original.flush()
-        self.log.flush()
-    def __getattr__(self, name):
-        return getattr(self.original, name)
-
-RUN_REPORTS_DIR = Path('run_reports')
-RUN_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-ETF_RUN_LOG_FILE = RUN_REPORTS_DIR / 'etf_run.log'
-_etf_run_log = open(ETF_RUN_LOG_FILE, 'w', encoding='utf-8', buffering=1)
-sys.stdout = TeeStream(sys.stdout, _etf_run_log)
-sys.stderr = TeeStream(sys.stderr, _etf_run_log)
-classification_call_diagnostics = []
-classification_calls_used = 0
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -1009,58 +983,22 @@ def return_from_history(close, periods):
 
 
 def compute_momentum_metrics(close):
-    """Compute cumulative returns plus stock-style price-path quality metrics."""
-    if close is None or len(close) < 20:
+    if close is None:
         return {}
-    latest = safe_float(close.iloc[-1])
-    daily_returns = close.pct_change().dropna()
-    downside = daily_returns[daily_returns < 0]
-    running_peak = close.cummax()
-    drawdowns = close / running_peak - 1
-    trend_window = close.tail(min(126, len(close)))
-    trend_r2 = None
-    annualized_trend = None
-    if len(trend_window) >= 20:
-        logs = np.log(trend_window.to_numpy(dtype=float))
-        if np.isfinite(logs).all():
-            x = np.arange(len(logs), dtype=float)
-            slope, intercept = np.polyfit(x, logs, 1)
-            fitted = slope * x + intercept
-            rss = float(np.square(logs - fitted).sum())
-            tss = float(np.square(logs - logs.mean()).sum())
-            trend_r2 = 1.0 - rss / tss if tss > 0 else 0.0
-            annualized_trend = float((np.exp(slope * 252) - 1) * 100)
-    avg50 = safe_float(close.tail(min(50, len(close))).mean())
-    avg200 = safe_float(close.tail(min(200, len(close))).mean())
-    high52 = safe_float(close.max())
-    ret1m = return_from_history(close, 21)
-    prior_2m_monthly = None
-    if len(close) > 63:
-        prior_total = float(close.iloc[-21] / close.iloc[-63])
-        prior_2m_monthly = (prior_total ** 0.5 - 1) * 100
-    acceleration = float(ret1m - prior_2m_monthly) if ret1m is not None and prior_2m_monthly is not None else None
-    rolling5 = close.pct_change(5).dropna()
+    if len(close) < 20:
+        return {}
     return {
-        'Price': latest,
-        '1M Return': ret1m,
+        'Price': safe_float(close.iloc[-1]),
+        '1M Return': return_from_history(close, 21),
         '3M Return': return_from_history(close, 63),
         '6M Return': return_from_history(close, 126),
         '9M Return': return_from_history(close, 189),
         '1Y Return': return_from_history(close, 252),
-        'Volatility 1Y': safe_float(daily_returns.std(ddof=0) * np.sqrt(252) * 100),
-        'DownsideVolatility': safe_float(downside.std(ddof=0) * np.sqrt(252) * 100) if len(downside) >= 10 else None,
-        'MaxDrawdown': safe_float(drawdowns.min() * 100),
-        'PositiveDayPct': safe_float((daily_returns > 0).mean() * 100),
-        'TrendR2': safe_float(trend_r2),
-        'AnnualizedTrend': safe_float(annualized_trend),
-        '50D Average': avg50,
-        '200D Average': avg200,
-        'Distance50DMA': safe_float((latest / avg50 - 1) * 100) if latest and avg50 else None,
-        'Distance200DMA': safe_float((latest / avg200 - 1) * 100) if latest and avg200 else None,
-        'Distance52WHigh': safe_float((latest / high52 - 1) * 100) if latest and high52 else None,
-        'Largest1DayMove': safe_float(daily_returns.abs().max() * 100) if not daily_returns.empty else None,
-        'Largest5DayMove': safe_float(rolling5.abs().max() * 100) if not rolling5.empty else None,
-        'MomentumAcceleration': safe_float(acceleration),
+        'Volatility 1Y': safe_float(
+            close.pct_change().std() * np.sqrt(252) * 100
+        ),
+        '50D Average': safe_float(close.rolling(50).mean().iloc[-1]),
+        '200D Average': safe_float(close.rolling(200).mean().iloc[-1]),
     }
 
 
@@ -1224,17 +1162,6 @@ def append_etf_yfinance_data(
         'TrailingPE',
         'PriceToBook',
         'Volatility 1Y',
-        'DownsideVolatility',
-        'MaxDrawdown',
-        'PositiveDayPct',
-        'TrendR2',
-        'AnnualizedTrend',
-        'Distance50DMA',
-        'Distance200DMA',
-        'Distance52WHigh',
-        'Largest1DayMove',
-        'Largest5DayMove',
-        'MomentumAcceleration',
         '50D Average',
         '200D Average',
         '1M Return',
@@ -1474,7 +1401,7 @@ def winsorized_rank(series, ascending=True):
 def score_etf_qvm(df, top_n=100, weights=None, min_quality=35):
     df = df.copy()
     if weights is None:
-        weights = {'Quality': 0.35, 'Value': 0.10, 'Momentum': 0.55}
+        weights = {'Quality': 0.25, 'Value': 0.15, 'Momentum': 0.6}
     numeric_columns = [
         'AUM',
         'ExpenseRatio',
@@ -1487,17 +1414,6 @@ def score_etf_qvm(df, top_n=100, weights=None, min_quality=35):
         'TrailingPE',
         'PriceToBook',
         'Volatility 1Y',
-        'DownsideVolatility',
-        'MaxDrawdown',
-        'PositiveDayPct',
-        'TrendR2',
-        'AnnualizedTrend',
-        'Distance50DMA',
-        'Distance200DMA',
-        'Distance52WHigh',
-        'Largest1DayMove',
-        'Largest5DayMove',
-        'MomentumAcceleration',
         '1M Return',
         '3M Return',
         '6M Return',
@@ -1617,49 +1533,6 @@ def score_etf_qvm(df, top_n=100, weights=None, min_quality=35):
         recent_return = df['3M Return'].fillna(0)
         recent_penalty = np.where(recent_return < 0, np.minimum(20, -recent_return * 0.5), 0)
         df['MomentumScore'] = (df['MomentumScore'] - recent_penalty).clip(0, 100)
-    # Add stock-style price-path quality and an entry-fragility penalty.
-    def percentile_score(column, ascending=True):
-        if column not in df.columns:
-            return pd.Series(50.0, index=df.index)
-        values = pd.to_numeric(df[column], errors='coerce')
-        return (values.rank(pct=True, ascending=ascending) * 100).fillna(50)
-
-    df['PricePathQuality'] = (
-        0.20 * percentile_score('Volatility 1Y', ascending=False)
-        + 0.20 * percentile_score('DownsideVolatility', ascending=False)
-        + 0.25 * percentile_score('MaxDrawdown', ascending=True)
-        + 0.15 * percentile_score('PositiveDayPct', ascending=True)
-        + 0.20 * percentile_score('TrendR2', ascending=True)
-    ).clip(0, 100)
-    df['MomentumScore'] = (
-        0.80 * df['MomentumScore'] + 0.20 * df['PricePathQuality']
-    ).clip(0, 100)
-
-    entry_components = []
-    for column in (
-        'Distance50DMA', 'MomentumAcceleration', 'Largest5DayMove',
-        'Volatility 1Y',
-    ):
-        if column in df.columns:
-            entry_components.append(
-                pd.to_numeric(df[column], errors='coerce').rank(pct=True) * 100
-            )
-    if entry_components:
-        quantitative_entry_risk = pd.concat(
-            entry_components, axis=1
-        ).mean(axis=1, skipna=True).fillna(50)
-        overextension_penalty = (
-            (quantitative_entry_risk - 75).clip(lower=0) / 25 * 15
-        ).clip(0, 15)
-    else:
-        quantitative_entry_risk = pd.Series(50.0, index=df.index)
-        overextension_penalty = pd.Series(0.0, index=df.index)
-    df['QuantitativeEntryRisk'] = quantitative_entry_risk.clip(0, 100)
-    df['OverextensionPenalty'] = overextension_penalty
-    df['MomentumScore'] = (
-        df['MomentumScore'] - df['OverextensionPenalty']
-    ).clip(0, 100)
-
     df['QVMScore'] = (
         df['QualityScore'] * weights['Quality']
         + df['ValueScore'] * weights['Value']
@@ -2835,254 +2708,17 @@ def pending_candidate_can_improve_full_portfolio(
     return candidate_rank < worst_same_sector_rank
 
 
-def combined_etf_reversal_risk(research):
-    order = {'MINIMAL': 0, 'LOW': 1, 'MODERATE': 2, 'ELEVATED': 3, 'SEVERE': 4}
-    levels = [
-        str(research.get(field) or '').upper()
-        for field in ('reversal_risk', 'exposure_reversal_risk', 'entry_reversal_risk')
-    ]
-    valid = [level for level in levels if level in order]
-    return max(valid, key=order.get) if valid else str(research.get('reversal_risk') or 'SEVERE').upper()
-
-
-def normalized_return_driver_key(research):
-    raw = research.get('risk_exposure_group') or research.get('exposure_group')
-    return re.sub(r'[^A-Z0-9]+', '_', str(raw or '').upper()).strip('_') or None
-
-
-def etf_final_score(candidate, research):
-    """QVM stays dominant; judgment fields provide a bounded continuation overlay."""
-    score = float(candidate.get('QVMScore') or 0.0)
-    risk = combined_etf_reversal_risk(research)
-    score += {'MINIMAL': 5.0, 'LOW': 3.0, 'MODERATE': -3.0,
-              'ELEVATED': -1000.0, 'SEVERE': -1000.0}.get(risk, -1000.0)
-    outlook = str(research.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
-    score += {'LIKELY': benchmark_likely_bonus,
-              'UNCERTAIN': benchmark_uncertain_penalty,
-              'UNLIKELY': -1000.0}.get(outlook, benchmark_uncertain_penalty)
-    continuation = str(research.get('continuation_strength') or 'ADEQUATE').upper()
-    score += continuation_adjustments.get(continuation, continuation_adjustments['WEAK'])
-    for field in ('holdings_concentration', 'construction_concentration'):
-        level = str(research.get(field) or 'LOW').upper()
-        score += {'LOW': 0.0, 'MODERATE': -1.0, 'HIGH': -2.0}.get(level, -1.0)
-    return score
-
-
-def judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
-    """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
-    global classification_calls_used
-    symbols = [
-        str(candidate['Symbol']).upper() for candidate in candidate_records
-        if str(candidate['Symbol']).upper() in research_by_symbol
-    ]
-    if not symbols:
-        return research_by_symbol
-    candidate_by_symbol = {
-        str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
-    }
-    batch_size = max(1, min(classification_batch_target, classification_batch_soft_max))
-    judged = dict(research_by_symbol)
-    prior_peer_patches = {}
-    for start in range(0, len(symbols), batch_size):
-        batch_symbols = symbols[start:start + batch_size]
-        if classification_calls_used >= max_classification_calls_per_run:
-            print('ETF classification-call budget exhausted; retaining grounded 2.5 provisional judgments for remaining ETFs.')
-            break
-        compact = []
-        for symbol in batch_symbols:
-            candidate = candidate_by_symbol[symbol]
-            research = judged[symbol]
-            compact.append({
-                'symbol': symbol,
-                'name': candidate.get('Name'),
-                'portfolio_group': candidate_sector_group(candidate),
-                'qvm_score': candidate.get('QVMScore'),
-                'quality_score': candidate.get('QualityScore'),
-                'value_score': candidate.get('ValueScore'),
-                'momentum_score': candidate.get('MomentumScore'),
-                'price_path_quality': candidate.get('PricePathQuality'),
-                'quantitative_entry_risk': candidate.get('QuantitativeEntryRisk'),
-                'overextension_penalty': candidate.get('OverextensionPenalty'),
-                'returns': {period: candidate.get(f'{period} Return') for period in ('1M','3M','6M','9M','1Y')},
-                'price_path': {
-                    'volatility': candidate.get('Volatility 1Y'),
-                    'downside_volatility': candidate.get('DownsideVolatility'),
-                    'max_drawdown': candidate.get('MaxDrawdown'),
-                    'positive_day_pct': candidate.get('PositiveDayPct'),
-                    'trend_r2': candidate.get('TrendR2'),
-                    'distance_50dma': candidate.get('Distance50DMA'),
-                    'distance_200dma': candidate.get('Distance200DMA'),
-                    'distance_52w_high': candidate.get('Distance52WHigh'),
-                    'largest_5d_move': candidate.get('Largest5DayMove'),
-                    'momentum_acceleration': candidate.get('MomentumAcceleration'),
-                },
-                'benchmark_excess_returns': {
-                    benchmark: {
-                        period: candidate.get(f'{period} Excess vs {benchmark}')
-                        for period in ('1M','3M','6M','9M','1Y')
-                    }
-                    for benchmark in benchmark_etfs
-                },
-                'grounded_research': research,
-                'previous_classification': (previous_diagnostics.get('classifications', {}) or {}).get(symbol),
-            })
-        prompt = (
-            config['prompt_etf_judgment'].rstrip()
-            + '\n\nCURRENT_DATE_UTC: ' + datetime.now(UTC).date().isoformat()
-            + '\n\nCONFIGURED_BENCHMARKS:\n' + json.dumps(benchmark_etfs)
-            + '\n\nMARKET_CONTEXT:\n' + json.dumps(market_context, ensure_ascii=False)
-            + '\n\nPEER_CLASSIFICATIONS_FROM_EARLIER_BATCHES:\n' + json.dumps(prior_peer_patches, ensure_ascii=False)
-            + '\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n' + json.dumps(compact, ensure_ascii=False)
-        )
-        models = [classification_model]
-        if classification_fallback_model not in models:
-            models.append(classification_fallback_model)
-        patches = None
-        used_model = None
-        last_error = None
-        for model_index, model_name in enumerate(models):
-            attempts = classification_attempts if model_index == 0 else 1
-            for attempt in range(1, attempts + 1):
-                if classification_calls_used >= max_classification_calls_per_run:
-                    break
-                classification_calls_used += 1
-                stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
-                print(f'Gemini ETF classification request {classification_calls_used}/{max_classification_calls_per_run}: {stage}')
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        config=build_gemini_config(
-                            classification_thinking_budget,
-                            enable_search=False,
-                            response_mime_type='application/json',
-                            max_output_tokens=classification_max_output_tokens,
-                        ),
-                        contents=prompt,
-                    )
-                    metadata = extract_gemini_metadata(response)
-                    metadata['response_text_chars'] = len(getattr(response, 'text', '') or '')
-                    print_gemini_metadata(stage, metadata)
-                    data = parse_json_response(getattr(response, 'text', None))
-                    patches = data.get('results') if isinstance(data, dict) else None
-                    if not isinstance(patches, list):
-                        raise ValueError('ETF judgment response lacks results array.')
-                    patch_by_symbol = {
-                        str(item.get('symbol') or '').upper(): item
-                        for item in patches if isinstance(item, dict)
-                    }
-                    missing = [symbol for symbol in batch_symbols if symbol not in patch_by_symbol]
-                    if missing:
-                        raise ValueError('ETF judgment omitted: ' + ', '.join(missing))
-                    used_model = model_name
-                    classification_call_diagnostics.append({
-                        'stage': 'etf_judgment', 'model': model_name,
-                        'attempt': attempt, 'symbols': list(batch_symbols),
-                        'success': True, 'fallback': model_index > 0,
-                        'metadata': metadata,
-                    })
-                    patches = patch_by_symbol
-                    break
-                except Exception as exc:
-                    last_error = exc
-                    classification_call_diagnostics.append({
-                        'stage': 'etf_judgment', 'model': model_name,
-                        'attempt': attempt, 'symbols': list(batch_symbols),
-                        'success': False, 'fallback': model_index > 0,
-                        'error': str(exc),
-                    })
-                    print(f'Warning: {stage} failed: {exc}')
-                    if attempt < attempts:
-                        time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
-            if patches is not None:
-                break
-        if patches is None:
-            print(f'Warning: ETF judgment unavailable for batch; preserving validated 2.5 provisional classifications: {last_error}')
-            continue
-        allowed_risks = {'MINIMAL','LOW','MODERATE','ELEVATED','SEVERE'}
-        concentration_levels = {'LOW','MODERATE','HIGH'}
-        for symbol in batch_symbols:
-            patch = patches[symbol]
-            research = dict(judged[symbol])
-            exposure_risk = str(patch.get('exposure_reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            entry_risk = str(patch.get('entry_reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            overall = str(patch.get('reversal_risk') or research.get('reversal_risk') or 'LOW').upper()
-            if not {exposure_risk, entry_risk, overall}.issubset(allowed_risks):
-                raise ValueError(f'{symbol} judgment returned invalid reversal risk.')
-            order = {'MINIMAL':0,'LOW':1,'MODERATE':2,'ELEVATED':3,'SEVERE':4}
-            overall = max((overall, exposure_risk, entry_risk), key=order.get)
-            continuation = str(patch.get('continuation_strength') or 'ADEQUATE').upper()
-            benchmark_outlook = str(patch.get('benchmark_outperformance_outlook') or 'UNCERTAIN').upper()
-            holdings_conc = str(patch.get('holdings_concentration') or 'LOW').upper()
-            construction_conc = str(patch.get('construction_concentration') or 'LOW').upper()
-            if continuation not in {'STRONG','ADEQUATE','WEAK'}:
-                raise ValueError(f'{symbol} judgment returned invalid continuation_strength.')
-            if benchmark_outlook not in {'LIKELY','UNCERTAIN','UNLIKELY'}:
-                raise ValueError(f'{symbol} judgment returned invalid benchmark outlook.')
-            if holdings_conc not in concentration_levels or construction_conc not in concentration_levels:
-                raise ValueError(f'{symbol} judgment returned invalid concentration level.')
-            research.update({
-                'judgment_model': used_model,
-                'exposure_reversal_risk': exposure_risk,
-                'entry_reversal_risk': entry_risk,
-                'reversal_risk': overall,
-                'holdings_concentration': holdings_conc,
-                'construction_concentration': construction_conc,
-                'benchmark_outperformance_outlook': benchmark_outlook,
-                'benchmark_outperformance_basis': patch.get('benchmark_outperformance_basis'),
-                'continuation_strength': continuation,
-                'primary_reversal_channel': patch.get('primary_reversal_channel'),
-                'classification_change_reason': patch.get('classification_change_reason'),
-                'material_new_evidence': patch.get('material_new_evidence'),
-            })
-            for field in ('risk_exposure_group', 'primary_risk_event_id', 'explanation'):
-                if field in patch:
-                    research[field] = patch[field]
-            # 3.5 judgment is authoritative for continuation/entry risk; Python
-            # still owns hard mandate and portfolio-policy exclusions.
-            if overall in {'ELEVATED','SEVERE'}:
-                research['eligible'] = False
-                research['eligibility_reason'] = f'Excluded by authoritative ETF judgment because reversal risk is {overall}.'
-            elif benchmark_outlook == 'UNLIKELY':
-                research['eligible'] = False
-                research['eligibility_reason'] = 'Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months.'
-            judged[symbol] = research
-            prior_peer_patches[symbol] = {
-                key: research.get(key) for key in (
-                    'reversal_risk','continuation_strength',
-                    'benchmark_outperformance_outlook','risk_exposure_group'
-                )
-            }
-    return judged
-
-
 def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, max_moderate_event):
-    selected, sector_counts, event_counts, driver_counts = [], {}, {}, {}
-    ranked_candidates = sorted(
-        candidates,
-        key=lambda candidate: (
-            etf_final_score(
-                candidate,
-                research_by_symbol.get(str(candidate['Symbol']).upper(), {}),
-            )
-            if research_by_symbol.get(str(candidate['Symbol']).upper(), {}).get('judgment_model')
-            else float(candidate.get('QVMScore') or 0.0)
-        ),
-        reverse=True,
-    )
-    for candidate in ranked_candidates:
+    selected, sector_counts, event_counts = [], {}, {}
+    for candidate in candidates:
         if len(selected) >= target:
             break
         symbol = str(candidate['Symbol']).upper()
         research = research_by_symbol.get(symbol)
         if not research or not research.get('eligible', True):
             continue
-        risk = combined_etf_reversal_risk(research)
+        risk = str(research.get('reversal_risk') or '').upper()
         if risk not in SELECTABLE_RISKS:
-            continue
-        if (
-            research.get('judgment_model')
-            and etf_final_score(candidate, research) < minimum_final_selection_score
-        ):
             continue
         sector = candidate_sector_group(candidate)
         sector_key = sector.casefold()
@@ -3091,15 +2727,10 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
         event_key = normalized_risk_event_key(research)
         if risk == 'MODERATE' and event_key and event_counts.get(event_key, 0) >= max_moderate_event:
             continue
-        driver_key = normalized_return_driver_key(research)
-        if driver_key and driver_counts.get(driver_key, 0) >= max_etfs_per_return_driver:
-            continue
         selected.append({'candidate': candidate, 'research': research})
         sector_counts[sector_key] = sector_counts.get(sector_key, 0) + 1
         if risk == 'MODERATE' and event_key:
             event_counts[event_key] = event_counts.get(event_key, 0) + 1
-        if driver_key:
-            driver_counts[driver_key] = driver_counts.get(driver_key, 0) + 1
     return selected
 
 
@@ -3212,21 +2843,9 @@ def build_context_review(
 
 def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector,
                           max_moderate_event, research_disposition=None):
-    selected, ledger, sector_counts, event_counts, driver_counts = [], [], {}, {}, {}
+    selected, ledger, sector_counts, event_counts = [], [], {}, {}
     research_disposition = research_disposition or {}
-    ranked_candidates = sorted(
-        list(candidates),
-        key=lambda candidate: etf_final_score(
-            candidate,
-            research_by_symbol.get(str(candidate['Symbol']).upper(), {}),
-        ) if str(candidate['Symbol']).upper() in research_by_symbol else float(candidate.get('QVMScore') or 0.0),
-        reverse=True,
-    )
-    qvm_rank = {
-        str(candidate['Symbol']).upper(): rank
-        for rank, candidate in enumerate(candidates, start=1)
-    }
-    for candidate in ranked_candidates:
+    for rank, candidate in enumerate(candidates, start=1):
         if len(selected) >= target:
             break
         symbol = str(candidate['Symbol']).upper()
@@ -3234,7 +2853,6 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
         status, reason = None, None
         sector = candidate_sector_group(candidate)
         sector_key = sector.casefold()
-        final_score = None
         if not research:
             disposition = research_disposition.get(symbol, 'NOT_NEEDED')
             if disposition == 'VALIDATION_FAILED':
@@ -3256,27 +2874,14 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
                 status = 'NOT RESEARCHED — NOT NEEDED'
                 reason = 'The portfolio filled before research was needed.'
         else:
-            risk = combined_etf_reversal_risk(research)
+            risk = str(research.get('reversal_risk') or '').upper()
             event_key = normalized_risk_event_key(research)
-            driver_key = normalized_return_driver_key(research)
-            final_score = etf_final_score(candidate, research)
-            benchmark_outlook = str(
-                research.get('benchmark_outperformance_outlook') or 'UNCERTAIN'
-            ).upper()
-            continuation = str(research.get('continuation_strength') or 'ADEQUATE').upper()
             if not research.get('eligible', True):
                 status = 'NOT SELECTED — INELIGIBLE'
                 reason = research.get('eligibility_reason') or research.get('explanation')
             elif risk not in SELECTABLE_RISKS:
                 status = f'NOT SELECTED — {risk}'
                 reason = research.get('explanation')
-            elif final_score < minimum_final_selection_score:
-                status = 'NOT SELECTED — FINAL SCORE BELOW MINIMUM'
-                reason = (
-                    f'Final continuation score {final_score:.2f} is below '
-                    f'{minimum_final_selection_score:.2f}; '
-                    f'continuation={continuation}, benchmark={benchmark_outlook}.'
-                )
             elif sector_counts.get(sector_key, 0) >= max_per_sector:
                 status = 'SKIPPED — SECTOR CAPACITY'
                 reason = f'{max_per_sector} selected ETFs already use the {sector} sector/category.'
@@ -3286,27 +2891,18 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             ):
                 status = 'SKIPPED — RISK-EVENT CAPACITY'
                 reason = f'The {event_key[0]} / {event_key[1]} group is already full.'
-            elif driver_key and driver_counts.get(driver_key, 0) >= max_etfs_per_return_driver:
-                status = 'SKIPPED — RETURN-DRIVER CAPACITY'
-                reason = f'{max_etfs_per_return_driver} selected ETFs already depend on {driver_key}.'
             else:
                 selected.append({'candidate': candidate, 'research': research})
                 sector_counts[sector_key] = sector_counts.get(sector_key, 0) + 1
                 if risk == 'MODERATE' and event_key:
                     event_counts[event_key] = event_counts.get(event_key, 0) + 1
-                if driver_key:
-                    driver_counts[driver_key] = driver_counts.get(driver_key, 0) + 1
                 status = f'SELECTED — {risk}'
                 reason = research.get('explanation')
         ledger.append({
-            'qvm_rank': qvm_rank.get(symbol),
+            'qvm_rank': rank,
             'symbol': symbol,
             'sector_group': sector,
             'status': status,
-            'final_selection_score': final_score,
-            'continuation_strength': research.get('continuation_strength') if research else None,
-            'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook') if research else None,
-            'return_driver_group': normalized_return_driver_key(research) if research else None,
             'sector_selected_after': sector_counts.get(sector_key, 0),
             'total_selected_after': len(selected),
             'risk_derivation': risk_derivation_summary(research) if research else None,
@@ -3429,14 +3025,6 @@ def build_summary_input(selected):
             'name': candidate.get('Name') or research.get('fund_name'),
             'sector': candidate_sector_group(candidate),
             'reversal_risk': research.get('reversal_risk'),
-            'exposure_reversal_risk': research.get('exposure_reversal_risk'),
-            'entry_reversal_risk': research.get('entry_reversal_risk'),
-            'continuation_strength': research.get('continuation_strength'),
-            'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook'),
-            'benchmark_outperformance_basis': research.get('benchmark_outperformance_basis'),
-            'holdings_concentration': research.get('holdings_concentration'),
-            'construction_concentration': research.get('construction_concentration'),
-            'primary_reversal_channel': research.get('primary_reversal_channel'),
             'explanation': research.get('explanation'),
             'holdings_evidence': research.get('holdings_evidence'),
             'current_driver_evidence': research.get('current_driver_evidence'),
@@ -3544,8 +3132,7 @@ config_path = SCRIPT_DIR / 'etf_config.yml'
 with config_path.open('r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
 required_prompt_keys = {
-    'prompt_market_context', 'prompt_etf_batch', 'prompt_etf_judgment',
-    'prompt_html_summary'
+    'prompt_market_context', 'prompt_etf_batch', 'prompt_html_summary'
 }
 missing_prompt_keys = sorted(required_prompt_keys - set(config or {}))
 if missing_prompt_keys:
@@ -3564,31 +3151,12 @@ max_retries = config['max_retries']
 initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
-classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
-classification_fallback_model = str(config.get('classification_fallback_model', model_primary))
-classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
-classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
-classification_attempts = max(1, int(config.get('classification_attempts', 2)))
-max_classification_calls_per_run = max(1, int(config.get('max_classification_calls_per_run', 8)))
-classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
-classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
-classification_min_intermediate_batch = max(1, int(config.get('classification_min_intermediate_batch', 15)))
 thinking_budget = config.get('thinking_budget', 12288)
 summary_thinking_budget = config.get('summary_thinking_budget', 4096)
 gemini_max_output_tokens = config.get('gemini_max_output_tokens', 49152)
 gemini_batch_size = config.get('gemini_batch_size', 15)
 target_selected_etfs = config.get('target_selected_etfs', 10)
 max_etfs_per_sector_group = config.get('max_etfs_per_sector_group', 2)
-max_etfs_per_return_driver = max(1, int(config.get('max_etfs_per_return_driver', 2)))
-minimum_final_selection_score = float(config.get('minimum_final_selection_score', 72.0))
-benchmark_likely_bonus = float(config.get('benchmark_likely_bonus', 5.0))
-benchmark_uncertain_penalty = float(config.get('benchmark_uncertain_penalty', -4.0))
-continuation_adjustments = {
-    'STRONG': float(config.get('continuation_strong_bonus', 4.0)),
-    'ADEQUATE': float(config.get('continuation_adequate_bonus', 0.0)),
-    'WEAK': float(config.get('continuation_weak_penalty', -4.0)),
-}
-repeated_return_driver_penalty = float(config.get('repeated_return_driver_penalty', -3.0))
 max_candidates_per_provisional_group = config.get(
     'max_candidates_per_provisional_group', 4
 )
@@ -3628,10 +3196,6 @@ cache_version = config.get('cache_version', 1)
 research_cache_version = config.get(
     'etf_research_cache_version', cache_version
 )
-run_report_file = config.get('run_diagnostics_file', 'run_reports/etf_run_report.json')
-previous_diagnostics = load_json_object(run_report_file)
-print(f'Run report: {Path(run_report_file).resolve()}')
-print(f'Run log: {ETF_RUN_LOG_FILE.resolve()}')
 benchmark_etfs = [
     str(symbol).strip().upper()
     for symbol in config['benchmark_etfs']
@@ -3644,7 +3208,7 @@ research_pool_limit = min(
     top_n,
     int(config.get('research_candidate_pool_limit', top_n)),
 )
-qvm_weights = config.get('qvm_weights', {'Quality': 0.35, 'Value': 0.10, 'Momentum': 0.55})
+qvm_weights = config.get('qvm_weights', {'Quality': 0.25, 'Value': 0.15, 'Momentum': 0.6})
 min_quality = config.get('min_quality', 35)
 top_etfs = load_top_qvm_cache(top_n, research_pool_limit)
 if top_etfs is None:
@@ -3870,10 +3434,7 @@ gemini_columns = [
         'ResearchAdmission',
         'QualityScore', 'ValueScore', 'MomentumScore',
         'BenchmarkRelativeScore', 'AUM', 'ExpenseRatio', 'AverageVolume',
-        'Volatility 1Y', 'DownsideVolatility', 'MaxDrawdown', 'PositiveDayPct',
-        'TrendR2', 'Distance50DMA', 'Distance200DMA', 'Distance52WHigh',
-        'Largest5DayMove', 'MomentumAcceleration', 'PricePathQuality',
-        'QuantitativeEntryRisk', 'OverextensionPenalty', 'TrailingPE', 'PriceToBook', '1M Return',
+        'Volatility 1Y', 'TrailingPE', 'PriceToBook', '1M Return',
         '3M Return', '6M Return', '9M Return', '1Y Return',
         'FundOverview', 'AssetClasses', 'SectorWeightings', 'TopHoldings',
         'CanonicalSector', 'StyleCategory', 'PortfolioGroup',
@@ -4019,8 +3580,7 @@ for candidate in candidate_records:
     signature = {
         key: candidate.get(key) for key in (
             'Symbol', 'Name', 'Category', 'ResearchAdmission', 'QVMScore',
-            'BenchmarkRelativeScore', 'PricePathQuality',
-            'QuantitativeEntryRisk', 'OverextensionPenalty',
+            'BenchmarkRelativeScore',
             'ExpenseRatio', 'AUM', '1M Return', '3M Return', '6M Return',
             '9M Return', '1Y Return', 'FundOverview', 'AssetClasses',
             'SectorWeightings', 'TopHoldings', 'CanonicalSector',
@@ -4788,27 +4348,6 @@ while (
     )
     print(f'Portfolio preview after batch: {len(selected)}/{target_selected_etfs} selected.')
 
-# Freeze the grounded 2.5 evidence pool, then apply an authoritative
-# cross-candidate no-Search judgment before final portfolio construction.
-pre_judgment_count = len(research_by_symbol)
-research_by_symbol = judge_etf_research_pool(
-    client, candidate_records, research_by_symbol, market_context
-)
-for call in classification_call_diagnostics:
-    if call.get('success') and call.get('model'):
-        models_used.append(call['model'])
-selected = preview_portfolio(
-    candidate_records,
-    research_by_symbol,
-    target_selected_etfs,
-    max_etfs_per_sector_group,
-    max_moderate_per_risk_event,
-)
-print(
-    f'Authoritative ETF judgment completed for {pre_judgment_count} validated '
-    f'ETFs; post-judgment preview={len(selected)}/{target_selected_etfs}.'
-)
-
 research_budget_exhausted = (
     len(selected) < target_selected_etfs
     and not request_budget.can_reserve('research')
@@ -4972,8 +4511,9 @@ update_html_page(
     'etf_index.html',
     model_used,
 )
-# previous_diagnostics was loaded before the run so classification drift
-# compares against the prior execution rather than the report being written now.
+previous_diagnostics = load_json_object(
+    config.get('run_diagnostics_file', 'caches/etf_run_diagnostics.json')
+)
 current_classifications = {
     symbol: {
         'portfolio_group': candidate_sector_group(candidate_by_symbol[symbol]),
@@ -4983,15 +4523,6 @@ current_classifications = {
         'python_eligible': research.get('eligible'),
         'eligibility_reason': research.get('eligibility_reason'),
         'reversal_risk': research.get('reversal_risk'),
-        'exposure_reversal_risk': research.get('exposure_reversal_risk'),
-        'entry_reversal_risk': research.get('entry_reversal_risk'),
-        'continuation_strength': research.get('continuation_strength'),
-        'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook'),
-        'benchmark_outperformance_basis': research.get('benchmark_outperformance_basis'),
-        'holdings_concentration': research.get('holdings_concentration'),
-        'construction_concentration': research.get('construction_concentration'),
-        'primary_reversal_channel': research.get('primary_reversal_channel'),
-        'judgment_model': research.get('judgment_model'),
         'risk_basis': research.get('risk_basis'),
         'mechanism_status': research.get('mechanism_status'),
         'normalization_probability': research.get('normalization_probability'),
@@ -5018,11 +4549,7 @@ previous_classifications = previous_diagnostics.get('classifications', {})
 classification_changes = []
 comparison_fields = {
     'portfolio_group', 'canonical_sector', 'style_category',
-    'research_admission', 'python_eligible', 'reversal_risk',
-    'exposure_reversal_risk', 'entry_reversal_risk', 'continuation_strength',
-    'benchmark_outperformance_outlook', 'holdings_concentration',
-    'construction_concentration', 'primary_reversal_channel', 'judgment_model',
-    'risk_basis',
+    'research_admission', 'python_eligible', 'reversal_risk', 'risk_basis',
     'mechanism_status', 'normalization_probability', 'benchmark_assessment',
     'mandate_assessment', 'us_equity_weight_estimate', 'mandate_basis',
     'evidence_scope', 'adverse_change_observed', 'adverse_change_date',
@@ -5091,28 +4618,6 @@ diagnostics = {
     'research_disposition': research_disposition,
     'decision_ledger': decision_ledger,
     'context_review': context_review,
-    'classification_calls': classification_call_diagnostics,
-    'candidate_analysis': {
-        str(candidate['Symbol']).upper(): {
-            'qvm_score': candidate.get('QVMScore'),
-            'quality_score': candidate.get('QualityScore'),
-            'value_score': candidate.get('ValueScore'),
-            'momentum_score': candidate.get('MomentumScore'),
-            'price_path_quality': candidate.get('PricePathQuality'),
-            'quantitative_entry_risk': candidate.get('QuantitativeEntryRisk'),
-            'overextension_penalty': candidate.get('OverextensionPenalty'),
-            'returns': {period: candidate.get(f'{period} Return') for period in ('1M','3M','6M','9M','1Y')},
-            'benchmark_excess_returns': {
-                benchmark: {period: candidate.get(f'{period} Excess vs {benchmark}') for period in ('1M','3M','6M','9M','1Y')}
-                for benchmark in benchmark_etfs
-            },
-            'final_selection_score': (
-                etf_final_score(candidate, research_by_symbol[str(candidate['Symbol']).upper()])
-                if str(candidate['Symbol']).upper() in research_by_symbol else None
-            ),
-        }
-        for candidate in candidate_records
-    },
     'calls': call_diagnostics,
 }
 save_json_object_atomic(
@@ -5124,7 +4629,6 @@ print(
     f'  logical calls: {request_budget.total_used}/{request_budget.total}\n'
     f'  ETF research logical calls: {request_budget.research_used}/{request_budget.research_limit}\n'
     f'  summary logical calls: {request_budget.summary_used}\n'
-    f'  ETF judgment calls: {classification_calls_used}/{max_classification_calls_per_run}\n'
     f'  actual API attempts: {request_budget.api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '

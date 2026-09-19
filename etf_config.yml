@@ -124,14 +124,19 @@ model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
 # Gemini 3.5 Flash is the authoritative no-Search ETF continuation/risk judge.
 classification_model: gemini-3.5-flash
-classification_fallback_model: gemini-2.5-flash
+classification_fallback_model: gemini-3.5-flash
+# The HTML summary normally uses the seventh 3.5 call. If that call fails,
+# retry once on 2.5 Flash using the reserved eighth 2.5-stage call.
+summary_model: gemini-3.5-flash
+summary_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
 classification_attempts: 2
-# Logical judgment batches and transport/schema retries have separate budgets.
-# A malformed response no longer consumes multiple logical classification slots.
-max_classification_logical_calls_per_run: 8
-max_classification_api_attempts_per_run: 20
+# Six calls are available to judgment, including retries. One additional 3.5
+# call is reserved exclusively for the HTML summary.
+max_classification_logical_calls_per_run: 6
+max_classification_api_attempts_per_run: 6
+max_gemini_35_calls_per_run: 7
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
@@ -205,8 +210,10 @@ max_concentration_penalty: -2.0
 repeated_return_driver_penalty: -3.0
 thinking_budget: 12288
 summary_thinking_budget: 4096
-max_gemini_calls_per_run: 7
+max_gemini_calls_per_run: 8
 max_etf_research_calls_per_run: 6
+# Hard 2.5-model ceiling across context, research, summary, and retries.
+max_gemini_api_attempts_per_run: 8
 reserved_summary_calls: 1
 summary_reservation_releasable_on_shortfall: true
 max_transient_api_attempts: 3

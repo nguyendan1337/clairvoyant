@@ -60,6 +60,7 @@ sys.stderr = TeeStream(sys.stderr, _etf_run_log)
 classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
+summary_35_api_attempts_used = 0
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -116,7 +117,10 @@ def build_gemini_config(
 
 
 class GeminiRequestBudget:
-    def __init__(self, total, research, reserved_summary=1, release_summary_for_research=False):
+    def __init__(
+        self, total, research, reserved_summary=1,
+        release_summary_for_research=False, max_api_attempts=None,
+    ):
         self.total = int(total)
         self.research_limit = int(research)
         self.reserved_summary = int(reserved_summary)
@@ -128,6 +132,9 @@ class GeminiRequestBudget:
         self.research_api_attempts = 0
         self.summary_api_attempts = 0
         self.context_api_attempts = 0
+        self.max_api_attempts = int(
+            total if max_api_attempts is None else max_api_attempts
+        )
 
     def can_reserve(self, category):
         if self.total_used >= self.total:
@@ -155,6 +162,11 @@ class GeminiRequestBudget:
         self.total_used += 1
 
     def record_api_attempt(self, category):
+        if self.api_attempts >= self.max_api_attempts:
+            raise RuntimeError(
+                f'Gemini API-attempt ceiling exhausted '
+                f'({self.api_attempts}/{self.max_api_attempts}).'
+            )
         self.api_attempts += 1
         if category == 'research':
             self.research_api_attempts += 1
@@ -3082,7 +3094,7 @@ def print_replacement_diagnostics(records):
 
 
 def queue_portfolio_challengers(candidate_records, research_by_symbol, selected, pending_retries, queued_symbols):
-    """Queue only a few exceptional unresearched alternatives after the portfolio fills."""
+    """Queue the strongest unresearched ETFs that can plausibly displace an incumbent."""
     if not challenger_research_enabled or len(selected) < target_selected_etfs:
         return []
     pending_symbols = {str(item['candidate']['Symbol']).upper() for item in pending_retries}
@@ -3093,7 +3105,15 @@ def queue_portfolio_challengers(candidate_records, research_by_symbol, selected,
             continue
         qvm = float(candidate.get('QVMScore') or 0.0)
         relative = float(candidate.get('BenchmarkRelativeScore') or 0.0)
-        if qvm < challenger_min_qvm or relative < challenger_min_relative_score:
+        # Either strong QVM or exceptional benchmark-relative strength is
+        # enough to earn the deterministic head-to-head test. Requiring both
+        # could leave a plausible incumbent replacement unresearched.
+        if qvm < challenger_min_qvm and relative < challenger_min_relative_score:
+            continue
+        if (
+            etf_optimistic_final_score(candidate) + score_comparison_epsilon
+            < minimum_final_selection_score
+        ):
             continue
         if not pending_candidate_can_improve_full_portfolio(
             candidate, selected, rank_by_symbol, max_etfs_per_sector_group
@@ -3335,11 +3355,14 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     return normalized
 
 
-def safe_judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
+def safe_judge_etf_research_pool(
+    client, candidate_records, research_by_symbol, market_context, force=False,
+):
     """Contain any unexpected judge failure so one classification bug cannot abort the run."""
     try:
         return judge_etf_research_pool(
-            client, candidate_records, research_by_symbol, market_context
+            client, candidate_records, research_by_symbol, market_context,
+            force=force,
         )
     except BaseException as exc:
         if isinstance(exc, (KeyboardInterrupt, SystemExit, TotalRuntimeTimeout)):
@@ -3357,7 +3380,9 @@ def safe_judge_etf_research_pool(client, candidate_records, research_by_symbol, 
         return research_by_symbol
 
 
-def judge_etf_research_pool(client, candidate_records, research_by_symbol, market_context):
+def judge_etf_research_pool(
+    client, candidate_records, research_by_symbol, market_context, force=False,
+):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
     candidate_by_symbol = {
@@ -3374,7 +3399,12 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
     ]
     if not symbols:
         return research_by_symbol
-    batch_size = max(1, min(classification_batch_target, classification_batch_soft_max))
+    if not force and len(symbols) < classification_batch_target:
+        print(
+            f'Accumulating ETF judgment candidates: {len(symbols)}/'
+            f'{classification_batch_target}; no 3.5 call yet.'
+        )
+        return research_by_symbol
     prior_peer_patches = {
         symbol: {
             key: research.get(key) for key in (
@@ -3385,8 +3415,16 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
         for symbol, research in judged.items()
         if research.get('judgment_model')
     }
-    for start in range(0, len(symbols), batch_size):
-        batch_symbols = symbols[start:start + batch_size]
+    start = 0
+    while symbols and (force or len(symbols) >= classification_batch_target):
+        batch_symbols = symbols[:classification_batch_soft_max]
+        tail = len(symbols) - len(batch_symbols)
+        if 0 < tail < classification_min_intermediate_batch:
+            keep = max(
+                classification_min_intermediate_batch,
+                len(batch_symbols) - (classification_min_intermediate_batch - tail),
+            )
+            batch_symbols = batch_symbols[:keep]
         if classification_logical_calls_used >= max_classification_logical_calls_per_run:
             print('ETF logical classification-call budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
             break
@@ -3623,6 +3661,10 @@ def judge_etf_research_pool(client, candidate_records, research_by_symbol, marke
                 'ETF judgment catch-up required for: '
                 + ', '.join(invalid_patch_symbols)
             )
+        symbols = symbols[len(batch_symbols):]
+        start += len(batch_symbols)
+        if not force and len(symbols) < classification_batch_target:
+            break
     return judged
 
 
@@ -3952,7 +3994,12 @@ def build_recommendations_table(selected):
         return f'{number:.2f}%' if percent else f'{number:.2f}'
 
     rows = []
-    for item in selected:
+    sorted_selected = sorted(
+        selected,
+        key=lambda item: float(item['candidate'].get('QVMScore') or 0.0),
+        reverse=True,
+    )
+    for item in sorted_selected:
         candidate, research = item['candidate'], item['research']
         symbol = html.escape(str(candidate['Symbol']))
         name = html.escape(str(candidate.get('Name') or research.get('fund_name') or symbol))
@@ -4193,11 +4240,20 @@ model_primary = config['model_primary']
 model_fallback = config['model_fallback']
 classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
 classification_fallback_model = str(config.get('classification_fallback_model', model_primary))
+summary_model = str(config.get('summary_model', classification_model))
+summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
 classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
 classification_attempts = max(1, int(config.get('classification_attempts', 2)))
 max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
 max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
+max_gemini_35_calls_per_run = int(config.get('max_gemini_35_calls_per_run', 7))
+if max_classification_api_attempts_per_run >= max_gemini_35_calls_per_run:
+    raise ValueError(
+        'ETF config must reserve at least one 3.5 call for the HTML summary: '
+        'max_classification_api_attempts_per_run must be lower than '
+        'max_gemini_35_calls_per_run.'
+    )
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
 classification_min_intermediate_batch = max(1, int(config.get('classification_min_intermediate_batch', 15)))
@@ -4259,6 +4315,9 @@ max_candidates_per_provisional_group = config.get(
 max_moderate_per_risk_event = config.get('max_moderate_per_risk_event', 2)
 max_gemini_calls_per_run = config.get('max_gemini_calls_per_run', 7)
 max_etf_research_calls_per_run = config.get('max_etf_research_calls_per_run', 5)
+max_gemini_api_attempts_per_run = int(
+    config.get('max_gemini_api_attempts_per_run', max_gemini_calls_per_run)
+)
 reserved_summary_calls = config.get('reserved_summary_calls', 1)
 max_transient_api_attempts = config.get('max_transient_api_attempts', 3)
 max_transient_delay = config.get('max_transient_delay', 60)
@@ -4582,6 +4641,7 @@ request_budget = GeminiRequestBudget(
     max_etf_research_calls_per_run,
     reserved_summary_calls,
     release_summary_for_research=False,
+    max_api_attempts=max_gemini_api_attempts_per_run,
 )
 call_diagnostics = []
 batch_research_diagnostics = []
@@ -4860,6 +4920,74 @@ while (
             )
         if not pending_retries:
             break
+
+    # Build every research call from the best currently actionable pool rather
+    # than continuing a stale rank cursor after authoritative judgment changes
+    # the portfolio. Repairs retain first priority because their evidence has
+    # already been paid for. New candidates are ordered by optimistic final
+    # merit, with a small tie-break bonus for genuinely open sector/family slots.
+    open_slots = max(0, target_selected_etfs - len(selected))
+    research_batch_limit = gemini_batch_size
+    if len(selected) >= target_selected_etfs - 2:
+        research_batch_limit = min(
+            gemini_batch_size, max(6, open_slots * 3)
+        )
+    elif len(selected) >= 6:
+        research_batch_limit = min(
+            gemini_batch_size, max(8, open_slots * 3)
+        )
+    pending_symbols = {
+        str(item['candidate']['Symbol']).upper() for item in pending_retries
+    }
+    if len(selected) < target_selected_etfs and len(pending_retries) < research_batch_limit:
+        selected_sectors = {
+            candidate_sector_group(item['candidate']).casefold() for item in selected
+        }
+        selected_families = {
+            etf_factor_family(item['candidate'], item.get('research')) for item in selected
+        }
+
+        def scheduling_priority(candidate):
+            sector_open = (
+                candidate_sector_group(candidate).casefold() not in selected_sectors
+            )
+            family_open = etf_factor_family(candidate) not in selected_families
+            open_capacity_bonus = 2.0 if sector_open and family_open else 0.75 if sector_open else 0.0
+            return (
+                etf_optimistic_final_score(candidate) + open_capacity_bonus,
+                quantitative_challenger_score(candidate),
+                -rank_by_symbol[str(candidate['Symbol']).upper()],
+            )
+
+        best_unresearched = []
+        for candidate in candidate_records:
+            symbol = str(candidate['Symbol']).upper()
+            if symbol in research_by_symbol or symbol in pending_symbols:
+                continue
+            if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
+                quantitative_floor_skipped_symbols_this_run.add(symbol)
+                continue
+            if lower_ranked_candidate_blocked_by_sector_capacity(
+                candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+            ) or lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+                sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
+            best_unresearched.append(candidate)
+        best_unresearched.sort(key=scheduling_priority, reverse=True)
+        additions = best_unresearched[:max(0, research_batch_limit - len(pending_retries))]
+        for candidate in additions:
+            pending_retries.append({
+                'candidate': candidate,
+                'needs_research': True,
+                'targeted_backfill': True,
+            })
+        if additions:
+            print(
+                'Targeted ETF research queue: '
+                + ', '.join(str(item['Symbol']) for item in additions)
+            )
+    # The global priority queue above supersedes the old forward-only cursor.
+    cursor = len(candidate_records)
     batch = []
     retry_symbols = set()
     retry_fresh_symbols = set()
@@ -4867,9 +4995,9 @@ while (
     provisional_counts = {}
     dedicated_basic_repair_batch = False
 
-    # High-ranked basic/evidence-completion failures get a compact repair-only call.
-    # Do not mix them with fresh searches: mixed calls are much more likely to
-    # hit MAX_TOKENS and omit the exact repair candidates we are trying to save.
+    # Put evidence-completion repairs first, but use spare batch capacity for
+    # fresh candidates. This avoids spending an entire 2.5 call on one small
+    # repair while still keeping the repair payload at the front of the prompt.
     basic_repair_pending = []
     other_pending = []
     for retry in pending_retries:
@@ -4882,13 +5010,12 @@ while (
         )
         (basic_repair_pending if is_basic_repair else other_pending).append(retry)
     if basic_repair_pending:
-        dedicated_basic_repair_batch = True
         pending_retries = basic_repair_pending + other_pending
     max_transport_retries_in_batch = max(
         1, int(round(gemini_batch_size * transport_retry_batch_fraction))
     )
     deferred_transport_retries = []
-    while pending_retries and len(batch) < gemini_batch_size:
+    while pending_retries and len(batch) < research_batch_limit:
         retry = pending_retries[0]
         candidate = retry['candidate']
         symbol = str(candidate['Symbol']).upper()
@@ -5573,8 +5700,26 @@ while (
     judged_before = sum(
         1 for research in research_by_symbol.values() if research.get('judgment_model')
     )
+    pending_judgment_count = sum(
+        1 for candidate in candidate_records
+        if (
+            str(candidate['Symbol']).upper() in research_by_symbol
+            and not research_by_symbol[str(candidate['Symbol']).upper()].get('judgment_model')
+            and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
+        )
+    )
+    remaining_research_calls = max(
+        0, request_budget.research_limit - request_budget.research_used
+    )
+    force_judgment = (
+        pending_judgment_count >= classification_min_intermediate_batch
+        and len(selected) + pending_judgment_count >= target_selected_etfs
+    ) or (
+        pending_judgment_count > 0 and remaining_research_calls <= 1
+    ) or not request_budget.can_reserve('research')
     research_by_symbol = safe_judge_etf_research_pool(
-        client, candidate_records, research_by_symbol, market_context
+        client, candidate_records, research_by_symbol, market_context,
+        force=force_judgment,
     )
     judged_after = sum(
         1 for research in research_by_symbol.values() if research.get('judgment_model')
@@ -5620,12 +5765,11 @@ while (
         and len(selected) < target_selected_etfs
     )
 
-# Safety catch-up: normally every validated ETF has already been judged inside
-# the loop. This pass only handles any unjudged cache/repair residue and, because
-# the judge skips judged symbols, cannot introduce repeated classification drift.
+# Final forced catch-up handles a deliberately accumulated tail. Because the
+# judge skips judged symbols, this cannot introduce repeated classification drift.
 pre_final_selected_count = len(selected)
 research_by_symbol = safe_judge_etf_research_pool(
-    client, candidate_records, research_by_symbol, market_context
+    client, candidate_records, research_by_symbol, market_context, force=True,
 )
 for call in classification_call_diagnostics:
     if call.get('success') and call.get('model') and call['model'] not in models_used:
@@ -5643,7 +5787,7 @@ if len(selected) < pre_final_selected_count:
     judgment_reopened_slots += reopened
     print(
         f'Warning: final judgment catch-up reopened {reopened} slot(s). '
-        'This should be rare because judgment normally runs after every research batch.'
+        'The accumulated tail was judged only after research closed.'
     )
 
 # Regression invariant: do not silently claim that research was unnecessary if
@@ -5753,7 +5897,7 @@ print('\n' + context_review + '\n')
 
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
-if config.get('final_summary_enabled', True) and request_budget.total_used < request_budget.total:
+if config.get('final_summary_enabled', True):
     selected_summary_input = build_summary_input(selected)
     summary_prompt = (
         config['prompt_html_summary'].rstrip()
@@ -5763,38 +5907,86 @@ if config.get('final_summary_enabled', True) and request_budget.total_used < req
         + json.dumps(selected_summary_input, ensure_ascii=False)
     )
     summary_data = None
-    for summary_model in [model_primary, model_fallback]:
-        if request_budget.total_used >= request_budget.total:
-            break
+    if (
+        classification_api_attempts_used + summary_35_api_attempts_used
+        < max_gemini_35_calls_per_run
+    ):
+        summary_35_api_attempts_used += 1
+        stage = 'ETF HTML summary'
+        total_35_attempt = (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        )
+        print(
+            f'Gemini 3.5 summary call {total_35_attempt}/'
+            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
+        )
+        try:
+            response = client.models.generate_content(
+                model=summary_model,
+                config=build_gemini_config(
+                    summary_thinking_budget,
+                    enable_search=False,
+                    response_mime_type='application/json',
+                    max_output_tokens=gemini_max_output_tokens,
+                ),
+                contents=summary_prompt,
+            )
+            response_text = getattr(response, 'text', None)
+            summary_data = parse_json_response(response_text)
+            summary_html = validate_summary_response(summary_data, selected)
+            metadata = extract_gemini_metadata(response)
+            metadata['response_text_chars'] = len(response_text or '')
+            print_gemini_metadata(stage, metadata)
+            models_used.append(summary_model)
+            call_diagnostics.append({
+                'stage': 'HTML summary', 'model': summary_model,
+                'model_family': '3.5', 'api_attempt': total_35_attempt,
+                'success': True, **metadata,
+            })
+            print('Using Gemini 3.5-written ETF HTML summary.')
+        except Exception as exc:
+            print(f'ETF summary unavailable from {summary_model}: {exc}')
+            call_diagnostics.append({
+                'stage': 'HTML summary', 'model': summary_model,
+                'model_family': '3.5', 'api_attempt': total_35_attempt,
+                'success': False, 'error': str(exc),
+            })
+            summary_data = None
+    else:
+        print(
+            'ETF 3.5 summary reservation was unavailable; trying the 2.5 fallback.'
+        )
+
+    if summary_data is None and request_budget.total_used < request_budget.total:
         try:
             summary_data, used_model, metadata = call_gemini_json(
                 client,
-                summary_model,
+                summary_fallback_model,
                 summary_prompt,
                 build_gemini_config(
                     summary_thinking_budget,
                     enable_search=False,
+                    response_mime_type='application/json',
                     max_output_tokens=gemini_max_output_tokens,
                 ),
-                'ETF HTML summary',
+                'ETF HTML summary fallback',
                 request_budget,
                 'summary',
                 1,
                 initial_delay,
                 max_transient_delay,
             )
-            models_used.append(used_model)
-            call_diagnostics.append({'stage': 'HTML summary', **metadata})
-            break
-        except Exception as exc:
-            print(f'ETF summary unavailable from {summary_model}: {exc}')
-    if isinstance(summary_data, dict):
-        try:
             summary_html = validate_summary_response(summary_data, selected)
-            print('Using Gemini-written ETF HTML summary.')
+            models_used.append(used_model)
+            call_diagnostics.append({
+                'stage': 'HTML summary fallback', 'model_family': '2.5',
+                **metadata,
+            })
+            print('Using Gemini 2.5 fallback ETF HTML summary.')
         except Exception as exc:
             print(
-                'Gemini summary was invalid; using deterministic fallback summary: '
+                'Gemini summary fallback was unavailable or invalid; using '
+                'deterministic fallback summary: '
                 f'{exc}'
             )
 
@@ -5937,6 +6129,7 @@ diagnostics = {
         'minimum_final_selection_score': minimum_final_selection_score,
         'max_classification_logical_calls_per_run': max_classification_logical_calls_per_run,
         'max_classification_api_attempts_per_run': max_classification_api_attempts_per_run,
+        'max_gemini_35_calls_per_run': max_gemini_35_calls_per_run,
         'benchmark_qvm_floor': benchmark_qvm_floor,
         'benchmark_qvm_override_margin': benchmark_qvm_override_margin,
         'minimum_uncertain_selection_score': minimum_uncertain_selection_score,
@@ -5950,8 +6143,13 @@ diagnostics = {
         'research_limit': request_budget.research_limit,
         'summary_used': request_budget.summary_used,
         'api_attempts': request_budget.api_attempts,
+        'api_attempt_limit': request_budget.max_api_attempts,
         'research_api_attempts': request_budget.research_api_attempts,
         'summary_api_attempts': request_budget.summary_api_attempts,
+        'summary_35_api_attempts': summary_35_api_attempts_used,
+        'total_35_api_attempts': (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        ),
         'context_api_attempts': request_budget.context_api_attempts,
         'summary_reservation_releasable_on_shortfall': summary_reservation_releasable_on_shortfall,
     },
@@ -6048,7 +6246,11 @@ print(
     f'  summary logical calls: {request_budget.summary_used}\n'
     f'  ETF judgment logical calls: {classification_logical_calls_used}/{max_classification_logical_calls_per_run}\n'
     f'  ETF judgment API attempts: {classification_api_attempts_used}/{max_classification_api_attempts_per_run}\n'
-    f'  actual API attempts: {request_budget.api_attempts} '
+    f'  ETF 3.5 summary API attempts: {summary_35_api_attempts_used}/1\n'
+    f'  total Gemini 3.5 API attempts: '
+    f'{classification_api_attempts_used + summary_35_api_attempts_used}/'
+    f'{max_gemini_35_calls_per_run}\n'
+    f'  actual API attempts: {request_budget.api_attempts}/{request_budget.max_api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '
     f'summary={request_budget.summary_api_attempts})'

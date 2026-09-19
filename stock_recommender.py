@@ -54,8 +54,8 @@ sys.stderr = TeeStream(sys.stderr, _stock_run_log)
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
-TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
-GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 30 * 60
+GEMINI_REQUEST_TIMEOUT_MS = 5 * 60 * 1000
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -669,6 +669,96 @@ class GeminiRequestBudget:
         )
 
 
+class GeminiApiAttemptBudgetExhausted(RuntimeError):
+    """Raised before an API call that would exceed a per-model hard ceiling."""
+
+
+class GeminiApiAttemptBudget:
+    """Enforce actual API-attempt limits by model family and workload."""
+
+    def __init__(self, family_limits, category_limits):
+        self.family_limits = {
+            str(family): int(limit)
+            for family, limit in family_limits.items()
+        }
+        self.category_limits = {
+            (str(family), str(category)): int(limit)
+            for (family, category), limit in category_limits.items()
+        }
+        self.family_used = {family: 0 for family in self.family_limits}
+        self.category_used = {
+            key: 0 for key in self.category_limits
+        }
+
+    @staticmethod
+    def model_family(model_name):
+        normalized = str(model_name or "").lower()
+        if "gemini-3.5" in normalized:
+            return "3.5"
+        if "gemini-2.5" in normalized:
+            return "2.5"
+        return normalized or "unknown"
+
+    def reserve(self, model_name, category, stage):
+        family = self.model_family(model_name)
+        family_limit = self.family_limits.get(family)
+        category_key = (family, str(category))
+        category_limit = self.category_limits.get(category_key)
+        family_used = self.family_used.get(family, 0)
+        category_used = self.category_used.get(category_key, 0)
+        if family_limit is not None and family_used >= family_limit:
+            raise GeminiApiAttemptBudgetExhausted(
+                f"Gemini {family} API-attempt budget of {family_limit} was "
+                f"exhausted before {stage}."
+            )
+        if category_limit is not None and category_used >= category_limit:
+            raise GeminiApiAttemptBudgetExhausted(
+                f"Gemini {family} {category} API-attempt budget of "
+                f"{category_limit} was exhausted before {stage}."
+            )
+        self.family_used[family] = family_used + 1
+        if category_limit is not None:
+            self.category_used[category_key] = category_used + 1
+        print(
+            f"Gemini {family} API budget: "
+            f"{self.family_used[family]}/{family_limit or 'unlimited'} total; "
+            f"{self.category_used.get(category_key, 0)}/"
+            f"{category_limit or 'unlimited'} {category}."
+        )
+
+    def remaining(self, model_name, category):
+        family = self.model_family(model_name)
+        family_limit = self.family_limits.get(family)
+        family_remaining = (
+            float("inf") if family_limit is None
+            else max(0, family_limit - self.family_used.get(family, 0))
+        )
+        category_key = (family, str(category))
+        category_limit = self.category_limits.get(category_key)
+        category_remaining = (
+            float("inf") if category_limit is None
+            else max(
+                0,
+                category_limit - self.category_used.get(category_key, 0),
+            )
+        )
+        return min(family_remaining, category_remaining)
+
+    def snapshot(self):
+        return {
+            "family_used": dict(self.family_used),
+            "family_limits": dict(self.family_limits),
+            "category_used": {
+                f"{family}:{category}": used
+                for (family, category), used in self.category_used.items()
+            },
+            "category_limits": {
+                f"{family}:{category}": limit
+                for (family, category), limit in self.category_limits.items()
+            },
+        }
+
+
 def stable_json_hash(value):
     encoded = json.dumps(
         value,
@@ -1155,6 +1245,55 @@ def extract_delimited_stock_results(text):
     return results
 
 
+def is_daily_gemini_quota_error(exc):
+    error_text = str(exc).upper()
+    return any(marker in error_text for marker in (
+        "GENERATE_CONTENT_FREE_TIER_REQUESTS",
+        "GENERATEREQUESTSPERDAYPERPROJECTPERMODEL",
+        "REQUESTS PER DAY",
+        "DAILY QUOTA",
+    ))
+
+
+def is_transient_gemini_error(exc):
+    """Recognize retryable Gemini and transport failures consistently."""
+    if is_daily_gemini_quota_error(exc):
+        return False
+    error_text = str(exc).upper()
+    error_type = type(exc).__name__.upper()
+    error_code = getattr(exc, "code", None)
+    return (
+        isinstance(exc, (TimeoutError, ConnectionError))
+        or error_code in {408, 429, 500, 502, 503, 504}
+        or any(marker in error_text for marker in (
+            "EMPTY RESPONSE FROM GEMINI",
+            "RESOURCE_EXHAUSTED",
+            "TOO MANY REQUESTS",
+            "UNAVAILABLE",
+            "HIGH DEMAND",
+            "TIMEOUT",
+            "TIMED OUT",
+            "DEADLINE EXCEEDED",
+            "SERVER DISCONNECTED",
+            "WITHOUT SENDING A RESPONSE",
+            "REMOTE PROTOCOL ERROR",
+            "CONNECTION RESET",
+            "CONNECTION ABORTED",
+            "CONNECTION ERROR",
+            "CONNECTION CLOSED",
+            "BROKEN PIPE",
+            "TEMPORARILY UNAVAILABLE",
+            "TRY AGAIN LATER",
+        ))
+        or any(marker in error_type for marker in (
+            "TIMEOUT",
+            "CONNECTION",
+            "REMOTEPROTOCOL",
+            "NETWORK",
+        ))
+    )
+
+
 def judge_stock_research_batch(
         client,
         research_results,
@@ -1163,20 +1302,22 @@ def judge_stock_research_batch(
         previous_classifications,
         peer_classifications,
 ):
-    """Use 3.5 Flash as the primary no-Search judge, with 2.5 Flash fallback.
+    """Use only 3.5 Flash as the no-Search judge.
 
     Research facts and sources remain owned by the grounded 2.5 research stage.
     The judge returns only decision-field patches, which are merged into the
     grounded drafts. This keeps classification quality independent from search
     behavior and prevents a judgment failure from discarding valid research.
+    A per-batch retry cap prevents one outage from consuming the run-wide
+    classification budget needed by later batches.
     """
     global classification_calls_used
     if not research_results:
         return research_results, None
     if classification_calls_used >= max_classification_calls_per_run:
         print(
-            "Classification-call budget exhausted; validating grounded drafts "
-            "with Python safeguards."
+            "Classification-call budget exhausted; leaving grounded drafts "
+            "pending for the next run."
         )
         return research_results, None
 
@@ -1252,153 +1393,166 @@ def judge_stock_research_batch(
         + json.dumps(compact_candidates, ensure_ascii=False)
     )
 
-    models = [classification_model]
-    if classification_fallback_model not in models:
-        models.append(classification_fallback_model)
+    attempts = min(
+        max_classification_attempts_per_batch,
+        max_classification_calls_per_run - classification_calls_used,
+    )
     last_error = None
-    for model_index, model_name in enumerate(models):
-        attempts = classification_attempts if model_index == 0 else 1
-        for attempt in range(1, attempts + 1):
-            if classification_calls_used >= max_classification_calls_per_run:
-                break
-            classification_calls_used += 1
-            stage = (
-                f"stock judgment for {len(compact_candidates)} stocks "
-                f"({model_name}, attempt {attempt}/{attempts})"
+    for attempt in range(1, attempts + 1):
+        stage = (
+            f"stock judgment for {len(compact_candidates)} stocks "
+            f"({classification_model}, attempt {attempt}/{attempts})"
+        )
+        try:
+            api_attempt_budget.reserve(
+                classification_model, "classification", stage
             )
-            print(
-                f"Gemini classification request {classification_calls_used}/"
-                f"{max_classification_calls_per_run}: {stage}"
+        except GeminiApiAttemptBudgetExhausted as exc:
+            last_error = exc
+            print(f"Classification budget stopped {stage}: {exc}")
+            break
+        classification_calls_used += 1
+        print(
+            f"Gemini classification request {classification_calls_used}/"
+            f"{max_classification_calls_per_run}: {stage}"
+        )
+        try:
+            response = client.models.generate_content(
+                model=classification_model,
+                config=build_gemini_config(
+                    classification_thinking_budget,
+                    enable_search=False,
+                    max_output_tokens=classification_max_output_tokens,
+                ),
+                contents=prompt,
             )
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    config=build_gemini_config(
-                        classification_thinking_budget,
-                        enable_search=False,
-                        max_output_tokens=classification_max_output_tokens,
-                    ),
-                    contents=prompt,
+            text = getattr(response, "text", None)
+            if not text or not text.strip():
+                raise ValueError("Empty classification response.")
+            data = parse_json_response(text)
+            patches = data.get("results") if isinstance(data, dict) else None
+            if not isinstance(patches, list):
+                raise ValueError("Classification response lacks results array.")
+            patch_by_symbol = {
+                str(item.get("symbol") or "").upper(): item
+                for item in patches if isinstance(item, dict)
+            }
+            missing = [
+                symbol for symbol in expected
+                if symbol in by_symbol and symbol not in patch_by_symbol
+            ]
+            if not patch_by_symbol or len(patch_by_symbol) != len(patches):
+                raise ValueError(
+                    "Classification returned no distinct, symbol-keyed patches."
                 )
-                text = getattr(response, "text", None)
-                if not text or not text.strip():
-                    raise ValueError("Empty classification response.")
-                data = parse_json_response(text)
-                patches = data.get("results") if isinstance(data, dict) else None
-                if not isinstance(patches, list):
-                    raise ValueError("Classification response lacks results array.")
-                patch_by_symbol = {
-                    str(item.get("symbol") or "").upper(): item
-                    for item in patches if isinstance(item, dict)
-                }
-                missing = [s for s in expected if s in by_symbol and s not in patch_by_symbol]
-                if not patch_by_symbol or len(patch_by_symbol) != len(patches):
-                    raise ValueError(
-                        "Classification returned no distinct, symbol-keyed patches."
-                    )
-                unexpected = sorted(set(patch_by_symbol).difference(expected))
-                if unexpected:
-                    raise ValueError(
-                        "Classification returned unexpected symbols: "
-                        + ", ".join(unexpected)
-                    )
-                if missing:
-                    print(
-                        "Classification response omitted "
-                        + ", ".join(missing)
-                        + "; preserving the returned judgments and queuing only "
-                        "the missing research for later classification."
-                    )
+            unexpected = sorted(set(patch_by_symbol).difference(expected))
+            if unexpected:
+                raise ValueError(
+                    "Classification returned unexpected symbols: "
+                    + ", ".join(unexpected)
+                )
+            if missing:
+                print(
+                    "Classification response omitted "
+                    + ", ".join(missing)
+                    + "; preserving the returned judgments and queuing only "
+                    "the missing research for later classification."
+                )
 
-                allowed = {
-                    "business_reversal_risk", "entry_reversal_risk",
-                    "reversal_risk", "risk_basis", "catalyst_dependence",
-                    "business_concentration", "binary_event_risk",
-                    "benchmark_outperformance_outlook", "benchmark_outperformance_basis",
-                    "continuation_strength",
-                    "mechanism_status", "normalization_probability",
-                    "continuation_outlook", "probability_indicator_type",
-                    "probability_basis", "risk_time_horizon",
-                    "risk_materiality", "primary_risk_event_id",
-                    "risk_exposure_group", "reversal_mechanism",
-                    "probability_evidence", "material_effect", "explanation",
-                    "primary_reversal_channel", "classification_change_reason",
-                    "material_new_evidence",
-                }
-                merged = []
-                for symbol in expected:
-                    draft = by_symbol.get(symbol)
-                    if draft is None or symbol not in patch_by_symbol:
-                        continue
-                    result = dict(draft)
-                    patch = patch_by_symbol[symbol]
-                    for field in allowed:
-                        if field in patch:
-                            result[field] = patch[field]
-                    if "risk_exposure_group" not in patch:
-                        result["_missing_return_driver_group"] = True
-                    merged.append(result)
-                classification_call_diagnostics.append({
-                    "stage": "stock_judgment",
-                    "model": model_name,
-                    "attempt": attempt,
-                    "symbols": [x["symbol"] for x in compact_candidates],
-                    "returned_symbols": [x["symbol"] for x in merged],
-                    "missing_symbols": missing,
-                    "fallback": model_index > 0,
-                    "success": True,
-                    "status": "PARTIAL" if missing else "SUCCESS",
-                })
-                gemini_attempt_diagnostics.append({
-                    "stage": "stock_judgment",
-                    "model": model_name,
-                    "attempt": attempt,
-                    "category": "classification",
-                    "search_enabled": False,
-                    "symbols": [x["symbol"] for x in compact_candidates],
-                    "status": "PARTIAL" if missing else "SUCCESS",
-                })
-                if model_index > 0:
-                    print(
-                        "Gemini 3.5 judgment unavailable; successfully used "
-                        "2.5 Flash no-Search judgment fallback."
-                    )
-                return merged, model_name
-            except Exception as exc:
-                last_error = exc
-                classification_call_diagnostics.append({
-                    "stage": "stock_judgment",
-                    "model": model_name,
-                    "attempt": attempt,
-                    "symbols": [x["symbol"] for x in compact_candidates],
-                    "fallback": model_index > 0,
-                    "success": False,
-                    "status": "ERROR",
-                    "error": str(exc),
-                })
-                gemini_attempt_diagnostics.append({
-                    "stage": "stock_judgment",
-                    "model": model_name,
-                    "attempt": attempt,
-                    "category": "classification",
-                    "search_enabled": False,
-                    "symbols": [x["symbol"] for x in compact_candidates],
-                    "status": "ERROR",
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                })
-                print(f"Warning: {stage} failed: {exc}")
-                if attempt < attempts:
-                    delay = min(
-                        max_transient_backoff_seconds,
-                        initial_transient_backoff_seconds * (2 ** (attempt - 1)),
-                    ) + random.uniform(0, transient_backoff_jitter_seconds)
-                    print(f"Retrying classification in {delay:.1f}s...")
-                    time.sleep(delay)
+            allowed = {
+                "business_reversal_risk", "entry_reversal_risk",
+                "reversal_risk", "risk_basis", "catalyst_dependence",
+                "business_concentration", "binary_event_risk",
+                "benchmark_outperformance_outlook",
+                "benchmark_outperformance_basis", "continuation_strength",
+                "mechanism_status", "normalization_probability",
+                "continuation_outlook", "probability_indicator_type",
+                "probability_basis", "risk_time_horizon",
+                "risk_materiality", "primary_risk_event_id",
+                "risk_exposure_group", "reversal_mechanism",
+                "probability_evidence", "material_effect", "explanation",
+                "primary_reversal_channel", "classification_change_reason",
+                "material_new_evidence",
+            }
+            merged = []
+            for symbol in expected:
+                draft = by_symbol.get(symbol)
+                if draft is None or symbol not in patch_by_symbol:
+                    continue
+                result = dict(draft)
+                patch = patch_by_symbol[symbol]
+                for field in allowed:
+                    if field in patch:
+                        result[field] = patch[field]
+                if "risk_exposure_group" not in patch:
+                    result["_missing_return_driver_group"] = True
+                merged.append(result)
+            classification_call_diagnostics.append({
+                "stage": "stock_judgment",
+                "model": classification_model,
+                "attempt": attempt,
+                "symbols": [item["symbol"] for item in compact_candidates],
+                "returned_symbols": [item["symbol"] for item in merged],
+                "missing_symbols": missing,
+                "fallback": False,
+                "success": True,
+                "status": "PARTIAL" if missing else "SUCCESS",
+            })
+            gemini_attempt_diagnostics.append({
+                "stage": "stock_judgment",
+                "model": classification_model,
+                "attempt": attempt,
+                "category": "classification",
+                "search_enabled": False,
+                "symbols": [item["symbol"] for item in compact_candidates],
+                "status": "PARTIAL" if missing else "SUCCESS",
+            })
+            return merged, classification_model
+        except Exception as exc:
+            last_error = exc
+            transient_error = is_transient_gemini_error(exc)
+            classification_call_diagnostics.append({
+                "stage": "stock_judgment",
+                "model": classification_model,
+                "attempt": attempt,
+                "symbols": [item["symbol"] for item in compact_candidates],
+                "fallback": False,
+                "success": False,
+                "status": "ERROR",
+                "error": str(exc),
+                "transient": transient_error,
+            })
+            gemini_attempt_diagnostics.append({
+                "stage": "stock_judgment",
+                "model": classification_model,
+                "attempt": attempt,
+                "category": "classification",
+                "search_enabled": False,
+                "symbols": [item["symbol"] for item in compact_candidates],
+                "status": "ERROR",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "transient": transient_error,
+            })
+            print(f"Warning: {stage} failed: {exc}")
+            if not transient_error:
+                print(
+                    "Classification failure is not transient; opening the "
+                    "circuit breaker without spending more calls on this batch."
+                )
+                break
+            if attempt < attempts:
+                delay = min(
+                    max_transient_backoff_seconds,
+                    initial_transient_backoff_seconds * (2 ** (attempt - 1)),
+                ) + random.uniform(0, transient_backoff_jitter_seconds)
+                print(f"Retrying 3.5 classification in {delay:.1f}s...")
+                time.sleep(delay)
 
     print(
-        "Warning: all judgment models were unavailable; validating the grounded "
-        f"2.5 research drafts directly: {last_error}"
+        "Warning: Gemini 3.5 judgment is unavailable after this batch's retry "
+        "allowance; preserving validated research as PENDING_JUDGMENT and "
+        f"opening the classification circuit breaker: {last_error}"
     )
     return research_results, None
 
@@ -2976,6 +3130,8 @@ def call_gemini_json(
         required_search_candidates=None,
         allow_partial_stock_results=False,
         max_attempts=None,
+        fallback_max_attempts=None,
+        retry_output_errors=False,
         budget_category="general"):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
@@ -2988,10 +3144,33 @@ def call_gemini_json(
     )
     request_budget.reserve(stage, category=budget_category)
     last_error = None
-    for model_name in models:
-        for attempt in range(attempt_limit):
+    for model_index, model_name in enumerate(models):
+        model_attempt_limit = (
+            attempt_limit
+            if model_index == 0 or fallback_max_attempts is None
+            else max(1, int(fallback_max_attempts))
+        )
+        for attempt in range(model_attempt_limit):
             attempt_prompt = prompt
             metadata = None
+            try:
+                api_attempt_budget.reserve(
+                    model_name, budget_category, stage
+                )
+            except GeminiApiAttemptBudgetExhausted as exc:
+                last_error = exc
+                gemini_attempt_diagnostics.append({
+                    "stage": stage,
+                    "model": model_name,
+                    "attempt": attempt + 1,
+                    "category": budget_category,
+                    "search_enabled": bool(require_google_search),
+                    "status": "API_BUDGET_EXHAUSTED",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                })
+                print(f"API-attempt budget stopped {stage}: {exc}")
+                break
             try:
                 request_budget.record_api_attempt(
                     f"{stage} ({model_name}, attempt {attempt + 1})",
@@ -3136,33 +3315,11 @@ def call_gemini_json(
                 error_type = type(exc).__name__.upper()
                 error_code = getattr(exc, "code", None)
 
-                daily_quota_exhausted = (
-                    "GENERATE_CONTENT_FREE_TIER_REQUESTS" in error_text
-                    or "GENERATEREQUESTSPERDAYPERPROJECTPERMODEL" in error_text
-                    or "REQUESTS PER DAY" in error_text
-                    or "DAILY QUOTA" in error_text
-                )
-
-                transient_error = (
-                    not daily_quota_exhausted
-                    and (
-                        error_code in {408, 429, 500, 502, 503, 504}
-                        or "EMPTY RESPONSE FROM GEMINI" in error_text
-                        or "RESOURCE_EXHAUSTED" in error_text
-                        or "TOO MANY REQUESTS" in error_text
-                        or "UNAVAILABLE" in error_text
-                        or "TIMEOUT" in error_text
-                        or "TIMEOUT" in error_type
-                        or "SERVER DISCONNECTED" in error_text
-                        or "CONNECTION RESET" in error_text
-                        or "CONNECTION ABORTED" in error_text
-                        or "REMOTE PROTOCOL" in error_text
-                        or "PEER CLOSED" in error_text
-                        or "NETWORK ERROR" in error_text
-                        or "REMOTEPROTOCOLERROR" in error_type
-                        or "CONNECTERROR" in error_type
-                        or "READERROR" in error_type
-                    )
+                daily_quota_exhausted = is_daily_gemini_quota_error(exc)
+                transient_error = is_transient_gemini_error(exc)
+                retryable_output_error = bool(
+                    retry_output_errors
+                    and isinstance(exc, (ValueError, json.JSONDecodeError))
                 )
 
                 gemini_attempt_diagnostics.append({
@@ -3174,13 +3331,14 @@ def call_gemini_json(
                     "status": (
                         "DAILY_QUOTA_EXHAUSTED" if daily_quota_exhausted
                         else "TRANSIENT_ERROR" if transient_error
+                        else "RETRYABLE_OUTPUT_ERROR" if retryable_output_error
                         else "ERROR"
                     ),
                     "error_type": type(exc).__name__,
                     "error": str(exc),
                 })
                 print(
-                    f"Error on attempt {attempt + 1}/{attempt_limit} "
+                    f"Error on attempt {attempt + 1}/{model_attempt_limit} "
                     f"during {stage} with {model_name}: {exc}"
                 )
 
@@ -3198,13 +3356,16 @@ def call_gemini_json(
                         "retrying the exhausted model."
                     ) from exc
 
-                if transient_error and attempt < attempt_limit - 1:
+                if (
+                    (transient_error or retryable_output_error)
+                    and attempt < model_attempt_limit - 1
+                ):
                     delay = min(
                         max_transient_backoff_seconds,
                         initial_transient_backoff_seconds * (3 ** attempt),
                     ) + random.uniform(0, transient_backoff_jitter_seconds)
                     print(
-                        f"Transient Gemini error; retrying the same model and "
+                        f"Retryable Gemini error; retrying the same model and "
                         f"unchanged request in {delay:.1f}s..."
                     )
                     time.sleep(delay)
@@ -3300,7 +3461,7 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 6
+TOP_QVM_CACHE_VERSION = 5
 
 
 def load_top_qvm_cache(benchmark_context=None, hurdle_tolerance_pct=0.25):
@@ -3811,7 +3972,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     Function defaults are approximately balanced. The production caller
     explicitly uses configurable continuation-oriented weights (currently
-    Quality 45%, Value 10%, and Momentum 45%).
+    Quality 50%, Value 15%, and Momentum 35%).
     """
 
     df = df.copy()
@@ -3895,7 +4056,6 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         'GrossMargin',
         'OperatingMargin',
         'RevenueGrowth',
-        'EarningsGrowth',
         'FCFMargin',
         'OperatingCashFlowMargin',
         'CurrentRatio',
@@ -5083,18 +5243,25 @@ transient_backoff_jitter_seconds = float(
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
 classification_model = str(config.get("classification_model", "gemini-3.5-flash"))
-classification_fallback_model = str(
-    config.get("classification_fallback_model", model_primary)
-)
+classification_fallback_model = None
 classification_thinking_budget = int(
     config.get("classification_thinking_budget", 8192)
 )
 classification_max_output_tokens = int(
     config.get("classification_max_output_tokens", 32768)
 )
-classification_attempts = max(1, int(config.get("classification_attempts", 2)))
 max_classification_calls_per_run = max(
     1, int(config.get("max_classification_calls_per_run", 8))
+)
+max_classification_attempts_per_batch = max(
+    1,
+    min(
+        max_classification_calls_per_run,
+        int(config.get(
+            "max_classification_attempts_per_batch",
+            config.get("classification_attempts", 3),
+        )),
+    ),
 )
 classification_batch_target = max(1, int(config.get("classification_batch_target", 25)))
 classification_batch_soft_max = max(
@@ -5212,6 +5379,41 @@ max_stock_research_calls_per_run = int(
     config.get("max_stock_research_calls_per_run", max_gemini_calls_per_run)
 )
 reserved_summary_calls = int(config.get("reserved_summary_calls", 1))
+max_3_5_api_calls_per_run = int(config.get("max_3_5_api_calls_per_run", 8))
+max_3_5_classification_calls_per_run = int(config.get(
+    "max_3_5_classification_calls_per_run",
+    max_classification_calls_per_run,
+))
+max_3_5_summary_calls_per_run = int(config.get(
+    "max_3_5_summary_calls_per_run", 2
+))
+max_2_5_api_calls_per_run = int(config.get("max_2_5_api_calls_per_run", 8))
+max_2_5_market_calls_per_run = int(config.get(
+    "max_2_5_market_calls_per_run", 1
+))
+max_2_5_research_calls_per_run = int(config.get(
+    "max_2_5_research_calls_per_run", 6
+))
+max_2_5_summary_fallback_calls_per_run = int(config.get(
+    "max_2_5_summary_fallback_calls_per_run", 1
+))
+if max_3_5_classification_calls_per_run != max_classification_calls_per_run:
+    raise ValueError(
+        "max_3_5_classification_calls_per_run must equal "
+        "max_classification_calls_per_run."
+    )
+if (
+    max_3_5_classification_calls_per_run + max_3_5_summary_calls_per_run
+    > max_3_5_api_calls_per_run
+):
+    raise ValueError("Gemini 3.5 category limits exceed its total API-call limit.")
+if (
+    max_2_5_market_calls_per_run
+    + max_2_5_research_calls_per_run
+    + max_2_5_summary_fallback_calls_per_run
+    > max_2_5_api_calls_per_run
+):
+    raise ValueError("Gemini 2.5 category limits exceed its total API-call limit.")
 max_research_attempts_per_stock = int(
     config.get("max_research_attempts_per_stock", 2)
 )
@@ -5244,6 +5446,13 @@ print(
     f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
+    f"3.5_api_budget={max_3_5_api_calls_per_run} "
+    f"({max_3_5_classification_calls_per_run} classification + "
+    f"{max_3_5_summary_calls_per_run} summary), "
+    f"2.5_api_budget={max_2_5_api_calls_per_run} "
+    f"({max_2_5_market_calls_per_run} market + "
+    f"{max_2_5_research_calls_per_run} research + "
+    f"{max_2_5_summary_fallback_calls_per_run} summary fallback), "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
     f"deferred_research_attempts_per_run="
     f"{max_deferred_research_attempts_per_run}, "
@@ -5345,7 +5554,6 @@ cols_for_eval = [
     'EV_EBITDA',
     'PEG',
     'RevenueGrowth',
-    'EarningsGrowth',
     'OperatingMargin',
     'FCFMargin',
     '3M Return',
@@ -5449,6 +5657,19 @@ request_budget = GeminiRequestBudget(
     max_gemini_calls_per_run,
     stock_maximum=max_stock_research_calls_per_run,
     reserved_summary_calls=(reserved_summary_calls if final_summary_enabled else 0),
+)
+api_attempt_budget = GeminiApiAttemptBudget(
+    family_limits={
+        "3.5": max_3_5_api_calls_per_run,
+        "2.5": max_2_5_api_calls_per_run,
+    },
+    category_limits={
+        ("3.5", "classification"): max_3_5_classification_calls_per_run,
+        ("3.5", "summary"): max_3_5_summary_calls_per_run,
+        ("2.5", "market"): max_2_5_market_calls_per_run,
+        ("2.5", "stock"): max_2_5_research_calls_per_run,
+        ("2.5", "summary"): max_2_5_summary_fallback_calls_per_run,
+    },
 )
 
 market_prompt = (
@@ -5807,7 +6028,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
     risk_event_counts = {}
     return_driver_counts = {}
     moderate_selected_count = 0
-    
+
     scored_validated_candidates = []
     for candidate in candidate_records:
         symbol = str(candidate["Symbol"]).upper()
@@ -5821,7 +6042,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             research,
         ))
     scored_validated_candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
-    
+
     if verbose:
         print("FINAL VALIDATED CANDIDATE COMPARISON")
     for score, _, candidate, research in scored_validated_candidates:
@@ -5837,7 +6058,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
             f"risk_event={normalized_risk_event_key(research)}, "
             f"return_driver={normalized_return_driver_key(research)}"
         )
-    
+
     for position, (score, _, candidate, research) in enumerate(scored_validated_candidates):
         symbol = str(candidate["Symbol"]).upper()
         sector = candidate["Sector"]
@@ -5856,7 +6077,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
         event_key = normalized_risk_event_key(research)
         driver_key = normalized_return_driver_key(research)
         independent_alternative = None
-    
+
         status = None
         if not bool(research.get("eligible", True)):
             status = "EXCLUDED — ELIGIBILITY"
@@ -5928,7 +6149,7 @@ def build_stock_portfolio(candidate_records, validated_cached_research, verbose=
                 f"{independent_alternative[1]:.2f}; minimum lead "
                 f"{second_return_driver_minimum_lead:.2f}; {status}"
             )
-    
+
         decision_ledger.append({
             "qvm_rank": candidate["QVM Rank"],
             "symbol": symbol,
@@ -6129,6 +6350,17 @@ def classify_pending(force=False):
             break
 
 
+# Recovery order is deliberate: classify every fresh, validated cache entry
+# before spending another search-enabled 2.5 call. This makes a rerun after a
+# 3.5 outage cheap and prevents pending evidence from being researched again.
+if pending_classification:
+    print(
+        "Classifying cached PENDING_JUDGMENT research before new stock "
+        f"research: {len(pending_classification)} candidate(s)."
+    )
+    classify_pending(force=True)
+
+
 batch_start = 0
 carried_ranked_candidates = []
 backfill_announced = False
@@ -6155,11 +6387,14 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         validated_for_pool.append(pool_symbol)
 
     if (
-        request_budget.stock_maximum is not None
-        and request_budget.stock_used >= request_budget.stock_maximum
+        (
+            request_budget.stock_maximum is not None
+            and request_budget.stock_used >= request_budget.stock_maximum
+        )
+        or api_attempt_budget.remaining(model_primary, "stock") <= 0
     ):
         print(
-            "Stock research-call budget exhausted; freezing the validated "
+            "Stock research API budget exhausted; freezing the validated "
             f"comparison pool at {len(validated_for_pool)} eligible candidates."
         )
         break
@@ -6399,10 +6634,15 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
         # batch calls. Targeted calls contain only candidates that failed the
         # preceding validation attempt.
         while pending_candidates:
-            if (request_budget.stock_maximum is not None
-                    and request_budget.stock_used >= request_budget.stock_maximum):
+            if (
+                (
+                    request_budget.stock_maximum is not None
+                    and request_budget.stock_used >= request_budget.stock_maximum
+                )
+                or api_attempt_budget.remaining(model_primary, "stock") <= 0
+            ):
                 print(
-                    "Stock research-call budget exhausted with pending retries; "
+                    "Stock research API budget exhausted with pending retries; "
                     "keeping validated evidence and proceeding to classification."
                 )
                 break
@@ -7134,16 +7374,43 @@ else:
 
 if not selected:
     raise RuntimeError("No stocks passed the full research and classification rules.")
+pending_judgment_symbols = sorted(pending_classification)
+if pending_judgment_symbols and classification_unavailable_this_run:
+    portfolio_status = "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE"
+elif len(selected) < target_selected_stocks:
+    portfolio_status = "PORTFOLIO_SHORTFALL_QUALITY"
+else:
+    portfolio_status = "PORTFOLIO_COMPLETE"
+
 if len(selected) < target_selected_stocks:
+    shortfall_label = (
+        "PORTFOLIO INCOMPLETE — JUDGMENT SERVICE UNAVAILABLE"
+        if portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE"
+        else "PORTFOLIO SHORTFALL — QUALITY BAR"
+    )
+    shortfall_action = (
+        "Validated research remains PENDING_JUDGMENT and will be classified "
+        "before new research on the next run."
+        if pending_judgment_symbols
+        else "Publishing qualified stocks without relaxing selection rules."
+    )
     print(
-        f"PORTFOLIO SHORTFALL: {len(selected)}/{target_selected_stocks}; "
+        f"{shortfall_label}: {len(selected)}/{target_selected_stocks}; "
         f"QVM pool={len(candidate_records)}, researched unique="
         f"{len(researched_symbols_this_run)}, classified="
         f"{len(validated_cached_research)}, invalid="
         f"{len(research_failures_by_symbol)}, judgment invalid="
-        f"{len(classification_failures_by_symbol)}, unresearched="
-        f"{len(candidate_records) - len(set(validated_cached_research) | set(research_failures_by_symbol) | researched_symbols_this_run)}. "
-        "Publishing qualified stocks without relaxing selection rules."
+        f"{len(classification_failures_by_symbol)}, pending judgment="
+        f"{len(pending_judgment_symbols)}, unresearched="
+        f"{len(candidate_records) - len(set(validated_cached_research) | set(pending_judgment_symbols) | set(research_failures_by_symbol) | researched_symbols_this_run)}. "
+        + shortfall_action
+    )
+elif portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE":
+    print(
+        "PORTFOLIO INCOMPLETE — JUDGMENT SERVICE UNAVAILABLE: "
+        f"{len(selected)}/{target_selected_stocks} confirmed selections, but "
+        f"{len(pending_judgment_symbols)} validated candidate(s) remain "
+        "PENDING_JUDGMENT and could change the final comparison."
     )
 
 recommendations_table = build_recommendations_table(selected)
@@ -7186,11 +7453,10 @@ if final_summary_enabled:
     try:
         summary_data, summary_model, _ = call_gemini_json(
             client=client,
-            model_primary=model_primary,
-            # Summary generation is lower-risk than stock classification, so
-            # Flash-Lite is an acceptable fallback when Flash has exhausted its
-            # separate per-model daily quota.
-            model_fallback=model_fallback,
+            # Summary owns two of the eight 3.5 calls. If both fail, allow one
+            # final 2.5 Flash no-Search fallback call.
+            model_primary=classification_model,
+            model_fallback=model_primary,
             gemini_config=build_gemini_config(
                 summary_thinking_budget, enable_search=False
             ),
@@ -7199,7 +7465,9 @@ if final_summary_enabled:
             validator=lambda data: validate_summary_response(data, selected),
             request_budget=request_budget,
             require_google_search=False,
-            max_attempts=1,
+            max_attempts=2,
+            fallback_max_attempts=1,
+            retry_output_errors=True,
             budget_category="summary",
         )
         recommendations_summary = summary_data["summary_html"].strip()
@@ -7210,6 +7478,16 @@ if final_summary_enabled:
             "Warning: final Gemini summary was unavailable; using the "
             f"deterministic Python summary instead: {exc}"
         )
+
+if portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE":
+    recommendations_summary = (
+        '<p><strong>Portfolio incomplete:</strong> Gemini 3.5 classification '
+        'was unavailable. The displayed selections are confirmed, but '
+        f'{len(pending_judgment_symbols)} validated candidate(s) remain '
+        'pending judgment and may fill or change the portfolio on the next '
+        'run.</p>'
+        + recommendations_summary
+    )
 
 # The full QVM table remains the complete ranked candidate stream.
 output_columns = [
@@ -7328,12 +7606,15 @@ run_report = {
         "stock_api_attempts": request_budget.stock_api_attempts,
         "classification_api_attempts_used": classification_calls_used,
         "classification_api_attempts_maximum": max_classification_calls_per_run,
+        "per_model_api_attempts": api_attempt_budget.snapshot(),
     },
     "gemini_call_ledger": gemini_attempt_diagnostics,
     "successful_gemini_metadata": gemini_call_diagnostics,
     "classification_calls": classification_call_diagnostics,
     "classification_validation_failures": classification_failures_by_symbol,
     "classification_failure_details": classification_failure_details_by_symbol,
+    "portfolio_status": portfolio_status,
+    "pending_judgment_symbols": pending_judgment_symbols,
     "token_totals": {
         field: summed_call_metric(field)
         for field in (
@@ -7390,6 +7671,15 @@ print(f"  requests used: {request_budget.used}/{request_budget.maximum}")
 print(
     f"  stock research calls: {request_budget.stock_used}/"
     f"{request_budget.stock_maximum}"
+)
+api_budget_snapshot = api_attempt_budget.snapshot()
+print(
+    "  actual API attempts by model family: "
+    + ", ".join(
+        f"Gemini {family}={used}/"
+        f"{api_budget_snapshot['family_limits'][family]}"
+        for family, used in api_budget_snapshot["family_used"].items()
+    )
 )
 print(f"  newly validated stocks: {len(newly_validated_symbols)}")
 if stock_call_diagnostics:

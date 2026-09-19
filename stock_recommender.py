@@ -3153,6 +3153,15 @@ def call_gemini_json(
                         or "UNAVAILABLE" in error_text
                         or "TIMEOUT" in error_text
                         or "TIMEOUT" in error_type
+                        or "SERVER DISCONNECTED" in error_text
+                        or "CONNECTION RESET" in error_text
+                        or "CONNECTION ABORTED" in error_text
+                        or "REMOTE PROTOCOL" in error_text
+                        or "PEER CLOSED" in error_text
+                        or "NETWORK ERROR" in error_text
+                        or "REMOTEPROTOCOLERROR" in error_type
+                        or "CONNECTERROR" in error_type
+                        or "READERROR" in error_type
                     )
                 )
 

@@ -92,6 +92,9 @@ max_stock_sources: 5
 market_context_cache_file: caches/gemini_market_context_cache.json
 stock_research_cache_file: caches/gemini_stock_research_cache.json
 gemini_research_cache_hours: 12
+market_context_cache_hours: 12
+market_context_schema_version: 1
+market_context_prompt_version: 2
 # Stock prompt content is hashed separately, so prompt edits invalidate stock
 # research without unnecessarily invalidating a still-current market context.
 cache_version: 6
@@ -99,98 +102,97 @@ final_summary_enabled: true
 summary_thinking_budget: 4096
 
 prompt_market_context: |
-  You are an expert U.S. stock-market analyst with real-time Google Search.
+  You are the shared market-research stage for U.S. stock and ETF recommenders.
+  Research the CURRENT U.S. market and world environment once so both systems
+  can reuse the same evidence. Use Google Search before answering. Prefer
+  information from the last 5-10 days, supplemented by current official policy
+  or economic releases and continuing events when necessary.
 
-  PURPOSE
-  Research the CURRENT U.S. market and world environment once so the resulting
-  context can be reused when evaluating QVM-ranked stocks today.
+  SEARCH PLAN
+  Perform exactly five targeted searches total. Each search should cover
+  several related questions. Do not run follow-up or alternative searches:
+  1. S&P 500 performance, breadth, investor mood and market health.
+  2. U.S. growth, inflation, rates, Federal Reserve expectations, liquidity,
+     credit, earnings and estimate revisions.
+  3. Current operating conditions and leadership across all canonical sectors
+     listed below.
+  4. Factor, size and thematic leadership, including value, growth, momentum,
+     quality, dividends and large-, mid- and small-cap stocks.
+  5. Geopolitical, commodity, freight, supply-chain, regulatory, crowding,
+     valuation, concentration and flow conditions that could reverse recent
+     winners within 6-12 months.
 
-  This task requires current web research. Use Google Search before answering.
-  Prefer evidence from the past 5-10 days, extending to approximately 30 days
-  only for continuing events that remain materially relevant.
-
-  RESEARCH COVERAGE
-  Use multiple targeted searches to assess:
-    1. S&P 500 direction, recent performance, breadth, and market health
-    2. Investor mood and the largest current market drivers
-    3. Inflation, interest rates, Federal Reserve expectations, and major macro data
-    4. U.S. earnings trends and material regulatory developments
-    5. Wars, geopolitical disruptions, and major world developments
-    6. Energy, commodity, freight, and supply-chain conditions
-    7. Currently strong, mixed, and weak U.S. stock sectors or industries
-    8. Temporary events whose normalization could reverse recent winners
-
-  Treat wars and geopolitical disruptions as possible earnings and valuation
-  drivers, not generic background. Identify the normalization mechanism for
-  every material temporary event.
+  CANONICAL SECTORS
+  sector_context must contain a specific current sentence for every one of
+  these exact keys: Basic Materials, Communication Services, Consumer
+  Cyclical, Consumer Defensive, Energy, Financial Services, Healthcare,
+  Industrials, Real Estate, Technology and Utilities. Do not rename, combine
+  or omit a key. Each sentence must identify a current operating, demand,
+  pricing, regulatory, valuation or financing condition, not generic filler.
 
   ACTIVE RISK-EVENT CATALOG
-  Build active_risk_events as the authoritative canonical event catalog for
-  this run. Include only documented, current real-world events that materially
-  affect multiple companies or industries in the covered sectors. Use one
-  stable UPPER_SNAKE_CASE event_id per real-world event, even when it reaches
-  companies through different prices, freight markets, costs, or operating
-  mechanisms. Do not create company-specific, industry-specific, commodity-
-  specific, or transmission-mechanism variants of the same event. Put those
-  distinctions in affected_industries and the description instead. Return an
-  empty array when no qualifying shared event is established by current
-  sources. Stock research will be required to use these exact IDs and may not
-  invent additional IDs.
+  active_risk_events is the authoritative shared event catalog for both
+  recommenders. Include only documented current events materially affecting
+  multiple companies or industries. Use one stable UPPER_SNAKE_CASE event_id
+  per real-world event even when it reaches companies through different
+  commodity prices, freight markets, costs or operating mechanisms. Do not
+  create company-, industry-, commodity- or transmission-specific variants of
+  the same event. Put those differences in description, affected_industries
+  and beneficiaries. Return an empty array when no shared event qualifies.
 
-  MARKET AND SECTOR WRITING QUALITY
-  - market_intro must include at least one explicit S&P 500 percentage and the
-    period measured.
-  - Separate positive market supports from negative pressures. Never describe
-    cautious or bearish sentiment as being caused by positive earnings or
-    investment.
-  - State Federal Reserve actions as market expectations unless an official
-    decision has occurred. Persistent inflation alone does not establish that a
-    rate increase is expected.
-  - Every sector_context value must identify a specific current operating,
-    demand, pricing, regulatory, or financing condition. Never use generic
-    filler such as "most sectors are weak," "conditions are mixed," or "the
-    sector remains relevant."
-  - Cover every sector named in REQUIRED_SECTOR_GROUPS when that section is
-    supplied by Python.
+  WRITING AND FACT RULES
+  - market_summary and market_intro must contain the same viewer-facing
+    paragraph of 3-5 concise sentences. Include an explicit S&P 500 percentage
+    and measured period, investor mood, the largest supports and the most
+    important concern.
+  - Separate positive market supports from negative pressures. Never attribute
+    cautious or bearish sentiment to positive earnings or investment.
+  - State Federal Reserve actions as expectations unless an official decision
+    has occurred. Persistent inflation alone does not establish that a rate
+    increase is expected.
+  - Avoid generic language such as "conditions are mixed," "most sectors are
+    weak" or "the sector remains relevant."
+  - Use 2-5 real decision-relevant sources. Prefer official releases,
+    government or exchange data and credible financial reporting. Never invent
+    a URL.
 
   OUTPUT
-  Return exactly one valid JSON object with no Markdown fences, citations outside
-  the JSON, commentary, or text before or after it.
-
-  Use this schema:
+  Return exactly one JSON object without Markdown or commentary:
   {
     "as_of_date": "YYYY-MM-DD",
     "market_status": "STRONG | MIXED | WEAK",
-    "market_intro": "A viewer-facing paragraph of 3-5 concise sentences covering current S&P 500 direction and a relevant percentage, investor mood, the 1-2 largest drivers, and the most important concern.",
+    "market_summary": "Viewer-facing market paragraph",
+    "market_intro": "Identical viewer-facing market paragraph",
     "market_direction": "Concise description",
     "major_drivers": ["..."],
     "macro_conditions": ["..."],
     "strong_sectors": ["..."],
     "weak_sectors": ["..."],
+    "strong_exposures": ["..."],
+    "weak_exposures": ["..."],
     "sector_context": {
-      "Exact or commonly used sector name": "One concise current sector-level sentence"
+      "Basic Materials": "Specific current condition",
+      "Communication Services": "Specific current condition",
+      "Consumer Cyclical": "Specific current condition",
+      "Consumer Defensive": "Specific current condition",
+      "Energy": "Specific current condition",
+      "Financial Services": "Specific current condition",
+      "Healthcare": "Specific current condition",
+      "Industrials": "Specific current condition",
+      "Real Estate": "Specific current condition",
+      "Technology": "Specific current condition",
+      "Utilities": "Specific current condition"
     },
-    "active_risk_events": [
-      {
-        "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
-        "description": "Current event and affected markets",
-        "affected_industries": ["..."],
-        "normalization_risk": "How de-escalation or normalization could reverse beneficiaries"
-      }
-    ],
-    "sources": [
-      {
-        "title": "Source title",
-        "date": "YYYY-MM-DD or publication date as reported",
-        "url": "https://..."
-      }
-    ]
+    "factor_and_theme_context": {"Value": "Specific current condition"},
+    "active_risk_events": [{
+      "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
+      "description": "Current event and affected markets",
+      "affected_industries": ["..."],
+      "beneficiaries": ["..."],
+      "normalization_risk": "How normalization could reverse beneficiaries"
+    }],
+    "sources": [{"title": "Source title", "date": "YYYY-MM-DD", "url": "https://..."}]
   }
-
-  SOURCE RULES
-  Include several credible current sources. Prefer official releases, government
-  data, company or exchange information, and credible financial reporting.
-  Every URL must be a real source used in the research. Do not invent sources.
 
 prompt_stock_judgment: |
   You are the authoritative no-Search reversal-risk judge for a U.S. momentum

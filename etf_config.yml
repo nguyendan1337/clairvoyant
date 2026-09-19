@@ -238,7 +238,7 @@ run_diagnostics_file: run_reports/etf_run_report.json
 run_log_file: run_reports/etf_run.log
 market_context_cache_hours: 12
 market_context_schema_version: 1
-market_context_prompt_version: 1
+market_context_prompt_version: 2
 gemini_research_cache_hours: 12
 cache_version: 4
 # Kept separate so ETF research can be invalidated without preventing reuse of
@@ -250,24 +250,58 @@ prompt_market_context: |
   Research the CURRENT U.S. market and world environment once so both systems
   can reuse the same evidence. Use Google Search before answering. Prefer
   information from the last 5-10 days, supplemented by current official policy
-  or economic releases when necessary.
+  or economic releases and continuing events when necessary.
 
+  SEARCH PLAN
   Perform exactly five targeted searches total. Each search should cover
-  several related questions rather than spawning follow-up searches:
+  several related questions. Do not run follow-up or alternative searches:
   1. S&P 500 performance, breadth, investor mood and market health.
   2. U.S. growth, inflation, rates, Federal Reserve expectations, liquidity,
      credit, earnings and estimate revisions.
-  3. Operating conditions and leadership across Technology, Healthcare,
-     Financials, Consumer Cyclical, Consumer Defensive, Energy, Industrials,
-     Basic Materials, Communication Services, Utilities and Real Estate.
+  3. Current operating conditions and leadership across all canonical sectors
+     listed below.
   4. Factor, size and thematic leadership, including value, growth, momentum,
-     quality, dividends and large/mid/small caps.
-  5. Geopolitical, commodity, freight, regulatory, crowding, valuation,
-     concentration and flow conditions that could reverse winners in 6-12 months.
+     quality, dividends and large-, mid- and small-cap stocks.
+  5. Geopolitical, commodity, freight, supply-chain, regulatory, crowding,
+     valuation, concentration and flow conditions that could reverse recent
+     winners within 6-12 months.
 
-  Return exactly one JSON object without Markdown. market_summary and
-  market_intro must contain the same 3-5 sentence viewer-facing paragraph with
-  at least one explicit S&P 500 percentage and measured period.
+  CANONICAL SECTORS
+  sector_context must contain a specific current sentence for every one of
+  these exact keys: Basic Materials, Communication Services, Consumer
+  Cyclical, Consumer Defensive, Energy, Financial Services, Healthcare,
+  Industrials, Real Estate, Technology and Utilities. Do not rename, combine
+  or omit a key. Each sentence must identify a current operating, demand,
+  pricing, regulatory, valuation or financing condition, not generic filler.
+
+  ACTIVE RISK-EVENT CATALOG
+  active_risk_events is the authoritative shared event catalog for both
+  recommenders. Include only documented current events materially affecting
+  multiple companies or industries. Use one stable UPPER_SNAKE_CASE event_id
+  per real-world event even when it reaches companies through different
+  commodity prices, freight markets, costs or operating mechanisms. Do not
+  create company-, industry-, commodity- or transmission-specific variants of
+  the same event. Put those differences in description, affected_industries
+  and beneficiaries. Return an empty array when no shared event qualifies.
+
+  WRITING AND FACT RULES
+  - market_summary and market_intro must contain the same viewer-facing
+    paragraph of 3-5 concise sentences. Include an explicit S&P 500 percentage
+    and measured period, investor mood, the largest supports and the most
+    important concern.
+  - Separate positive market supports from negative pressures. Never attribute
+    cautious or bearish sentiment to positive earnings or investment.
+  - State Federal Reserve actions as expectations unless an official decision
+    has occurred. Persistent inflation alone does not establish that a rate
+    increase is expected.
+  - Avoid generic language such as "conditions are mixed," "most sectors are
+    weak" or "the sector remains relevant."
+  - Use 2-5 real decision-relevant sources. Prefer official releases,
+    government or exchange data and credible financial reporting. Never invent
+    a URL.
+
+  OUTPUT
+  Return exactly one JSON object without Markdown or commentary:
   {
     "as_of_date": "YYYY-MM-DD",
     "market_status": "STRONG | MIXED | WEAK",
@@ -280,7 +314,19 @@ prompt_market_context: |
     "weak_sectors": ["..."],
     "strong_exposures": ["..."],
     "weak_exposures": ["..."],
-    "sector_context": {"Technology": "Specific current condition"},
+    "sector_context": {
+      "Basic Materials": "Specific current condition",
+      "Communication Services": "Specific current condition",
+      "Consumer Cyclical": "Specific current condition",
+      "Consumer Defensive": "Specific current condition",
+      "Energy": "Specific current condition",
+      "Financial Services": "Specific current condition",
+      "Healthcare": "Specific current condition",
+      "Industrials": "Specific current condition",
+      "Real Estate": "Specific current condition",
+      "Technology": "Specific current condition",
+      "Utilities": "Specific current condition"
+    },
     "factor_and_theme_context": {"Value": "Specific current condition"},
     "active_risk_events": [{
       "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
@@ -291,7 +337,6 @@ prompt_market_context: |
     }],
     "sources": [{"title": "Source title", "date": "YYYY-MM-DD", "url": "https://..."}]
   }
-  Use 2-5 real decision-relevant sources. Do not invent URLs.
 
 prompt_etf_batch: |
   You are the structured ETF-research stage in a Python-owned recommendation

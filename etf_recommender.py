@@ -6027,8 +6027,8 @@ df_html = df_html.rename(
     columns={
         'Name': 'ETF Name',
         'Category': 'Sector',
-        '3M Return': '3M Return (%)',
-        '1Y Return': '1Y Return (%)',
+        '3M Return': '3 Month Return (%)',
+        '1Y Return': '1 Year Return (%)',
         'QVMScore': 'QVM Score',
     }
 )

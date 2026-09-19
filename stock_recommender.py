@@ -1828,8 +1828,20 @@ def validate_stock_research_evidence(
 
 
 def validate_market_context(data):
+    if not isinstance(data, dict):
+        raise ValueError("Market context must be a JSON object.")
+    summary = str(
+        data.get("market_summary") or data.get("market_intro") or ""
+    ).strip()
+    if not summary:
+        raise ValueError("Market context has an empty market summary.")
+    # Normalize the shared aliases so stock- and ETF-created caches hash and
+    # validate to the same downstream representation.
+    data["market_summary"] = summary
+    data["market_intro"] = summary
     required = {
-        "as_of_date", "market_status", "market_intro", "market_direction",
+        "as_of_date", "market_status", "market_summary", "market_intro",
+        "market_direction",
         "major_drivers", "macro_conditions", "strong_sectors",
         "weak_sectors", "sector_context", "active_risk_events", "sources"
     }
@@ -1838,12 +1850,34 @@ def validate_market_context(data):
         raise ValueError(f"Market context is missing fields: {sorted(missing)}")
     if data["market_status"] not in {"STRONG", "MIXED", "WEAK"}:
         raise ValueError("Market context has an invalid market_status.")
-    if not str(data["market_intro"]).strip():
-        raise ValueError("Market context has an empty market_intro.")
-    if not re.search(r"\d+(?:\.\d+)?\s*%", str(data["market_intro"])):
+    if not re.search(r"\d+(?:\.\d+)?\s*%", summary):
         raise ValueError("Market context market_intro has no S&P 500 percentage.")
+    for field in (
+            "major_drivers", "macro_conditions", "strong_sectors",
+            "weak_sectors", "strong_exposures", "weak_exposures",
+    ):
+        if field in data and not isinstance(data[field], list):
+            raise ValueError(f"Market context {field} must be an array.")
+    data.setdefault("strong_exposures", list(data.get("strong_sectors") or []))
+    data.setdefault("weak_exposures", list(data.get("weak_sectors") or []))
+    if not isinstance(data.get("factor_and_theme_context"), dict):
+        data["factor_and_theme_context"] = {}
     if not isinstance(data["sector_context"], dict):
         raise ValueError("Market context sector_context must be an object.")
+    canonical_sectors = {
+        "Basic Materials", "Communication Services", "Consumer Cyclical",
+        "Consumer Defensive", "Energy", "Financial Services", "Healthcare",
+        "Industrials", "Real Estate", "Technology", "Utilities",
+    }
+    missing_sectors = sorted(
+        sector for sector in canonical_sectors
+        if not str(data["sector_context"].get(sector, "")).strip()
+    )
+    if missing_sectors:
+        raise ValueError(
+            "Market context is missing canonical sector context: "
+            + ", ".join(missing_sectors)
+        )
     active_risk_events = data["active_risk_events"]
     if not isinstance(active_risk_events, list):
         raise ValueError("Market context active_risk_events must be an array.")
@@ -1877,7 +1911,8 @@ def validate_market_context(data):
             raise ValueError(
                 f"Market risk event {event_id} has no normalization_risk."
             )
-    validate_sources(data["sources"], "Market context")
+    validate_sources(data["sources"], "Market context", minimum=2, maximum=5)
+    return data
 
 
 ALLOWED_REVERSAL_RISKS = {
@@ -5303,6 +5338,15 @@ stock_research_cache_file = cache_file_path(config.get(
 gemini_research_cache_hours = float(
     config.get("gemini_research_cache_hours", 12)
 )
+market_context_cache_hours = float(
+    config.get("market_context_cache_hours", 12)
+)
+market_context_schema_version = int(
+    config.get("market_context_schema_version", 1)
+)
+market_context_prompt_version = int(
+    config.get("market_context_prompt_version", 1)
+)
 cache_version = int(config.get("cache_version", 1))
 final_summary_enabled = bool(config.get("final_summary_enabled", True))
 summary_thinking_budget = int(config.get("summary_thinking_budget", 4096))
@@ -5322,6 +5366,8 @@ print(
     f"{max_deferred_research_attempts_per_run}, "
     f"structural_repairs_per_stock={max_structural_repairs_per_stock}, "
     f"thinking_budget={thinking_budget}, cache_version={cache_version}, "
+    f"market_cache_contract={market_context_schema_version}/"
+    f"{market_context_prompt_version}, "
     f"cautious_floor={cautious_exposure_floor_enabled}, "
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
@@ -5527,37 +5573,70 @@ request_budget = GeminiRequestBudget(
     summary_api_maximum=max_summary_fallback_api_attempts_per_run,
 )
 
-market_prompt = (
-    config["prompt_market_context"]
-    + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
-    + "REQUIRED_SECTOR_GROUPS:\n"
-    + json.dumps(required_sector_groups, ensure_ascii=False)
-    + "\n"
+market_prompt = config["prompt_market_context"].rstrip() + (
+    f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
 )
 market_prompt_hash = stable_json_hash({
-    "cache_version": cache_version,
+    "schema_version": market_context_schema_version,
+    "prompt_version": market_context_prompt_version,
     "model": model_primary,
     "prompt": market_prompt,
 })
 market_cache = load_json_object(market_context_cache_file)
 market_context = None
 market_model = None
-
-if (
-        market_cache.get("version") == cache_version
-        and market_cache.get("prompt_hash") == market_prompt_hash
-        and market_cache.get("model") == model_primary
-        and cache_entry_is_fresh(
-            market_cache, gemini_research_cache_hours
-        )
-):
+cached_market_data = (
+    market_cache.get("data") or market_cache.get("market_context")
+    if isinstance(market_cache, dict) else None
+)
+cache_rejection_reason = None
+if not market_cache:
+    cache_rejection_reason = "file missing, empty or unreadable"
+elif market_cache.get("schema_version") != market_context_schema_version:
+    cache_rejection_reason = (
+        "schema-version mismatch "
+        f"(cached={market_cache.get('schema_version')!r}, "
+        f"expected={market_context_schema_version!r})"
+    )
+elif market_cache.get("prompt_version") != market_context_prompt_version:
+    cache_rejection_reason = (
+        "prompt-version mismatch "
+        f"(cached={market_cache.get('prompt_version')!r}, "
+        f"expected={market_context_prompt_version!r})"
+    )
+elif market_cache.get("prompt_hash") != market_prompt_hash:
+    cache_rejection_reason = "prompt-hash mismatch"
+elif market_cache.get("model") not in {model_primary, model_fallback}:
+    cache_rejection_reason = (
+        f"model mismatch (cached={market_cache.get('model')!r})"
+    )
+elif not cache_entry_is_fresh(market_cache, market_context_cache_hours):
+    age = cache_age_hours(
+        market_cache.get("created_at") or market_cache.get("timestamp")
+    )
+    cache_rejection_reason = (
+        f"expired or invalid timestamp (age_hours={age!r}, "
+        f"ttl_hours={market_context_cache_hours})"
+    )
+elif not isinstance(cached_market_data, dict):
+    cache_rejection_reason = "cached market data is missing"
+else:
     try:
-        validate_current_market_context(market_cache["market_context"])
-        market_context = market_cache["market_context"]
+        validate_current_market_context(cached_market_data)
+        market_context = cached_market_data
         market_model = market_cache["model"]
-        print(f"Using validated market context cache: {market_context_cache_file}")
+        age = cache_age_hours(
+            market_cache.get("created_at") or market_cache.get("timestamp")
+        )
+        print(
+            f"Using validated shared market context cache "
+            f"({age:.1f}h old): {market_context_cache_file}"
+        )
     except (KeyError, TypeError, ValueError) as exc:
-        print(f"Ignoring invalid market context cache: {exc}")
+        cache_rejection_reason = f"content validation failed: {exc}"
+
+if market_context is None and cache_rejection_reason:
+    print(f"Market cache not reused: {cache_rejection_reason}.")
 
 if market_context is None:
     print("\n...calling Gemini for current market context...\n")
@@ -5573,11 +5652,16 @@ if market_context is None:
         require_google_search=require_google_search,
         budget_category="market",
     )
+    now_iso = datetime.now(UTC).isoformat()
     save_json_object_atomic(market_context_cache_file, {
         "version": cache_version,
-        "created_at": datetime.now(UTC).isoformat(),
+        "schema_version": market_context_schema_version,
+        "prompt_version": market_context_prompt_version,
+        "created_at": now_iso,
+        "timestamp": now_iso,
         "prompt_hash": market_prompt_hash,
         "model": market_model,
+        "data": market_context,
         "market_context": market_context,
         "research_metadata": {
             "search_queries": market_metadata["search_queries"],

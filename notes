@@ -13,9 +13,9 @@ git update-index --assume-unchanged index.html
 
 git push origin main --force
 
-SAVED PORTFOLIOS 9/14/26:
-- stocks: INSW, TNK, SLDE, DAVE, CGAU, EXEL, CDNA, ANF, AYA, FTNT
-- etfs: XLE, DIVB, VFLO, FENY, AVLV, SCHD, VLUE, XBI, KBWB, CIBR
+SAVED PORTFOLIOS 9/19/26:
+- stocks: SLDE, FTNT, AYA, SBLK, DSVSF, CDNA, VCTR, HNGE, REPX, GSL
+- etfs: XLE, DIVB, VFLO, AVLV, XLK, XBI, SEIV, RSPT
 
 Features to add/Improvements to make:
 - remove web scraping and replace with yfinance in stock recommender, filter some here too

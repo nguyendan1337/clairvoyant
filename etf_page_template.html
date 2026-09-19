@@ -540,11 +540,16 @@
     $(document).ready(function() {
         $('.recommendations-table').each(function() {
             if (!$.fn.DataTable.isDataTable(this)) {
+                const qvmColumnIndex = $(this).find('thead th').filter(function() {
+                    return $(this).text().trim().toLowerCase() === 'qvm score';
+                }).first().index();
                 $(this).DataTable({
                     paging: true,
                     searching: true,
                     info: false,
-                    order: [[3, 'desc']]
+                    // Preserve Python's row order only when a QVM column is
+                    // absent. Both ETF tables normally sort QVM descending.
+                    order: qvmColumnIndex >= 0 ? [[qvmColumnIndex, 'desc']] : []
                 });
             }
         });

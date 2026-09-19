@@ -3877,6 +3877,12 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             elif disposition == 'SECTOR_CAPACITY':
                 status = 'NOT RESEARCHED — SECTOR CAPACITY'
                 reason = f'{max_per_sector} higher-ranked ETFs already use {sector}.'
+            elif disposition == 'FACTOR_FAMILY_CAPACITY':
+                status = 'NOT RESEARCHED — FACTOR-FAMILY CAPACITY'
+                reason = (
+                    f'{max_etfs_per_factor_family} higher-ranked ETFs already use '
+                    f'the {family} factor family.'
+                )
             elif disposition == 'PROVISIONAL_GROUP_CAP':
                 status = 'NOT RESEARCHED — PROVISIONAL GROUP CAP'
                 reason = 'Deferred to avoid over-researching one provisional group.'
@@ -4805,6 +4811,7 @@ pending_retries = []
 deferred_excess_candidates = []
 deferred_excess_symbols_this_run = set()
 sector_capacity_skipped_symbols_this_run = set()
+factor_family_capacity_skipped_symbols_this_run = set()
 quantitative_floor_skipped_symbols_this_run = set()
 research_attempts_by_symbol = {}
 structural_repairs_by_symbol = {}
@@ -4969,8 +4976,11 @@ while (
                 continue
             if lower_ranked_candidate_blocked_by_sector_capacity(
                 candidate, selected, rank_by_symbol, max_etfs_per_sector_group
-            ) or lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+            ):
                 sector_capacity_skipped_symbols_this_run.add(symbol)
+                continue
+            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+                factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             best_unresearched.append(candidate)
         best_unresearched.sort(key=scheduling_priority, reverse=True)
@@ -5082,7 +5092,7 @@ while (
             sector_capacity_skipped_symbols_this_run.add(symbol)
             continue
         if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-            sector_capacity_skipped_symbols_this_run.add(symbol)
+            factor_family_capacity_skipped_symbols_this_run.add(symbol)
             continue
         provisional = provisional_exposure_group(candidate)
         selectable_in_provisional = 0
@@ -5131,7 +5141,7 @@ while (
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
+                factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             provisional = provisional_exposure_group(candidate)
             if provisional_counts.get(provisional, 0) >= max_candidates_per_provisional_group:
@@ -5164,7 +5174,7 @@ while (
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
+                factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             record_capacity_challenger(candidate, selected, capacity_challenger_tests)
             batch.append(candidate)
@@ -5187,7 +5197,7 @@ while (
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
+                factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if len(batch) < gemini_batch_size:
                 record_capacity_challenger(candidate, selected, capacity_challenger_tests)
@@ -5214,7 +5224,7 @@ while (
                 sector_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
+                factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             record_capacity_challenger(candidate, selected, capacity_challenger_tests)
             batch.append(candidate)
@@ -5226,7 +5236,8 @@ while (
     if not batch:
         remaining_calls = request_budget.research_limit - request_budget.research_used
         actionable_remaining = []
-        blocked_remaining = []
+        sector_blocked_remaining = []
+        factor_blocked_remaining = []
         for candidate in candidate_records:
             symbol = str(candidate['Symbol']).upper()
             if symbol in research_by_symbol:
@@ -5236,7 +5247,11 @@ while (
             if lower_ranked_candidate_blocked_by_sector_capacity(
                 candidate, selected, rank_by_symbol, max_etfs_per_sector_group
             ):
-                blocked_remaining.append(symbol)
+                sector_blocked_remaining.append(symbol)
+            elif lower_ranked_candidate_blocked_by_factor_family_capacity(
+                candidate, selected
+            ):
+                factor_blocked_remaining.append(symbol)
             else:
                 actionable_remaining.append(symbol)
         print(
@@ -5244,7 +5259,8 @@ while (
             f'{len(candidate_records)} total candidates, '
             f'{len(research_by_symbol)} with validated research, '
             f'{len(selected)}/{target_selected_etfs} selectable, '
-            f'{len(blocked_remaining)} remaining candidates blocked by full sectors, '
+            f'{len(sector_blocked_remaining)} remaining candidates blocked by full sectors, '
+            f'{len(factor_blocked_remaining)} blocked by full factor families, '
             f'{len(actionable_remaining)} actionable unresearched candidates, '
             f'{remaining_calls} research calls still available.'
         )
@@ -5797,20 +5813,20 @@ remaining_unresearched = sum(
     if str(candidate['Symbol']).upper() not in research_by_symbol
 )
 actionable_unresearched = []
-capacity_blocked_unresearched = []
+sector_capacity_blocked_unresearched = []
+factor_family_blocked_unresearched = []
 for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     if symbol in research_by_symbol:
         continue
     if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
         continue
-    if (
-        lower_ranked_candidate_blocked_by_sector_capacity(
-            candidate, selected, rank_by_symbol, max_etfs_per_sector_group
-        )
-        or lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected)
+    if lower_ranked_candidate_blocked_by_sector_capacity(
+        candidate, selected, rank_by_symbol, max_etfs_per_sector_group
     ):
-        capacity_blocked_unresearched.append(symbol)
+        sector_capacity_blocked_unresearched.append(symbol)
+    elif lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+        factor_family_blocked_unresearched.append(symbol)
     else:
         actionable_unresearched.append(symbol)
 if (
@@ -5855,8 +5871,12 @@ for candidate in candidate_records:
         research_disposition[symbol] = 'VALIDATION_FAILED'
     elif symbol in transport_failed_symbols_this_run:
         research_disposition[symbol] = 'API_UNAVAILABLE'
-    elif symbol in sector_capacity_skipped_symbols_this_run:
+    elif lower_ranked_candidate_blocked_by_sector_capacity(
+        candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+    ):
         research_disposition[symbol] = 'SECTOR_CAPACITY'
+    elif lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
+        research_disposition[symbol] = 'FACTOR_FAMILY_CAPACITY'
     elif symbol in deferred_excess_symbols_this_run:
         research_disposition[symbol] = 'PROVISIONAL_GROUP_CAP'
     elif partial_portfolio and research_budget_exhausted:
@@ -6165,6 +6185,9 @@ diagnostics = {
         'sector_capacity_skipped_symbols': sorted(
             sector_capacity_skipped_symbols_this_run
         ),
+        'factor_family_capacity_skipped_symbols': sorted(
+            factor_family_capacity_skipped_symbols_this_run
+        ),
         'validated_symbols': sorted(research_by_symbol),
         'selected_symbols': [item['candidate']['Symbol'] for item in selected],
         'batches': batch_research_diagnostics,
@@ -6237,7 +6260,12 @@ print(
     + f'  max factor-family exposure: {max_etfs_per_factor_family}\n'
     f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
     f'  authoritative backfill batches: {authoritative_backfill_batches}\n'
-    f'  remaining unresearched candidates: {remaining_unresearched}' + '\n' + f'  actionable unresearched candidates: {len(actionable_unresearched)}' + '\n' + f'  capacity-blocked unresearched candidates: {len(capacity_blocked_unresearched)}'
+    f'  remaining unresearched candidates: {remaining_unresearched}\n'
+    f'  actionable unresearched candidates: {len(actionable_unresearched)}\n'
+    f'  sector-capacity-blocked unresearched candidates: '
+    f'{len(sector_capacity_blocked_unresearched)}\n'
+    f'  factor-family-blocked unresearched candidates: '
+    f'{len(factor_family_blocked_unresearched)}'
 )
 print(
     'Gemini request budget:\n'

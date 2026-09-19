@@ -120,7 +120,6 @@ class GeminiRequestBudget:
     def __init__(
         self, total, research, reserved_summary=1,
         release_summary_for_research=False, max_api_attempts=None,
-        market_api_maximum=2,
     ):
         self.total = int(total)
         self.research_limit = int(research)
@@ -136,13 +135,9 @@ class GeminiRequestBudget:
         self.max_api_attempts = int(
             total if max_api_attempts is None else max_api_attempts
         )
-        self.market_api_maximum = int(market_api_maximum)
 
     def can_reserve(self, category):
-        if (
-            self.total_used >= self.total
-            or self.api_attempts >= self.max_api_attempts
-        ):
+        if self.total_used >= self.total:
             return False
         if category == 'research':
             required_reserve = 0 if self.release_summary_for_research else self.reserved_summary
@@ -171,22 +166,6 @@ class GeminiRequestBudget:
             raise RuntimeError(
                 f'Gemini API-attempt ceiling exhausted '
                 f'({self.api_attempts}/{self.max_api_attempts}).'
-            )
-        if (
-            category == 'research'
-            and self.research_api_attempts >= self.research_limit
-        ):
-            raise RuntimeError(
-                f'ETF research API-attempt ceiling exhausted '
-                f'({self.research_api_attempts}/{self.research_limit}).'
-            )
-        if (
-            category not in {'research', 'summary'}
-            and self.context_api_attempts >= self.market_api_maximum
-        ):
-            raise RuntimeError(
-                f'ETF market-context API-attempt ceiling exhausted '
-                f'({self.context_api_attempts}/{self.market_api_maximum}).'
             )
         self.api_attempts += 1
         if category == 'research':
@@ -312,10 +291,7 @@ def is_transient_gemini_error(exc):
         '429', '503', 'resource_exhausted', 'unavailable', 'high demand',
         'deadline', 'timeout', 'temporarily', 'empty response',
         'malformed', 'jsondecode', 'expecting value', 'expecting property name',
-        'unterminated string', 'server disconnected',
-        'without sending a response', 'remote protocol error',
-        'connection reset', 'connection aborted', 'connection error',
-        'connection closed', 'broken pipe', 'try again later',
+        'unterminated string',
     ))
 
 
@@ -3574,10 +3550,7 @@ def judge_etf_research_pool(
                     # A valid JSON response with the wrong schema is structural, not
                     # transient. Repeating the same model/prompt usually reproduces it,
                     # so move directly to the fallback model instead of burning budget.
-                    if (
-                        is_daily_quota_error(exc)
-                        or not is_transient_gemini_error(exc)
-                    ):
+                    if isinstance(exc, ValueError):
                         break
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
@@ -4051,7 +4024,7 @@ def build_recommendations_table(selected):
     return (
         '<table class="recommendations-table"><thead><tr>'
         '<th>Symbol</th><th>Name</th><th>Sector</th>'
-        '<th>3 Month Return</th><th>1 Yr Return</th>'
+        '<th>3 Month Return</th><th>1 Year Return</th>'
         '<th>QVM Score</th><th>Reversal Risk</th>'
         '</tr></thead><tbody>' + ''.join(rows) + '</tbody></table>'
     )
@@ -4272,9 +4245,7 @@ initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
 classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
-classification_fallback_model = str(
-    config.get('classification_fallback_model', classification_model)
-)
+classification_fallback_model = str(config.get('classification_fallback_model', model_primary))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
@@ -4282,7 +4253,7 @@ classification_max_output_tokens = int(config.get('classification_max_output_tok
 classification_attempts = max(1, int(config.get('classification_attempts', 2)))
 max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
 max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
-max_gemini_35_calls_per_run = int(config.get('max_gemini_35_calls_per_run', 8))
+max_gemini_35_calls_per_run = int(config.get('max_gemini_35_calls_per_run', 7))
 if max_classification_api_attempts_per_run >= max_gemini_35_calls_per_run:
     raise ValueError(
         'ETF config must reserve at least one 3.5 call for the HTML summary: '
@@ -4352,9 +4323,6 @@ max_gemini_calls_per_run = config.get('max_gemini_calls_per_run', 7)
 max_etf_research_calls_per_run = config.get('max_etf_research_calls_per_run', 5)
 max_gemini_api_attempts_per_run = int(
     config.get('max_gemini_api_attempts_per_run', max_gemini_calls_per_run)
-)
-max_market_context_api_attempts_per_run = int(
-    config.get('max_market_context_api_attempts_per_run', 2)
 )
 reserved_summary_calls = config.get('reserved_summary_calls', 1)
 max_transient_api_attempts = config.get('max_transient_api_attempts', 3)
@@ -4680,7 +4648,6 @@ request_budget = GeminiRequestBudget(
     reserved_summary_calls,
     release_summary_for_research=False,
     max_api_attempts=max_gemini_api_attempts_per_run,
-    market_api_maximum=max_market_context_api_attempts_per_run,
 )
 call_diagnostics = []
 batch_research_diagnostics = []
@@ -4904,8 +4871,7 @@ initial_provisional_count = len(selected)
 provisional_portfolio_peak = max(provisional_portfolio_peak, initial_provisional_count)
 if research_by_symbol:
     research_by_symbol = safe_judge_etf_research_pool(
-        client, candidate_records, research_by_symbol, market_context,
-        force=True,
+        client, candidate_records, research_by_symbol, market_context
     )
     for call in classification_call_diagnostics:
         if call.get('success') and call.get('model') and call['model'] not in models_used:
@@ -5961,19 +5927,18 @@ if config.get('final_summary_enabled', True):
         + json.dumps(selected_summary_input, ensure_ascii=False)
     )
     summary_data = None
-    while (
-        summary_data is None
-        and summary_35_api_attempts_used < 2
-        and classification_api_attempts_used + summary_35_api_attempts_used
+    if (
+        classification_api_attempts_used + summary_35_api_attempts_used
         < max_gemini_35_calls_per_run
     ):
         summary_35_api_attempts_used += 1
         stage = 'ETF HTML summary'
-        total_35_attempt = classification_api_attempts_used + summary_35_api_attempts_used
+        total_35_attempt = (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        )
         print(
             f'Gemini 3.5 summary call {total_35_attempt}/'
-            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model}), '
-            f'attempt {summary_35_api_attempts_used}/2'
+            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
         )
         try:
             response = client.models.generate_content(
@@ -6007,17 +5972,12 @@ if config.get('final_summary_enabled', True):
                 'success': False, 'error': str(exc),
             })
             summary_data = None
-            if (
-                summary_35_api_attempts_used >= 2
-                or is_daily_quota_error(exc)
-                or not is_transient_gemini_error(exc)
-            ):
-                break
-            delay = min(max_transient_delay, initial_delay) + random.uniform(0, 3)
-            print(f'Retrying transient ETF 3.5 summary failure in {delay:.1f}s...')
-            time.sleep(delay)
+    else:
+        print(
+            'ETF 3.5 summary reservation was unavailable; trying the 2.5 fallback.'
+        )
 
-    if summary_data is None and request_budget.can_reserve('summary'):
+    if summary_data is None and request_budget.total_used < request_budget.total:
         try:
             summary_data, used_model, metadata = call_gemini_json(
                 client,
@@ -6067,8 +6027,8 @@ df_html = df_html.rename(
     columns={
         'Name': 'ETF Name',
         'Category': 'Sector',
-        '3M Return': '3M Return (%)',
-        '1Y Return': '1Y Return (%)',
+        '3M Return': '3 Month Return (%)',
+        '1Y Return': '1 Year Return (%)',
         'QVMScore': 'QVM Score',
     }
 )

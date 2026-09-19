@@ -54,8 +54,8 @@ sys.stderr = TeeStream(sys.stderr, _stock_run_log)
 CACHE_DIR = Path("caches")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
-TOTAL_RUNTIME_TIMEOUT_SECONDS = 30 * 60
-GEMINI_REQUEST_TIMEOUT_MS = 5 * 60 * 1000
+TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
+GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -3132,6 +3132,7 @@ def call_gemini_json(
         max_attempts=None,
         fallback_max_attempts=None,
         retry_output_errors=False,
+        minimum_exposed_search_queries=0,
         budget_category="general"):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
@@ -3194,6 +3195,16 @@ def call_gemini_json(
                 if require_google_search and not used_search:
                     raise ValueError(
                         "Gemini returned an ungrounded response without Google Search."
+                    )
+                if (
+                    minimum_exposed_search_queries
+                    and metadata["search_queries"]
+                    and len(metadata["search_queries"]) < minimum_exposed_search_queries
+                ):
+                    raise ValueError(
+                        f"Gemini exposed only {len(metadata['search_queries'])} "
+                        f"search queries; at least {minimum_exposed_search_queries} "
+                        "are required for this research stage."
                     )
 
                 # When query metadata is exposed, verify company-specific search
@@ -5407,13 +5418,15 @@ if (
     > max_3_5_api_calls_per_run
 ):
     raise ValueError("Gemini 3.5 category limits exceed its total API-call limit.")
-if (
-    max_2_5_market_calls_per_run
-    + max_2_5_research_calls_per_run
-    + max_2_5_summary_fallback_calls_per_run
-    > max_2_5_api_calls_per_run
+for category_name, category_limit in (
+    ("market", max_2_5_market_calls_per_run),
+    ("research", max_2_5_research_calls_per_run),
+    ("summary", max_2_5_summary_fallback_calls_per_run),
 ):
-    raise ValueError("Gemini 2.5 category limits exceed its total API-call limit.")
+    if category_limit > max_2_5_api_calls_per_run:
+        raise ValueError(
+            f"Gemini 2.5 {category_name} limit exceeds the shared total limit."
+        )
 max_research_attempts_per_stock = int(
     config.get("max_research_attempts_per_stock", 2)
 )
@@ -5434,7 +5447,9 @@ stock_research_cache_file = cache_file_path(config.get(
 gemini_research_cache_hours = float(
     config.get("gemini_research_cache_hours", 12)
 )
-cache_version = int(config.get("cache_version", 1))
+market_context_cache_hours = float(
+    config.get("market_context_cache_hours", 12)
+)
 final_summary_enabled = bool(config.get("final_summary_enabled", True))
 summary_thinking_budget = int(config.get("summary_thinking_budget", 4096))
 
@@ -5457,7 +5472,7 @@ print(
     f"deferred_research_attempts_per_run="
     f"{max_deferred_research_attempts_per_run}, "
     f"structural_repairs_per_stock={max_structural_repairs_per_stock}, "
-    f"thinking_budget={thinking_budget}, cache_version={cache_version}, "
+    f"thinking_budget={thinking_budget}, "
     f"cautious_floor={cautious_exposure_floor_enabled}, "
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
@@ -5629,9 +5644,30 @@ essential_columns_for_gemini = [
 df_gemini = top_stocks[essential_columns_for_gemini].copy().reset_index(drop=True)
 df_gemini.insert(0, "QVM Rank", range(1, len(df_gemini) + 1))
 candidate_records = dataframe_records(df_gemini)
-required_sector_groups = list(dict.fromkeys(
-    str(candidate["Sector"]) for candidate in candidate_records
-))
+CANONICAL_MARKET_SECTORS = (
+    "Basic Materials", "Communication Services", "Consumer Cyclical",
+    "Consumer Defensive", "Energy", "Financial Services", "Healthcare",
+    "Industrials", "Real Estate", "Technology", "Utilities",
+)
+MARKET_CONTEXT_SCHEMA_FIELDS = (
+    "as_of_date", "market_status", "market_summary", "market_intro",
+    "market_direction", "major_drivers", "macro_conditions",
+    "strong_sectors", "weak_sectors", "strong_exposures", "weak_exposures",
+    "sector_context", "factor_and_theme_context", "active_risk_events",
+    "sources",
+)
+STOCK_RESEARCH_EVIDENCE_FIELDS = (
+    "symbol", "research_status", "research_incomplete_reason",
+    "industry_group", "business_description", "industry_context",
+    "crypto_dependence", "current_operating_evidence",
+    "material_company_event", "reversal_risk", "risk_basis",
+    "catalyst_dependence", "mechanism_status", "normalization_probability",
+    "continuation_outlook", "durable_drivers", "temporary_drivers",
+    "reversal_mechanism", "current_fact", "probability_evidence",
+    "probability_indicator_type", "probability_basis", "material_effect",
+    "risk_time_horizon", "risk_materiality", "company_difference",
+    "primary_risk_event_id", "risk_exposure_group", "explanation", "sources",
+)
 
 
 def validate_current_market_context(data):
@@ -5642,7 +5678,7 @@ def validate_current_market_context(data):
         for key, value in context.items()
     }
     missing_sectors = [
-        sector for sector in required_sector_groups
+        sector for sector in CANONICAL_MARKET_SECTORS
         if not normalized_context.get(sector.strip().casefold())
     ]
     if missing_sectors:
@@ -5650,6 +5686,19 @@ def validate_current_market_context(data):
             "Market context is missing required sector context: "
             + ", ".join(missing_sectors)
         )
+    if not isinstance(data.get("factor_and_theme_context"), dict):
+        raise ValueError("Market context requires factor_and_theme_context object")
+    distinct_source_urls = {
+        str(source.get("url") or "").strip()
+        for source in data.get("sources") or []
+        if isinstance(source, dict) and str(source.get("url") or "").strip()
+    }
+    if len(distinct_source_urls) < 6:
+        raise ValueError("Market context requires at least 6 distinct source URLs")
+    if str(data.get("market_summary", "")).strip() != str(
+        data.get("market_intro", "")
+    ).strip():
+        raise ValueError("market_summary and market_intro must be identical")
 
 client = initialize_gemini_client()
 gemini_config = build_gemini_config(thinking_budget)
@@ -5672,40 +5721,76 @@ api_attempt_budget = GeminiApiAttemptBudget(
     },
 )
 
-market_prompt = (
-    config["prompt_market_context"]
-    + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
-    + "REQUIRED_SECTOR_GROUPS:\n"
-    + json.dumps(required_sector_groups, ensure_ascii=False)
-    + "\n"
-)
-market_prompt_hash = stable_json_hash({
-    "cache_version": cache_version,
+market_prompt_template = config["prompt_market_context"].strip()
+market_schema_hash = stable_json_hash(MARKET_CONTEXT_SCHEMA_FIELDS)
+market_contract_hash = stable_json_hash({
+    "contract": "shared_stock_etf_market_context_v1",
     "model": model_primary,
-    "prompt": market_prompt,
+    "google_search": bool(require_google_search),
+    "prompt_template": market_prompt_template,
+    "schema_hash": market_schema_hash,
 })
+market_prompt = (
+    market_prompt_template
+    + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
+)
+market_prompt_hash = stable_json_hash(market_prompt_template)
+market_file_exists = os.path.exists(market_context_cache_file)
 market_cache = load_json_object(market_context_cache_file)
+market_entries = market_cache.get("entries")
+if not isinstance(market_entries, dict):
+    market_entries = {}
+market_cache = {"file_format_version": 1, "entries": market_entries}
+market_entry = market_entries.get(market_contract_hash)
 market_context = None
 market_model = None
+market_miss_reason = "file_missing_fresh_seed" if not market_file_exists else "contract_not_cached"
+market_cache_age = None
+cache_diagnostics = {
+    "market": {
+        "path": market_context_cache_file,
+        "file_existed": market_file_exists,
+        "entries_loaded": len(market_entries),
+        "contract_hash": market_contract_hash,
+        "prompt_hash": market_prompt_hash,
+        "schema_hash": market_schema_hash,
+        "ttl_hours": market_context_cache_hours,
+        "hit": False,
+        "miss_reason": market_miss_reason,
+    },
+    "stock_research": {},
+}
+if isinstance(market_entry, dict):
+    market_cache_age = cache_age_hours(market_entry.get("created_at"))
+    if not cache_entry_is_fresh(market_entry, market_context_cache_hours):
+        market_miss_reason = "expired"
+    elif market_entry.get("model") != model_primary:
+        market_miss_reason = "model_mismatch"
+    else:
+        try:
+            validate_current_market_context(
+                market_entry.get("data") or market_entry["market_context"]
+            )
+            market_context = market_entry.get("data") or market_entry["market_context"]
+            market_model = market_entry["model"]
+            market_miss_reason = None
+        except (KeyError, TypeError, ValueError) as exc:
+            market_miss_reason = f"validation_failed: {exc}"
 
-if (
-        market_cache.get("version") == cache_version
-        and market_cache.get("prompt_hash") == market_prompt_hash
-        and market_cache.get("model") == model_primary
-        and cache_entry_is_fresh(
-            market_cache, gemini_research_cache_hours
-        )
-):
-    try:
-        validate_current_market_context(market_cache["market_context"])
-        market_context = market_cache["market_context"]
-        market_model = market_cache["model"]
-        print(f"Using validated market context cache: {market_context_cache_file}")
-    except (KeyError, TypeError, ValueError) as exc:
-        print(f"Ignoring invalid market context cache: {exc}")
+cache_diagnostics["market"].update({
+    "hit": market_context is not None,
+    "miss_reason": market_miss_reason,
+    "age_hours": market_cache_age,
+})
+print(
+    "MARKET CACHE " + ("HIT" if market_context is not None else "MISS")
+    + f" path={market_context_cache_file} entries={len(market_entries)}"
+    + f" contract={market_contract_hash[:12]} age_hours={market_cache_age}"
+    + ("" if market_miss_reason is None else f" reason={market_miss_reason}")
+)
 
 if market_context is None:
-    print("\n...calling Gemini for current market context...\n")
+    print("\n...calling Gemini for fresh shared stock/ETF market context...\n")
     market_context, market_model, market_metadata = call_gemini_json(
         client=client,
         model_primary=model_primary,
@@ -5716,19 +5801,37 @@ if market_context is None:
         validator=validate_current_market_context,
         request_budget=request_budget,
         require_google_search=require_google_search,
+        max_attempts=2,
+        retry_output_errors=True,
+        minimum_exposed_search_queries=6,
         budget_category="market",
     )
-    save_json_object_atomic(market_context_cache_file, {
-        "version": cache_version,
+    market_entries[market_contract_hash] = {
         "created_at": datetime.now(UTC).isoformat(),
+        "contract_hash": market_contract_hash,
         "prompt_hash": market_prompt_hash,
+        "schema_hash": market_schema_hash,
         "model": market_model,
+        "data": market_context,
         "market_context": market_context,
         "research_metadata": {
             "search_queries": market_metadata["search_queries"],
             "tool_tokens": market_metadata["tool_tokens"],
         },
+    }
+    save_json_object_atomic(market_context_cache_file, market_cache)
+    exposed_market_searches = len(market_metadata.get("search_queries") or [])
+    cache_diagnostics["market"].update({
+        "created": True,
+        "exposed_search_queries": exposed_market_searches,
+        "entries_after_save": len(market_entries),
     })
+    print(
+        f"MARKET CACHE SAVED contract={market_contract_hash[:12]} "
+        f"entries={len(market_entries)} exposed_search_queries={exposed_market_searches}"
+    )
+else:
+    print(f"Using validated shared market context cache: {market_context_cache_file}")
 
 market_context_hash = stable_json_hash(market_context)
 allowed_risk_event_ids = {
@@ -5738,167 +5841,182 @@ print(
     "Dynamic market risk-event catalog: "
     f"{len(allowed_risk_event_ids)} canonical event(s)."
 )
-# Output-transport wording does not change researched facts or classifications,
-# so it should not invalidate otherwise valid stock research. This preserves
-# the prior prompt hash while still applying the no-duplicate instruction to
-# every new Gemini request.
-stock_prompt_cache_text = config["prompt_stock_batch"].replace(
-    "After emitting END_STOCK_RESULT for a symbol, never emit that symbol again.\n"
-    "Do not repeat, revise, or self-correct an earlier completed result block.\n",
-    "",
-)
+
+# Grounded 2.5 evidence and market-sensitive 3.5 judgment have separate
+# contracts. Market/QVM changes can therefore refresh judgment without paying
+# for the same Google-grounded company research again.
+stock_prompt_cache_text = config["prompt_stock_batch"].strip()
+research_schema_hash = stable_json_hash(STOCK_RESEARCH_EVIDENCE_FIELDS)
 stock_prompt_hash = stable_json_hash({
-    "cache_version": cache_version,
+    "contract": "stock_grounded_research_v1",
     "model": model_primary,
+    "google_search": bool(require_google_search),
     "prompt": stock_prompt_cache_text,
-    # The cache stores the post-judgment merged result, so a judgment-schema
-    # change must invalidate stock research even when grounded research text is unchanged.
-    "judgment_prompt": config["prompt_stock_judgment"],
-    "classification_model": classification_model,
+    "schema_hash": research_schema_hash,
 })
-# The prior v6 cache key included the former judgment instructions. Reuse its
-# still-fresh grounded evidence once, then require a new 3.5 judgment for the
-# dynamically assigned return-driver group. This saves 2.5 Search quota.
-previous_judgment_stock_prompt_hash = (
-    "9523141ba91b41acb469b70c9af4ec13a10c1c95f08c25c03eeefebfaddc7d77"
-    if cache_version == 6
-    and model_primary == "gemini-2.5-flash"
-    and classification_model == "gemini-3.5-flash"
-    else None
-)
+judgment_contract_hash = stable_json_hash({
+    "contract": "stock_market_judgment_v1",
+    "model": classification_model,
+    "fallback_model": classification_fallback_model,
+    "prompt": config["prompt_stock_judgment"].strip(),
+})
+
+def stock_research_cache_key(symbol):
+    return stable_json_hash({
+        "research_contract_hash": stock_prompt_hash,
+        "symbol": str(symbol).upper(),
+    })
+
+def stock_judgment_input_hash(candidate):
+    return stable_json_hash({
+        "judgment_contract_hash": judgment_contract_hash,
+        "market_context_hash": market_context_hash,
+        "candidate": candidate,
+    })
+
+research_file_exists = os.path.exists(stock_research_cache_file)
 stock_research_cache = load_json_object(stock_research_cache_file)
-if stock_research_cache.get("version") != cache_version:
-    stock_research_cache = {
-        "version": cache_version, "entries": {}, "deferred_entries": {}
-    }
-stock_research_cache.setdefault("entries", {})
-stock_research_cache.setdefault("deferred_entries", {})
-stock_research_cache["entries"] = {
-    key: entry
-    for key, entry in stock_research_cache["entries"].items()
-    if isinstance(entry, dict)
-    and cache_entry_is_fresh(entry, gemini_research_cache_hours)
+entries_before_prune = stock_research_cache.get("entries")
+deferred_before_prune = stock_research_cache.get("deferred_entries")
+if not isinstance(entries_before_prune, dict):
+    entries_before_prune = {}
+if not isinstance(deferred_before_prune, dict):
+    deferred_before_prune = {}
+stock_research_cache = {
+    "file_format_version": 1,
+    "entries": {
+        key: entry for key, entry in entries_before_prune.items()
+        if isinstance(entry, dict)
+        and cache_entry_is_fresh(entry, gemini_research_cache_hours)
+    },
+    "deferred_entries": {
+        key: entry for key, entry in deferred_before_prune.items()
+        if isinstance(entry, dict)
+        and cache_entry_is_fresh(entry, gemini_research_cache_hours)
+    },
 }
-stock_research_cache["deferred_entries"] = {
-    key: entry
-    for key, entry in stock_research_cache["deferred_entries"].items()
-    if isinstance(entry, dict)
-    and cache_entry_is_fresh(entry, gemini_research_cache_hours)
+expired_entry_count = len(entries_before_prune) - len(stock_research_cache["entries"])
+cache_diagnostics["stock_research"] = {
+    "path": stock_research_cache_file,
+    "file_existed": research_file_exists,
+    "research_contract_hash": stock_prompt_hash,
+    "research_schema_hash": research_schema_hash,
+    "judgment_contract_hash": judgment_contract_hash,
+    "ttl_hours": gemini_research_cache_hours,
+    "entries_loaded": len(entries_before_prune),
+    "entries_fresh": len(stock_research_cache["entries"]),
+    "entries_expired": expired_entry_count,
+    "evidence_hits": 0,
+    "judgment_hits": 0,
+    "judgment_refreshes": 0,
+    "misses": 0,
+    "validation_failures": 0,
+    "miss_reasons": {},
 }
+print(
+    f"RESEARCH CACHE OPEN path={stock_research_cache_file} "
+    f"exists={research_file_exists} loaded={len(entries_before_prune)} "
+    f"fresh={len(stock_research_cache['entries'])} expired={expired_entry_count} "
+    f"contract={stock_prompt_hash[:12]}"
+)
 save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
-# Resolve every fresh stock cache entry before making any new request. This
-# allows Python to determine whether the complete portfolio can already be
-# built from prior successful calls, including lower-ranked cached candidates.
 validated_cached_research = {}
 pending_classification = {}
 global_cache_keys_by_symbol = {}
+cached_symbols_any_contract = {
+    str(entry.get("symbol") or "").upper()
+    for entry in stock_research_cache["entries"].values()
+    if isinstance(entry, dict) and entry.get("symbol")
+}
+expired_symbols = {
+    str(entry.get("symbol") or "").upper()
+    for entry in entries_before_prune.values()
+    if isinstance(entry, dict)
+    and entry.get("symbol")
+    and not cache_entry_is_fresh(entry, gemini_research_cache_hours)
+}
 for candidate in candidate_records:
     symbol = str(candidate["Symbol"]).upper()
-    cache_key = stable_json_hash({
-        "market_context_hash": market_context_hash,
-        "stock_prompt_hash": stock_prompt_hash,
-        "model": model_primary,
-        "candidate": candidate,
-    })
+    cache_key = stock_research_cache_key(symbol)
     global_cache_keys_by_symbol[symbol] = cache_key
     entry = stock_research_cache["entries"].get(cache_key)
-    if not entry and previous_judgment_stock_prompt_hash:
-        previous_cache_key = stable_json_hash({
-            "market_context_hash": market_context_hash,
-            "stock_prompt_hash": previous_judgment_stock_prompt_hash,
-            "model": model_primary,
-            "candidate": candidate,
-        })
-        previous_entry = stock_research_cache["entries"].get(previous_cache_key)
-        if (
-            isinstance(previous_entry, dict)
-            and previous_entry.get("market_context_hash") == market_context_hash
-            and previous_entry.get("candidate_hash") == stable_json_hash(candidate)
-            and previous_entry.get("stock_prompt_hash")
-            == previous_judgment_stock_prompt_hash
-            and isinstance(previous_entry.get("research"), dict)
-        ):
-            # Keep all original grounded facts and sources. The old judgment
-            # fields are ignored until the new classifier overwrites them.
-            entry = {
-                **previous_entry,
-                "research": dict(previous_entry["research"]),
-                "judgment_model": None,
-                "judged_at": None,
-                "stock_prompt_hash": stock_prompt_hash,
-            }
-            stock_research_cache["entries"][cache_key] = entry
-            print(f"Reusing grounded research for {symbol}; refreshing return-driver judgment.")
-    if not entry:
-        deferred = stock_research_cache["deferred_entries"].get(cache_key)
-        if (isinstance(deferred, dict)
-                and isinstance(deferred.get("research"), dict)
-                and "invalid continuation_strength" in str(
-                    deferred.get("validation_error") or ""
-                )):
-            # Older runs incorrectly demanded a 3.5-owned field from 2.5.
-            # Recover the grounded draft when it passes research validation.
-            draft = deferred.get("research")
-            metadata = deferred.get("research_metadata") or {}
-            try:
-                validate_stock_research_evidence(
-                    {"results": [draft]}, [candidate],
-                    minimum_sources=minimum_sources_for_candidate(
-                        metadata.get("search_queries", []), candidate
-                    ),
-                )
-            except (KeyError, TypeError, ValueError):
-                pass
-            else:
-                entry = {
-                    "created_at": datetime.now(UTC).isoformat(),
-                    "model": deferred.get("model") or model_primary,
-                    "research_model": deferred.get("model") or model_primary,
-                    "judgment_model": None,
-                    "market_context_hash": market_context_hash,
-                    "stock_prompt_hash": stock_prompt_hash,
-                    "candidate_hash": stable_json_hash(candidate),
-                    "research": draft,
-                    "research_metadata": metadata,
-                }
-                stock_research_cache["entries"][cache_key] = entry
-                stock_research_cache["deferred_entries"].pop(cache_key, None)
-                print(f"Recovered grounded research for {symbol} for 3.5 classification.")
-    if not entry:
+    if not isinstance(entry, dict):
+        if not research_file_exists:
+            reason = "file_missing_fresh_seed"
+        elif symbol in expired_symbols:
+            reason = "expired"
+        elif symbol in cached_symbols_any_contract:
+            reason = "research_contract_changed"
+        else:
+            reason = "symbol_not_cached"
+        cache_diagnostics["stock_research"]["misses"] += 1
+        cache_diagnostics["stock_research"]["miss_reasons"][reason] = (
+            cache_diagnostics["stock_research"]["miss_reasons"].get(reason, 0) + 1
+        )
+        print(f"RESEARCH CACHE MISS symbol={symbol} reason={reason}")
         continue
     try:
-        cached_result = entry["research"]
-        cached_search_queries = entry.get(
-            "research_metadata", {}
-        ).get("search_queries", [])
+        cached_result = entry.get("grounded_research") or entry["research"]
+        cached_search_queries = (entry.get("research_metadata") or {}).get(
+            "search_queries", []
+        )
         cache_minimum_sources = minimum_sources_for_candidate(
             cached_search_queries, candidate
         )
-        if entry.get("judgment_model"):
+        validate_stock_research_evidence(
+            {"results": [cached_result]}, [candidate],
+            minimum_sources=cache_minimum_sources,
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        cache_diagnostics["stock_research"]["validation_failures"] += 1
+        cache_diagnostics["stock_research"]["misses"] += 1
+        cache_diagnostics["stock_research"]["miss_reasons"]["validation_failed"] = (
+            cache_diagnostics["stock_research"]["miss_reasons"].get("validation_failed", 0) + 1
+        )
+        print(f"RESEARCH CACHE MISS symbol={symbol} reason=validation_failed detail={exc}")
+        stock_research_cache["entries"].pop(cache_key, None)
+        continue
+
+    cache_diagnostics["stock_research"]["evidence_hits"] += 1
+    expected_judgment_input_hash = stock_judgment_input_hash(candidate)
+    judgment_is_current = (
+        bool(entry.get("judgment_model"))
+        and entry.get("judgment_contract_hash") == judgment_contract_hash
+        and entry.get("judgment_input_hash") == expected_judgment_input_hash
+    )
+    if judgment_is_current:
+        try:
+            judged_result = entry["research"]
             validate_stock_batch(
-                {"results": [cached_result]}, [candidate],
+                {"results": [judged_result]}, [candidate],
                 minimum_sources=cache_minimum_sources,
                 allowed_risk_event_ids=allowed_risk_event_ids,
             )
-        else:
-            validate_stock_research_evidence(
-                {"results": [cached_result]}, [candidate],
-                minimum_sources=cache_minimum_sources,
-            )
-        if entry.get("judgment_model"):
-            validated_cached_research[symbol] = cached_result
-        else:
-            pending_classification[symbol] = cached_result
-    except (KeyError, TypeError, ValueError) as exc:
-        print(f"Ignoring invalid stock cache entry for {symbol}: {exc}")
+            validated_cached_research[symbol] = judged_result
+            cache_diagnostics["stock_research"]["judgment_hits"] += 1
+            print(f"RESEARCH CACHE HIT symbol={symbol} evidence=hit judgment=hit")
+            continue
+        except (KeyError, TypeError, ValueError) as exc:
+            print(f"RESEARCH CACHE JUDGMENT REFRESH symbol={symbol} reason=validation_failed detail={exc}")
+
+    pending_classification[symbol] = cached_result
+    entry["grounded_research"] = cached_result
+    entry["research"] = cached_result
+    entry["judgment_model"] = None
+    entry["judged_at"] = None
+    cache_diagnostics["stock_research"]["judgment_refreshes"] += 1
+    print(
+        f"RESEARCH CACHE HIT symbol={symbol} evidence=hit judgment=refresh "
+        "reason=market_candidate_or_judgment_contract_changed"
+    )
 
 save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 
 # Individual cache entries can each be structurally valid while disagreeing
 # about a shared market mechanism. Audit them together before deciding the
-# cache can fill the portfolio. An inconsistent LOW result becomes a deferred
-# draft so it receives a focused, evidence-backed correction.
+# cache can fill the portfolio. A judgment inconsistency refreshes only the
+# no-Search 3.5 layer; its still-valid grounded evidence remains reusable.
 cache_consistency_changed = False
 for symbol, cached_result in list(validated_cached_research.items()):
     comparison_results = [
@@ -5910,19 +6028,20 @@ for symbol, cached_result in list(validated_cached_research.items()):
         validate_shared_event_consistency(cached_result, comparison_results)
     except ValueError as exc:
         cache_key = global_cache_keys_by_symbol[symbol]
-        prior_entry = stock_research_cache["entries"].pop(cache_key, {})
+        prior_entry = stock_research_cache["entries"].get(cache_key, {})
+        grounded_result = prior_entry.get("grounded_research") or cached_result
         validated_cached_research.pop(symbol, None)
-        stock_research_cache["deferred_entries"][cache_key] = {
-            "created_at": datetime.now(UTC).isoformat(),
-            "model": prior_entry.get("model") or model_primary,
-            "research": cached_result,
-            "validation_error": str(exc),
-            "research_attempts": 0,
-            "repair_attempts": 0,
-            "research_metadata": prior_entry.get("research_metadata", {}),
-        }
+        pending_classification[symbol] = grounded_result
+        prior_entry.update({
+            "grounded_research": grounded_result,
+            "research": grounded_result,
+            "judgment_model": None,
+            "judged_at": None,
+        })
+        stock_research_cache["entries"][cache_key] = prior_entry
+        cache_diagnostics["stock_research"]["judgment_refreshes"] += 1
         cache_consistency_changed = True
-        print(f"Deferred inconsistent cached research for {symbol}: {exc}")
+        print(f"Refreshing inconsistent cached judgment for {symbol}: {exc}")
 
 # Cross-check individually valid cached records against one another so stale
 # issuer-fact contamination cannot survive simply because each object validates
@@ -6326,12 +6445,16 @@ def classify_pending(force=False):
                 valid_count += 1
                 validated_cached_research[symbol] = result
                 entry.update({
+                    "grounded_research": entry.get("grounded_research")
+                    or pending_classification.get(symbol),
                     "research": result,
                     "judgment_model": judge_model,
                     "judgment_fallback_used": bool(
                         judge_model and judge_model != classification_model
                     ),
                     "judged_at": datetime.now(UTC).isoformat() if judge_model else None,
+                    "judgment_contract_hash": judgment_contract_hash,
+                    "judgment_input_hash": stock_judgment_input_hash(candidate),
                 })
                 stock_research_cache["entries"][cache_key] = entry
                 research_failures_by_symbol.pop(symbol, None)
@@ -6530,12 +6653,7 @@ while batch_start < len(candidate_records) or carried_ranked_candidates:
             if queued_by_sector.get(future_sector, 0) >= future_sector_limit:
                 continue
 
-            future_cache_key = stable_json_hash({
-                "market_context_hash": market_context_hash,
-                "stock_prompt_hash": stock_prompt_hash,
-                "model": model_primary,
-                "candidate": future_candidate,
-            })
+            future_cache_key = stock_research_cache_key(future_symbol)
             future_entry = stock_research_cache["entries"].get(
                 future_cache_key
             )
@@ -6995,18 +7113,14 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                     "created_at": datetime.now(UTC).isoformat(),
                     "model": batch_model,
                     "research_model": batch_model,
-                    "judgment_model": judgment_model_used,
-                    "judgment_fallback_used": bool(
-                        judgment_model_used
-                        and judgment_model_used != classification_model
-                    ),
-                    "judged_at": (
-                        datetime.now(UTC).isoformat()
-                        if judgment_model_used else None
-                    ),
-                    "market_context_hash": market_context_hash,
-                    "stock_prompt_hash": stock_prompt_hash,
-                    "candidate_hash": stable_json_hash(candidate),
+                    "judgment_model": None,
+                    "judgment_fallback_used": False,
+                    "judged_at": None,
+                    "research_contract_hash": stock_prompt_hash,
+                    "research_schema_hash": research_schema_hash,
+                    "symbol": symbol,
+                    "identity_name": candidate.get("Name"),
+                    "grounded_research": result,
                     "research": result,
                     "research_metadata": {
                         "search_queries": batch_metadata["search_queries"],
@@ -7583,6 +7697,28 @@ print("SELECTED EVIDENCE AUDIT (missing event/date fields are unknown)")
 for audit in selected_evidence_audit:
     print("  " + json.dumps(audit, ensure_ascii=False, default=str))
 
+cache_diagnostics["market"]["file_size_bytes"] = (
+    os.path.getsize(market_context_cache_file)
+    if os.path.exists(market_context_cache_file) else 0
+)
+cache_diagnostics["stock_research"].update({
+    "entries_after_run": len(stock_research_cache.get("entries", {})),
+    "deferred_entries_after_run": len(
+        stock_research_cache.get("deferred_entries", {})
+    ),
+    "newly_researched_symbols": sorted(researched_symbols_this_run),
+    "file_size_bytes": (
+        os.path.getsize(stock_research_cache_file)
+        if os.path.exists(stock_research_cache_file) else 0
+    ),
+})
+print("CACHE EFFECTIVENESS SUMMARY")
+print("  market: " + json.dumps(cache_diagnostics["market"], default=str))
+print(
+    "  stock research: "
+    + json.dumps(cache_diagnostics["stock_research"], default=str)
+)
+
 run_report = {
     "schema_version": 2,
     "created_at": datetime.now(UTC).isoformat(),
@@ -7595,6 +7731,7 @@ run_report = {
         "models_used_this_run": list(dict.fromkeys(models_used)),
     },
     "qvm_candidate_hash": stable_json_hash(candidate_records),
+    "cache_diagnostics": cache_diagnostics,
     "benchmark_context": benchmark_context,
     "yfinance_fundamentals": yfinance_fundamentals_diagnostics,
     "request_budget": {

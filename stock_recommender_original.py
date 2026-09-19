@@ -74,7 +74,6 @@ duplicate_result_diagnostics = []
 runtime_reconciliation_diagnostics = []
 classification_call_diagnostics = []
 classification_calls_used = 0
-summary_35_api_attempts_used = 0
 yfinance_fundamentals_diagnostics = {
     "eligible_symbols": 0,
     "cache_hits": 0,
@@ -617,9 +616,7 @@ def build_gemini_config(
 
 class GeminiRequestBudget:
     def __init__(
-            self, maximum, stock_maximum=None, reserved_summary_calls=0,
-            max_api_attempts=None, market_api_maximum=1,
-            stock_api_maximum=None, summary_api_maximum=1):
+            self, maximum, stock_maximum=None, reserved_summary_calls=0):
         self.maximum = int(maximum)
         self.stock_maximum = (
             None if stock_maximum is None else int(stock_maximum)
@@ -629,18 +626,6 @@ class GeminiRequestBudget:
         self.stock_used = 0
         self.api_attempts = 0
         self.stock_api_attempts = 0
-        self.market_api_attempts = 0
-        self.summary_api_attempts = 0
-        self.max_api_attempts = int(
-            self.maximum if max_api_attempts is None else max_api_attempts
-        )
-        self.market_api_maximum = int(market_api_maximum)
-        self.stock_api_maximum = int(
-            self.stock_maximum
-            if stock_api_maximum is None and self.stock_maximum is not None
-            else stock_api_maximum
-        )
-        self.summary_api_maximum = int(summary_api_maximum)
 
     def reserve(self, stage, category="general"):
         if category == "stock" and (
@@ -674,43 +659,13 @@ class GeminiRequestBudget:
             self.stock_used += 1
 
     def record_api_attempt(self, stage, category="general"):
-        if self.api_attempts >= self.max_api_attempts:
-            raise RuntimeError(
-                f"Gemini 2.5-stage API-attempt ceiling exhausted "
-                f"({self.api_attempts}/{self.max_api_attempts}) before {stage}."
-            )
-        category_used = {
-            "market": self.market_api_attempts,
-            "stock": self.stock_api_attempts,
-            "summary": self.summary_api_attempts,
-        }.get(category)
-        category_maximum = {
-            "market": self.market_api_maximum,
-            "stock": self.stock_api_maximum,
-            "summary": self.summary_api_maximum,
-        }.get(category)
-        if (
-                category_maximum is not None
-                and category_used >= category_maximum
-        ):
-            raise RuntimeError(
-                f"Gemini {category} API-attempt ceiling exhausted "
-                f"({category_used}/{category_maximum}) before {stage}."
-            )
         self.api_attempts += 1
         if category == "stock":
             self.stock_api_attempts += 1
-        elif category == "market":
-            self.market_api_attempts += 1
-        elif category == "summary":
-            self.summary_api_attempts += 1
         print(
             f"Gemini logical request {self.used}/{self.maximum}: {stage} "
-            f"(2.5-stage API attempt {self.api_attempts}/"
-            f"{self.max_api_attempts}; stock={self.stock_api_attempts}/"
-            f"{self.stock_api_maximum}, market={self.market_api_attempts}/"
-            f"{self.market_api_maximum}, summary={self.summary_api_attempts}/"
-            f"{self.summary_api_maximum})"
+            f"(API attempt {self.api_attempts}; "
+            f"stock API attempts {self.stock_api_attempts})"
         )
 
 
@@ -4819,8 +4774,8 @@ def build_recommendations_table(selected):
         "<th>Symbol</th>",
         "<th>Stock Name</th>",
         "<th>Sector Group</th>",
-        "<th>3 Month Return (%)</th>",
-        "<th>1 Year Return (%)</th>",
+        "<th>52 Wk Change (%)</th>",
+        "<th>3 Mo Return (%)</th>",
         "<th>QVMScore</th>",
         "<th>Reversal Risk</th>",
         "</tr>",
@@ -4836,8 +4791,8 @@ def build_recommendations_table(selected):
             f"<td>{yahoo_link(symbol, symbol)}</td>",
             f"<td>{yahoo_link(symbol, candidate['Name'])}</td>",
             f"<td>{escape(str(candidate['Sector']))}</td>",
-            f"<td>{format_number(candidate.get('3M Return'))}</td>",
             f"<td>{format_number(candidate.get('52 WkChange %'))}</td>",
+            f"<td>{format_number(candidate.get('3M Return'))}</td>",
             f"<td>{format_number(candidate.get('QVMScore'))}</td>",
             f"<td><strong>{escape(research['reversal_risk'])}</strong></td>",
             "</tr>",
@@ -5121,10 +5076,6 @@ classification_model = str(config.get("classification_model", "gemini-3.5-flash"
 classification_fallback_model = str(
     config.get("classification_fallback_model", model_primary)
 )
-summary_model = str(config.get("summary_model", classification_model))
-summary_fallback_model = str(
-    config.get("summary_fallback_model", model_primary)
-)
 classification_thinking_budget = int(
     config.get("classification_thinking_budget", 8192)
 )
@@ -5135,15 +5086,6 @@ classification_attempts = max(1, int(config.get("classification_attempts", 2)))
 max_classification_calls_per_run = max(
     1, int(config.get("max_classification_calls_per_run", 8))
 )
-max_gemini_35_calls_per_run = int(
-    config.get("max_gemini_35_calls_per_run", 7)
-)
-if max_classification_calls_per_run >= max_gemini_35_calls_per_run:
-    raise ValueError(
-        "Stock config must reserve at least one 3.5 Flash call for the HTML "
-        "summary: max_classification_calls_per_run must be lower than "
-        "max_gemini_35_calls_per_run."
-    )
 classification_batch_target = max(1, int(config.get("classification_batch_target", 25)))
 classification_batch_soft_max = max(
     classification_batch_target, int(config.get("classification_batch_soft_max", 30))
@@ -5259,29 +5201,6 @@ max_gemini_calls_per_run = int(config.get("max_gemini_calls_per_run", 12))
 max_stock_research_calls_per_run = int(
     config.get("max_stock_research_calls_per_run", max_gemini_calls_per_run)
 )
-max_gemini_api_attempts_per_run = int(
-    config.get("max_gemini_api_attempts_per_run", max_gemini_calls_per_run)
-)
-max_market_context_api_attempts_per_run = int(
-    config.get("max_market_context_api_attempts_per_run", 1)
-)
-max_stock_research_api_attempts_per_run = int(config.get(
-    "max_stock_research_api_attempts_per_run",
-    max_stock_research_calls_per_run,
-))
-max_summary_fallback_api_attempts_per_run = int(
-    config.get("max_summary_fallback_api_attempts_per_run", 1)
-)
-configured_25_stage_maximum = (
-    max_market_context_api_attempts_per_run
-    + max_stock_research_api_attempts_per_run
-    + max_summary_fallback_api_attempts_per_run
-)
-if configured_25_stage_maximum > max_gemini_api_attempts_per_run:
-    raise ValueError(
-        "Stock config 2.5-stage category ceilings exceed the total Gemini "
-        "API-attempt ceiling."
-    )
 reserved_summary_calls = int(config.get("reserved_summary_calls", 1))
 max_research_attempts_per_stock = int(
     config.get("max_research_attempts_per_stock", 2)
@@ -5315,8 +5234,6 @@ print(
     f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
-    f"max_2.5_api_attempts={max_gemini_api_attempts_per_run}, "
-    f"max_3.5_api_attempts={max_gemini_35_calls_per_run}, "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
     f"deferred_research_attempts_per_run="
     f"{max_deferred_research_attempts_per_run}, "
@@ -5521,10 +5438,6 @@ request_budget = GeminiRequestBudget(
     max_gemini_calls_per_run,
     stock_maximum=max_stock_research_calls_per_run,
     reserved_summary_calls=(reserved_summary_calls if final_summary_enabled else 0),
-    max_api_attempts=max_gemini_api_attempts_per_run,
-    market_api_maximum=max_market_context_api_attempts_per_run,
-    stock_api_maximum=max_stock_research_api_attempts_per_run,
-    summary_api_maximum=max_summary_fallback_api_attempts_per_run,
 )
 
 market_prompt = (
@@ -5722,24 +5635,6 @@ for candidate in candidate_records:
                 print(f"Recovered grounded research for {symbol} for 3.5 classification.")
     if not entry:
         continue
-    if (
-            entry.get("judgment_model")
-            and entry.get("judgment_model") != classification_model
-            and isinstance(entry.get("research"), dict)
-    ):
-        # Preserve grounded 2.5 research, but never reuse a judgment produced
-        # by the former 2.5 classification fallback under the 3.5-only policy.
-        entry = {
-            **entry,
-            "research": dict(entry["research"]),
-            "judgment_model": None,
-            "judged_at": None,
-        }
-        stock_research_cache["entries"][cache_key] = entry
-        print(
-            f"Reusing grounded research for {symbol}; refreshing its "
-            f"judgment with {classification_model}."
-        )
     try:
         cached_result = entry["research"]
         cached_search_queries = entry.get(
@@ -7277,108 +7172,39 @@ if final_summary_enabled:
         + "\n\nSELECTED_STOCKS:\n"
         + json.dumps(selected_summary_input, ensure_ascii=False)
     )
-    summary_data = None
-    if (
-            classification_calls_used + summary_35_api_attempts_used
-            < max_gemini_35_calls_per_run
-    ):
-        summary_35_api_attempts_used += 1
-        summary_35_attempt = (
-            classification_calls_used + summary_35_api_attempts_used
+    try:
+        summary_data, summary_model, _ = call_gemini_json(
+            client=client,
+            model_primary=model_primary,
+            # Summary generation is lower-risk than stock classification, so
+            # Flash-Lite is an acceptable fallback when Flash has exhausted its
+            # separate per-model daily quota.
+            model_fallback=model_fallback,
+            gemini_config=build_gemini_config(
+                summary_thinking_budget, enable_search=False
+            ),
+            prompt=summary_prompt,
+            stage="final HTML summary",
+            validator=lambda data: validate_summary_response(data, selected),
+            request_budget=request_budget,
+            require_google_search=False,
+            max_attempts=1,
+            budget_category="summary",
         )
-        stage = "final HTML summary"
+        recommendations_summary = summary_data["summary_html"].strip()
+        models_used.append(summary_model)
+        print("Using Gemini-written HTML summary.")
+    except Exception as exc:
         print(
-            f"Gemini 3.5 summary call {summary_35_attempt}/"
-            f"{max_gemini_35_calls_per_run}: {stage} ({summary_model})"
+            "Warning: final Gemini summary was unavailable; using the "
+            f"deterministic Python summary instead: {exc}"
         )
-        try:
-            response = client.models.generate_content(
-                model=summary_model,
-                config=build_gemini_config(
-                    summary_thinking_budget, enable_search=False
-                ),
-                contents=summary_prompt,
-            )
-            response_text = getattr(response, "text", None)
-            if not response_text or not response_text.strip():
-                raise ValueError("Empty response from Gemini.")
-            summary_data = parse_json_response(response_text)
-            validate_summary_response(summary_data, selected)
-            recommendations_summary = summary_data["summary_html"].strip()
-            metadata = extract_gemini_metadata(response)
-            print_gemini_metadata(stage, metadata)
-            models_used.append(summary_model)
-            gemini_attempt_diagnostics.append({
-                "stage": stage,
-                "model": summary_model,
-                "model_family": "3.5",
-                "attempt": summary_35_attempt,
-                "category": "summary",
-                "search_enabled": False,
-                "status": "SUCCESS",
-                "prompt_tokens": metadata.get("prompt_tokens"),
-                "tool_tokens": metadata.get("tool_tokens"),
-                "cached_tokens": metadata.get("cached_tokens"),
-                "thinking_tokens": metadata.get("thinking_tokens"),
-                "output_tokens": metadata.get("output_tokens"),
-                "total_tokens": metadata.get("total_tokens"),
-            })
-            print("Using Gemini 3.5-written HTML summary.")
-        except Exception as exc:
-            gemini_attempt_diagnostics.append({
-                "stage": stage,
-                "model": summary_model,
-                "model_family": "3.5",
-                "attempt": summary_35_attempt,
-                "category": "summary",
-                "search_enabled": False,
-                "status": "ERROR",
-                "error_type": type(exc).__name__,
-                "error": str(exc),
-            })
-            print(f"Gemini 3.5 HTML summary was unavailable: {exc}")
-            summary_data = None
-    else:
-        print(
-            "Gemini 3.5 summary reservation was unavailable; trying the "
-            "reserved 2.5 fallback."
-        )
-
-    if summary_data is None:
-        try:
-            summary_data, used_summary_model, _ = call_gemini_json(
-                client=client,
-                model_primary=summary_fallback_model,
-                model_fallback=summary_fallback_model,
-                gemini_config=build_gemini_config(
-                    summary_thinking_budget, enable_search=False
-                ),
-                prompt=summary_prompt,
-                stage="final HTML summary fallback",
-                validator=lambda data: validate_summary_response(data, selected),
-                request_budget=request_budget,
-                require_google_search=False,
-                max_attempts=1,
-                budget_category="summary",
-            )
-            recommendations_summary = summary_data["summary_html"].strip()
-            models_used.append(used_summary_model)
-            print("Using Gemini 2.5 fallback HTML summary.")
-        except Exception as exc:
-            print(
-                "Warning: Gemini summary fallback was unavailable; using the "
-                f"deterministic Python summary instead: {exc}"
-            )
 
 # The full QVM table remains the complete ranked candidate stream.
 output_columns = [
-    'Symbol', 'Name', 'Sector', '3M Return', '52 WkChange %', 'QVMScore'
+    'Symbol', 'Name', 'Sector', '52 WkChange %', '3M Return', 'QVMScore'
 ]
 df_html = df_gemini[output_columns].copy()
-df_html = df_html.rename(columns={
-    '3M Return': '3 Month Return (%)',
-    '52 WkChange %': '1 Year Return (%)',
-})
 df_html["_RawSymbol"] = df_html["Symbol"].astype(str)
 df_html["Symbol"] = df_html["Symbol"].apply(
     lambda symbol: yahoo_link(symbol, symbol)
@@ -7477,8 +7303,6 @@ run_report = {
         "research_fallback": model_fallback,
         "classification_primary": classification_model,
         "classification_fallback": classification_fallback_model,
-        "summary_primary": summary_model,
-        "summary_fallback": summary_fallback_model,
         "models_used_this_run": list(dict.fromkeys(models_used)),
     },
     "qvm_candidate_hash": stable_json_hash(candidate_records),
@@ -7491,16 +7315,8 @@ run_report = {
         "stock_maximum": request_budget.stock_maximum,
         "api_attempts": request_budget.api_attempts,
         "stock_api_attempts": request_budget.stock_api_attempts,
-        "market_api_attempts": request_budget.market_api_attempts,
-        "summary_fallback_api_attempts": request_budget.summary_api_attempts,
-        "api_attempt_limit": request_budget.max_api_attempts,
         "classification_api_attempts_used": classification_calls_used,
         "classification_api_attempts_maximum": max_classification_calls_per_run,
-        "summary_35_api_attempts_used": summary_35_api_attempts_used,
-        "total_35_api_attempts": (
-            classification_calls_used + summary_35_api_attempts_used
-        ),
-        "max_gemini_35_calls_per_run": max_gemini_35_calls_per_run,
     },
     "gemini_call_ledger": gemini_attempt_diagnostics,
     "successful_gemini_metadata": gemini_call_diagnostics,
@@ -7563,23 +7379,6 @@ print(f"  requests used: {request_budget.used}/{request_budget.maximum}")
 print(
     f"  stock research calls: {request_budget.stock_used}/"
     f"{request_budget.stock_maximum}"
-)
-print(
-    f"  Gemini 2.5-stage API attempts: {request_budget.api_attempts}/"
-    f"{request_budget.max_api_attempts} "
-    f"(market={request_budget.market_api_attempts}/"
-    f"{request_budget.market_api_maximum}, research="
-    f"{request_budget.stock_api_attempts}/{request_budget.stock_api_maximum}, "
-    f"summary fallback={request_budget.summary_api_attempts}/"
-    f"{request_budget.summary_api_maximum})"
-)
-print(
-    f"  Gemini 3.5 API attempts: "
-    f"{classification_calls_used + summary_35_api_attempts_used}/"
-    f"{max_gemini_35_calls_per_run} "
-    f"(classification={classification_calls_used}/"
-    f"{max_classification_calls_per_run}, summary="
-    f"{summary_35_api_attempts_used}/1)"
 )
 print(f"  newly validated stocks: {len(newly_validated_symbols)}")
 if stock_call_diagnostics:

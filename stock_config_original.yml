@@ -17,19 +17,11 @@ model_fallback: gemini-2.5-flash-lite
 # Gemini 3.5 Flash is the primary no-Search risk judge. If it is unavailable,
 # the same evidence packet is judged by 2.5 Flash without Search.
 classification_model: gemini-3.5-flash
-# Keep judgment on 3.5 Flash so classification can never consume the separate
-# 2.5 Flash research and summary-fallback allowance.
-classification_fallback_model: gemini-3.5-flash
-# The normal summary uses the seventh 3.5 Flash call. If it fails, make one
-# final attempt with the eighth, reserved 2.5 Flash call.
-summary_model: gemini-3.5-flash
-summary_fallback_model: gemini-2.5-flash
+classification_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
 classification_attempts: 2
-# Retries count toward these hard API-attempt ceilings.
-max_classification_calls_per_run: 6
-max_gemini_35_calls_per_run: 7
+max_classification_calls_per_run: 8
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
@@ -69,15 +61,9 @@ excluded_crypto_dependence:
   - PRIMARY
 thinking_budget: 12288
 require_google_search: true
-max_gemini_calls_per_run: 8
+max_gemini_calls_per_run: 7
 # Search/research budget remains separate from no-Search 3.5 judgment calls.
-max_stock_research_calls_per_run: 6
-# Hard 2.5-stage ceiling across market context, research, fallback summary, and
-# retries: at most 1 market + 6 research + 1 summary fallback call.
-max_gemini_api_attempts_per_run: 8
-max_market_context_api_attempts_per_run: 1
-max_stock_research_api_attempts_per_run: 6
-max_summary_fallback_api_attempts_per_run: 1
+max_stock_research_calls_per_run: 5
 reserved_summary_calls: 1
 max_validation_rounds: 4
 max_research_attempts_per_stock: 2

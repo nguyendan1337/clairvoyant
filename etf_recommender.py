@@ -4024,7 +4024,7 @@ def build_recommendations_table(selected):
     return (
         '<table class="recommendations-table"><thead><tr>'
         '<th>Symbol</th><th>Name</th><th>Sector</th>'
-        '<th>3 Month Return</th><th>1 Yr Return</th>'
+        '<th>3 Month Return</th><th>1 Year Return</th>'
         '<th>QVM Score</th><th>Reversal Risk</th>'
         '</tr></thead><tbody>' + ''.join(rows) + '</tbody></table>'
     )

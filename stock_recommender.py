@@ -74,7 +74,6 @@ duplicate_result_diagnostics = []
 runtime_reconciliation_diagnostics = []
 classification_call_diagnostics = []
 classification_calls_used = 0
-summary_35_api_attempts_used = 0
 yfinance_fundamentals_diagnostics = {
     "eligible_symbols": 0,
     "cache_hits": 0,
@@ -617,9 +616,7 @@ def build_gemini_config(
 
 class GeminiRequestBudget:
     def __init__(
-            self, maximum, stock_maximum=None, reserved_summary_calls=0,
-            max_api_attempts=None, market_api_maximum=1,
-            stock_api_maximum=None, summary_api_maximum=1):
+            self, maximum, stock_maximum=None, reserved_summary_calls=0):
         self.maximum = int(maximum)
         self.stock_maximum = (
             None if stock_maximum is None else int(stock_maximum)
@@ -629,18 +626,6 @@ class GeminiRequestBudget:
         self.stock_used = 0
         self.api_attempts = 0
         self.stock_api_attempts = 0
-        self.market_api_attempts = 0
-        self.summary_api_attempts = 0
-        self.max_api_attempts = int(
-            self.maximum if max_api_attempts is None else max_api_attempts
-        )
-        self.market_api_maximum = int(market_api_maximum)
-        self.stock_api_maximum = int(
-            self.stock_maximum
-            if stock_api_maximum is None and self.stock_maximum is not None
-            else stock_api_maximum
-        )
-        self.summary_api_maximum = int(summary_api_maximum)
 
     def reserve(self, stage, category="general"):
         if category == "stock" and (
@@ -674,43 +659,13 @@ class GeminiRequestBudget:
             self.stock_used += 1
 
     def record_api_attempt(self, stage, category="general"):
-        if self.api_attempts >= self.max_api_attempts:
-            raise RuntimeError(
-                f"Gemini 2.5-stage API-attempt ceiling exhausted "
-                f"({self.api_attempts}/{self.max_api_attempts}) before {stage}."
-            )
-        category_used = {
-            "market": self.market_api_attempts,
-            "stock": self.stock_api_attempts,
-            "summary": self.summary_api_attempts,
-        }.get(category)
-        category_maximum = {
-            "market": self.market_api_maximum,
-            "stock": self.stock_api_maximum,
-            "summary": self.summary_api_maximum,
-        }.get(category)
-        if (
-                category_maximum is not None
-                and category_used >= category_maximum
-        ):
-            raise RuntimeError(
-                f"Gemini {category} API-attempt ceiling exhausted "
-                f"({category_used}/{category_maximum}) before {stage}."
-            )
         self.api_attempts += 1
         if category == "stock":
             self.stock_api_attempts += 1
-        elif category == "market":
-            self.market_api_attempts += 1
-        elif category == "summary":
-            self.summary_api_attempts += 1
         print(
             f"Gemini logical request {self.used}/{self.maximum}: {stage} "
-            f"(2.5-stage API attempt {self.api_attempts}/"
-            f"{self.max_api_attempts}; stock={self.stock_api_attempts}/"
-            f"{self.stock_api_maximum}, market={self.market_api_attempts}/"
-            f"{self.market_api_maximum}, summary={self.summary_api_attempts}/"
-            f"{self.summary_api_maximum})"
+            f"(API attempt {self.api_attempts}; "
+            f"stock API attempts {self.stock_api_attempts})"
         )
 
 
@@ -1828,20 +1783,8 @@ def validate_stock_research_evidence(
 
 
 def validate_market_context(data):
-    if not isinstance(data, dict):
-        raise ValueError("Market context must be a JSON object.")
-    summary = str(
-        data.get("market_summary") or data.get("market_intro") or ""
-    ).strip()
-    if not summary:
-        raise ValueError("Market context has an empty market summary.")
-    # Normalize the shared aliases so stock- and ETF-created caches hash and
-    # validate to the same downstream representation.
-    data["market_summary"] = summary
-    data["market_intro"] = summary
     required = {
-        "as_of_date", "market_status", "market_summary", "market_intro",
-        "market_direction",
+        "as_of_date", "market_status", "market_intro", "market_direction",
         "major_drivers", "macro_conditions", "strong_sectors",
         "weak_sectors", "sector_context", "active_risk_events", "sources"
     }
@@ -1850,34 +1793,12 @@ def validate_market_context(data):
         raise ValueError(f"Market context is missing fields: {sorted(missing)}")
     if data["market_status"] not in {"STRONG", "MIXED", "WEAK"}:
         raise ValueError("Market context has an invalid market_status.")
-    if not re.search(r"\d+(?:\.\d+)?\s*%", summary):
+    if not str(data["market_intro"]).strip():
+        raise ValueError("Market context has an empty market_intro.")
+    if not re.search(r"\d+(?:\.\d+)?\s*%", str(data["market_intro"])):
         raise ValueError("Market context market_intro has no S&P 500 percentage.")
-    for field in (
-            "major_drivers", "macro_conditions", "strong_sectors",
-            "weak_sectors", "strong_exposures", "weak_exposures",
-    ):
-        if field in data and not isinstance(data[field], list):
-            raise ValueError(f"Market context {field} must be an array.")
-    data.setdefault("strong_exposures", list(data.get("strong_sectors") or []))
-    data.setdefault("weak_exposures", list(data.get("weak_sectors") or []))
-    if not isinstance(data.get("factor_and_theme_context"), dict):
-        data["factor_and_theme_context"] = {}
     if not isinstance(data["sector_context"], dict):
         raise ValueError("Market context sector_context must be an object.")
-    canonical_sectors = {
-        "Basic Materials", "Communication Services", "Consumer Cyclical",
-        "Consumer Defensive", "Energy", "Financial Services", "Healthcare",
-        "Industrials", "Real Estate", "Technology", "Utilities",
-    }
-    missing_sectors = sorted(
-        sector for sector in canonical_sectors
-        if not str(data["sector_context"].get(sector, "")).strip()
-    )
-    if missing_sectors:
-        raise ValueError(
-            "Market context is missing canonical sector context: "
-            + ", ".join(missing_sectors)
-        )
     active_risk_events = data["active_risk_events"]
     if not isinstance(active_risk_events, list):
         raise ValueError("Market context active_risk_events must be an array.")
@@ -1911,8 +1832,7 @@ def validate_market_context(data):
             raise ValueError(
                 f"Market risk event {event_id} has no normalization_risk."
             )
-    validate_sources(data["sources"], "Market context", minimum=2, maximum=5)
-    return data
+    validate_sources(data["sources"], "Market context")
 
 
 ALLOWED_REVERSAL_RISKS = {
@@ -3371,7 +3291,7 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 5
+TOP_QVM_CACHE_VERSION = 6
 
 
 def load_top_qvm_cache(benchmark_context=None, hurdle_tolerance_pct=0.25):
@@ -3882,7 +3802,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     Function defaults are approximately balanced. The production caller
     explicitly uses configurable continuation-oriented weights (currently
-    Quality 50%, Value 15%, and Momentum 35%).
+    Quality 45%, Value 10%, and Momentum 45%).
     """
 
     df = df.copy()
@@ -3966,6 +3886,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         'GrossMargin',
         'OperatingMargin',
         'RevenueGrowth',
+        'EarningsGrowth',
         'FCFMargin',
         'OperatingCashFlowMargin',
         'CurrentRatio',
@@ -4854,8 +4775,8 @@ def build_recommendations_table(selected):
         "<th>Symbol</th>",
         "<th>Stock Name</th>",
         "<th>Sector Group</th>",
-        "<th>3 Month Return (%)</th>",
-        "<th>1 Year Return (%)</th>",
+        "<th>52 Wk Change (%)</th>",
+        "<th>3 Mo Return (%)</th>",
         "<th>QVMScore</th>",
         "<th>Reversal Risk</th>",
         "</tr>",
@@ -4871,8 +4792,8 @@ def build_recommendations_table(selected):
             f"<td>{yahoo_link(symbol, symbol)}</td>",
             f"<td>{yahoo_link(symbol, candidate['Name'])}</td>",
             f"<td>{escape(str(candidate['Sector']))}</td>",
-            f"<td>{format_number(candidate.get('3M Return'))}</td>",
             f"<td>{format_number(candidate.get('52 WkChange %'))}</td>",
+            f"<td>{format_number(candidate.get('3M Return'))}</td>",
             f"<td>{format_number(candidate.get('QVMScore'))}</td>",
             f"<td><strong>{escape(research['reversal_risk'])}</strong></td>",
             "</tr>",
@@ -5156,10 +5077,6 @@ classification_model = str(config.get("classification_model", "gemini-3.5-flash"
 classification_fallback_model = str(
     config.get("classification_fallback_model", model_primary)
 )
-summary_model = str(config.get("summary_model", classification_model))
-summary_fallback_model = str(
-    config.get("summary_fallback_model", model_primary)
-)
 classification_thinking_budget = int(
     config.get("classification_thinking_budget", 8192)
 )
@@ -5170,15 +5087,6 @@ classification_attempts = max(1, int(config.get("classification_attempts", 2)))
 max_classification_calls_per_run = max(
     1, int(config.get("max_classification_calls_per_run", 8))
 )
-max_gemini_35_calls_per_run = int(
-    config.get("max_gemini_35_calls_per_run", 7)
-)
-if max_classification_calls_per_run >= max_gemini_35_calls_per_run:
-    raise ValueError(
-        "Stock config must reserve at least one 3.5 Flash call for the HTML "
-        "summary: max_classification_calls_per_run must be lower than "
-        "max_gemini_35_calls_per_run."
-    )
 classification_batch_target = max(1, int(config.get("classification_batch_target", 25)))
 classification_batch_soft_max = max(
     classification_batch_target, int(config.get("classification_batch_soft_max", 30))
@@ -5294,29 +5202,6 @@ max_gemini_calls_per_run = int(config.get("max_gemini_calls_per_run", 12))
 max_stock_research_calls_per_run = int(
     config.get("max_stock_research_calls_per_run", max_gemini_calls_per_run)
 )
-max_gemini_api_attempts_per_run = int(
-    config.get("max_gemini_api_attempts_per_run", max_gemini_calls_per_run)
-)
-max_market_context_api_attempts_per_run = int(
-    config.get("max_market_context_api_attempts_per_run", 1)
-)
-max_stock_research_api_attempts_per_run = int(config.get(
-    "max_stock_research_api_attempts_per_run",
-    max_stock_research_calls_per_run,
-))
-max_summary_fallback_api_attempts_per_run = int(
-    config.get("max_summary_fallback_api_attempts_per_run", 1)
-)
-configured_25_stage_maximum = (
-    max_market_context_api_attempts_per_run
-    + max_stock_research_api_attempts_per_run
-    + max_summary_fallback_api_attempts_per_run
-)
-if configured_25_stage_maximum > max_gemini_api_attempts_per_run:
-    raise ValueError(
-        "Stock config 2.5-stage category ceilings exceed the total Gemini "
-        "API-attempt ceiling."
-    )
 reserved_summary_calls = int(config.get("reserved_summary_calls", 1))
 max_research_attempts_per_stock = int(
     config.get("max_research_attempts_per_stock", 2)
@@ -5338,15 +5223,6 @@ stock_research_cache_file = cache_file_path(config.get(
 gemini_research_cache_hours = float(
     config.get("gemini_research_cache_hours", 12)
 )
-market_context_cache_hours = float(
-    config.get("market_context_cache_hours", 12)
-)
-market_context_schema_version = int(
-    config.get("market_context_schema_version", 1)
-)
-market_context_prompt_version = int(
-    config.get("market_context_prompt_version", 1)
-)
 cache_version = int(config.get("cache_version", 1))
 final_summary_enabled = bool(config.get("final_summary_enabled", True))
 summary_thinking_budget = int(config.get("summary_thinking_budget", 4096))
@@ -5359,15 +5235,11 @@ print(
     f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
-    f"max_2.5_api_attempts={max_gemini_api_attempts_per_run}, "
-    f"max_3.5_api_attempts={max_gemini_35_calls_per_run}, "
     f"research_attempts_per_stock={max_research_attempts_per_stock}, "
     f"deferred_research_attempts_per_run="
     f"{max_deferred_research_attempts_per_run}, "
     f"structural_repairs_per_stock={max_structural_repairs_per_stock}, "
     f"thinking_budget={thinking_budget}, cache_version={cache_version}, "
-    f"market_cache_contract={market_context_schema_version}/"
-    f"{market_context_prompt_version}, "
     f"cautious_floor={cautious_exposure_floor_enabled}, "
     f"normal_candidates={normal_candidate_limit}, "
     f"max_candidates={max_candidates}, "
@@ -5464,6 +5336,7 @@ cols_for_eval = [
     'EV_EBITDA',
     'PEG',
     'RevenueGrowth',
+    'EarningsGrowth',
     'OperatingMargin',
     'FCFMargin',
     '3M Return',
@@ -5567,76 +5440,39 @@ request_budget = GeminiRequestBudget(
     max_gemini_calls_per_run,
     stock_maximum=max_stock_research_calls_per_run,
     reserved_summary_calls=(reserved_summary_calls if final_summary_enabled else 0),
-    max_api_attempts=max_gemini_api_attempts_per_run,
-    market_api_maximum=max_market_context_api_attempts_per_run,
-    stock_api_maximum=max_stock_research_api_attempts_per_run,
-    summary_api_maximum=max_summary_fallback_api_attempts_per_run,
 )
 
-market_prompt = config["prompt_market_context"].rstrip() + (
-    f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
+market_prompt = (
+    config["prompt_market_context"]
+    + f"\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n"
+    + "REQUIRED_SECTOR_GROUPS:\n"
+    + json.dumps(required_sector_groups, ensure_ascii=False)
+    + "\n"
 )
 market_prompt_hash = stable_json_hash({
-    "schema_version": market_context_schema_version,
-    "prompt_version": market_context_prompt_version,
+    "cache_version": cache_version,
     "model": model_primary,
     "prompt": market_prompt,
 })
 market_cache = load_json_object(market_context_cache_file)
 market_context = None
 market_model = None
-cached_market_data = (
-    market_cache.get("data") or market_cache.get("market_context")
-    if isinstance(market_cache, dict) else None
-)
-cache_rejection_reason = None
-if not market_cache:
-    cache_rejection_reason = "file missing, empty or unreadable"
-elif market_cache.get("schema_version") != market_context_schema_version:
-    cache_rejection_reason = (
-        "schema-version mismatch "
-        f"(cached={market_cache.get('schema_version')!r}, "
-        f"expected={market_context_schema_version!r})"
-    )
-elif market_cache.get("prompt_version") != market_context_prompt_version:
-    cache_rejection_reason = (
-        "prompt-version mismatch "
-        f"(cached={market_cache.get('prompt_version')!r}, "
-        f"expected={market_context_prompt_version!r})"
-    )
-elif market_cache.get("prompt_hash") != market_prompt_hash:
-    cache_rejection_reason = "prompt-hash mismatch"
-elif market_cache.get("model") not in {model_primary, model_fallback}:
-    cache_rejection_reason = (
-        f"model mismatch (cached={market_cache.get('model')!r})"
-    )
-elif not cache_entry_is_fresh(market_cache, market_context_cache_hours):
-    age = cache_age_hours(
-        market_cache.get("created_at") or market_cache.get("timestamp")
-    )
-    cache_rejection_reason = (
-        f"expired or invalid timestamp (age_hours={age!r}, "
-        f"ttl_hours={market_context_cache_hours})"
-    )
-elif not isinstance(cached_market_data, dict):
-    cache_rejection_reason = "cached market data is missing"
-else:
-    try:
-        validate_current_market_context(cached_market_data)
-        market_context = cached_market_data
-        market_model = market_cache["model"]
-        age = cache_age_hours(
-            market_cache.get("created_at") or market_cache.get("timestamp")
-        )
-        print(
-            f"Using validated shared market context cache "
-            f"({age:.1f}h old): {market_context_cache_file}"
-        )
-    except (KeyError, TypeError, ValueError) as exc:
-        cache_rejection_reason = f"content validation failed: {exc}"
 
-if market_context is None and cache_rejection_reason:
-    print(f"Market cache not reused: {cache_rejection_reason}.")
+if (
+        market_cache.get("version") == cache_version
+        and market_cache.get("prompt_hash") == market_prompt_hash
+        and market_cache.get("model") == model_primary
+        and cache_entry_is_fresh(
+            market_cache, gemini_research_cache_hours
+        )
+):
+    try:
+        validate_current_market_context(market_cache["market_context"])
+        market_context = market_cache["market_context"]
+        market_model = market_cache["model"]
+        print(f"Using validated market context cache: {market_context_cache_file}")
+    except (KeyError, TypeError, ValueError) as exc:
+        print(f"Ignoring invalid market context cache: {exc}")
 
 if market_context is None:
     print("\n...calling Gemini for current market context...\n")
@@ -5652,16 +5488,11 @@ if market_context is None:
         require_google_search=require_google_search,
         budget_category="market",
     )
-    now_iso = datetime.now(UTC).isoformat()
     save_json_object_atomic(market_context_cache_file, {
         "version": cache_version,
-        "schema_version": market_context_schema_version,
-        "prompt_version": market_context_prompt_version,
-        "created_at": now_iso,
-        "timestamp": now_iso,
+        "created_at": datetime.now(UTC).isoformat(),
         "prompt_hash": market_prompt_hash,
         "model": market_model,
-        "data": market_context,
         "market_context": market_context,
         "research_metadata": {
             "search_queries": market_metadata["search_queries"],
@@ -5806,24 +5637,6 @@ for candidate in candidate_records:
                 print(f"Recovered grounded research for {symbol} for 3.5 classification.")
     if not entry:
         continue
-    if (
-            entry.get("judgment_model")
-            and entry.get("judgment_model") != classification_model
-            and isinstance(entry.get("research"), dict)
-    ):
-        # Preserve grounded 2.5 research, but never reuse a judgment produced
-        # by the former 2.5 classification fallback under the 3.5-only policy.
-        entry = {
-            **entry,
-            "research": dict(entry["research"]),
-            "judgment_model": None,
-            "judged_at": None,
-        }
-        stock_research_cache["entries"][cache_key] = entry
-        print(
-            f"Reusing grounded research for {symbol}; refreshing its "
-            f"judgment with {classification_model}."
-        )
     try:
         cached_result = entry["research"]
         cached_search_queries = entry.get(
@@ -7361,108 +7174,39 @@ if final_summary_enabled:
         + "\n\nSELECTED_STOCKS:\n"
         + json.dumps(selected_summary_input, ensure_ascii=False)
     )
-    summary_data = None
-    if (
-            classification_calls_used + summary_35_api_attempts_used
-            < max_gemini_35_calls_per_run
-    ):
-        summary_35_api_attempts_used += 1
-        summary_35_attempt = (
-            classification_calls_used + summary_35_api_attempts_used
+    try:
+        summary_data, summary_model, _ = call_gemini_json(
+            client=client,
+            model_primary=model_primary,
+            # Summary generation is lower-risk than stock classification, so
+            # Flash-Lite is an acceptable fallback when Flash has exhausted its
+            # separate per-model daily quota.
+            model_fallback=model_fallback,
+            gemini_config=build_gemini_config(
+                summary_thinking_budget, enable_search=False
+            ),
+            prompt=summary_prompt,
+            stage="final HTML summary",
+            validator=lambda data: validate_summary_response(data, selected),
+            request_budget=request_budget,
+            require_google_search=False,
+            max_attempts=1,
+            budget_category="summary",
         )
-        stage = "final HTML summary"
+        recommendations_summary = summary_data["summary_html"].strip()
+        models_used.append(summary_model)
+        print("Using Gemini-written HTML summary.")
+    except Exception as exc:
         print(
-            f"Gemini 3.5 summary call {summary_35_attempt}/"
-            f"{max_gemini_35_calls_per_run}: {stage} ({summary_model})"
+            "Warning: final Gemini summary was unavailable; using the "
+            f"deterministic Python summary instead: {exc}"
         )
-        try:
-            response = client.models.generate_content(
-                model=summary_model,
-                config=build_gemini_config(
-                    summary_thinking_budget, enable_search=False
-                ),
-                contents=summary_prompt,
-            )
-            response_text = getattr(response, "text", None)
-            if not response_text or not response_text.strip():
-                raise ValueError("Empty response from Gemini.")
-            summary_data = parse_json_response(response_text)
-            validate_summary_response(summary_data, selected)
-            recommendations_summary = summary_data["summary_html"].strip()
-            metadata = extract_gemini_metadata(response)
-            print_gemini_metadata(stage, metadata)
-            models_used.append(summary_model)
-            gemini_attempt_diagnostics.append({
-                "stage": stage,
-                "model": summary_model,
-                "model_family": "3.5",
-                "attempt": summary_35_attempt,
-                "category": "summary",
-                "search_enabled": False,
-                "status": "SUCCESS",
-                "prompt_tokens": metadata.get("prompt_tokens"),
-                "tool_tokens": metadata.get("tool_tokens"),
-                "cached_tokens": metadata.get("cached_tokens"),
-                "thinking_tokens": metadata.get("thinking_tokens"),
-                "output_tokens": metadata.get("output_tokens"),
-                "total_tokens": metadata.get("total_tokens"),
-            })
-            print("Using Gemini 3.5-written HTML summary.")
-        except Exception as exc:
-            gemini_attempt_diagnostics.append({
-                "stage": stage,
-                "model": summary_model,
-                "model_family": "3.5",
-                "attempt": summary_35_attempt,
-                "category": "summary",
-                "search_enabled": False,
-                "status": "ERROR",
-                "error_type": type(exc).__name__,
-                "error": str(exc),
-            })
-            print(f"Gemini 3.5 HTML summary was unavailable: {exc}")
-            summary_data = None
-    else:
-        print(
-            "Gemini 3.5 summary reservation was unavailable; trying the "
-            "reserved 2.5 fallback."
-        )
-
-    if summary_data is None:
-        try:
-            summary_data, used_summary_model, _ = call_gemini_json(
-                client=client,
-                model_primary=summary_fallback_model,
-                model_fallback=summary_fallback_model,
-                gemini_config=build_gemini_config(
-                    summary_thinking_budget, enable_search=False
-                ),
-                prompt=summary_prompt,
-                stage="final HTML summary fallback",
-                validator=lambda data: validate_summary_response(data, selected),
-                request_budget=request_budget,
-                require_google_search=False,
-                max_attempts=1,
-                budget_category="summary",
-            )
-            recommendations_summary = summary_data["summary_html"].strip()
-            models_used.append(used_summary_model)
-            print("Using Gemini 2.5 fallback HTML summary.")
-        except Exception as exc:
-            print(
-                "Warning: Gemini summary fallback was unavailable; using the "
-                f"deterministic Python summary instead: {exc}"
-            )
 
 # The full QVM table remains the complete ranked candidate stream.
 output_columns = [
-    'Symbol', 'Name', 'Sector', '3M Return', '52 WkChange %', 'QVMScore'
+    'Symbol', 'Name', 'Sector', '52 WkChange %', '3M Return', 'QVMScore'
 ]
 df_html = df_gemini[output_columns].copy()
-df_html = df_html.rename(columns={
-    '3M Return': '3 Month Return (%)',
-    '52 WkChange %': '1 Year Return (%)',
-})
 df_html["_RawSymbol"] = df_html["Symbol"].astype(str)
 df_html["Symbol"] = df_html["Symbol"].apply(
     lambda symbol: yahoo_link(symbol, symbol)
@@ -7561,8 +7305,6 @@ run_report = {
         "research_fallback": model_fallback,
         "classification_primary": classification_model,
         "classification_fallback": classification_fallback_model,
-        "summary_primary": summary_model,
-        "summary_fallback": summary_fallback_model,
         "models_used_this_run": list(dict.fromkeys(models_used)),
     },
     "qvm_candidate_hash": stable_json_hash(candidate_records),
@@ -7575,16 +7317,8 @@ run_report = {
         "stock_maximum": request_budget.stock_maximum,
         "api_attempts": request_budget.api_attempts,
         "stock_api_attempts": request_budget.stock_api_attempts,
-        "market_api_attempts": request_budget.market_api_attempts,
-        "summary_fallback_api_attempts": request_budget.summary_api_attempts,
-        "api_attempt_limit": request_budget.max_api_attempts,
         "classification_api_attempts_used": classification_calls_used,
         "classification_api_attempts_maximum": max_classification_calls_per_run,
-        "summary_35_api_attempts_used": summary_35_api_attempts_used,
-        "total_35_api_attempts": (
-            classification_calls_used + summary_35_api_attempts_used
-        ),
-        "max_gemini_35_calls_per_run": max_gemini_35_calls_per_run,
     },
     "gemini_call_ledger": gemini_attempt_diagnostics,
     "successful_gemini_metadata": gemini_call_diagnostics,
@@ -7647,23 +7381,6 @@ print(f"  requests used: {request_budget.used}/{request_budget.maximum}")
 print(
     f"  stock research calls: {request_budget.stock_used}/"
     f"{request_budget.stock_maximum}"
-)
-print(
-    f"  Gemini 2.5-stage API attempts: {request_budget.api_attempts}/"
-    f"{request_budget.max_api_attempts} "
-    f"(market={request_budget.market_api_attempts}/"
-    f"{request_budget.market_api_maximum}, research="
-    f"{request_budget.stock_api_attempts}/{request_budget.stock_api_maximum}, "
-    f"summary fallback={request_budget.summary_api_attempts}/"
-    f"{request_budget.summary_api_maximum})"
-)
-print(
-    f"  Gemini 3.5 API attempts: "
-    f"{classification_calls_used + summary_35_api_attempts_used}/"
-    f"{max_gemini_35_calls_per_run} "
-    f"(classification={classification_calls_used}/"
-    f"{max_classification_calls_per_run}, summary="
-    f"{summary_35_api_attempts_used}/1)"
 )
 print(f"  newly validated stocks: {len(newly_validated_symbols)}")
 if stock_call_diagnostics:

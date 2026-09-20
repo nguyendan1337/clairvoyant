@@ -249,6 +249,54 @@ prompt_stock_judgment: |
   - SEVERE: current evidence strongly indicates the continuation thesis is
     breaking or is overwhelmingly dependent on a reversing condition.
 
+  RISK FIELD CONSISTENCY
+  Return risk_basis, current_fact, probability_evidence and material_effect
+  together with the final labels. Reassess these fields from this candidate's
+  supplied evidence instead of inheriting a research-stage rationale after
+  changing its judgment. Quote or closely summarize supplied facts without
+  inventing metrics, dates, events or evidence.
+
+  A HYPOTHETICAL mechanism can support MODERATE for an independent entry,
+  concentration or binary-event concern only when all of these hold:
+  - entry_reversal_risk is MODERATE, or business_concentration/binary_event_risk
+    is MODERATE or HIGH;
+  - current_fact identifies the specific existing exposure, probability_evidence
+    explains why it makes this particular downside path credible, and
+    material_effect describes the material consequence;
+  - risk_time_horizon is 0_3_MONTHS, 3_6_MONTHS or 6_12_MONTHS, risk_materiality
+    is MODERATE or HIGH, and continuation_outlook is CONTINUATION_MORE_LIKELY;
+  - primary_reversal_channel is CATALYST_EXHAUSTION, VALUATION_RERATING,
+    BINARY_EVENT or MOMENTUM_FRAGILITY. FUNDAMENTAL_DETERIORATION may use this
+    exception only for a documented concentration or binary-event exposure.
+  Generic sector risk, valuation alone, ordinary volatility or a hypothetical
+  consequence without a current exposure fact does not satisfy this exception.
+  A plausible exposure does not establish an adverse change: use
+  probability_indicator_type NONE and probability_basis NONE when no current
+  adverse change is established. When there is no separate operating-risk
+  basis, risk_basis is NONE; the channel and causal-chain fields describe the
+  independent entry/concentration concern.
+
+  Outside that exception, NORMALIZED_OPERATING_DETERIORATION at MODERATE or
+  higher requires ACTIVE or UNUSUALLY_PROBABLE plus a current adverse indicator
+  supported by COMPANY_REPORTED_CHANGE, OBSERVABLE_MARKET_CHANGE or
+  REGULATORY_OR_CONTRACT_ACTION. The existing cautious temporary-dependence
+  floor remains: a material temporary operating driver can justify MODERATE
+  with HYPOTHETICAL, NOT_ESTABLISHED and CONTINUATION_MORE_LIKELY before an
+  adverse change begins. Identify that operating driver and its material effect.
+
+  NONRECURRING ACCOUNTING COMPARISONS
+  An asset-sale gain, settlement, refund, tax benefit or other one-time
+  accounting item disappearing from the comparison period does not by itself
+  establish deterioration in recurring operations. Judge the recurring
+  business and independent entry risks separately. If that comparison is the
+  only concern, use NONRECURRING_COMPARISON_ONLY with LOW risk. A separately
+  evidenced operating deterioration, financing consequence, customer exposure
+  or entry risk must retain its own risk level and applicable risk basis.
+  Do not use the accounting gain as evidence for that independent mechanism.
+  Do not assume a transaction has no ongoing operating consequences. If the
+  supplied evidence cannot resolve the concern, state the uncertainty without
+  inventing facts or automatically lowering the risk.
+
   CONTINUATION STRENGTH
   Judge the affirmative evidence that the stock can continue outperforming the
   configured benchmarks over the next 6-12 months. This is separate from
@@ -275,6 +323,9 @@ prompt_stock_judgment: |
   level must include classification_change_reason and material_new_evidence.
   If a prior concrete mechanism disappears, explicitly explain why it no longer
   applies; wording differences are not evidence of a changed risk.
+  Correct a prior judgment that violates the current rules even if its facts
+  are unchanged. Explain the rule correction in classification_change_reason
+  and use null for material_new_evidence when there is no new evidence.
 
   PEER CONSISTENCY
   Compare candidates sharing the same economic driver/risk event. Similar
@@ -313,49 +364,26 @@ prompt_stock_judgment: |
   return, analyst price target, or LOW risk alone is insufficient. Use UNCERTAIN
   when that affirmative case is not supported; do not invent missing evidence.
 
-  STRICT ENUM CONTRACT
-  Before returning JSON, validate every result against these exact vocabularies:
-  - business_reversal_risk, entry_reversal_risk, reversal_risk:
-    MINIMAL, LOW, MODERATE, ELEVATED, or SEVERE. Never use HIGH for these fields.
-  - business_concentration, binary_event_risk, catalyst_dependence,
-    risk_materiality: LOW, MODERATE, or HIGH.
-  - benchmark_outperformance_outlook: LIKELY, UNCERTAIN, or UNLIKELY.
-  - continuation_strength: STRONG, ADEQUATE, or WEAK.
-  - primary_reversal_channel: TEMPORARY_DRIVER_NORMALIZATION,
-    FUNDAMENTAL_DETERIORATION, CATALYST_EXHAUSTION, VALUATION_RERATING,
-    BINARY_EVENT, or MOMENTUM_FRAGILITY.
-  - risk_basis: NONE, NORMALIZED_OPERATING_DETERIORATION,
-    TEMPORARY_DRIVER_NORMALIZATION, or NONRECURRING_COMPARISON_ONLY.
-  - mechanism_status: NONE, HYPOTHETICAL, ACTIVE, or UNUSUALLY_PROBABLE.
-  - normalization_probability: NOT_APPLICABLE, NOT_ESTABLISHED,
-    REASONABLY_PROBABLE, or AT_LEAST_AS_LIKELY.
-  - continuation_outlook: CONTINUATION_MORE_LIKELY,
-    REVERSAL_AT_LEAST_AS_LIKELY, or THESIS_BROKEN.
-  - probability_indicator_type: NONE, GUIDANCE_REDUCTION, ORDER_CONTRACTION,
-    UTILIZATION_DECLINE, PRICE_OR_MARGIN_COMPRESSION, CAPACITY_INCREASE,
-    CONTRACT_EXPIRY, INVENTORY_CHANGE, REGULATORY_ACTION,
-    FORWARD_MARKET_CHANGE, or OTHER_CURRENT_INDICATOR.
-  - probability_basis: COMPANY_REPORTED_CHANGE, OBSERVABLE_MARKET_CHANGE,
-    REGULATORY_OR_CONTRACT_ACTION, EXTERNAL_EXPECTATION_ONLY, or NONE.
-  - risk_time_horizon: 0_3_MONTHS, 3_6_MONTHS, 6_12_MONTHS, LONGER, or null.
-  Return every required key once for every supplied candidate. Do not substitute
-  synonyms such as HIGH for ELEVATED, MEDIUM for MODERATE, or free-form labels.
-
   OUTPUT
   Return exactly one JSON object with a results array in candidate order. Each
   result must include: symbol, business_reversal_risk, entry_reversal_risk,
   reversal_risk, business_concentration, binary_event_risk,
   benchmark_outperformance_outlook, benchmark_outperformance_basis,
-  continuation_strength,
+  continuation_strength, risk_basis, current_fact, probability_evidence,
+  material_effect,
   primary_reversal_channel, reversal_mechanism, continuation_outlook,
   mechanism_status, normalization_probability, catalyst_dependence,
   probability_indicator_type, probability_basis, risk_time_horizon,
   risk_materiality, primary_risk_event_id, risk_exposure_group,
   classification_change_reason, material_new_evidence, and explanation.
   Preserve source-backed research meaning. Do not return sources.
-  Immediately before responding, self-check candidate coverage, required keys,
-  exact enum spelling, and cross-field consistency. Correct the JSON silently;
-  return no commentary outside the single JSON object.
+  All fields are strings, except use JSON null for absent current_fact,
+  probability_evidence, material_effect, primary_reversal_channel,
+  risk_time_horizon, primary_risk_event_id, risk_exposure_group,
+  classification_change_reason or material_new_evidence. Never omit a field.
+  Use only the exact allowed enum values. In particular, continuation_strength
+  must be STRONG, ADEQUATE or WEAK. Check every candidate for enum spelling and
+  causal-chain consistency before returning the batch.
 
 prompt_stock_batch: |
   You are an expert U.S. stock analyst with real-time Google Search. Evaluate

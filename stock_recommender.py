@@ -74,6 +74,7 @@ duplicate_result_diagnostics = []
 runtime_reconciliation_diagnostics = []
 classification_call_diagnostics = []
 classification_calls_used = 0
+classification_schema_unavailable = False
 yfinance_fundamentals_diagnostics = {
     "eligible_symbols": 0,
     "cache_hits": 0,
@@ -597,7 +598,8 @@ def initialize_gemini_client():
 
 
 def build_gemini_config(
-        thinking_budget, enable_search=True, max_output_tokens=None):
+        thinking_budget, enable_search=True, max_output_tokens=None,
+        response_schema=None):
     """Create a low-variance Gemini configuration."""
     tools = None
     if enable_search:
@@ -611,6 +613,9 @@ def build_gemini_config(
     }
     if max_output_tokens is not None:
         options["max_output_tokens"] = int(max_output_tokens)
+    if response_schema is not None:
+        options["response_mime_type"] = "application/json"
+        options["response_schema"] = response_schema
     return types.GenerateContentConfig(**options)
 
 
@@ -1311,7 +1316,7 @@ def judge_stock_research_batch(
     A per-batch retry cap prevents one outage from consuming the run-wide
     classification budget needed by later batches.
     """
-    global classification_calls_used
+    global classification_calls_used, classification_schema_unavailable
     if not research_results:
         return research_results, None
     if classification_calls_used >= max_classification_calls_per_run:
@@ -1404,6 +1409,13 @@ def judge_stock_research_batch(
             f"({classification_model}, attempt {attempt}/{attempts})"
         )
         try:
+            judgment_config = build_stock_judgment_config()
+        except (TypeError, ValueError) as exc:
+            last_error = exc
+            print(f"Classification configuration failed before an API call: {exc}")
+            break
+        structured_output = bool(getattr(judgment_config, "response_schema", None))
+        try:
             api_attempt_budget.reserve(
                 classification_model, "classification", stage
             )
@@ -1419,12 +1431,10 @@ def judge_stock_research_batch(
         try:
             response = client.models.generate_content(
                 model=classification_model,
-                config=build_gemini_config(
-                    classification_thinking_budget,
-                    enable_search=False,
-                    max_output_tokens=classification_max_output_tokens,
-                ),
-                contents=prompt,
+                config=judgment_config,
+                contents=(prompt if structured_output else prompt
+                          + "\n\nEXACT_JUDGMENT_ENUM_VALUES:\n"
+                          + json.dumps(STOCK_JUDGMENT_ENUMS)),
             )
             text = getattr(response, "text", None)
             if not text or not text.strip():
@@ -1459,28 +1469,20 @@ def judge_stock_research_batch(
                     "the missing research for later classification."
                 )
 
-            allowed = {
-                "business_reversal_risk", "entry_reversal_risk",
-                "reversal_risk", "risk_basis", "catalyst_dependence",
-                "business_concentration", "binary_event_risk",
-                "benchmark_outperformance_outlook",
-                "benchmark_outperformance_basis", "continuation_strength",
-                "mechanism_status", "normalization_probability",
-                "continuation_outlook", "probability_indicator_type",
-                "probability_basis", "risk_time_horizon",
-                "risk_materiality", "primary_risk_event_id",
-                "risk_exposure_group", "reversal_mechanism",
-                "probability_evidence", "material_effect", "explanation",
-                "primary_reversal_channel", "classification_change_reason",
-                "material_new_evidence",
-            }
+            allowed = set(STOCK_JUDGMENT_FIELDS).difference({"symbol"})
             merged = []
+            invalid_patch_symbols = []
             for symbol in expected:
                 draft = by_symbol.get(symbol)
                 if draft is None or symbol not in patch_by_symbol:
                     continue
                 result = dict(draft)
                 patch = patch_by_symbol[symbol]
+                try:
+                    validate_stock_judgment_patch(patch)
+                except ValueError as exc:
+                    result["_judgment_patch_error"] = str(exc)
+                    invalid_patch_symbols.append(symbol)
                 for field in allowed:
                     if field in patch:
                         result[field] = patch[field]
@@ -1494,9 +1496,11 @@ def judge_stock_research_batch(
                 "symbols": [item["symbol"] for item in compact_candidates],
                 "returned_symbols": [item["symbol"] for item in merged],
                 "missing_symbols": missing,
+                "invalid_patch_symbols": invalid_patch_symbols,
+                "structured_output": structured_output,
                 "fallback": False,
                 "success": True,
-                "status": "PARTIAL" if missing else "SUCCESS",
+                "status": "PARTIAL" if missing or invalid_patch_symbols else "SUCCESS",
             })
             gemini_attempt_diagnostics.append({
                 "stage": "stock_judgment",
@@ -1504,8 +1508,9 @@ def judge_stock_research_batch(
                 "attempt": attempt,
                 "category": "classification",
                 "search_enabled": False,
+                "structured_output": structured_output,
                 "symbols": [item["symbol"] for item in compact_candidates],
-                "status": "PARTIAL" if missing else "SUCCESS",
+                "status": "PARTIAL" if missing or invalid_patch_symbols else "SUCCESS",
             })
             return merged, classification_model
         except Exception as exc:
@@ -1518,6 +1523,7 @@ def judge_stock_research_batch(
                 "symbols": [item["symbol"] for item in compact_candidates],
                 "fallback": False,
                 "success": False,
+                "structured_output": structured_output,
                 "status": "ERROR",
                 "error": str(exc),
                 "transient": transient_error,
@@ -1535,6 +1541,14 @@ def judge_stock_research_batch(
                 "transient": transient_error,
             })
             print(f"Warning: {stage} failed: {exc}")
+            if structured_output and is_judgment_schema_compatibility_error(exc):
+                classification_schema_unavailable = True
+                print(
+                    "The classification API rejected structured output support; "
+                    "using the JSON prompt with strict local validation for "
+                    "remaining attempts. Existing call limits still apply."
+                )
+                continue
             if not transient_error:
                 print(
                     "Classification failure is not transient; opening the "
@@ -2004,6 +2018,163 @@ REVERSAL_RISK_ORDER = {
     "SEVERE": 4,
 }
 
+# Shared by the API schema and local patch validation. This classification
+# vocabulary is deliberately outside the grounded research cache contract.
+STOCK_JUDGMENT_ENUMS = {
+    "business_reversal_risk": tuple(REVERSAL_RISK_ORDER),
+    "entry_reversal_risk": tuple(REVERSAL_RISK_ORDER),
+    "reversal_risk": tuple(REVERSAL_RISK_ORDER),
+    "business_concentration": ("LOW", "MODERATE", "HIGH"),
+    "binary_event_risk": ("LOW", "MODERATE", "HIGH"),
+    "benchmark_outperformance_outlook": ("LIKELY", "UNCERTAIN", "UNLIKELY"),
+    "continuation_strength": ("STRONG", "ADEQUATE", "WEAK"),
+    "risk_basis": (
+        "NONE", "NORMALIZED_OPERATING_DETERIORATION",
+        "TEMPORARY_DRIVER_NORMALIZATION", "NONRECURRING_COMPARISON_ONLY",
+    ),
+    "primary_reversal_channel": (
+        "TEMPORARY_DRIVER_NORMALIZATION", "FUNDAMENTAL_DETERIORATION",
+        "CATALYST_EXHAUSTION", "VALUATION_RERATING", "BINARY_EVENT", "MOMENTUM_FRAGILITY",
+    ),
+    "mechanism_status": ("NONE", "HYPOTHETICAL", "ACTIVE", "UNUSUALLY_PROBABLE"),
+    "normalization_probability": (
+        "NOT_APPLICABLE", "NOT_ESTABLISHED", "REASONABLY_PROBABLE", "AT_LEAST_AS_LIKELY",
+    ),
+    "continuation_outlook": (
+        "CONTINUATION_MORE_LIKELY", "REVERSAL_AT_LEAST_AS_LIKELY", "THESIS_BROKEN",
+    ),
+    "catalyst_dependence": ("LOW", "MODERATE", "HIGH"),
+    "probability_indicator_type": (
+        "NONE", "GUIDANCE_REDUCTION", "ORDER_CONTRACTION", "UTILIZATION_DECLINE",
+        "PRICE_OR_MARGIN_COMPRESSION", "CAPACITY_INCREASE", "CONTRACT_EXPIRY",
+        "INVENTORY_CHANGE", "REGULATORY_ACTION", "FORWARD_MARKET_CHANGE",
+        "OTHER_CURRENT_INDICATOR",
+    ),
+    "probability_basis": (
+        "COMPANY_REPORTED_CHANGE", "OBSERVABLE_MARKET_CHANGE",
+        "REGULATORY_OR_CONTRACT_ACTION", "EXTERNAL_EXPECTATION_ONLY", "NONE",
+    ),
+    "risk_time_horizon": ("0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS", "LONGER"),
+    "risk_materiality": ("LOW", "MODERATE", "HIGH"),
+}
+STOCK_JUDGMENT_TEXT_FIELDS = (
+    "benchmark_outperformance_basis", "reversal_mechanism", "current_fact",
+    "probability_evidence", "material_effect", "primary_risk_event_id",
+    "risk_exposure_group", "classification_change_reason", "material_new_evidence",
+    "explanation",
+)
+STOCK_JUDGMENT_NULLABLE_FIELDS = {
+    "primary_reversal_channel", "risk_time_horizon", "current_fact",
+    "probability_evidence", "material_effect", "primary_risk_event_id",
+    "risk_exposure_group", "classification_change_reason", "material_new_evidence",
+}
+STOCK_JUDGMENT_FIELDS = ("symbol", *STOCK_JUDGMENT_ENUMS, *STOCK_JUDGMENT_TEXT_FIELDS)
+STOCK_JUDGMENT_VALIDATION_VERSION = 2
+
+
+def stock_judgment_response_schema():
+    """Use the SDK's simple Schema subset without extra dependencies."""
+    properties = {}
+    for field in STOCK_JUDGMENT_FIELDS:
+        definition = {"type": "STRING"}
+        if field in STOCK_JUDGMENT_ENUMS:
+            definition["enum"] = list(STOCK_JUDGMENT_ENUMS[field])
+        if field in STOCK_JUDGMENT_NULLABLE_FIELDS:
+            definition["nullable"] = True
+        properties[field] = definition
+    return {
+        "type": "OBJECT",
+        "properties": {"results": {
+            "type": "ARRAY",
+            "items": {"type": "OBJECT", "properties": properties,
+                      "required": list(STOCK_JUDGMENT_FIELDS)},
+        }},
+        "required": ["results"],
+    }
+
+
+def validate_stock_judgment_patch(patch):
+    """Prevent incomplete patches from inheriting stale decision evidence."""
+    missing = [field for field in STOCK_JUDGMENT_FIELDS if field not in patch]
+    if missing:
+        raise ValueError("Judgment omitted required fields: " + ", ".join(missing))
+    for field in STOCK_JUDGMENT_FIELDS:
+        value = patch[field]
+        if value is None and field in STOCK_JUDGMENT_NULLABLE_FIELDS:
+            continue
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"Judgment has invalid {field}: {value!r}")
+        if field in STOCK_JUDGMENT_ENUMS and value not in STOCK_JUDGMENT_ENUMS[field]:
+            raise ValueError(f"Judgment has invalid {field}: {value!r}")
+
+
+def is_judgment_schema_compatibility_error(exc):
+    """Only explicit schema errors may use the existing JSON-prompt fallback."""
+    if not (isinstance(exc, (TypeError, ValueError)) or getattr(exc, "code", None) == 400):
+        return False
+    message = re.sub(r"[^a-z0-9]+", "", str(exc).lower())
+    return any(marker in message for marker in (
+        "responseschema", "responsejsonschema", "responsemimetype", "structuredoutput",
+    )) and any(marker in message for marker in (
+        "notsupported", "unsupported", "unknownfield", "unknownname",
+        "unexpectedkeyword", "extrainputsarenotpermitted", "toocomplex", "toomanystates",
+    ))
+
+
+def build_stock_judgment_config():
+    """Check SDK compatibility before spending a classification call."""
+    global classification_schema_unavailable
+    options = dict(enable_search=False, max_output_tokens=classification_max_output_tokens)
+    if not classification_schema_unavailable:
+        try:
+            return build_gemini_config(
+                classification_thinking_budget,
+                response_schema=stock_judgment_response_schema(), **options,
+            )
+        except (TypeError, ValueError) as exc:
+            if not is_judgment_schema_compatibility_error(exc):
+                raise
+            classification_schema_unavailable = True
+            print("Classification SDK cannot use the response schema; using "
+                  "the JSON prompt with strict local enum validation.")
+    return build_gemini_config(classification_thinking_budget, **options)
+
+
+def has_material_entry_or_concentration_risk(result):
+    return bool(
+        REVERSAL_RISK_ORDER.get(result.get("entry_reversal_risk"), 0)
+        >= REVERSAL_RISK_ORDER["MODERATE"]
+        or result.get("business_concentration") in {"MODERATE", "HIGH"}
+        or result.get("binary_event_risk") in {"MODERATE", "HIGH"}
+    )
+
+
+def supported_hypothetical_entry_risk(result):
+    """A MODERATE entry concern needs an explicit current causal chain."""
+    evidence_present = all(
+        isinstance(result.get(field), str)
+        and result[field].strip().upper() not in {"", "NONE", "NULL", "N/A", "NAN"}
+        for field in ("current_fact", "probability_evidence", "material_effect")
+    )
+    channel = result.get("primary_reversal_channel")
+    supported_channel = channel in {
+        "CATALYST_EXHAUSTION", "VALUATION_RERATING", "BINARY_EVENT", "MOMENTUM_FRAGILITY",
+    } or (channel == "FUNDAMENTAL_DETERIORATION" and (
+        result.get("business_concentration") in {"MODERATE", "HIGH"}
+        or result.get("binary_event_risk") in {"MODERATE", "HIGH"}
+    ))
+    return bool(
+        combined_reversal_risk(result) == "MODERATE"
+        and has_material_entry_or_concentration_risk(result)
+        and supported_channel
+        and result.get("risk_basis") in {"NONE", "NORMALIZED_OPERATING_DETERIORATION"}
+        and result.get("mechanism_status") == "HYPOTHETICAL"
+        and result.get("continuation_outlook") == "CONTINUATION_MORE_LIKELY"
+        and result.get("risk_materiality") in {"MODERATE", "HIGH"}
+        and result.get("risk_time_horizon") in {"0_3_MONTHS", "3_6_MONTHS", "6_12_MONTHS"}
+        and evidence_present
+    )
+
 
 def validate_stock_batch_structure(data, expected_candidates):
     """Allow partial batches while rejecting duplicate or unexpected symbols."""
@@ -2325,7 +2496,7 @@ def validate_stock_batch(
         continuation_strength = str(
             result.get("continuation_strength") or ""
         ).strip().upper()
-        if continuation_strength not in {"STRONG", "ADEQUATE", "WEAK"}:
+        if continuation_strength not in STOCK_JUDGMENT_ENUMS["continuation_strength"]:
             raise ValueError(
                 f"{symbol} has invalid continuation_strength "
                 f"{continuation_strength!r}."
@@ -2718,7 +2889,8 @@ def validate_stock_batch(
         result["probability_basis"] = probability_basis
 
         exposure_floor = bool(
-            cautious_exposure_floor_applies(
+            reversal_risk in {"MINIMAL", "LOW", "MODERATE"}
+            and cautious_exposure_floor_applies(
                 result,
                 cautious_exposure_floor_enabled,
                 cautious_exposure_floor_min_dependence,
@@ -2771,33 +2943,21 @@ def validate_stock_batch(
             str(result.get("primary_reversal_channel") or "").upper(),
         ).strip("_")
         result["primary_reversal_channel"] = primary_reversal_channel or None
-        entry_or_concentration_floor = bool(
-            REVERSAL_RISK_ORDER.get(reversal_risk, 0)
-            >= REVERSAL_RISK_ORDER["MODERATE"]
-            and (
-                REVERSAL_RISK_ORDER.get(
-                    result.get("entry_reversal_risk"), 0
-                ) >= REVERSAL_RISK_ORDER["MODERATE"]
-                or result.get("business_concentration") in {"MODERATE", "HIGH"}
-                or result.get("binary_event_risk") in {"MODERATE", "HIGH"}
+        entry_or_concentration_floor = supported_hypothetical_entry_risk(result)
+
+        # Rejudge conflicting accounting interpretations from preserved
+        # evidence; never automatically erase an independent entry risk.
+        if reversal_risk in evidence_required_risks and (
+            risk_basis == "NONRECURRING_COMPARISON_ONLY"
+            or (risk_basis == "TEMPORARY_DRIVER_NORMALIZATION"
+                and has_nonrecurring_temporary_item(temporary_drivers))
+        ):
+            raise ValueError(
+                f"{symbol} material risk relies on a nonrecurring comparison; "
+                "reclassify recurring business and independent entry risk "
+                "from cached evidence. A disappearing accounting gain alone "
+                "is not operating deterioration."
             )
-            and primary_reversal_channel in {
-                "CATALYST_EXHAUSTION", "VALUATION_RERATING", "BINARY_EVENT",
-                "MOMENTUM_FRAGILITY", "FUNDAMENTAL_DETERIORATION",
-            }
-            and str(result.get("material_effect") or "").strip()
-        )
-        if entry_or_concentration_floor and not reversal_evidence:
-            reversal_evidence = " ".join(
-                part for part in (
-                    str(result.get("reversal_mechanism") or "").strip(),
-                    str(result.get("material_effect") or "").strip(),
-                ) if part
-            )
-            result["reversal_evidence"] = reversal_evidence
-            if risk_materiality == "LOW":
-                risk_materiality = "MODERATE"
-                result["risk_materiality"] = risk_materiality
 
         reconciliation_reason = None
         if (
@@ -2805,22 +2965,7 @@ def validate_stock_batch(
                 and not exposure_floor
                 and not entry_or_concentration_floor
         ):
-            if (
-                    risk_basis == "TEMPORARY_DRIVER_NORMALIZATION"
-                    and has_nonrecurring_temporary_item(temporary_drivers)
-            ):
-                # Refunds, settlements and similar comparison adjustments are
-                # not operating catalysts. This correction uses the existing
-                # researched fields and must not trigger another search.
-                risk_basis = "NONRECURRING_COMPARISON_ONLY"
-                temporary_drivers = []
-                result["risk_basis"] = risk_basis
-                result["temporary_drivers"] = temporary_drivers
-                reconciliation_reason = (
-                    "a nonrecurring comparison item was treated as a temporary "
-                    "operating driver"
-                )
-            elif probability_indicator_type == "NONE":
+            if probability_indicator_type == "NONE":
                 reconciliation_reason = (
                     "no qualifying current probability indicator"
                 )
@@ -2847,6 +2992,12 @@ def validate_stock_batch(
                 )
 
         if reconciliation_reason:
+            if has_material_entry_or_concentration_risk(result):
+                raise ValueError(
+                    f"{symbol} material entry/concentration risk lacks a "
+                    f"supported causal chain: {reconciliation_reason}; "
+                    "preserving the draft rather than lowering component risks."
+                )
             downgrade_unproven_material_risk(
                 result, symbol, reconciliation_reason
             )
@@ -2896,7 +3047,7 @@ def validate_stock_batch(
         if reversal_risk in evidence_required_risks:
             required_fields = (
                 ("material_effect",)
-                if exposure_floor or entry_or_concentration_floor
+                if exposure_floor
                 else ("current_fact", "probability_evidence", "material_effect")
             )
             missing_evidence_fields = [
@@ -2957,6 +3108,7 @@ def validate_stock_batch(
         elif reversal_risk == "MODERATE":
             if (
                     not exposure_floor
+                    and not entry_or_concentration_floor
                     and mechanism_status not in {"ACTIVE", "UNUSUALLY_PROBABLE"}
             ):
                 raise ValueError(f"{symbol} MODERATE fields violate mechanism mapping.")
@@ -2966,7 +3118,7 @@ def validate_stock_batch(
                 print(
                     f"Normalized MODERATE continuation_outlook for {symbol}."
                 )
-            if risk_basis not in {
+            if not entry_or_concentration_floor and risk_basis not in {
                 "NORMALIZED_OPERATING_DETERIORATION",
                 "TEMPORARY_DRIVER_NORMALIZATION",
             }:
@@ -3472,9 +3624,7 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-# Version 6 restores EarningsGrowth to QualityScore. Older cached rankings
-# must be rebuilt so they cannot bypass the corrected scoring calculation.
-TOP_QVM_CACHE_VERSION = 6
+TOP_QVM_CACHE_VERSION = 7
 
 
 def load_top_qvm_cache(benchmark_context=None, hurdle_tolerance_pct=0.25):
@@ -3720,7 +3870,11 @@ def append_qvm_data_yfinance(
                 for metric, value in stock_returns.items()
             }
 
-            score = np.nanmean([ret_3m, ret_6m, ret_9m])
+            available_returns = [
+                value for value in (ret_3m, ret_6m, ret_9m)
+                if value is not None and np.isfinite(value)
+            ]
+            score = float(np.mean(available_returns)) if available_returns else -np.inf
             momentum_scores[symbol] = score
 
             data_map[symbol] = {
@@ -3764,6 +3918,7 @@ def append_qvm_data_yfinance(
         symbol
         for symbol in tickers_list
         if data_map.get(symbol, {}).get("3M Return") is not None
+        and np.isfinite(data_map[symbol]["3M Return"])
         and data_map[symbol]["3M Return"] >= min_3_month_return
     ]
     removed_by_3m_gate = len(tickers_list) - len(momentum_eligible_symbols)
@@ -3985,7 +4140,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     Function defaults are approximately balanced. The production caller
     explicitly uses configurable continuation-oriented weights (currently
-    Quality 45%, Value 10%, and Momentum 45%).
+    Quality 50%, Value 15%, and Momentum 35%).
     """
 
     df = df.copy()
@@ -5859,7 +6014,9 @@ stock_prompt_hash = stable_json_hash({
     "schema_hash": research_schema_hash,
 })
 judgment_contract_hash = stable_json_hash({
-    "contract": "stock_market_judgment_v1",
+    "contract": "stock_market_judgment_v2",
+    "validation_version": STOCK_JUDGMENT_VALIDATION_VERSION,
+    "response_schema": stock_judgment_response_schema(),
     "model": classification_model,
     "fallback_model": classification_fallback_model,
     "prompt": config["prompt_stock_judgment"].strip(),
@@ -6414,6 +6571,9 @@ def classify_pending(force=False):
                 )
             }
             try:
+                patch_error = result.pop("_judgment_patch_error", None)
+                if patch_error:
+                    raise ValueError(f"{symbol} {patch_error}")
                 if result.pop("_missing_return_driver_group", False):
                     raise ValueError(
                         f"{symbol} judgment omitted risk_exposure_group; "
@@ -7448,39 +7608,6 @@ previous_selected_symbols = previous_run_diagnostics.get(
     "selected_symbols", []
 )
 current_decisions = build_decision_snapshots(decision_ledger)
-
-# Make the final portfolio boundary auditable without spending another model
-# call. This records the weakest selected stock and the five highest-scoring
-# validated non-selections together with the exact rule that blocked each one.
-selected_decision_rows = [
-    decision for decision in decision_ledger
-    if str(decision.get("status") or "").startswith("SELECTED")
-    and decision.get("final_selection_score") is not None
-]
-validated_nonselected_rows = [
-    decision for decision in decision_ledger
-    if not str(decision.get("status") or "").startswith(("SELECTED", "EXCLUDED"))
-    and decision.get("final_selection_score") is not None
-]
-weakest_selected_decision = (
-    min(
-        selected_decision_rows,
-        key=lambda decision: float(decision["final_selection_score"]),
-    )
-    if selected_decision_rows else None
-)
-best_nonselected_decisions = sorted(
-    validated_nonselected_rows,
-    key=lambda decision: float(decision["final_selection_score"]),
-    reverse=True,
-)[:5]
-selection_boundary_audit = {
-    "weakest_selected": weakest_selected_decision,
-    "best_validated_nonselected": best_nonselected_decisions,
-}
-print("SELECTION BOUNDARY AUDIT")
-print("  " + json.dumps(selection_boundary_audit, ensure_ascii=False, default=str))
-
 previous_decisions = previous_run_diagnostics.get("decisions", {})
 portfolio_changes = build_portfolio_changes(
     previous_selected_symbols,
@@ -7660,15 +7787,10 @@ df_html_table = df_html.to_html(
     classes="recommendations-table",
     border=0
 )
-# Change only the rendered headers. Preserve the existing internal field
-# names and return values, including the 52-week figure previously displayed.
-for internal_column, display_label in (
-    ("3M Return", "3 Month Return %"),
-    ("52 WkChange %", "1 Year Return %"),
-):
-    df_html_table = df_html_table.replace(
-        f"<th>{internal_column}</th>", f"<th>{display_label}</th>"
-    )
+# Display labels only. Both original DataFrame column names stay unchanged.
+df_html_table = df_html_table.replace(
+    "<th>3M Return</th>", "<th>3 Month Return %</th>"
+).replace("<th>52 WkChange %</th>", "<th>1 Year Return %</th>")
 
 model_used = ", ".join(dict.fromkeys(models_used))
 update_html_page(
@@ -7837,7 +7959,6 @@ run_report = {
     "duplicate_results": duplicate_result_diagnostics,
     "duplicate_extra_block_count": total_duplicate_blocks,
     "decisions": current_decisions,
-    "selection_boundary_audit": selection_boundary_audit,
     "selected_symbols": current_selected_symbols,
     "portfolio_changes": portfolio_changes,
     "market_context": {

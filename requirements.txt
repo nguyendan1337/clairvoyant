@@ -3,6 +3,7 @@ beautifulsoup4
 python-dotenv
 google-genai
 requests
+tabulate
 yfinance
 PyYAML
 pandas

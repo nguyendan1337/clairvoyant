@@ -57,6 +57,22 @@ TOP_QVM_STOCKS_MD_FILE = CACHE_DIR / "top_qvm_stocks.md"
 TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
 GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
 
+# Local semantic matching for dynamic risk-event reconciliation. FastEmbed is
+# loaded lazily only when Gemini returns a noncanonical event ID. The existing
+# deterministic lexical matcher remains a technical fallback so embedding
+# import/model-download/runtime failures cannot take down the recommender.
+FASTEMBED_MODEL_NAME = os.getenv(
+    "CLAIRVOYANT_FASTEMBED_MODEL", "BAAI/bge-small-en-v1.5"
+)
+FASTEMBED_CACHE_DIR = CACHE_DIR / "fastembed"
+FASTEMBED_IDENTITY_MIN_SIMILARITY = 0.64
+FASTEMBED_TRANSMISSION_MIN_SIMILARITY = 0.60
+FASTEMBED_COMBINED_MIN_SIMILARITY = 0.64
+FASTEMBED_UNIQUENESS_MARGIN = 0.06
+_fastembed_model = None
+_fastembed_unavailable_reason = None
+_risk_event_embedding_cache = {}
+
 
 class TotalRuntimeTimeout(BaseException):
     """Stop the process when the recommender exceeds its total runtime."""
@@ -2429,28 +2445,96 @@ def _risk_event_terms(value):
     }
 
 
-def reconcile_dynamic_risk_event_id(result, active_risk_events):
-    """Map a noncanonical Gemini event label to the current dynamic catalog.
+def _cosine_similarity(left, right):
+    """Return bounded cosine similarity, or None for unusable vectors."""
+    try:
+        left = np.asarray(left, dtype=float).reshape(-1)
+        right = np.asarray(right, dtype=float).reshape(-1)
+        if left.size == 0 or right.size == 0 or left.size != right.size:
+            return None
+        denominator = float(np.linalg.norm(left) * np.linalg.norm(right))
+        if not np.isfinite(denominator) or denominator <= 0:
+            return None
+        value = float(np.dot(left, right) / denominator)
+        if not np.isfinite(value):
+            return None
+        return max(-1.0, min(1.0, value))
+    except Exception:
+        return None
 
-    This is representation repair only. It never creates an event when Gemini
-    returned null, never changes risk/exposure fields, and never uses a
-    stock- or event-specific alias table. Ambiguous/weak matches are returned
-    unchanged so the existing strict validator still fails closed.
-    """
-    raw_event_id = str(result.get("primary_risk_event_id") or "").strip()
-    if not raw_event_id or not isinstance(active_risk_events, list):
-        return raw_event_id or None
 
-    catalog = {
-        str(event.get("event_id") or "").strip(): event
-        for event in active_risk_events
-        if isinstance(event, dict) and str(event.get("event_id") or "").strip()
-    }
-    if raw_event_id in catalog:
-        return raw_event_id
-    if not catalog:
-        return raw_event_id
+def _risk_event_identity_text_from_result(result, raw_event_id):
+    return " ".join(filter(None, [
+        f"event label {raw_event_id}",
+        str(result.get("reversal_mechanism") or ""),
+        " ".join(str(x) for x in (result.get("temporary_drivers") or [])),
+        str(result.get("current_fact") or ""),
+        str(result.get("probability_evidence") or ""),
+    ])).strip()
 
+
+def _risk_event_transmission_text_from_result(result):
+    return " ".join(filter(None, [
+        f"industry {result.get('industry_group') or ''}",
+        f"risk exposure {result.get('risk_exposure_group') or ''}",
+        str(result.get("reversal_mechanism") or ""),
+        str(result.get("material_effect") or ""),
+        " ".join(str(x) for x in (result.get("temporary_drivers") or [])),
+    ])).strip()
+
+
+def _risk_event_identity_text_from_catalog(event):
+    return " ".join(filter(None, [
+        f"event id {event.get('event_id') or ''}",
+        str(event.get("description") or ""),
+        str(event.get("normalization_risk") or ""),
+    ])).strip()
+
+
+def _risk_event_transmission_text_from_catalog(event):
+    return " ".join(filter(None, [
+        "affected industries " + " ".join(
+            str(x) for x in (event.get("affected_industries") or [])
+        ),
+        "beneficiaries " + " ".join(
+            str(x) for x in (event.get("beneficiaries") or [])
+        ),
+        str(event.get("normalization_risk") or ""),
+        str(event.get("description") or ""),
+    ])).strip()
+
+
+def _get_fastembed_model():
+    """Load FastEmbed lazily; return None permanently after a technical failure."""
+    global _fastembed_model, _fastembed_unavailable_reason
+    if _fastembed_model is not None:
+        return _fastembed_model
+    if _fastembed_unavailable_reason is not None:
+        return None
+    try:
+        from fastembed import TextEmbedding
+
+        FASTEMBED_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        _fastembed_model = TextEmbedding(
+            model_name=FASTEMBED_MODEL_NAME,
+            cache_dir=str(FASTEMBED_CACHE_DIR),
+        )
+        print(
+            "FastEmbed risk-event matcher ready: "
+            f"model={FASTEMBED_MODEL_NAME}, cache={FASTEMBED_CACHE_DIR}."
+        )
+        return _fastembed_model
+    except Exception as exc:
+        _fastembed_unavailable_reason = f"{type(exc).__name__}: {exc}"
+        print(
+            "FastEmbed risk-event matcher unavailable; using deterministic "
+            f"lexical fallback for this run: {_fastembed_unavailable_reason}"
+        )
+        return None
+
+
+def _lexical_risk_event_scores(result, raw_event_id, catalog):
+    """Existing deterministic matcher, retained as a technical fallback."""
     id_terms = _risk_event_terms(raw_event_id)
     exposure_terms = _risk_event_terms(result.get("risk_exposure_group"))
     industry_terms = _risk_event_terms(result.get("industry_group"))
@@ -2472,17 +2556,11 @@ def reconcile_dynamic_risk_event_id(result, active_risk_events):
             str(event.get("normalization_risk") or ""),
         ]))
         all_event_terms = event_id_terms | event_context_terms
-
-        # Strongest signals are the model's event-label terms and the explicit
-        # economic exposure/industry. Narrative evidence is only supporting
-        # context, preventing generic prose from driving reconciliation.
         score = 0.0
         score += 3.0 * len(id_terms & all_event_terms)
         score += 3.0 * len(exposure_terms & all_event_terms)
         score += 2.0 * len(industry_terms & all_event_terms)
         score += 0.5 * min(6, len(evidence_terms & all_event_terms))
-
-        # Require at least one structural bridge beyond generic narrative text.
         structural_overlap = bool(
             (id_terms & all_event_terms)
             or (exposure_terms & all_event_terms)
@@ -2490,32 +2568,255 @@ def reconcile_dynamic_risk_event_id(result, active_risk_events):
         )
         if structural_overlap:
             scored.append((score, event_id))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return scored
 
+
+def _risk_event_structural_compatibility(result, raw_event_id, event):
+    """Require a concrete economic bridge in addition to vector similarity."""
+    generic_channel_terms = {
+        "MARKET", "MARKETS", "PRICE", "PRICES", "RATE", "RATES",
+        "STRONG", "WEAK", "HIGH", "LOW", "GLOBAL", "SUPPLY", "DEMAND",
+        "CONDITIONS", "ECONOMIC", "ECONOMY", "INDUSTRY", "INDUSTRIES",
+    }
+    id_terms = _risk_event_terms(raw_event_id)
+    exposure_terms = _risk_event_terms(result.get("risk_exposure_group"))
+    exposure_specific_terms = exposure_terms - generic_channel_terms
+    industry_terms = _risk_event_terms(result.get("industry_group"))
+
+    event_id_terms = _risk_event_terms(event.get("event_id"))
+    event_industry_terms = _risk_event_terms(
+        " ".join(str(x) for x in (event.get("affected_industries") or []))
+    )
+    event_context_terms = _risk_event_terms(" ".join([
+        str(event.get("description") or ""),
+        " ".join(str(x) for x in (event.get("affected_industries") or [])),
+        " ".join(str(x) for x in (event.get("beneficiaries") or [])),
+        str(event.get("normalization_risk") or ""),
+    ]))
+    all_event_terms = event_id_terms | event_context_terms
+
+    event_label_overlap = id_terms & all_event_terms
+    exposure_overlap = exposure_specific_terms & all_event_terms
+    industry_overlap = industry_terms & event_industry_terms
+
+    # At least one economic bridge must exist. Label overlap alone is not enough.
+    compatible = bool(exposure_overlap or industry_overlap)
+    return {
+        "compatible": compatible,
+        "event_label_overlap": sorted(event_label_overlap),
+        "exposure_overlap": sorted(exposure_overlap),
+        "industry_overlap": sorted(industry_overlap),
+    }
+
+
+def _semantic_risk_event_scores(result, raw_event_id, catalog):
+    """Use local FastEmbed vectors to rank current events on two dimensions."""
+    model = _get_fastembed_model()
+    if model is None:
+        return None
+
+    try:
+        ordered_events = list(catalog.items())
+        catalog_payload = [
+            {
+                "event_id": event_id,
+                "description": event.get("description"),
+                "affected_industries": event.get("affected_industries"),
+                "beneficiaries": event.get("beneficiaries"),
+                "normalization_risk": event.get("normalization_risk"),
+            }
+            for event_id, event in ordered_events
+        ]
+        cache_key = (FASTEMBED_MODEL_NAME, stable_json_hash(catalog_payload))
+        catalog_vectors = _risk_event_embedding_cache.get(cache_key)
+        if catalog_vectors is None:
+            catalog_texts = []
+            for _, event in ordered_events:
+                catalog_texts.extend([
+                    _risk_event_identity_text_from_catalog(event),
+                    _risk_event_transmission_text_from_catalog(event),
+                ])
+            embedded = list(model.embed(catalog_texts))
+            if len(embedded) != 2 * len(ordered_events):
+                raise ValueError(
+                    "FastEmbed returned an unexpected number of event vectors."
+                )
+            catalog_vectors = {}
+            for index, (event_id, _) in enumerate(ordered_events):
+                catalog_vectors[event_id] = {
+                    "identity": embedded[index * 2],
+                    "transmission": embedded[index * 2 + 1],
+                }
+            _risk_event_embedding_cache.clear()
+            _risk_event_embedding_cache[cache_key] = catalog_vectors
+
+        stock_vectors = list(model.embed([
+            _risk_event_identity_text_from_result(result, raw_event_id),
+            _risk_event_transmission_text_from_result(result),
+        ]))
+        if len(stock_vectors) != 2:
+            raise ValueError(
+                "FastEmbed returned an unexpected number of stock vectors."
+            )
+
+        scored = []
+        for event_id, event in ordered_events:
+            identity_similarity = _cosine_similarity(
+                stock_vectors[0], catalog_vectors[event_id]["identity"]
+            )
+            transmission_similarity = _cosine_similarity(
+                stock_vectors[1], catalog_vectors[event_id]["transmission"]
+            )
+            if identity_similarity is None or transmission_similarity is None:
+                continue
+            structural = _risk_event_structural_compatibility(
+                result, raw_event_id, event
+            )
+            combined_similarity = (
+                0.55 * identity_similarity + 0.45 * transmission_similarity
+            )
+            scored.append({
+                "event_id": event_id,
+                "identity_similarity": identity_similarity,
+                "transmission_similarity": transmission_similarity,
+                "combined_similarity": combined_similarity,
+                "structural": structural,
+            })
+        scored.sort(
+            key=lambda item: (-item["combined_similarity"], item["event_id"])
+        )
+        return scored
+    except Exception as exc:
+        print(
+            "FastEmbed risk-event scoring failed; using deterministic lexical "
+            f"fallback for this reconciliation: {type(exc).__name__}: {exc}"
+        )
+        runtime_reconciliation_diagnostics.append({
+            "symbol": str(result.get("symbol") or "").strip().upper(),
+            "type": "dynamic_risk_event_embedding_fallback",
+            "reason": f"{type(exc).__name__}: {exc}",
+        })
+        return None
+
+
+def reconcile_dynamic_risk_event_id(result, active_risk_events):
+    """Map a noncanonical Gemini event label to the current dynamic catalog.
+
+    FastEmbed supplies semantic candidate ranking. Python remains authoritative:
+    a repair requires strong identity similarity, strong transmission similarity,
+    a unique winner, and a concrete structural/economic bridge. The function
+    changes only primary_risk_event_id. If semantic matching is unavailable, the
+    previously deployed deterministic matcher is used as a technical fallback.
+    Weak or ambiguous matches remain unchanged so strict validation fails closed.
+    """
+    raw_event_id = str(result.get("primary_risk_event_id") or "").strip()
+    if not raw_event_id or not isinstance(active_risk_events, list):
+        return raw_event_id or None
+
+    catalog = {
+        str(event.get("event_id") or "").strip(): event
+        for event in active_risk_events
+        if isinstance(event, dict) and str(event.get("event_id") or "").strip()
+    }
+    if raw_event_id in catalog:
+        return raw_event_id
+    if not catalog:
+        return raw_event_id
+
+    semantic_scores = _semantic_risk_event_scores(
+        result, raw_event_id, catalog
+    )
+    if semantic_scores:
+        best = semantic_scores[0]
+        runner_up = (
+            semantic_scores[1]["combined_similarity"]
+            if len(semantic_scores) > 1 else -1.0
+        )
+        margin = best["combined_similarity"] - runner_up
+        accepted = (
+            best["identity_similarity"] >= FASTEMBED_IDENTITY_MIN_SIMILARITY
+            and best["transmission_similarity"]
+            >= FASTEMBED_TRANSMISSION_MIN_SIMILARITY
+            and best["combined_similarity"]
+            >= FASTEMBED_COMBINED_MIN_SIMILARITY
+            and margin >= FASTEMBED_UNIQUENESS_MARGIN
+            and best["structural"]["compatible"]
+        )
+        if not accepted:
+            symbol = str(result.get("symbol") or "").strip().upper()
+            print(
+                f"Semantic risk-event reconciliation declined for {symbol}: "
+                f"returned={raw_event_id!r}, best={best['event_id']!r}, "
+                f"identity={best['identity_similarity']:.3f}, "
+                f"transmission={best['transmission_similarity']:.3f}, "
+                f"combined={best['combined_similarity']:.3f}, margin={margin:.3f}, "
+                f"structural={best['structural']['compatible']}."
+            )
+            runtime_reconciliation_diagnostics.append({
+                "symbol": symbol,
+                "type": "dynamic_risk_event_id_semantic_decline",
+                "field": "primary_risk_event_id",
+                "from": raw_event_id,
+                "candidate": best["event_id"],
+                "identity_similarity": best["identity_similarity"],
+                "transmission_similarity": best["transmission_similarity"],
+                "combined_similarity": best["combined_similarity"],
+                "runner_up_similarity": runner_up,
+                "margin": margin,
+                "structural": best["structural"],
+            })
+            return raw_event_id
+
+        best_event_id = best["event_id"]
+        symbol = str(result.get("symbol") or "").strip().upper()
+        print(
+            f"Reconciled semantic primary_risk_event_id for {symbol}: "
+            f"{raw_event_id!r} -> {best_event_id!r} "
+            f"(identity={best['identity_similarity']:.3f}, "
+            f"transmission={best['transmission_similarity']:.3f}, "
+            f"combined={best['combined_similarity']:.3f}, margin={margin:.3f})."
+        )
+        runtime_reconciliation_diagnostics.append({
+            "symbol": symbol,
+            "type": "dynamic_risk_event_id_semantic_reconciliation",
+            "field": "primary_risk_event_id",
+            "from": raw_event_id,
+            "to": best_event_id,
+            "identity_similarity": best["identity_similarity"],
+            "transmission_similarity": best["transmission_similarity"],
+            "combined_similarity": best["combined_similarity"],
+            "runner_up_similarity": runner_up,
+            "margin": margin,
+            "structural": best["structural"],
+            "model": FASTEMBED_MODEL_NAME,
+        })
+        return best_event_id
+
+    # Technical fallback only. Semantic ambiguity never falls through here.
+    scored = _lexical_risk_event_scores(result, raw_event_id, catalog)
     if not scored:
         return raw_event_id
-    scored.sort(key=lambda item: (-item[0], item[1]))
     best_score, best_event_id = scored[0]
     runner_up_score = scored[1][0] if len(scored) > 1 else 0.0
-
-    # Deliberately conservative: a strong score and clear margin are required.
-    # Otherwise the original unknown ID survives and strict validation rejects it.
     if best_score < 6.0 or best_score - runner_up_score < 2.0:
         return raw_event_id
 
     symbol = str(result.get("symbol") or "").strip().upper()
     print(
-        f"Reconciled dynamic primary_risk_event_id for {symbol}: "
+        f"Reconciled fallback primary_risk_event_id for {symbol}: "
         f"{raw_event_id!r} -> {best_event_id!r} "
         f"(score={best_score:.1f}, margin={best_score - runner_up_score:.1f})."
     )
     runtime_reconciliation_diagnostics.append({
         "symbol": symbol,
-        "type": "dynamic_risk_event_id_reconciliation",
+        "type": "dynamic_risk_event_id_lexical_fallback",
         "field": "primary_risk_event_id",
         "from": raw_event_id,
         "to": best_event_id,
         "score": best_score,
         "runner_up_score": runner_up_score,
+        "fallback_reason": _fastembed_unavailable_reason or "embedding_runtime_failure",
     })
     return best_event_id
 

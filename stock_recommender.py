@@ -72,6 +72,7 @@ FASTEMBED_UNIQUENESS_MARGIN = 0.06
 _fastembed_model = None
 _fastembed_unavailable_reason = None
 _risk_event_embedding_cache = {}
+_shared_event_compatibility_cache = {}
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -2821,6 +2822,110 @@ def reconcile_dynamic_risk_event_id(result, active_risk_events):
     return best_event_id
 
 
+def _shared_event_exposure_compatibility(result, target_event_id, active_risk_events):
+    """Evaluate whether a current event truly transmits through this exposure.
+
+    This is intentionally narrower than event-ID reconciliation. The event ID is
+    already known from a peer judgment; FastEmbed is used only to test whether
+    the candidate stock's economic exposure is actually compatible with that
+    current event. A technical embedding failure returns None so callers retain
+    the previous strict behavior rather than becoming more permissive.
+    """
+    target_event_id = str(target_event_id or "").strip()
+    if not target_event_id or not isinstance(active_risk_events, list):
+        return None
+
+    normalize_event = lambda value: re.sub(
+        r"[^A-Z0-9]+", "_", str(value or "").upper()
+    ).strip("_")
+    normalized_target = normalize_event(target_event_id)
+
+    catalog = {}
+    target_catalog_id = None
+    for event in active_risk_events:
+        if not isinstance(event, dict):
+            continue
+        event_id = str(event.get("event_id") or "").strip()
+        if not event_id:
+            continue
+        catalog[event_id] = event
+        if normalize_event(event_id) == normalized_target:
+            target_catalog_id = event_id
+
+    if not catalog or target_catalog_id is None:
+        return None
+
+    result_payload = {
+        "symbol": result.get("symbol"),
+        "industry_group": result.get("industry_group"),
+        "risk_exposure_group": result.get("risk_exposure_group"),
+        "temporary_drivers": result.get("temporary_drivers"),
+        "reversal_mechanism": result.get("reversal_mechanism"),
+        "current_fact": result.get("current_fact"),
+        "probability_evidence": result.get("probability_evidence"),
+        "material_effect": result.get("material_effect"),
+    }
+    catalog_payload = [
+        {
+            "event_id": event_id,
+            "description": event.get("description"),
+            "affected_industries": event.get("affected_industries"),
+            "beneficiaries": event.get("beneficiaries"),
+            "normalization_risk": event.get("normalization_risk"),
+        }
+        for event_id, event in sorted(catalog.items())
+    ]
+    cache_key = (
+        FASTEMBED_MODEL_NAME,
+        stable_json_hash(result_payload),
+        stable_json_hash(catalog_payload),
+        target_catalog_id,
+    )
+    cached = _shared_event_compatibility_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    scores = _semantic_risk_event_scores(
+        result, target_catalog_id, catalog
+    )
+    if scores is None:
+        return None
+
+    target = next(
+        (item for item in scores if item["event_id"] == target_catalog_id),
+        None,
+    )
+    if target is None:
+        return None
+
+    runner_up_similarity = max(
+        (
+            item["transmission_similarity"]
+            for item in scores
+            if item["event_id"] != target_catalog_id
+        ),
+        default=-1.0,
+    )
+    margin = target["transmission_similarity"] - runner_up_similarity
+    compatible = bool(
+        target["transmission_similarity"]
+        >= FASTEMBED_TRANSMISSION_MIN_SIMILARITY
+        and margin >= FASTEMBED_UNIQUENESS_MARGIN
+        and target["structural"]["compatible"]
+    )
+    decision = {
+        "compatible": compatible,
+        "event_id": target_catalog_id,
+        "transmission_similarity": target["transmission_similarity"],
+        "runner_up_similarity": runner_up_similarity,
+        "margin": margin,
+        "structural": target["structural"],
+        "model": FASTEMBED_MODEL_NAME,
+    }
+    _shared_event_compatibility_cache[cache_key] = decision
+    return decision
+
+
 def validate_stock_batch(
         data,
         expected_candidates,
@@ -3605,8 +3710,17 @@ def validate_stock_batch(
         )
 
 
-def validate_shared_event_consistency(result, comparison_results):
-    """Require an explicit structural reason for a shared-event divergence."""
+def validate_shared_event_consistency(
+        result, comparison_results, active_risk_events=None
+):
+    """Require evidence for shared-event divergence only when transmission matches.
+
+    Exact exposure-group equality is not, by itself, enough to force two stocks
+    into the same current market event. When FastEmbed is available, a missing
+    event is enforced only if the current event catalog supports a unique,
+    structurally compatible economic transmission to the candidate exposure.
+    If embeddings are unavailable, the previous strict behavior is preserved.
+    """
     normalize_group = lambda value: re.sub(
         r"[^A-Z0-9]+", "_", str(value or "").upper()
     ).strip("_")
@@ -3642,6 +3756,29 @@ def validate_shared_event_consistency(result, comparison_results):
             and result_risk in {"MINIMAL", "LOW"}
             and not str(result.get("company_difference") or "").strip()
         ):
+            compatibility = _shared_event_exposure_compatibility(
+                result, other_event_id, active_risk_events
+            )
+            if compatibility is not None and not compatibility["compatible"]:
+                symbol = str(result.get("symbol") or "").strip().upper()
+                other_symbol = str(other.get("symbol") or "").strip().upper()
+                print(
+                    f"Accepted shared-event omission for {symbol} versus "
+                    f"{other_symbol}: event={other_event_id}, "
+                    f"exposure={comparison_group}, "
+                    f"transmission={compatibility['transmission_similarity']:.3f}, "
+                    f"margin={compatibility['margin']:.3f}, "
+                    f"structural={compatibility['structural']['compatible']}."
+                )
+                runtime_reconciliation_diagnostics.append({
+                    "symbol": symbol,
+                    "type": "shared_event_omission_allowed_incompatible_transmission",
+                    "compared_with": other_symbol,
+                    "event_id": other_event_id,
+                    "exposure_group": comparison_group,
+                    **compatibility,
+                })
+                continue
             raise ValueError(
                 f"{result.get('symbol')} omits documented shared event "
                 f"{other_event_id} for comparable exposure {comparison_group}; "
@@ -6605,7 +6742,10 @@ for symbol, cached_result in list(validated_cached_research.items()):
         if other_symbol != symbol
     ]
     try:
-        validate_shared_event_consistency(cached_result, comparison_results)
+        validate_shared_event_consistency(
+            cached_result, comparison_results,
+            active_risk_events=market_context["active_risk_events"],
+        )
     except ValueError as exc:
         cache_key = global_cache_keys_by_symbol[symbol]
         prior_entry = stock_research_cache["entries"].get(cache_key, {})
@@ -7008,7 +7148,9 @@ def classify_pending(force=False):
                     active_risk_events=market_context["active_risk_events"],
                 )
                 validate_shared_event_consistency(
-                    result, list(validated_cached_research.values())
+                    result,
+                    list(validated_cached_research.values()),
+                    active_risk_events=market_context["active_risk_events"],
                 )
             except (KeyError, TypeError, ValueError) as exc:
                 print(f"Classification invalid for {symbol}: {exc}; preserving grounded draft for a future judgment.")

@@ -125,18 +125,22 @@ model_fallback: gemini-2.5-flash-lite
 # Gemini 3.5 Flash is the authoritative no-Search ETF continuation/risk judge.
 classification_model: gemini-3.5-flash
 classification_fallback_model: gemini-3.5-flash
-# The HTML summary may use the final two 3.5 calls: one initial attempt and
-# one transient-failure retry. Only then may it use remaining 2.5 capacity.
+# The HTML summary normally uses the seventh 3.5 call. If that call fails,
+# retry once on 2.5 Flash using the reserved eighth 2.5-stage call.
 summary_model: gemini-3.5-flash
 summary_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
 classification_attempts: 2
-# Six calls are available to judgment, including retries. Two additional 3.5
-# calls are reserved for the HTML summary and its retry.
+# Six calls are available to judgment, including retries. One additional 3.5
+# call is reserved exclusively for the HTML summary.
 max_classification_logical_calls_per_run: 6
 max_classification_api_attempts_per_run: 6
-max_gemini_35_calls_per_run: 8
+# Hard model-family and workload ceilings count actual HTTP attempts, including
+# transient retries. Classification and summary share the seven-call 3.5 cap.
+max_3_5_api_calls_per_run: 7
+max_3_5_classification_calls_per_run: 6
+max_3_5_summary_calls_per_run: 1
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
@@ -212,13 +216,15 @@ thinking_budget: 12288
 summary_thinking_budget: 4096
 max_gemini_calls_per_run: 8
 max_etf_research_calls_per_run: 6
-# Hard 2.5-model ceiling across context, research, summary, and retries.
+# Hard 2.5-model ceilings across context, research, summary, and retries. The
+# category allowances share the eight-call family cap rather than adding to it.
 max_gemini_api_attempts_per_run: 8
-max_market_context_api_attempts_per_run: 2
-# Do not reserve a 2.5 call for summary. The fallback summary runs only if
-# market context plus research/retries used fewer than eight attempts.
-reserved_summary_calls: 0
-summary_reservation_releasable_on_shortfall: false
+max_2_5_api_calls_per_run: 8
+max_2_5_market_calls_per_run: 2
+max_2_5_research_calls_per_run: 6
+max_2_5_summary_fallback_calls_per_run: 1
+reserved_summary_calls: 1
+summary_reservation_releasable_on_shortfall: true
 max_transient_api_attempts: 3
 max_transient_delay: 60
 transport_retry_batch_fraction: 0.67
@@ -235,42 +241,68 @@ max_etf_sources: 5
 final_summary_enabled: true
 
 top_qvm_cache_expiry_hours: 6
-market_context_cache_file: caches/gemini_market_context_cache.json
+market_context_cache_file: caches/gemini_shared_market_context_cache.json
 etf_research_cache_file: caches/gemini_etf_research_cache.json
 run_diagnostics_file: run_reports/etf_run_report.json
 run_log_file: run_reports/etf_run.log
 market_context_cache_hours: 12
-market_context_schema_version: 1
-market_context_prompt_version: 1
 gemini_research_cache_hours: 12
 cache_version: 4
-# Kept separate so ETF research can be invalidated without preventing reuse of
-# the stock recommender's shared market-context cache.
+# ETF research remains separate; only the content-addressed market cache is
+# shared with the stock recommender.
 etf_research_cache_version: 13
 
 prompt_market_context: |
   You are the shared market-research stage for U.S. stock and ETF recommenders.
-  Research the CURRENT U.S. market and world environment once so both systems
-  can reuse the same evidence. Use Google Search before answering. Prefer
-  information from the last 5-10 days, supplemented by current official policy
-  or economic releases when necessary.
+  Research the CURRENT U.S. market and global environment once so both systems
+  can reuse the same decision-grade evidence. Use Google Search. Prefer facts
+  from the past 5-10 days, supplemented by current official releases and
+  continuing events when necessary.
 
-  Perform exactly five targeted searches total. Each search should cover
-  several related questions rather than spawning follow-up searches:
-  1. S&P 500 performance, breadth, investor mood and market health.
-  2. U.S. growth, inflation, rates, Federal Reserve expectations, liquidity,
-     credit, earnings and estimate revisions.
-  3. Operating conditions and leadership across Technology, Healthcare,
-     Financials, Consumer Cyclical, Consumer Defensive, Energy, Industrials,
-     Basic Materials, Communication Services, Utilities and Real Estate.
-  4. Factor, size and thematic leadership, including value, growth, momentum,
-     quality, dividends and large/mid/small caps.
-  5. Geopolitical, commodity, freight, regulatory, crowding, valuation,
-     concentration and flow conditions that could reverse winners in 6-12 months.
+  SEARCH PLAN
+  Perform exactly eight targeted searches total. Do not combine or replace the
+  eight subjects, and do not run follow-up searches:
+  1. S&P 500, Nasdaq and Russell performance, breadth, volatility and sentiment.
+  2. Inflation, employment, growth and other current official macro releases.
+  3. Federal Reserve policy, rate expectations, Treasury yields, credit and liquidity.
+  4. U.S. earnings growth, guidance, margins and analyst estimate revisions.
+  5. Current leadership and operating conditions across all canonical sectors below.
+  6. Value, growth, momentum, quality, dividends, size, valuation, flows and crowding.
+  7. Geopolitics, energy, commodities, freight and supply-chain conditions.
+  8. Material regulation and temporary events whose normalization could reverse winners.
 
-  Return exactly one JSON object without Markdown. market_summary and
-  market_intro must contain the same 3-5 sentence viewer-facing paragraph with
-  at least one explicit S&P 500 percentage and measured period.
+  CANONICAL SECTORS
+  sector_context must contain one specific current sentence for every exact key:
+  Basic Materials, Communication Services, Consumer Cyclical, Consumer
+  Defensive, Energy, Financial Services, Healthcare, Industrials, Real Estate,
+  Technology and Utilities. Do not rename, combine or omit keys. Each sentence
+  must identify a current operating, demand, pricing, regulatory, valuation or
+  financing condition, not generic sector performance filler.
+
+  ACTIVE RISK-EVENT CATALOG
+  active_risk_events is authoritative for both recommenders. Include only
+  documented current events materially affecting multiple companies or
+  industries. Use one stable UPPER_SNAKE_CASE event_id per real-world event,
+  even when it reaches companies through different commodity prices, freight
+  markets, costs or operating mechanisms. Put transmission differences in the
+  description, affected_industries and beneficiaries. Return [] when no shared
+  event qualifies.
+
+  FACT AND WRITING RULES
+  - market_summary and market_intro must contain the same viewer-facing 3-5
+    sentence paragraph with an explicit S&P 500 percentage and measured period,
+    investor mood, the largest supports and the most important concern.
+  - Separate positive supports from negative pressures.
+  - State Federal Reserve actions as expectations unless an official decision
+    has occurred.
+  - Avoid filler such as "conditions are mixed," "most sectors are weak" or
+    "the sector remains relevant."
+  - Use 6-10 distinct real sources. Prefer official government, central-bank,
+    exchange and company releases, supplemented by credible financial reporting.
+  - Every source must materially support the returned context. Never invent URLs.
+
+  OUTPUT
+  Return exactly one valid JSON object with no Markdown or commentary:
   {
     "as_of_date": "YYYY-MM-DD",
     "market_status": "STRONG | MIXED | WEAK",
@@ -283,18 +315,37 @@ prompt_market_context: |
     "weak_sectors": ["..."],
     "strong_exposures": ["..."],
     "weak_exposures": ["..."],
-    "sector_context": {"Technology": "Specific current condition"},
+    "sector_context": {
+      "Basic Materials": "Specific current condition",
+      "Communication Services": "Specific current condition",
+      "Consumer Cyclical": "Specific current condition",
+      "Consumer Defensive": "Specific current condition",
+      "Energy": "Specific current condition",
+      "Financial Services": "Specific current condition",
+      "Healthcare": "Specific current condition",
+      "Industrials": "Specific current condition",
+      "Real Estate": "Specific current condition",
+      "Technology": "Specific current condition",
+      "Utilities": "Specific current condition"
+    },
     "factor_and_theme_context": {"Value": "Specific current condition"},
-    "active_risk_events": [{
-      "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
-      "description": "Current event and affected markets",
-      "affected_industries": ["..."],
-      "beneficiaries": ["..."],
-      "normalization_risk": "How normalization could reverse beneficiaries"
-    }],
-    "sources": [{"title": "Source title", "date": "YYYY-MM-DD", "url": "https://..."}]
+    "active_risk_events": [
+      {
+        "event_id": "STABLE_UPPER_SNAKE_CASE_ID",
+        "description": "Current event and affected markets",
+        "affected_industries": ["..."],
+        "beneficiaries": ["..."],
+        "normalization_risk": "How de-escalation or normalization could reverse beneficiaries"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Source title",
+        "date": "YYYY-MM-DD or publication date as reported",
+        "url": "https://..."
+      }
+    ]
   }
-  Use 2-5 real decision-relevant sources. Do not invent URLs.
 
 prompt_etf_batch: |
   You are the structured ETF-research stage in a Python-owned recommendation

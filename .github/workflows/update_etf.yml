@@ -37,13 +37,13 @@ jobs:
         run: mkdir -p caches
 
       # Shared by the stock and ETF workflows. A unique restore key avoids
-      # trying to overwrite an immutable cache entry; restore-keys retrieves
+      # trying to overwrite an immutable cache entry. restore-keys retrieves
       # the newest shared market cache saved by either workflow.
       - name: Restore shared market-context cache
         id: market-cache
         uses: actions/cache/restore@v4
         with:
-          path: caches/gemini_market_context_cache.json
+          path: caches/gemini_shared_market_context_cache.json
           key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-restore-${{ github.run_id }}
           restore-keys: |
             clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-
@@ -65,7 +65,7 @@ jobs:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python etf_recommender.py
 
-      # Save validated runtime state even if a later step fails.
+      # Save validated ETF runtime state even if a later step fails.
       - name: Save ETF runtime cache
         if: always()
         uses: actions/cache/save@v4
@@ -78,13 +78,13 @@ jobs:
 
       # Save the shared cache by content hash. If the market context did not
       # change, GitHub can reuse the existing immutable cache instead of
-      # creating another identical shared-market entry.
+      # creating another identical entry.
       - name: Save shared market-context cache
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: caches/gemini_market_context_cache.json
-          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('caches/gemini_market_context_cache.json') }}
+          path: caches/gemini_shared_market_context_cache.json
+          key: clairvoyant-market-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('caches/gemini_shared_market_context_cache.json') }}
 
       - name: Commit and push ETF page and run reports
         if: always()

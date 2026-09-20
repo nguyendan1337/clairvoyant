@@ -35,6 +35,22 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 TOTAL_RUNTIME_TIMEOUT_SECONDS = 60 * 60
 GEMINI_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
 
+# Local semantic matching for dynamic market-event IDs. FastEmbed is loaded
+# lazily only when Gemini returns a noncanonical ID. Any import, model-download,
+# or runtime failure falls back to a deterministic lexical matcher, so this
+# optional reconciliation layer cannot take down the ETF run.
+FASTEMBED_MODEL_NAME = os.getenv(
+    'CLAIRVOYANT_FASTEMBED_MODEL', 'BAAI/bge-small-en-v1.5'
+)
+FASTEMBED_CACHE_DIR = Path('caches') / 'fastembed'
+FASTEMBED_IDENTITY_MIN_SIMILARITY = 0.64
+FASTEMBED_TRANSMISSION_MIN_SIMILARITY = 0.60
+FASTEMBED_COMBINED_MIN_SIMILARITY = 0.64
+FASTEMBED_UNIQUENESS_MARGIN = 0.06
+_fastembed_model = None
+_fastembed_unavailable_reason = None
+_risk_event_embedding_cache = {}
+
 
 class TeeStream:
     """Keep console output while recording a complete upload-friendly run log."""
@@ -61,6 +77,7 @@ classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
 summary_35_api_attempts_used = 0
+runtime_reconciliation_diagnostics = []
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -120,7 +137,6 @@ class GeminiRequestBudget:
     def __init__(
         self, total, research, reserved_summary=1,
         release_summary_for_research=False, max_api_attempts=None,
-        market_api_maximum=2,
     ):
         self.total = int(total)
         self.research_limit = int(research)
@@ -136,13 +152,9 @@ class GeminiRequestBudget:
         self.max_api_attempts = int(
             total if max_api_attempts is None else max_api_attempts
         )
-        self.market_api_maximum = int(market_api_maximum)
 
     def can_reserve(self, category):
-        if (
-            self.total_used >= self.total
-            or self.api_attempts >= self.max_api_attempts
-        ):
+        if self.total_used >= self.total:
             return False
         if category == 'research':
             required_reserve = 0 if self.release_summary_for_research else self.reserved_summary
@@ -172,22 +184,6 @@ class GeminiRequestBudget:
                 f'Gemini API-attempt ceiling exhausted '
                 f'({self.api_attempts}/{self.max_api_attempts}).'
             )
-        if (
-            category == 'research'
-            and self.research_api_attempts >= self.research_limit
-        ):
-            raise RuntimeError(
-                f'ETF research API-attempt ceiling exhausted '
-                f'({self.research_api_attempts}/{self.research_limit}).'
-            )
-        if (
-            category not in {'research', 'summary'}
-            and self.context_api_attempts >= self.market_api_maximum
-        ):
-            raise RuntimeError(
-                f'ETF market-context API-attempt ceiling exhausted '
-                f'({self.context_api_attempts}/{self.market_api_maximum}).'
-            )
         self.api_attempts += 1
         if category == 'research':
             self.research_api_attempts += 1
@@ -195,6 +191,94 @@ class GeminiRequestBudget:
             self.summary_api_attempts += 1
         else:
             self.context_api_attempts += 1
+
+
+class GeminiApiAttemptBudgetExhausted(RuntimeError):
+    """Raised before an API call that would exceed a per-model ceiling."""
+
+
+class GeminiApiAttemptBudget:
+    """Enforce actual API-attempt limits by model family and workload."""
+
+    def __init__(self, family_limits, category_limits):
+        self.family_limits = {
+            str(family): int(limit)
+            for family, limit in family_limits.items()
+        }
+        self.category_limits = {
+            (str(family), str(category)): int(limit)
+            for (family, category), limit in category_limits.items()
+        }
+        self.family_used = {family: 0 for family in self.family_limits}
+        self.category_used = {key: 0 for key in self.category_limits}
+
+    @staticmethod
+    def model_family(model_name):
+        normalized = str(model_name or '').lower()
+        if 'gemini-3.5' in normalized:
+            return '3.5'
+        if 'gemini-2.5' in normalized:
+            return '2.5'
+        return normalized or 'unknown'
+
+    def reserve(self, model_name, category, stage):
+        family = self.model_family(model_name)
+        family_limit = self.family_limits.get(family)
+        category_key = (family, str(category))
+        category_limit = self.category_limits.get(category_key)
+        family_used = self.family_used.get(family, 0)
+        category_used = self.category_used.get(category_key, 0)
+        if family_limit is not None and family_used >= family_limit:
+            raise GeminiApiAttemptBudgetExhausted(
+                f'Gemini {family} API-attempt budget of {family_limit} was '
+                f'exhausted before {stage}.'
+            )
+        if category_limit is not None and category_used >= category_limit:
+            raise GeminiApiAttemptBudgetExhausted(
+                f'Gemini {family} {category} API-attempt budget of '
+                f'{category_limit} was exhausted before {stage}.'
+            )
+        self.family_used[family] = family_used + 1
+        if category_limit is not None:
+            self.category_used[category_key] = category_used + 1
+        print(
+            f'Gemini {family} API budget: '
+            f'{self.family_used[family]}/{family_limit or "unlimited"} total; '
+            f'{self.category_used.get(category_key, 0)}/'
+            f'{category_limit or "unlimited"} {category}.'
+        )
+
+    def remaining(self, model_name, category):
+        family = self.model_family(model_name)
+        family_limit = self.family_limits.get(family)
+        family_remaining = (
+            float('inf') if family_limit is None
+            else max(0, family_limit - self.family_used.get(family, 0))
+        )
+        category_key = (family, str(category))
+        category_limit = self.category_limits.get(category_key)
+        category_remaining = (
+            float('inf') if category_limit is None
+            else max(
+                0,
+                category_limit - self.category_used.get(category_key, 0),
+            )
+        )
+        return min(family_remaining, category_remaining)
+
+    def snapshot(self):
+        return {
+            'family_used': dict(self.family_used),
+            'family_limits': dict(self.family_limits),
+            'category_used': {
+                f'{family}:{category}': used
+                for (family, category), used in self.category_used.items()
+            },
+            'category_limits': {
+                f'{family}:{category}': limit
+                for (family, category), limit in self.category_limits.items()
+            },
+        }
 
 
 def parse_json_response(text):
@@ -312,10 +396,7 @@ def is_transient_gemini_error(exc):
         '429', '503', 'resource_exhausted', 'unavailable', 'high demand',
         'deadline', 'timeout', 'temporarily', 'empty response',
         'malformed', 'jsondecode', 'expecting value', 'expecting property name',
-        'unterminated string', 'server disconnected',
-        'without sending a response', 'remote protocol error',
-        'connection reset', 'connection aborted', 'connection error',
-        'connection closed', 'broken pipe', 'try again later',
+        'unterminated string',
     ))
 
 
@@ -346,6 +427,8 @@ def call_gemini_json(
     budget.reserve(category)
     logical_request = budget.total_used
     for attempt in range(1, int(max_attempts) + 1):
+        api_category = 'market' if category == 'context' else category
+        api_attempt_budget.reserve(model, api_category, stage)
         budget.record_api_attempt(category)
         print(
             f'Gemini logical request {logical_request}/{budget.total}: {stage} '
@@ -1800,6 +1883,20 @@ def validate_sources(sources, label, minimum=2, maximum=5):
     return cleaned[:maximum]
 
 
+CANONICAL_MARKET_SECTORS = (
+    'Basic Materials', 'Communication Services', 'Consumer Cyclical',
+    'Consumer Defensive', 'Energy', 'Financial Services', 'Healthcare',
+    'Industrials', 'Real Estate', 'Technology', 'Utilities',
+)
+MARKET_CONTEXT_SCHEMA_FIELDS = (
+    'as_of_date', 'market_status', 'market_summary', 'market_intro',
+    'market_direction', 'major_drivers', 'macro_conditions',
+    'strong_sectors', 'weak_sectors', 'strong_exposures', 'weak_exposures',
+    'sector_context', 'factor_and_theme_context', 'active_risk_events',
+    'sources',
+)
+
+
 def validate_market_context(data):
     if not isinstance(data, dict):
         raise ValueError('Market context must be a JSON object.')
@@ -1817,6 +1914,36 @@ def validate_market_context(data):
     data['market_intro'] = summary
     if not isinstance(data['active_risk_events'], list):
         raise ValueError('active_risk_events must be a list.')
+    seen_event_ids = set()
+    for index, event in enumerate(data['active_risk_events']):
+        if not isinstance(event, dict):
+            raise ValueError(
+                f'Market risk event {index + 1} must be an object.'
+            )
+        event_id = str(event.get('event_id') or '').strip()
+        if not re.fullmatch(r'[A-Z0-9]+(?:_[A-Z0-9]+)*', event_id):
+            raise ValueError(
+                f'Market risk event {index + 1} has invalid event_id '
+                f'{event_id!r}; expected UPPER_SNAKE_CASE.'
+            )
+        if event_id in seen_event_ids:
+            raise ValueError(f'Duplicate market risk event_id {event_id!r}.')
+        seen_event_ids.add(event_id)
+        if not str(event.get('description') or '').strip():
+            raise ValueError(f'Market risk event {event_id} has no description.')
+        affected_industries = event.get('affected_industries')
+        if (
+            not isinstance(affected_industries, list)
+            or not affected_industries
+            or any(not str(value).strip() for value in affected_industries)
+        ):
+            raise ValueError(
+                f'Market risk event {event_id} must have affected_industries.'
+            )
+        if not str(event.get('normalization_risk') or '').strip():
+            raise ValueError(
+                f'Market risk event {event_id} has no normalization_risk.'
+            )
     for field in ('major_drivers', 'macro_conditions', 'strong_sectors',
                   'weak_sectors', 'strong_exposures', 'weak_exposures'):
         if field in data and not isinstance(data[field], list):
@@ -1829,7 +1956,50 @@ def validate_market_context(data):
         data['sector_context'] = {}
     if not isinstance(data.get('factor_and_theme_context'), dict):
         data['factor_and_theme_context'] = {}
-    data['sources'] = validate_sources(data['sources'], 'Market context', minimum=2)
+    data['sources'] = validate_sources(
+        data['sources'], 'Market context', minimum=2, maximum=10
+    )
+    return data
+
+
+def validate_current_market_context(data):
+    """Validate the exact shared stock/ETF market-context contract."""
+    data = validate_market_context(data)
+    required = set(MARKET_CONTEXT_SCHEMA_FIELDS)
+    missing = required.difference(data)
+    if missing:
+        raise ValueError(
+            f'Market context is missing fields: {sorted(missing)}'
+        )
+    if data.get('market_status') not in {'STRONG', 'MIXED', 'WEAK'}:
+        raise ValueError('Market context has an invalid market_status.')
+    normalized_context = {
+        str(key).strip().casefold(): str(value).strip()
+        for key, value in data.get('sector_context', {}).items()
+    }
+    missing_sectors = [
+        sector for sector in CANONICAL_MARKET_SECTORS
+        if not normalized_context.get(sector.casefold())
+    ]
+    if missing_sectors:
+        raise ValueError(
+            'Market context is missing required sector context: '
+            + ', '.join(missing_sectors)
+        )
+    if not isinstance(data.get('factor_and_theme_context'), dict):
+        raise ValueError(
+            'Market context requires factor_and_theme_context object.'
+        )
+    if len({source['url'] for source in data['sources']}) < 6:
+        raise ValueError(
+            'Market context requires at least 6 distinct source URLs.'
+        )
+    if str(data.get('market_summary') or '').strip() != str(
+        data.get('market_intro') or ''
+    ).strip():
+        raise ValueError(
+            'market_summary and market_intro must be identical.'
+        )
     return data
 
 
@@ -2173,7 +2343,442 @@ def bind_mechanism_evidence_source(result):
     return result
 
 
-def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5):
+def _risk_event_terms(value):
+    """Return stable comparison terms for dynamic event-ID reconciliation."""
+    text = ' '.join(str(value or '').upper().split())
+    terms = re.findall(r'[A-Z0-9]+', text)
+    stopwords = {
+        'A', 'AN', 'AND', 'ARE', 'AS', 'AT', 'BE', 'BY', 'CURRENT',
+        'EVENT', 'FOR', 'FROM', 'IN', 'IS', 'IT', 'OF', 'ON', 'OR',
+        'RISK', 'THE', 'TO', 'WITH', 'WITHOUT', 'COULD', 'WOULD', 'MAY',
+        'MATERIAL', 'MATERIALLY', 'NORMALIZATION', 'NORMALIZE', 'NORMALIZING',
+        'DISRUPTION', 'DISRUPTIONS', 'TENSION', 'TENSIONS',
+    }
+    return {
+        term for term in terms
+        if len(term) >= 3 and term not in stopwords
+    }
+
+
+def _cosine_similarity(left, right):
+    """Return bounded cosine similarity, or None for unusable vectors."""
+    try:
+        left = np.asarray(left, dtype=float).reshape(-1)
+        right = np.asarray(right, dtype=float).reshape(-1)
+        if left.size == 0 or right.size == 0 or left.size != right.size:
+            return None
+        denominator = float(np.linalg.norm(left) * np.linalg.norm(right))
+        if not np.isfinite(denominator) or denominator <= 0:
+            return None
+        value = float(np.dot(left, right) / denominator)
+        if not np.isfinite(value):
+            return None
+        return max(-1.0, min(1.0, value))
+    except Exception:
+        return None
+
+
+def _risk_event_identity_text_from_result(result, raw_event_id):
+    return ' '.join(filter(None, [
+        f'event label {raw_event_id}',
+        str(result.get('reversal_mechanism') or ''),
+        str(result.get('current_driver_evidence') or ''),
+        str(result.get('probability_evidence') or ''),
+        str(result.get('primary_reversal_channel') or ''),
+    ])).strip()
+
+
+def _risk_event_transmission_text_from_result(result):
+    return ' '.join(filter(None, [
+        f'portfolio group {result.get("_portfolio_group") or ""}',
+        f'fund exposure {result.get("exposure_group") or ""}',
+        f'risk exposure {result.get("risk_exposure_group") or ""}',
+        str(result.get('reversal_mechanism') or ''),
+        str(result.get('material_effect') or ''),
+        str(result.get('holdings_evidence') or ''),
+    ])).strip()
+
+
+def _risk_event_identity_text_from_catalog(event):
+    return ' '.join(filter(None, [
+        f'event id {event.get("event_id") or ""}',
+        str(event.get('description') or ''),
+        str(event.get('normalization_risk') or ''),
+    ])).strip()
+
+
+def _risk_event_transmission_text_from_catalog(event):
+    return ' '.join(filter(None, [
+        'affected industries ' + ' '.join(
+            str(x) for x in (event.get('affected_industries') or [])
+        ),
+        'beneficiaries ' + ' '.join(
+            str(x) for x in (event.get('beneficiaries') or [])
+        ),
+        str(event.get('normalization_risk') or ''),
+        str(event.get('description') or ''),
+    ])).strip()
+
+
+def _get_fastembed_model():
+    """Load FastEmbed lazily and disable it for the run after a failure."""
+    global _fastembed_model, _fastembed_unavailable_reason
+    if _fastembed_model is not None:
+        return _fastembed_model
+    if _fastembed_unavailable_reason is not None:
+        return None
+    try:
+        from fastembed import TextEmbedding
+
+        FASTEMBED_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        _fastembed_model = TextEmbedding(
+            model_name=FASTEMBED_MODEL_NAME,
+            cache_dir=str(FASTEMBED_CACHE_DIR),
+        )
+        print(
+            'FastEmbed ETF risk-event matcher ready: '
+            f'model={FASTEMBED_MODEL_NAME}, cache={FASTEMBED_CACHE_DIR}.'
+        )
+        return _fastembed_model
+    except Exception as exc:
+        _fastembed_unavailable_reason = f'{type(exc).__name__}: {exc}'
+        print(
+            'FastEmbed ETF risk-event matcher unavailable; using deterministic '
+            f'lexical fallback for this run: {_fastembed_unavailable_reason}'
+        )
+        return None
+
+
+def _lexical_risk_event_scores(result, raw_event_id, catalog):
+    """Deterministic event matcher retained as a technical fallback."""
+    id_terms = _risk_event_terms(raw_event_id)
+    exposure_terms = _risk_event_terms(' '.join([
+        str(result.get('risk_exposure_group') or ''),
+        str(result.get('exposure_group') or ''),
+    ]))
+    portfolio_terms = _risk_event_terms(result.get('_portfolio_group'))
+    evidence_terms = _risk_event_terms(' '.join([
+        str(result.get('reversal_mechanism') or ''),
+        str(result.get('current_driver_evidence') or ''),
+        str(result.get('probability_evidence') or ''),
+        str(result.get('material_effect') or ''),
+        str(result.get('holdings_evidence') or ''),
+    ]))
+
+    scored = []
+    for event_id, event in catalog.items():
+        event_id_terms = _risk_event_terms(event_id)
+        event_context_terms = _risk_event_terms(' '.join([
+            str(event.get('description') or ''),
+            ' '.join(str(x) for x in (event.get('affected_industries') or [])),
+            ' '.join(str(x) for x in (event.get('beneficiaries') or [])),
+            str(event.get('normalization_risk') or ''),
+        ]))
+        all_event_terms = event_id_terms | event_context_terms
+        score = 0.0
+        score += 3.0 * len(id_terms & all_event_terms)
+        score += 3.0 * len(exposure_terms & all_event_terms)
+        score += 2.0 * len(portfolio_terms & all_event_terms)
+        score += 0.5 * min(6, len(evidence_terms & all_event_terms))
+        structural_overlap = bool(
+            (id_terms & all_event_terms)
+            or (exposure_terms & all_event_terms)
+            or (portfolio_terms & all_event_terms)
+        )
+        if structural_overlap:
+            scored.append((score, event_id))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return scored
+
+
+def _risk_event_structural_compatibility(result, raw_event_id, event):
+    """Require a concrete fund-exposure bridge beyond vector similarity."""
+    generic_channel_terms = {
+        'MARKET', 'MARKETS', 'PRICE', 'PRICES', 'RATE', 'RATES',
+        'STRONG', 'WEAK', 'HIGH', 'LOW', 'GLOBAL', 'SUPPLY', 'DEMAND',
+        'CONDITIONS', 'ECONOMIC', 'ECONOMY', 'INDUSTRY', 'INDUSTRIES',
+        'FUND', 'FUNDS', 'ETF', 'EQUITY', 'EQUITIES',
+    }
+    id_terms = _risk_event_terms(raw_event_id)
+    exposure_terms = _risk_event_terms(' '.join([
+        str(result.get('risk_exposure_group') or ''),
+        str(result.get('exposure_group') or ''),
+    ]))
+    exposure_specific_terms = exposure_terms - generic_channel_terms
+    portfolio_terms = _risk_event_terms(result.get('_portfolio_group'))
+
+    event_id_terms = _risk_event_terms(event.get('event_id'))
+    event_industry_terms = _risk_event_terms(
+        ' '.join(str(x) for x in (event.get('affected_industries') or []))
+    )
+    event_context_terms = _risk_event_terms(' '.join([
+        str(event.get('description') or ''),
+        ' '.join(str(x) for x in (event.get('affected_industries') or [])),
+        ' '.join(str(x) for x in (event.get('beneficiaries') or [])),
+        str(event.get('normalization_risk') or ''),
+    ]))
+    all_event_terms = event_id_terms | event_context_terms
+
+    event_label_overlap = id_terms & all_event_terms
+    exposure_overlap = exposure_specific_terms & all_event_terms
+    portfolio_overlap = portfolio_terms & event_industry_terms
+    return {
+        'compatible': bool(exposure_overlap or portfolio_overlap),
+        'event_label_overlap': sorted(event_label_overlap),
+        'exposure_overlap': sorted(exposure_overlap),
+        'portfolio_overlap': sorted(portfolio_overlap),
+    }
+
+
+def _semantic_risk_event_scores(result, raw_event_id, catalog):
+    """Rank current market events by identity and economic transmission."""
+    model = _get_fastembed_model()
+    if model is None:
+        return None
+    try:
+        ordered_events = list(catalog.items())
+        catalog_payload = [
+            {
+                'event_id': event_id,
+                'description': event.get('description'),
+                'affected_industries': event.get('affected_industries'),
+                'beneficiaries': event.get('beneficiaries'),
+                'normalization_risk': event.get('normalization_risk'),
+            }
+            for event_id, event in ordered_events
+        ]
+        cache_key = (FASTEMBED_MODEL_NAME, stable_json_hash(catalog_payload))
+        catalog_vectors = _risk_event_embedding_cache.get(cache_key)
+        if catalog_vectors is None:
+            catalog_texts = []
+            for _, event in ordered_events:
+                catalog_texts.extend([
+                    _risk_event_identity_text_from_catalog(event),
+                    _risk_event_transmission_text_from_catalog(event),
+                ])
+            embedded = list(model.embed(catalog_texts))
+            if len(embedded) != 2 * len(ordered_events):
+                raise ValueError(
+                    'FastEmbed returned an unexpected number of event vectors.'
+                )
+            catalog_vectors = {}
+            for index, (event_id, _) in enumerate(ordered_events):
+                catalog_vectors[event_id] = {
+                    'identity': embedded[index * 2],
+                    'transmission': embedded[index * 2 + 1],
+                }
+            _risk_event_embedding_cache.clear()
+            _risk_event_embedding_cache[cache_key] = catalog_vectors
+
+        etf_vectors = list(model.embed([
+            _risk_event_identity_text_from_result(result, raw_event_id),
+            _risk_event_transmission_text_from_result(result),
+        ]))
+        if len(etf_vectors) != 2:
+            raise ValueError(
+                'FastEmbed returned an unexpected number of ETF vectors.'
+            )
+
+        scored = []
+        for event_id, event in ordered_events:
+            identity_similarity = _cosine_similarity(
+                etf_vectors[0], catalog_vectors[event_id]['identity']
+            )
+            transmission_similarity = _cosine_similarity(
+                etf_vectors[1], catalog_vectors[event_id]['transmission']
+            )
+            if identity_similarity is None or transmission_similarity is None:
+                continue
+            structural = _risk_event_structural_compatibility(
+                result, raw_event_id, event
+            )
+            scored.append({
+                'event_id': event_id,
+                'identity_similarity': identity_similarity,
+                'transmission_similarity': transmission_similarity,
+                'combined_similarity': (
+                    0.55 * identity_similarity
+                    + 0.45 * transmission_similarity
+                ),
+                'structural': structural,
+            })
+        scored.sort(
+            key=lambda item: (-item['combined_similarity'], item['event_id'])
+        )
+        return scored
+    except Exception as exc:
+        print(
+            'FastEmbed ETF risk-event scoring failed; using deterministic '
+            f'lexical fallback: {type(exc).__name__}: {exc}'
+        )
+        runtime_reconciliation_diagnostics.append({
+            'symbol': str(result.get('symbol') or '').strip().upper(),
+            'type': 'dynamic_risk_event_embedding_fallback',
+            'reason': f'{type(exc).__name__}: {exc}',
+        })
+        return None
+
+
+def reconcile_dynamic_risk_event_id(result, active_risk_events):
+    """Map a noncanonical Gemini event label to the shared current catalog."""
+    raw_event_id = str(result.get('primary_risk_event_id') or '').strip()
+    if not raw_event_id or not isinstance(active_risk_events, list):
+        return raw_event_id or None
+    catalog = {
+        str(event.get('event_id') or '').strip(): event
+        for event in active_risk_events
+        if isinstance(event, dict) and str(event.get('event_id') or '').strip()
+    }
+    if raw_event_id in catalog or not catalog:
+        return raw_event_id
+
+    semantic_scores = _semantic_risk_event_scores(
+        result, raw_event_id, catalog
+    )
+    if semantic_scores:
+        best = semantic_scores[0]
+        runner_up = (
+            semantic_scores[1]['combined_similarity']
+            if len(semantic_scores) > 1 else -1.0
+        )
+        margin = best['combined_similarity'] - runner_up
+        accepted = (
+            best['identity_similarity'] >= FASTEMBED_IDENTITY_MIN_SIMILARITY
+            and best['transmission_similarity']
+            >= FASTEMBED_TRANSMISSION_MIN_SIMILARITY
+            and best['combined_similarity']
+            >= FASTEMBED_COMBINED_MIN_SIMILARITY
+            and margin >= FASTEMBED_UNIQUENESS_MARGIN
+            and best['structural']['compatible']
+        )
+        symbol = str(result.get('symbol') or '').strip().upper()
+        if not accepted:
+            print(
+                f'Semantic ETF risk-event reconciliation declined for {symbol}: '
+                f'returned={raw_event_id!r}, best={best["event_id"]!r}, '
+                f'identity={best["identity_similarity"]:.3f}, '
+                f'transmission={best["transmission_similarity"]:.3f}, '
+                f'combined={best["combined_similarity"]:.3f}, '
+                f'margin={margin:.3f}, '
+                f'structural={best["structural"]["compatible"]}.'
+            )
+            runtime_reconciliation_diagnostics.append({
+                'symbol': symbol,
+                'type': 'dynamic_risk_event_id_semantic_decline',
+                'field': 'primary_risk_event_id',
+                'from': raw_event_id,
+                'candidate': best['event_id'],
+                'identity_similarity': best['identity_similarity'],
+                'transmission_similarity': best['transmission_similarity'],
+                'combined_similarity': best['combined_similarity'],
+                'runner_up_similarity': runner_up,
+                'margin': margin,
+                'structural': best['structural'],
+            })
+            return raw_event_id
+
+        best_event_id = best['event_id']
+        print(
+            f'Reconciled semantic primary_risk_event_id for ETF {symbol}: '
+            f'{raw_event_id!r} -> {best_event_id!r} '
+            f'(identity={best["identity_similarity"]:.3f}, '
+            f'transmission={best["transmission_similarity"]:.3f}, '
+            f'combined={best["combined_similarity"]:.3f}, '
+            f'margin={margin:.3f}).'
+        )
+        runtime_reconciliation_diagnostics.append({
+            'symbol': symbol,
+            'type': 'dynamic_risk_event_id_semantic_reconciliation',
+            'field': 'primary_risk_event_id',
+            'from': raw_event_id,
+            'to': best_event_id,
+            'identity_similarity': best['identity_similarity'],
+            'transmission_similarity': best['transmission_similarity'],
+            'combined_similarity': best['combined_similarity'],
+            'runner_up_similarity': runner_up,
+            'margin': margin,
+            'structural': best['structural'],
+            'model': FASTEMBED_MODEL_NAME,
+        })
+        return best_event_id
+
+    # Technical fallback only. A semantic near-miss never falls through here.
+    scored = _lexical_risk_event_scores(result, raw_event_id, catalog)
+    if not scored:
+        return raw_event_id
+    best_score, best_event_id = scored[0]
+    runner_up_score = scored[1][0] if len(scored) > 1 else 0.0
+    if best_score < 6.0 or best_score - runner_up_score < 2.0:
+        return raw_event_id
+
+    symbol = str(result.get('symbol') or '').strip().upper()
+    print(
+        f'Reconciled fallback primary_risk_event_id for ETF {symbol}: '
+        f'{raw_event_id!r} -> {best_event_id!r} '
+        f'(score={best_score:.1f}, margin={best_score - runner_up_score:.1f}).'
+    )
+    runtime_reconciliation_diagnostics.append({
+        'symbol': symbol,
+        'type': 'dynamic_risk_event_id_lexical_fallback',
+        'field': 'primary_risk_event_id',
+        'from': raw_event_id,
+        'to': best_event_id,
+        'score': best_score,
+        'runner_up_score': runner_up_score,
+        'fallback_reason': (
+            _fastembed_unavailable_reason or 'embedding_runtime_failure'
+        ),
+    })
+    return best_event_id
+
+
+def reconcile_etf_risk_event_fields(result, candidate, active_risk_events):
+    """Reconcile only event identity; leave Gemini's investment judgment intact."""
+    result = dict(result)
+    match_context = dict(result)
+    match_context['_portfolio_group'] = str(
+        candidate.get('PortfolioGroup')
+        or candidate.get('CanonicalSector')
+        or candidate.get('Category')
+        or ''
+    ).strip()
+    event_id = str(result.get('primary_risk_event_id') or '').strip() or None
+    allowed_ids = {
+        str(event.get('event_id') or '').strip()
+        for event in (active_risk_events or [])
+        if isinstance(event, dict) and str(event.get('event_id') or '').strip()
+    }
+    if event_id and event_id not in allowed_ids:
+        match_context['primary_risk_event_id'] = event_id
+        event_id = reconcile_dynamic_risk_event_id(
+            match_context, active_risk_events
+        )
+    if event_id and event_id not in allowed_ids:
+        raise ValueError(
+            f'{result.get("symbol") or candidate.get("Symbol")} has unknown '
+            f'primary_risk_event_id {event_id!r}; use an exact event_id from '
+            'MARKET_CONTEXT.active_risk_events or null.'
+        )
+    result['primary_risk_event_id'] = event_id
+
+    exposure_group = result.get('risk_exposure_group')
+    if exposure_group is not None:
+        exposure_group = re.sub(
+            r'[^A-Z0-9]+', '_', str(exposure_group).upper()
+        ).strip('_') or None
+    if event_id and not exposure_group:
+        raise ValueError(
+            f'{result.get("symbol") or candidate.get("Symbol")} has a primary '
+            'risk event without risk_exposure_group.'
+        )
+    result['risk_exposure_group'] = exposure_group
+    return result
+
+
+def validate_etf_result(
+    result, candidate, minimum_sources=2, maximum_sources=5,
+    active_risk_events=None,
+):
     result = normalize_etf_result(result)
     result = normalize_hypothetical_consistency(result)
     symbol = str(candidate['Symbol']).upper()
@@ -2195,6 +2800,10 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
         maximum=maximum_sources,
     )
     result = bind_mechanism_evidence_source(result)
+    if active_risk_events is not None:
+        result = reconcile_etf_risk_event_fields(
+            result, candidate, active_risk_events
+        )
     if result.get('benchmark_assessment') not in {'PASS', 'FAIL'}:
         raise ValueError(f'{symbol} has invalid benchmark_assessment.')
     if result.get('mandate_assessment') not in {'US_EQUITY', 'NOT_US_EQUITY'}:
@@ -2397,7 +3006,10 @@ def validate_etf_result(result, candidate, minimum_sources=2, maximum_sources=5)
     return result
 
 
-def validate_etf_batch(data, candidates, minimum_sources=2, maximum_sources=5):
+def validate_etf_batch(
+    data, candidates, minimum_sources=2, maximum_sources=5,
+    active_risk_events=None,
+):
     if isinstance(data, dict):
         results = data.get('results')
     else:
@@ -2418,7 +3030,8 @@ def validate_etf_batch(data, candidates, minimum_sources=2, maximum_sources=5):
             continue
         try:
             valid[symbol] = validate_etf_result(
-                raw_by_symbol[symbol], candidate, minimum_sources, maximum_sources
+                raw_by_symbol[symbol], candidate, minimum_sources,
+                maximum_sources, active_risk_events,
             )
         except Exception as exc:
             errors[symbol] = str(exc)
@@ -3513,8 +4126,26 @@ def judge_etf_research_pool(
             for attempt in range(1, attempts + 1):
                 if classification_api_attempts_used >= max_classification_api_attempts_per_run:
                     break
-                classification_api_attempts_used += 1
                 stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
+                try:
+                    api_attempt_budget.reserve(
+                        model_name, 'classification', stage
+                    )
+                except GeminiApiAttemptBudgetExhausted as exc:
+                    last_error = exc
+                    classification_call_diagnostics.append({
+                        'stage': 'etf_judgment', 'model': model_name,
+                        'attempt': attempt,
+                        'logical_call': classification_logical_calls_used,
+                        'api_attempt': classification_api_attempts_used,
+                        'symbols': list(batch_symbols),
+                        'success': False, 'fallback': model_index > 0,
+                        'error': str(exc),
+                        'status': 'API_BUDGET_EXHAUSTED',
+                    })
+                    print(f'ETF API-attempt budget stopped {stage}: {exc}')
+                    break
+                classification_api_attempts_used += 1
                 print(
                     f'Gemini ETF classification logical call '
                     f'{classification_logical_calls_used}/{max_classification_logical_calls_per_run}; '
@@ -3574,10 +4205,7 @@ def judge_etf_research_pool(
                     # A valid JSON response with the wrong schema is structural, not
                     # transient. Repeating the same model/prompt usually reproduces it,
                     # so move directly to the fallback model instead of burning budget.
-                    if (
-                        is_daily_quota_error(exc)
-                        or not is_transient_gemini_error(exc)
-                    ):
+                    if isinstance(exc, ValueError):
                         break
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
@@ -3628,7 +4256,6 @@ def judge_etf_research_pool(
                 )
                 continue
 
-            valid_patch_count += 1
             exposure_risk = patch['exposure_reversal_risk']
             entry_risk = patch['entry_reversal_risk']
             overall = patch['reversal_risk']
@@ -3656,6 +4283,35 @@ def judge_etf_research_pool(
             for field in ('risk_exposure_group', 'primary_risk_event_id', 'explanation'):
                 if field in patch:
                     research[field] = patch[field]
+            try:
+                research = reconcile_etf_risk_event_fields(
+                    research,
+                    candidate_by_symbol[symbol],
+                    market_context.get('active_risk_events') or [],
+                )
+            except Exception as exc:
+                invalid_patch_symbols.append(symbol)
+                prior_research = dict(judged[symbol])
+                prior_research['judgment_validation_error'] = str(exc)
+                judged[symbol] = prior_research
+                classification_call_diagnostics.append({
+                    'stage': 'etf_judgment_event_reconciliation',
+                    'model': used_model,
+                    'logical_call': classification_logical_calls_used,
+                    'api_attempt': classification_api_attempts_used,
+                    'symbols': [symbol],
+                    'success': False,
+                    'error': str(exc),
+                    'raw_primary_risk_event_id': patch.get(
+                        'primary_risk_event_id'
+                    ),
+                })
+                print(
+                    f'Warning: ETF judgment event identity [{symbol}] was '
+                    f'isolated without discarding peer judgments: {exc}'
+                )
+                continue
+            valid_patch_count += 1
             # Reset only judgment-owned exclusion state before applying the new
             # authoritative patch; grounded mandate/research exclusions remain intact.
             prior_reason = str(research.get('eligibility_reason') or '')
@@ -4272,9 +4928,7 @@ initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
 classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
-classification_fallback_model = str(
-    config.get('classification_fallback_model', classification_model)
-)
+classification_fallback_model = str(config.get('classification_fallback_model', model_primary))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
@@ -4282,12 +4936,31 @@ classification_max_output_tokens = int(config.get('classification_max_output_tok
 classification_attempts = max(1, int(config.get('classification_attempts', 2)))
 max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
 max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
-max_gemini_35_calls_per_run = int(config.get('max_gemini_35_calls_per_run', 8))
-if max_classification_api_attempts_per_run >= max_gemini_35_calls_per_run:
+max_3_5_api_calls_per_run = int(config.get(
+    'max_3_5_api_calls_per_run', config.get('max_gemini_35_calls_per_run', 7)
+))
+max_3_5_classification_calls_per_run = int(config.get(
+    'max_3_5_classification_calls_per_run',
+    max_classification_api_attempts_per_run,
+))
+max_3_5_summary_calls_per_run = int(config.get(
+    'max_3_5_summary_calls_per_run', 1
+))
+max_gemini_35_calls_per_run = max_3_5_api_calls_per_run
+if (
+    max_3_5_classification_calls_per_run
+    != max_classification_api_attempts_per_run
+):
     raise ValueError(
-        'ETF config must reserve at least one 3.5 call for the HTML summary: '
-        'max_classification_api_attempts_per_run must be lower than '
-        'max_gemini_35_calls_per_run.'
+        'max_3_5_classification_calls_per_run must equal '
+        'max_classification_api_attempts_per_run.'
+    )
+if (
+    max_3_5_classification_calls_per_run + max_3_5_summary_calls_per_run
+    > max_3_5_api_calls_per_run
+):
+    raise ValueError(
+        'Gemini 3.5 category limits exceed its total API-call limit.'
     )
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
@@ -4353,9 +5026,32 @@ max_etf_research_calls_per_run = config.get('max_etf_research_calls_per_run', 5)
 max_gemini_api_attempts_per_run = int(
     config.get('max_gemini_api_attempts_per_run', max_gemini_calls_per_run)
 )
-max_market_context_api_attempts_per_run = int(
-    config.get('max_market_context_api_attempts_per_run', 2)
-)
+max_2_5_api_calls_per_run = int(config.get(
+    'max_2_5_api_calls_per_run', max_gemini_api_attempts_per_run
+))
+max_2_5_market_calls_per_run = int(config.get(
+    'max_2_5_market_calls_per_run', 2
+))
+max_2_5_research_calls_per_run = int(config.get(
+    'max_2_5_research_calls_per_run', max_etf_research_calls_per_run
+))
+max_2_5_summary_fallback_calls_per_run = int(config.get(
+    'max_2_5_summary_fallback_calls_per_run', 1
+))
+if max_gemini_api_attempts_per_run != max_2_5_api_calls_per_run:
+    raise ValueError(
+        'max_gemini_api_attempts_per_run must equal '
+        'max_2_5_api_calls_per_run.'
+    )
+for category_name, category_limit in (
+    ('market', max_2_5_market_calls_per_run),
+    ('research', max_2_5_research_calls_per_run),
+    ('summary', max_2_5_summary_fallback_calls_per_run),
+):
+    if category_limit > max_2_5_api_calls_per_run:
+        raise ValueError(
+            f'Gemini 2.5 {category_name} limit exceeds the shared total limit.'
+        )
 reserved_summary_calls = config.get('reserved_summary_calls', 1)
 max_transient_api_attempts = config.get('max_transient_api_attempts', 3)
 max_transient_delay = config.get('max_transient_delay', 60)
@@ -4379,12 +5075,11 @@ research_cache_file = config.get(
     'etf_research_cache_file', 'caches/gemini_etf_research_cache.json'
 )
 market_context_cache_file = config.get(
-    'market_context_cache_file', 'caches/gemini_market_context_cache.json'
+    'market_context_cache_file',
+    'caches/gemini_shared_market_context_cache.json',
 )
 research_cache_hours = config.get('gemini_research_cache_hours', 12)
 market_context_cache_hours = config.get('market_context_cache_hours', 12)
-market_context_schema_version = int(config.get('market_context_schema_version', 1))
-market_context_prompt_version = int(config.get('market_context_prompt_version', 1))
 cache_version = config.get('cache_version', 1)
 research_cache_version = config.get(
     'etf_research_cache_version', cache_version
@@ -4680,50 +5375,82 @@ request_budget = GeminiRequestBudget(
     reserved_summary_calls,
     release_summary_for_research=False,
     max_api_attempts=max_gemini_api_attempts_per_run,
-    market_api_maximum=max_market_context_api_attempts_per_run,
+)
+api_attempt_budget = GeminiApiAttemptBudget(
+    family_limits={
+        '3.5': max_3_5_api_calls_per_run,
+        '2.5': max_2_5_api_calls_per_run,
+    },
+    category_limits={
+        ('3.5', 'classification'): max_3_5_classification_calls_per_run,
+        ('3.5', 'summary'): max_3_5_summary_calls_per_run,
+        ('2.5', 'market'): max_2_5_market_calls_per_run,
+        ('2.5', 'research'): max_2_5_research_calls_per_run,
+        ('2.5', 'summary'): max_2_5_summary_fallback_calls_per_run,
+    },
 )
 call_diagnostics = []
 batch_research_diagnostics = []
 models_used = []
 
-# Research the shared market backdrop once and cache it separately from ETFs.
-market_prompt = config['prompt_market_context'].rstrip() + (
-    f'\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n'
-)
-market_prompt_hash = stable_json_hash({
-    'schema_version': market_context_schema_version,
-    'prompt_version': market_context_prompt_version,
+# Use the stock recommender's exact content-addressed shared market contract.
+# The prompt template and schema hash intentionally exclude CURRENT_DATE_UTC so
+# both daily jobs resolve the same fresh entry within the configured TTL.
+market_prompt_template = config['prompt_market_context'].strip()
+market_schema_hash = stable_json_hash(MARKET_CONTEXT_SCHEMA_FIELDS)
+market_contract_hash = stable_json_hash({
+    'contract': 'shared_stock_etf_market_context_v1',
     'model': model_primary,
-    'prompt': market_prompt,
+    'google_search': True,
+    'prompt_template': market_prompt_template,
+    'schema_hash': market_schema_hash,
 })
+market_prompt = (
+    market_prompt_template
+    + f'\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n'
+)
+market_prompt_hash = stable_json_hash(market_prompt_template)
+market_file_exists = os.path.exists(market_context_cache_file)
 market_cache = load_json_object(market_context_cache_file)
+market_entries = market_cache.get('entries')
+if not isinstance(market_entries, dict):
+    market_entries = {}
+market_cache = {'file_format_version': 1, 'entries': market_entries}
+market_entry = market_entries.get(market_contract_hash)
 market_context = None
-cached_market_data = (
-    market_cache.get('data') or market_cache.get('market_context')
-    if isinstance(market_cache, dict) else None
+market_model = None
+market_cache_age = None
+market_miss_reason = (
+    'file_missing_fresh_seed'
+    if not market_file_exists else 'contract_not_cached'
 )
-cache_model = market_cache.get('model') if isinstance(market_cache, dict) else None
-current_shared_contract = (
-    market_cache.get('schema_version') == market_context_schema_version
-    and market_cache.get('prompt_hash') == market_prompt_hash
+if isinstance(market_entry, dict):
+    timestamp = parse_utc_timestamp(
+        market_entry.get('timestamp') or market_entry.get('created_at')
+    )
+    if timestamp is not None:
+        market_cache_age = (
+            datetime.now(UTC) - timestamp
+        ).total_seconds() / 3600
+    if not cache_entry_is_fresh(market_entry, market_context_cache_hours):
+        market_miss_reason = 'expired'
+    elif market_entry.get('model') != model_primary:
+        market_miss_reason = 'model_mismatch'
+    else:
+        try:
+            market_context = validate_current_market_context(
+                market_entry.get('data') or market_entry['market_context']
+            )
+            market_model = market_entry['model']
+            market_miss_reason = None
+        except (KeyError, TypeError, ValueError) as exc:
+            market_miss_reason = f'validation_failed: {exc}'
+print(
+    'MARKET CACHE ' + ('HIT' if market_context is not None else 'MISS')
+    + f' path={market_context_cache_file} entries={len(market_entries)}'
+    + f' contract={market_contract_hash[:12]} age_hours={market_cache_age}'
+    + ('' if market_miss_reason is None else f' reason={market_miss_reason}')
 )
-compatible_stock_contract = (
-    market_cache.get('version') == cache_version
-    and isinstance(market_cache.get('market_context'), dict)
-)
-if (
-    (current_shared_contract or compatible_stock_contract)
-    and cache_model in {model_primary, model_fallback}
-    and cache_entry_is_fresh(market_cache, market_context_cache_hours)
-):
-    try:
-        market_context = validate_market_context(cached_market_data)
-        timestamp = parse_utc_timestamp(market_cache.get('timestamp') or market_cache.get('created_at'))
-        age = datetime.now(UTC) - timestamp
-        label = 'shared' if current_shared_contract else 'compatible stock'
-        print(f'Using validated {label} market context cache ({age.total_seconds() / 3600:.1f}h old).')
-    except Exception as exc:
-        print(f'Ignoring invalid shared market context cache: {exc}')
 if market_context is None:
     data, used_model, metadata = call_gemini_json(
         client,
@@ -4744,30 +5471,47 @@ if market_context is None:
     )
     if not metadata.get('search_queries') and metadata.get('tool_tokens', 0) <= 0:
         raise RuntimeError('Gemini returned ungrounded ETF market context.')
-    market_context = validate_market_context(data)
+    market_context = validate_current_market_context(data)
+    market_model = used_model
     models_used.append(used_model)
     call_diagnostics.append({'stage': 'market context', **metadata})
-    if len(metadata.get('search_queries', [])) > 5:
-        print(f'Market-context search overrun: Gemini exposed {len(metadata.get("search_queries", []))} queries; prompt maximum is 5.')
+    if len(metadata.get('search_queries', [])) > 8:
+        print(
+            'Market-context search overrun: Gemini exposed '
+            f'{len(metadata.get("search_queries", []))} queries; '
+            'prompt maximum is 8.'
+        )
     now_iso = datetime.now(UTC).isoformat()
+    market_entries[market_contract_hash] = {
+        'created_at': now_iso,
+        'contract_hash': market_contract_hash,
+        'prompt_hash': market_prompt_hash,
+        'schema_hash': market_schema_hash,
+        'model': used_model,
+        'data': market_context,
+        'market_context': market_context,
+        'research_metadata': {
+            'search_queries': metadata.get('search_queries', []),
+            'tool_tokens': metadata.get('tool_tokens', 0),
+        },
+    }
     save_json_object_atomic(
         market_context_cache_file,
-        {
-            'version': cache_version,
-            'schema_version': market_context_schema_version,
-            'prompt_version': market_context_prompt_version,
-            'prompt_hash': market_prompt_hash,
-            'model': used_model,
-            'created_at': now_iso,
-            'timestamp': now_iso,
-            'data': market_context,
-            'market_context': market_context,
-            'research_metadata': {
-                'search_queries': metadata.get('search_queries', []),
-                'tool_tokens': metadata.get('tool_tokens', 0),
-            },
-        },
+        market_cache,
     )
+    print(
+        f'MARKET CACHE SAVED contract={market_contract_hash[:12]} '
+        f'entries={len(market_entries)} exposed_search_queries='
+        f'{len(metadata.get("search_queries") or [])}'
+    )
+else:
+    print(
+        f'Using validated shared market context cache: '
+        f'{market_context_cache_file}'
+    )
+
+market_context_hash = stable_json_hash(market_context)
+active_risk_events = market_context.get('active_risk_events') or []
 
 research_prompt_hash = stable_json_hash(
     {'version': research_cache_version, 'prompt': config['prompt_etf_batch']}
@@ -4804,11 +5548,17 @@ for candidate in candidate_records:
         )
     }
     cache_key = stable_json_hash(
-        {'prompt_hash': research_prompt_hash, 'candidate': signature}
+        {
+            'prompt_hash': research_prompt_hash,
+            'market_context_hash': market_context_hash,
+            'candidate': signature,
+        }
     )
     cache_keys[symbol] = cache_key
     entry = research_cache['entries'].get(cache_key)
     compatible_cache = False
+    if entry and entry.get('market_context_hash') != market_context_hash:
+        entry = None
     if not entry:
         matching_entries = [
             prior_entry
@@ -4816,6 +5566,7 @@ for candidate in candidate_records:
             if (
                 isinstance(prior_entry, dict)
                 and cache_entry_is_fresh(prior_entry, research_cache_hours)
+                and prior_entry.get('market_context_hash') == market_context_hash
                 and str(
                     (prior_entry.get('research') or {}).get('symbol') or ''
                 ).strip().upper() == symbol
@@ -4833,6 +5584,7 @@ for candidate in candidate_records:
                 entry.get('research'), candidate,
                 config.get('min_etf_sources', 2),
                 config.get('max_etf_sources', 5),
+                active_risk_events,
             )
             cache_label = 'compatible validated' if compatible_cache else 'validated'
             print(f'Using {cache_label} ETF research cache for {symbol}.')
@@ -4904,8 +5656,7 @@ initial_provisional_count = len(selected)
 provisional_portfolio_peak = max(provisional_portfolio_peak, initial_provisional_count)
 if research_by_symbol:
     research_by_symbol = safe_judge_etf_research_pool(
-        client, candidate_records, research_by_symbol, market_context,
-        force=True,
+        client, candidate_records, research_by_symbol, market_context
     )
     for call in classification_call_diagnostics:
         if call.get('success') and call.get('model') and call['model'] not in models_used:
@@ -5433,6 +6184,7 @@ while (
             batch,
             config.get('min_etf_sources', 2),
             config.get('max_etf_sources', 5),
+            active_risk_events,
         )
         raw_result_shapes = {}
         for candidate in batch:
@@ -5529,6 +6281,7 @@ while (
                 research_by_symbol[symbol] = valid[symbol]
                 research_cache['entries'][cache_keys[symbol]] = {
                     'timestamp': datetime.now(UTC).isoformat(),
+                    'market_context_hash': market_context_hash,
                     'research': valid[symbol],
                 }
                 research_cache['deferred_entries'].pop(cache_keys[symbol], None)
@@ -5961,19 +6714,22 @@ if config.get('final_summary_enabled', True):
         + json.dumps(selected_summary_input, ensure_ascii=False)
     )
     summary_data = None
-    while (
-        summary_data is None
-        and summary_35_api_attempts_used < 2
-        and classification_api_attempts_used + summary_35_api_attempts_used
+    if (
+        classification_api_attempts_used + summary_35_api_attempts_used
         < max_gemini_35_calls_per_run
+        and api_attempt_budget.remaining(summary_model, 'summary') > 0
     ):
+        api_attempt_budget.reserve(
+            summary_model, 'summary', 'ETF HTML summary'
+        )
         summary_35_api_attempts_used += 1
         stage = 'ETF HTML summary'
-        total_35_attempt = classification_api_attempts_used + summary_35_api_attempts_used
+        total_35_attempt = (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        )
         print(
             f'Gemini 3.5 summary call {total_35_attempt}/'
-            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model}), '
-            f'attempt {summary_35_api_attempts_used}/2'
+            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
         )
         try:
             response = client.models.generate_content(
@@ -6007,17 +6763,12 @@ if config.get('final_summary_enabled', True):
                 'success': False, 'error': str(exc),
             })
             summary_data = None
-            if (
-                summary_35_api_attempts_used >= 2
-                or is_daily_quota_error(exc)
-                or not is_transient_gemini_error(exc)
-            ):
-                break
-            delay = min(max_transient_delay, initial_delay) + random.uniform(0, 3)
-            print(f'Retrying transient ETF 3.5 summary failure in {delay:.1f}s...')
-            time.sleep(delay)
+    else:
+        print(
+            'ETF 3.5 summary reservation was unavailable; trying the 2.5 fallback.'
+        )
 
-    if summary_data is None and request_budget.can_reserve('summary'):
+    if summary_data is None and request_budget.total_used < request_budget.total:
         try:
             summary_data, used_model, metadata = call_gemini_json(
                 client,
@@ -6175,6 +6926,19 @@ if classification_changes:
 else:
     print('Classification consistency: no changes among comparable cached ETFs.')
 
+reconciliation_counts = {}
+for item in runtime_reconciliation_diagnostics:
+    item_type = str(item.get('type') or 'unknown')
+    reconciliation_counts[item_type] = (
+        reconciliation_counts.get(item_type, 0) + 1
+    )
+if reconciliation_counts:
+    print('ETF runtime reconciliation summary:')
+    for item_type, count in sorted(reconciliation_counts.items()):
+        print(f'  {item_type}: {count}')
+else:
+    print('ETF runtime reconciliation summary: no label repairs were needed.')
+
 diagnostics = {
     'generated_at': datetime.now(UTC).isoformat(),
     'status': 'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS',
@@ -6211,6 +6975,7 @@ diagnostics = {
             classification_api_attempts_used + summary_35_api_attempts_used
         ),
         'context_api_attempts': request_budget.context_api_attempts,
+        'per_model_api_attempts': api_attempt_budget.snapshot(),
         'summary_reservation_releasable_on_shortfall': summary_reservation_releasable_on_shortfall,
     },
     'research': {
@@ -6238,6 +7003,8 @@ diagnostics = {
     },
     'classifications': current_classifications,
     'classification_changes': classification_changes,
+    'runtime_reconciliations': runtime_reconciliation_diagnostics,
+    'reconciliation_counts': reconciliation_counts,
     'consistency_warnings': consistency_warnings,
     'research_disposition': research_disposition,
     'decision_ledger': decision_ledger,

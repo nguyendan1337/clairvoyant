@@ -313,6 +313,34 @@ prompt_stock_judgment: |
   return, analyst price target, or LOW risk alone is insufficient. Use UNCERTAIN
   when that affirmative case is not supported; do not invent missing evidence.
 
+  STRICT ENUM CONTRACT
+  Before returning JSON, validate every result against these exact vocabularies:
+  - business_reversal_risk, entry_reversal_risk, reversal_risk:
+    MINIMAL, LOW, MODERATE, ELEVATED, or SEVERE. Never use HIGH for these fields.
+  - business_concentration, binary_event_risk, catalyst_dependence,
+    risk_materiality: LOW, MODERATE, or HIGH.
+  - benchmark_outperformance_outlook: LIKELY, UNCERTAIN, or UNLIKELY.
+  - continuation_strength: STRONG, ADEQUATE, or WEAK.
+  - primary_reversal_channel: TEMPORARY_DRIVER_NORMALIZATION,
+    FUNDAMENTAL_DETERIORATION, CATALYST_EXHAUSTION, VALUATION_RERATING,
+    BINARY_EVENT, or MOMENTUM_FRAGILITY.
+  - risk_basis: NONE, NORMALIZED_OPERATING_DETERIORATION,
+    TEMPORARY_DRIVER_NORMALIZATION, or NONRECURRING_COMPARISON_ONLY.
+  - mechanism_status: NONE, HYPOTHETICAL, ACTIVE, or UNUSUALLY_PROBABLE.
+  - normalization_probability: NOT_APPLICABLE, NOT_ESTABLISHED,
+    REASONABLY_PROBABLE, or AT_LEAST_AS_LIKELY.
+  - continuation_outlook: CONTINUATION_MORE_LIKELY,
+    REVERSAL_AT_LEAST_AS_LIKELY, or THESIS_BROKEN.
+  - probability_indicator_type: NONE, GUIDANCE_REDUCTION, ORDER_CONTRACTION,
+    UTILIZATION_DECLINE, PRICE_OR_MARGIN_COMPRESSION, CAPACITY_INCREASE,
+    CONTRACT_EXPIRY, INVENTORY_CHANGE, REGULATORY_ACTION,
+    FORWARD_MARKET_CHANGE, or OTHER_CURRENT_INDICATOR.
+  - probability_basis: COMPANY_REPORTED_CHANGE, OBSERVABLE_MARKET_CHANGE,
+    REGULATORY_OR_CONTRACT_ACTION, EXTERNAL_EXPECTATION_ONLY, or NONE.
+  - risk_time_horizon: 0_3_MONTHS, 3_6_MONTHS, 6_12_MONTHS, LONGER, or null.
+  Return every required key once for every supplied candidate. Do not substitute
+  synonyms such as HIGH for ELEVATED, MEDIUM for MODERATE, or free-form labels.
+
   OUTPUT
   Return exactly one JSON object with a results array in candidate order. Each
   result must include: symbol, business_reversal_risk, entry_reversal_risk,
@@ -325,6 +353,9 @@ prompt_stock_judgment: |
   risk_materiality, primary_risk_event_id, risk_exposure_group,
   classification_change_reason, material_new_evidence, and explanation.
   Preserve source-backed research meaning. Do not return sources.
+  Immediately before responding, self-check candidate coverage, required keys,
+  exact enum spelling, and cross-field consistency. Correct the JSON silently;
+  return no commentary outside the single JSON object.
 
 prompt_stock_batch: |
   You are an expert U.S. stock analyst with real-time Google Search. Evaluate

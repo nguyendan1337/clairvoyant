@@ -1352,7 +1352,9 @@ def judge_stock_research_batch(
                 "3m": candidate.get("3M Return"),
                 "6m": candidate.get("6M Return"),
                 "9m": candidate.get("9M Return"),
-                "1y": candidate.get("52 WkChange %"),
+                "1y": candidate.get(
+                    "1Y Return", candidate.get("52 WkChange %")
+                ),
             },
             "price_path": {
                 "annualized_volatility": candidate.get("AnnualizedVolatility"),
@@ -3983,7 +3985,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
 
     Function defaults are approximately balanced. The production caller
     explicitly uses configurable continuation-oriented weights (currently
-    Quality 50%, Value 15%, and Momentum 35%).
+    Quality 45%, Value 10%, and Momentum 45%).
     """
 
     df = df.copy()
@@ -4067,6 +4069,7 @@ def score_qvm(df, top_n=100, weights=None, min_quality=40):
         'GrossMargin',
         'OperatingMargin',
         'RevenueGrowth',
+        'EarningsGrowth',
         'FCFMargin',
         'OperatingCashFlowMargin',
         'CurrentRatio',
@@ -4955,8 +4958,8 @@ def build_recommendations_table(selected):
         "<th>Symbol</th>",
         "<th>Stock Name</th>",
         "<th>Sector Group</th>",
-        "<th>52 Wk Change (%)</th>",
-        "<th>3 Mo Return (%)</th>",
+        "<th>3 Month Return %</th>",
+        "<th>1 Year Return %</th>",
         "<th>QVMScore</th>",
         "<th>Reversal Risk</th>",
         "</tr>",
@@ -4972,8 +4975,8 @@ def build_recommendations_table(selected):
             f"<td>{yahoo_link(symbol, symbol)}</td>",
             f"<td>{yahoo_link(symbol, candidate['Name'])}</td>",
             f"<td>{escape(str(candidate['Sector']))}</td>",
-            f"<td>{format_number(candidate.get('52 WkChange %'))}</td>",
             f"<td>{format_number(candidate.get('3M Return'))}</td>",
+            f"<td>{format_number(candidate.get('1Y Return'))}</td>",
             f"<td>{format_number(candidate.get('QVMScore'))}</td>",
             f"<td><strong>{escape(research['reversal_risk'])}</strong></td>",
             "</tr>",
@@ -5569,6 +5572,7 @@ cols_for_eval = [
     'EV_EBITDA',
     'PEG',
     'RevenueGrowth',
+    'EarningsGrowth',
     'OperatingMargin',
     'FCFMargin',
     '3M Return',
@@ -7444,6 +7448,39 @@ previous_selected_symbols = previous_run_diagnostics.get(
     "selected_symbols", []
 )
 current_decisions = build_decision_snapshots(decision_ledger)
+
+# Make the final portfolio boundary auditable without spending another model
+# call. This records the weakest selected stock and the five highest-scoring
+# validated non-selections together with the exact rule that blocked each one.
+selected_decision_rows = [
+    decision for decision in decision_ledger
+    if str(decision.get("status") or "").startswith("SELECTED")
+    and decision.get("final_selection_score") is not None
+]
+validated_nonselected_rows = [
+    decision for decision in decision_ledger
+    if not str(decision.get("status") or "").startswith(("SELECTED", "EXCLUDED"))
+    and decision.get("final_selection_score") is not None
+]
+weakest_selected_decision = (
+    min(
+        selected_decision_rows,
+        key=lambda decision: float(decision["final_selection_score"]),
+    )
+    if selected_decision_rows else None
+)
+best_nonselected_decisions = sorted(
+    validated_nonselected_rows,
+    key=lambda decision: float(decision["final_selection_score"]),
+    reverse=True,
+)[:5]
+selection_boundary_audit = {
+    "weakest_selected": weakest_selected_decision,
+    "best_validated_nonselected": best_nonselected_decisions,
+}
+print("SELECTION BOUNDARY AUDIT")
+print("  " + json.dumps(selection_boundary_audit, ensure_ascii=False, default=str))
+
 previous_decisions = previous_run_diagnostics.get("decisions", {})
 portfolio_changes = build_portfolio_changes(
     previous_selected_symbols,
@@ -7605,9 +7642,13 @@ if portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE":
 
 # The full QVM table remains the complete ranked candidate stream.
 output_columns = [
-    'Symbol', 'Name', 'Sector', '52 WkChange %', '3M Return', 'QVMScore'
+    'Symbol', 'Name', 'Sector', '3M Return', '1Y Return', 'QVMScore'
 ]
 df_html = df_gemini[output_columns].copy()
+df_html = df_html.rename(columns={
+    '3M Return': '3 Month Return %',
+    '1Y Return': '1 Year Return %',
+})
 df_html["_RawSymbol"] = df_html["Symbol"].astype(str)
 df_html["Symbol"] = df_html["Symbol"].apply(
     lambda symbol: yahoo_link(symbol, symbol)
@@ -7791,6 +7832,7 @@ run_report = {
     "duplicate_results": duplicate_result_diagnostics,
     "duplicate_extra_block_count": total_duplicate_blocks,
     "decisions": current_decisions,
+    "selection_boundary_audit": selection_boundary_audit,
     "selected_symbols": current_selected_symbols,
     "portfolio_changes": portfolio_changes,
     "market_context": {

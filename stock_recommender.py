@@ -1352,9 +1352,7 @@ def judge_stock_research_batch(
                 "3m": candidate.get("3M Return"),
                 "6m": candidate.get("6M Return"),
                 "9m": candidate.get("9M Return"),
-                "1y": candidate.get(
-                    "1Y Return", candidate.get("52 WkChange %")
-                ),
+                "1y": candidate.get("52 WkChange %"),
             },
             "price_path": {
                 "annualized_volatility": candidate.get("AnnualizedVolatility"),
@@ -3474,7 +3472,9 @@ TOP_QVM_CACHE_FILE = cache_file_path("top_qvm_stocks_cache.pkl")
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 # Increment when QVM inputs or scoring semantics change so a prior cached
 # ranking cannot bypass the updated calculation.
-TOP_QVM_CACHE_VERSION = 5
+# Version 6 restores EarningsGrowth to QualityScore. Older cached rankings
+# must be rebuilt so they cannot bypass the corrected scoring calculation.
+TOP_QVM_CACHE_VERSION = 6
 
 
 def load_top_qvm_cache(benchmark_context=None, hurdle_tolerance_pct=0.25):
@@ -4976,7 +4976,7 @@ def build_recommendations_table(selected):
             f"<td>{yahoo_link(symbol, candidate['Name'])}</td>",
             f"<td>{escape(str(candidate['Sector']))}</td>",
             f"<td>{format_number(candidate.get('3M Return'))}</td>",
-            f"<td>{format_number(candidate.get('1Y Return'))}</td>",
+            f"<td>{format_number(candidate.get('52 WkChange %'))}</td>",
             f"<td>{format_number(candidate.get('QVMScore'))}</td>",
             f"<td><strong>{escape(research['reversal_risk'])}</strong></td>",
             "</tr>",
@@ -7642,13 +7642,9 @@ if portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE":
 
 # The full QVM table remains the complete ranked candidate stream.
 output_columns = [
-    'Symbol', 'Name', 'Sector', '3M Return', '1Y Return', 'QVMScore'
+    'Symbol', 'Name', 'Sector', '3M Return', '52 WkChange %', 'QVMScore'
 ]
 df_html = df_gemini[output_columns].copy()
-df_html = df_html.rename(columns={
-    '3M Return': '3 Month Return %',
-    '1Y Return': '1 Year Return %',
-})
 df_html["_RawSymbol"] = df_html["Symbol"].astype(str)
 df_html["Symbol"] = df_html["Symbol"].apply(
     lambda symbol: yahoo_link(symbol, symbol)
@@ -7664,6 +7660,15 @@ df_html_table = df_html.to_html(
     classes="recommendations-table",
     border=0
 )
+# Change only the rendered headers. Preserve the existing internal field
+# names and return values, including the 52-week figure previously displayed.
+for internal_column, display_label in (
+    ("3M Return", "3 Month Return %"),
+    ("52 WkChange %", "1 Year Return %"),
+):
+    df_html_table = df_html_table.replace(
+        f"<th>{internal_column}</th>", f"<th>{display_label}</th>"
+    )
 
 model_used = ", ".join(dict.fromkeys(models_used))
 update_html_page(

@@ -2412,11 +2412,120 @@ def downgrade_unproven_material_risk(result, symbol, reason):
     })
 
 
+def _risk_event_terms(value):
+    """Return stable comparison terms for dynamic event-ID reconciliation."""
+    text = " ".join(str(value or "").upper().split())
+    terms = re.findall(r"[A-Z0-9]+", text)
+    stopwords = {
+        "A", "AN", "AND", "ARE", "AS", "AT", "BE", "BY", "CURRENT",
+        "EVENT", "FOR", "FROM", "IN", "IS", "IT", "OF", "ON", "OR",
+        "RISK", "THE", "TO", "WITH", "WITHOUT", "COULD", "WOULD", "MAY",
+        "MATERIAL", "MATERIALLY", "NORMALIZATION", "NORMALIZE", "NORMALIZING",
+        "DISRUPTION", "DISRUPTIONS", "TENSION", "TENSIONS",
+    }
+    return {
+        term for term in terms
+        if len(term) >= 3 and term not in stopwords
+    }
+
+
+def reconcile_dynamic_risk_event_id(result, active_risk_events):
+    """Map a noncanonical Gemini event label to the current dynamic catalog.
+
+    This is representation repair only. It never creates an event when Gemini
+    returned null, never changes risk/exposure fields, and never uses a
+    stock- or event-specific alias table. Ambiguous/weak matches are returned
+    unchanged so the existing strict validator still fails closed.
+    """
+    raw_event_id = str(result.get("primary_risk_event_id") or "").strip()
+    if not raw_event_id or not isinstance(active_risk_events, list):
+        return raw_event_id or None
+
+    catalog = {
+        str(event.get("event_id") or "").strip(): event
+        for event in active_risk_events
+        if isinstance(event, dict) and str(event.get("event_id") or "").strip()
+    }
+    if raw_event_id in catalog:
+        return raw_event_id
+    if not catalog:
+        return raw_event_id
+
+    id_terms = _risk_event_terms(raw_event_id)
+    exposure_terms = _risk_event_terms(result.get("risk_exposure_group"))
+    industry_terms = _risk_event_terms(result.get("industry_group"))
+    evidence_terms = _risk_event_terms(" ".join([
+        str(result.get("reversal_mechanism") or ""),
+        " ".join(str(x) for x in (result.get("temporary_drivers") or [])),
+        str(result.get("current_fact") or ""),
+        str(result.get("probability_evidence") or ""),
+        str(result.get("material_effect") or ""),
+    ]))
+
+    scored = []
+    for event_id, event in catalog.items():
+        event_id_terms = _risk_event_terms(event_id)
+        event_context_terms = _risk_event_terms(" ".join([
+            str(event.get("description") or ""),
+            " ".join(str(x) for x in (event.get("affected_industries") or [])),
+            " ".join(str(x) for x in (event.get("beneficiaries") or [])),
+            str(event.get("normalization_risk") or ""),
+        ]))
+        all_event_terms = event_id_terms | event_context_terms
+
+        # Strongest signals are the model's event-label terms and the explicit
+        # economic exposure/industry. Narrative evidence is only supporting
+        # context, preventing generic prose from driving reconciliation.
+        score = 0.0
+        score += 3.0 * len(id_terms & all_event_terms)
+        score += 3.0 * len(exposure_terms & all_event_terms)
+        score += 2.0 * len(industry_terms & all_event_terms)
+        score += 0.5 * min(6, len(evidence_terms & all_event_terms))
+
+        # Require at least one structural bridge beyond generic narrative text.
+        structural_overlap = bool(
+            (id_terms & all_event_terms)
+            or (exposure_terms & all_event_terms)
+            or (industry_terms & all_event_terms)
+        )
+        if structural_overlap:
+            scored.append((score, event_id))
+
+    if not scored:
+        return raw_event_id
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    best_score, best_event_id = scored[0]
+    runner_up_score = scored[1][0] if len(scored) > 1 else 0.0
+
+    # Deliberately conservative: a strong score and clear margin are required.
+    # Otherwise the original unknown ID survives and strict validation rejects it.
+    if best_score < 6.0 or best_score - runner_up_score < 2.0:
+        return raw_event_id
+
+    symbol = str(result.get("symbol") or "").strip().upper()
+    print(
+        f"Reconciled dynamic primary_risk_event_id for {symbol}: "
+        f"{raw_event_id!r} -> {best_event_id!r} "
+        f"(score={best_score:.1f}, margin={best_score - runner_up_score:.1f})."
+    )
+    runtime_reconciliation_diagnostics.append({
+        "symbol": symbol,
+        "type": "dynamic_risk_event_id_reconciliation",
+        "field": "primary_risk_event_id",
+        "from": raw_event_id,
+        "to": best_event_id,
+        "score": best_score,
+        "runner_up_score": runner_up_score,
+    })
+    return best_event_id
+
+
 def validate_stock_batch(
         data,
         expected_candidates,
         minimum_sources=2,
         allowed_risk_event_ids=None,
+        active_risk_events=None,
 ):
     results = data.get("results")
     if not isinstance(results, list):
@@ -2624,6 +2733,14 @@ def validate_stock_batch(
         primary_risk_event_id = result.get("primary_risk_event_id")
         if primary_risk_event_id is not None:
             primary_risk_event_id = str(primary_risk_event_id).strip() or None
+        if (
+                primary_risk_event_id
+                and allowed_risk_event_ids is not None
+                and primary_risk_event_id not in allowed_risk_event_ids
+        ):
+            primary_risk_event_id = reconcile_dynamic_risk_event_id(
+                result, active_risk_events
+            )
         if (
                 primary_risk_event_id
                 and allowed_risk_event_ids is not None
@@ -6153,6 +6270,7 @@ for candidate in candidate_records:
                 {"results": [judged_result]}, [candidate],
                 minimum_sources=cache_minimum_sources,
                 allowed_risk_event_ids=allowed_risk_event_ids,
+                active_risk_events=market_context["active_risk_events"],
             )
             validated_cached_research[symbol] = judged_result
             cache_diagnostics["stock_research"]["judgment_hits"] += 1
@@ -6586,6 +6704,7 @@ def classify_pending(force=False):
                         candidate,
                     ),
                     allowed_risk_event_ids=allowed_risk_event_ids,
+                    active_risk_events=market_context["active_risk_events"],
                 )
                 validate_shared_event_consistency(
                     result, list(validated_cached_research.values())

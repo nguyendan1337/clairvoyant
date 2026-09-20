@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "created_at": "2026-09-20T16:21:04.091050+00:00",
-  "elapsed_seconds": 76,
+  "created_at": "2026-09-20T16:37:24.032480+00:00",
+  "elapsed_seconds": 65,
   "models": {
     "research_primary": "gemini-2.5-flash",
     "research_fallback": "gemini-2.5-flash-lite",
@@ -24,7 +24,7 @@
       "ttl_hours": 12.0,
       "hit": true,
       "miss_reason": null,
-      "age_hours": 1.26,
+      "age_hours": 1.53,
       "file_size_bytes": 81894
     },
     "stock_research": {
@@ -38,8 +38,8 @@
       "entries_fresh": 52,
       "entries_expired": 0,
       "evidence_hits": 52,
-      "judgment_hits": 48,
-      "judgment_refreshes": 4,
+      "judgment_hits": 50,
+      "judgment_refreshes": 2,
       "misses": 23,
       "validation_failures": 0,
       "miss_reasons": {
@@ -48,7 +48,7 @@
       "entries_after_run": 52,
       "deferred_entries_after_run": 0,
       "newly_researched_symbols": [],
-      "file_size_bytes": 651165
+      "file_size_bytes": 652282
     }
   },
   "benchmark_context": {
@@ -62,18 +62,18 @@
         "3M Return": -7.701346446993966,
         "6M Return": 31.711869060558456,
         "9M Return": 28.917457446157044,
-        "1Y Return": 23.4023135125135
+        "1Y Return": 23.402305726077827
       },
       "VGT": {
         "1M Return": 3.33727351121415,
         "3M Return": 1.6144623843239287,
         "6M Return": 39.075508034045924,
         "9M Return": 34.26016870230541,
-        "1Y Return": 32.599926683597374
+        "1Y Return": 32.59994861895663
       }
     },
     "hurdle_symbol": "VGT",
-    "hurdle_52_week_return": 32.599926683597374,
+    "hurdle_52_week_return": 32.59994861895663,
     "used_fallback": false
   },
   "yfinance_fundamentals": {
@@ -128,9 +128,7 @@
       "search_enabled": false,
       "structured_output": true,
       "symbols": [
-        "HAFN",
         "SBLK",
-        "DDI",
         "APA"
       ],
       "status": "SUCCESS"
@@ -142,12 +140,12 @@
       "category": "summary",
       "search_enabled": false,
       "status": "SUCCESS",
-      "prompt_tokens": 18415,
+      "prompt_tokens": 18417,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 11191,
-      "output_tokens": 2221,
-      "total_tokens": 31827,
+      "thinking_tokens": 11041,
+      "output_tokens": 2153,
+      "total_tokens": 31611,
       "search_queries": [],
       "grounding_chunks_exposed": 0
     }
@@ -155,12 +153,12 @@
   "successful_gemini_metadata": [
     {
       "stage": "final HTML summary",
-      "prompt_tokens": 18415,
+      "prompt_tokens": 18417,
       "tool_tokens": 0,
       "cached_tokens": null,
-      "thinking_tokens": 11191,
-      "output_tokens": 2221,
-      "total_tokens": 31827,
+      "thinking_tokens": 11041,
+      "output_tokens": 2153,
+      "total_tokens": 31611,
       "searches_exposed": 0,
       "grounding_chunks_exposed": 0
     }
@@ -171,15 +169,11 @@
       "model": "gemini-3.5-flash",
       "attempt": 1,
       "symbols": [
-        "HAFN",
         "SBLK",
-        "DDI",
         "APA"
       ],
       "returned_symbols": [
-        "HAFN",
         "SBLK",
-        "DDI",
         "APA"
       ],
       "missing_symbols": [],
@@ -191,43 +185,9 @@
     }
   ],
   "classification_validation_failures": {
-    "SBLK": "SBLK omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure DRY_BULK_FREIGHT_RATES; current research must establish the event treatment or a sourced company_difference.",
     "APA": "APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference."
   },
   "classification_failure_details": {
-    "SBLK": {
-      "error": "SBLK omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure DRY_BULK_FREIGHT_RATES; current research must establish the event treatment or a sourced company_difference.",
-      "judgment_model": "gemini-3.5-flash",
-      "fields_before_validation": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "LOW",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "LIKELY",
-        "continuation_strength": "STRONG",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "NONE",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": null,
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"
-      },
-      "evidence_excerpt": {
-        "temporary_drivers": "[]",
-        "reversal_mechanism": "\"No qualifying current reversal mechanism established\"",
-        "current_fact": "null",
-        "probability_evidence": "null",
-        "material_effect": "null"
-      }
-    },
     "APA": {
       "error": "APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference.",
       "judgment_model": "gemini-3.5-flash",
@@ -265,12 +225,12 @@
   "portfolio_status": "PORTFOLIO_COMPLETE",
   "pending_judgment_symbols": [],
   "token_totals": {
-    "prompt_tokens": 18415,
+    "prompt_tokens": 18417,
     "tool_tokens": 0,
     "cached_tokens": 0,
-    "thinking_tokens": 11191,
-    "output_tokens": 2221,
-    "total_tokens": 31827
+    "thinking_tokens": 11041,
+    "output_tokens": 2153,
+    "total_tokens": 31611
   },
   "research": {
     "unique_symbols_requested": 0,
@@ -288,6 +248,7 @@
       "CGAU",
       "CMBT",
       "CVE",
+      "DDI",
       "DHT",
       "DINO",
       "DSVSF",
@@ -295,6 +256,7 @@
       "ETON",
       "FRO",
       "FTNT",
+      "HAFN",
       "HNGE",
       "ILMN",
       "INSW",
@@ -328,8 +290,8 @@
       "WCPRF",
       "WDOFF"
     ],
-    "cached_research_records_used": 50,
-    "cached_judgment_records_used": 48,
+    "cached_research_records_used": 51,
+    "cached_judgment_records_used": 50,
     "source_counts": {
       "INSW": 4,
       "ECO": 5,
@@ -341,6 +303,7 @@
       "DHT": 5,
       "TRMD": 4,
       "SLDE": 5,
+      "HAFN": 4,
       "PBT": 4,
       "WDOFF": 5,
       "AYA": 5,
@@ -378,9 +341,9 @@
       "ASC": 5,
       "ETON": 4,
       "PSX": 4,
+      "DDI": 5,
       "ILMN": 5,
-      "HAFN": 4,
-      "DDI": 5
+      "SBLK": 5
     },
     "batches": []
   },
@@ -425,7 +388,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150316+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -547,7 +510,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150414+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -673,7 +636,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150495+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -799,7 +762,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150565+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -917,7 +880,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150647+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1039,7 +1002,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150715+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1161,7 +1124,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150782+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1283,7 +1246,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373402+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1362,7 +1325,7 @@
         "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"
       },
       "benchmark_outperformance_basis": "DHT has delivered substantial 1-year excess returns of 78.3% over VGT, supported by exceptionally strong tanker market conditions and Q2 2026 net profit of $198.3 million.",
-      "decision": "SELECTED — MODERATE",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 78.01087485625158,
         "reversal_risk": -3.0,
@@ -1414,7 +1377,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373491+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1489,7 +1452,7 @@
         "risk_exposure_group": "PRODUCT_TANKER_SPOT_RATES"
       },
       "benchmark_outperformance_basis": "TRMD has delivered 63.5% 1-year excess returns over VGT, supported by exceptionally strong freight markets and upgraded full-year 2026 guidance.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 77.55127302853033,
         "reversal_risk": -3.0,
@@ -1541,7 +1504,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.367976+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1632,6 +1595,128 @@
         "mechanism_status": 1.0
       }
     },
+    "HAFN": {
+      "qvm_rank": 11,
+      "qvm_score": 73.2969510027909,
+      "quality_score": 69.40675750541311,
+      "value_score": 73.05684179946812,
+      "momentum_score": 77.24050210090711,
+      "quantitative_entry_risk": 65.28169014084507,
+      "overextension_penalty": 0.0,
+      "sector": "Industrials",
+      "market_cap": null,
+      "price": 10.119999885559082,
+      "returns": {
+        "1m": 35.618189593188454,
+        "3m": 40.978582302623344,
+        "6m": 58.729365000360126,
+        "9m": 108.20521604482276,
+        "1y": 65.359474
+      },
+      "price_path": {
+        "annualized_volatility": 35.69427916023094,
+        "downside_volatility": 23.124842679944948,
+        "max_drawdown": -27.993269765456763,
+        "positive_day_pct": 56.8,
+        "trend_r2": 0.09539206434958614,
+        "distance_50dma": 30.638853747833306,
+        "distance_200dma": 50.17390631810619,
+        "distance_52w_high": 0.0,
+        "largest_5d_move": 14.371261051721952,
+        "momentum_acceleration": 33.66106048203854
+      },
+      "benchmark_excess_returns": {
+        "1m": 32.280916081974304,
+        "3m": 39.364119918299416,
+        "6m": 19.6538569663142,
+        "9m": 73.94504734251736,
+        "1y": 64.69034679342943
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-20T15:17:13.150848+00:00",
+        "age_hours_at_report": 1.34,
+        "fresh_this_run": false,
+        "search_queries": [
+          "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Okeanis Eco Tankers Corp. ECO investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Teekay Tankers Ltd. TNK investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Dorian LPG Ltd. LPG investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Tsakos Energy Navigation Limited TEN investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Frontline plc FRO investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Nordic American Tankers Limited NAT investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Hafnia Limited HAFN investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Star Bulk Carriers Corp. SBLK investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "MeiraGTx Holdings plc MGTX investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Karat Packaging Inc. KRT investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "Eton Pharmaceuticals, Inc. ETON investor relations latest results guidance operating metrics acquisition financing material announcement",
+          "International Seaways, Inc. INSW latest earnings release revenue guidance investor relations SEC",
+          "Tsakos Energy Navigation Limited TEN latest earnings release revenue guidance investor relations SEC"
+        ],
+        "source_count": 4,
+        "source_publication_dates": [
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUnAfe1PhRovx_HHLbcCLpDz_CLZJ_C2xvq_dQF-XEOWs8Dx4-WN6rA6vFQdi12Lx8nwPshBekaP3fi0pnEAyKOSrNh-5f-If72hRBS1MzozPKVuZPPGl1z7Z2axh_HCfTUIELkAVMlROSg2x147LJoMPIBvegqw==",
+            "published_at": "September 16 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGbNOSBzXpq2-86dy71GjZVoWawJ6qan4r0mLwsB-NHZ7Dlk6TpefVDxJWp0HTeWGBNtVCiXMZ2cQEz4EEC4W4YO42e-jXAW_iwqGSoqJcLfdT2LmfI1nw9h9g39LHltnDgyxTC3Pgq02rfU_ajO1SSXSJwm61_UHm4yUZZz34jKvS8XxiVyW_OWlum4biM-1ai8ktyY87H5mTMufOjhn6YH4nRDoq8xNFfcxJQzpkgjA8LlqcjivzbnkBsYA-cddDTOqfzHgXcBM3rJk9_Qq0=",
+            "published_at": "August 28 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG03bvoAm5bY61jPGhrgMJU2D_s56xyL4mMnaKkcqSoRm7RTvt31gaPQ4vgXCPH6k9CIu38gkFif8BeWDOo_HERryrCT6TPNKhZJx3XeThbbSvY5CPIARf7htu4Il_xyAcSWw==",
+            "published_at": "August 27 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGW32trvBgj4ScDG8AZKif_5F1C4bAnAd2p_bTwv1LSjxiKEeBux0amPf2SkIloD-gc9UnEk_F5F7ty2ePXWvT-WYgKfX-zRbwZ5QHSLPKGgWSzcnRZaRq8x88srnmAYMfal0rr9ngTNANP4A==",
+            "published_at": "September 16 2026"
+          }
+        ]
+      },
+      "material_company_event": "On September 16, 2026, Hafnia acquired an additional 4.5 million TORM shares. On August 28, 2026, the company declared a dividend of $0.5003 per share for Q2 2026.",
+      "material_company_event_review": "REPORTED",
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-20T16:20:22.575995+00:00",
+        "fallback_used": false,
+        "fresh_this_run": false
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "LIKELY",
+        "continuation_strength": "STRONG",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "NONE",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "PRODUCT_TANKER_FREIGHT_RATES"
+      },
+      "benchmark_outperformance_basis": "Strong trailing outperformance of 64.69% over 1 year and 39.36% over 3 months against VGT, supported by robust Q2 2026 net profit of $277.8 million and average TCE of $44,093 per day.",
+      "decision": "SELECTED — LOW",
+      "final_score_components": {
+        "qvm": 73.2969510027909,
+        "reversal_risk": 3.0,
+        "benchmark_outlook": 5.0,
+        "continuation_strength": 4.0,
+        "catalyst_dependence": 0.0,
+        "business_concentration": 0.0,
+        "binary_event_risk": 0.0,
+        "mechanism_status": 1.0
+      }
+    },
     "PBT": {
       "qvm_rank": 13,
       "qvm_score": 73.17137489177675,
@@ -1672,7 +1757,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373565+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1799,7 +1884,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.368047+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -1930,7 +2015,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.368179+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2061,7 +2146,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373636+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2136,7 +2221,7 @@
         "risk_exposure_group": "CRUDE_AND_PRODUCT_TANKER_SPOT_RATES"
       },
       "benchmark_outperformance_basis": "TK has delivered 53.0% 1-year excess returns over VGT, supported by record spot tanker rates and strong Q2 2026 adjusted net income of $194 million.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 72.74562390240095,
         "reversal_risk": -3.0,
@@ -2188,7 +2273,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373705+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2259,7 +2344,7 @@
         "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"
       },
       "benchmark_outperformance_basis": "SHIP has delivered 90.3% 1-year excess returns over VGT, supported by strong Capesize freight market conditions and Q2 2026 Adjusted EBITDA more than doubling to $41.5 million.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "SKIPPED — SECTOR CAPACITY",
       "final_score_components": {
         "qvm": 72.51121700414754,
         "reversal_risk": -3.0,
@@ -2311,7 +2396,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.368404+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2438,7 +2523,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373904+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2513,7 +2598,7 @@
         "risk_exposure_group": "REFINING_CRACK_SPREADS"
       },
       "benchmark_outperformance_basis": "DINO has delivered 95.3% 1-year excess returns over VGT, supported by strong refining margins and Q2 2026 adjusted EBITDA of $1.5 billion.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 72.19205951458491,
         "reversal_risk": -3.0,
@@ -2565,7 +2650,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.368114+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2696,7 +2781,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972210+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -2775,7 +2860,7 @@
         "risk_exposure_group": "REFINING_CRACK_SPREADS"
       },
       "benchmark_outperformance_basis": "VLO has delivered 126.9% 1-year excess returns over VGT, supported by strong refining operating income of $4.5 billion in Q2 2026.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 71.53326309257201,
         "reversal_risk": -3.0,
@@ -2827,7 +2912,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373772+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -2950,7 +3035,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373837+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -3077,7 +3162,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:03:03.368342+00:00",
-        "age_hours_at_report": 16.3,
+        "age_hours_at_report": 16.57,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -3204,7 +3289,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.374031+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -3327,7 +3412,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.373969+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -3454,7 +3539,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972467+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -3533,7 +3618,7 @@
         "risk_exposure_group": "SHIPPING_FREIGHT_RATES"
       },
       "benchmark_outperformance_basis": "CMBT has delivered 101.5% 1-year excess returns over VGT, supported by strong Q2 2026 net profit of $364.4 million and a stable contract backlog of $3.26 billion.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "NOT SELECTED — LOWER FINAL SCORE",
       "final_score_components": {
         "qvm": 70.47572263968169,
         "reversal_risk": -3.0,
@@ -3585,7 +3670,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972055+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -3664,7 +3749,7 @@
         "risk_exposure_group": "SHIPPING_FREIGHT_RATES"
       },
       "benchmark_outperformance_basis": "NMM has delivered 60.4% 1-year excess returns over VGT, supported by strong Q2 2026 net income of $167.9 million and a massive contracted revenue backlog of $4.4 billion through 2037.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "SKIPPED — SECTOR CAPACITY",
       "final_score_components": {
         "qvm": 70.32199649658178,
         "reversal_risk": -3.0,
@@ -3716,7 +3801,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212384+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -3830,7 +3915,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.971974+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -3961,7 +4046,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972394+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -4088,7 +4173,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.374154+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -4215,7 +4300,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.374316+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -4342,7 +4427,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972133+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -4473,7 +4558,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.374387+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -4548,7 +4633,7 @@
         "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"
       },
       "benchmark_outperformance_basis": "SB has delivered 75.6% 1-year excess returns over VGT, supported by strong Q2 2026 Adjusted EBITDA nearly doubling to $50.3 million and significant insider buying.",
-      "decision": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "decision": "SKIPPED — SECTOR CAPACITY",
       "final_score_components": {
         "qvm": 69.2305408695724,
         "reversal_risk": -3.0,
@@ -4600,7 +4685,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:05:22.374220+00:00",
-        "age_hours_at_report": 16.26,
+        "age_hours_at_report": 16.53,
         "fresh_this_run": false,
         "search_queries": [
           "DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -4727,7 +4812,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972320+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -4854,7 +4939,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212460+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -4968,7 +5053,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.150987+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5094,7 +5179,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212532+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5208,7 +5293,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212606+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5322,7 +5407,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972706+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -5453,7 +5538,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212676+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5567,7 +5652,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212294+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5681,7 +5766,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.151117+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -5803,7 +5888,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.971878+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -5934,7 +6019,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972918+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -6065,7 +6150,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:17:13.151203+00:00",
-        "age_hours_at_report": 1.06,
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -6187,7 +6272,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T15:19:28.212744+00:00",
-        "age_hours_at_report": 1.03,
+        "age_hours_at_report": 1.3,
         "fresh_this_run": false,
         "search_queries": [
           "Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -6261,6 +6346,137 @@
         "mechanism_status": 0.0
       }
     },
+    "DDI": {
+      "qvm_rank": 50,
+      "qvm_score": 66.50111269224844,
+      "quality_score": 74.83265809146796,
+      "value_score": 98.70431343712902,
+      "momentum_score": 51.01330046083324,
+      "quantitative_entry_risk": 48.45070422535211,
+      "overextension_penalty": 0.0,
+      "sector": "Communication Services",
+      "market_cap": null,
+      "price": 12.75,
+      "returns": {
+        "1m": -0.07837169829512103,
+        "3m": 11.744085631095036,
+        "6m": 52.60323995885332,
+        "9m": 54.54545454545454,
+        "1y": 35.638298
+      },
+      "price_path": {
+        "annualized_volatility": 33.07347463371485,
+        "downside_volatility": 17.575897352367228,
+        "max_drawdown": -12.882790207265549,
+        "positive_day_pct": 49.2,
+        "trend_r2": 0.701265421799179,
+        "distance_50dma": 4.467094789399306,
+        "distance_200dma": 23.34511976539173,
+        "distance_52w_high": -1.696224074783359,
+        "largest_5d_move": 24.46205963845052,
+        "momentum_acceleration": -5.8288941826657
+      },
+      "benchmark_excess_returns": {
+        "1m": -3.415645209509271,
+        "3m": 10.129623246771107,
+        "6m": 13.527731924807398,
+        "9m": 20.285285843149133,
+        "1y": 2.0357392425420784
+      },
+      "research_provenance": {
+        "model": "gemini-2.5-flash",
+        "created_at": "2026-09-20T00:10:08.972777+00:00",
+        "age_hours_at_report": 16.45,
+        "fresh_this_run": false,
+        "search_queries": [
+          "Centerra Gold Inc. CGAU investor relations latest results guidance",
+          "Riley Exploration Permian, Inc. REPX investor relations latest results guidance",
+          "Navios Maritime Partners L.P. NMM investor relations latest results guidance",
+          "Victory Capital Holdings, Inc. VCTR investor relations latest results guidance",
+          "Valero Energy Corporation VLO investor relations latest results guidance",
+          "Whitecap Resources Inc. WCPRF investor relations latest results guidance",
+          "Aura Minerals Inc. AUGO investor relations latest results guidance",
+          "Cmb.Tech NV CMBT investor relations latest results guidance",
+          "MeiraGTx Holdings plc MGTX investor relations latest results guidance",
+          "Par Pacific Holdings, Inc. PARR investor relations latest results guidance",
+          "APA Corporation APA investor relations latest results guidance",
+          "Hyperliquid Strategies Inc. PURR investor relations latest results guidance",
+          "DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance",
+          "Illumina, Inc. ILMN investor relations latest results guidance",
+          "Ardmore Shipping Corporation ASC investor relations latest results guidance",
+          "Victory Capital Holdings, Inc. VCTR latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Whitecap Resources Inc. WCPRF latest earnings release revenue guidance operating metrics investor relations SEC",
+          "MeiraGTx Holdings plc MGTX latest earnings release revenue guidance operating metrics investor relations SEC",
+          "Par Pacific Holdings, Inc. PARR latest earnings release revenue guidance operating metrics investor relations SEC",
+          "DoubleDown Interactive Co., Ltd. DDI latest earnings release revenue guidance operating metrics investor relations SEC"
+        ],
+        "source_count": 5,
+        "source_publication_dates": [
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFTgraIdR0fHw3xmxcDZW2VXG-ub5CZVS65OA22gioVzUabGMlDHTnTjdAlJFBODFuYK4qgd5xWrO3qcOIhcgV1uc-P3PSW37a13rAoVZhQS1kQwR6FAAoUzlJ4k7rgk6DU0EaywDLrAo2w1NKDi10S09SgU1O70ms=",
+            "published_at": "September 18 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHSrX7Da2NHgmxQCO3mF0p1p-lU8uHAQUC9q0yGcEKovKvMjPaINacanYhEhqA4JzhRwf02P4TP4VlEDgioKbVuJTugO_QlzwovC0Eglf-JHNHqSXlHmJJ_EHcAPsVorEh6GJh0XGyuqBycojDswqUKvVmug7GC0lo6RYz4Hbi62bm4TE7Croqbt7Ymbtwk",
+            "published_at": "N/A"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGTMR2le5jSdNVTNZYPVaX1pxkU7mjK1_zt6Mnlx3GjceUaKLYBL0ei02XpBVV5TRYT-T3R8jrVtdJ5YwuBRFzzhWvWanbGjoBwANhD48I-Hv2_mr8ARSBDWsL9ZYU6NU5ukaEIzatbNdo3zFRPNPu1lrjg2lNmccCWbqFbgZmwLV7j",
+            "published_at": "N/A"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF-jStZauA5kI3hVF5KdCJC70S3dpAEzB1ipThLl5lsKjlfs15fesjMg_z7TF38KUiHDXeqJEUj8Go84cuqFrmwJS2Y6sYZg3TRGXAxPYUujw5kWI5bC7_pusO0J6GxIi0IhGsk4wh6W4q4aF2Vez18_9nGr3R19MDR2XZj7rsbXfdD45BIbXMEqGs3qTFCwP5Y0-JIKmlSzR-CUc5bMHIPHMZoQheEkpvbIUb9rfBu0JK0pZs4_hM=",
+            "published_at": "July 28 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG2EXTyZFw_wVpw0mLiXstiY8KuyEgE0bF4u-hBIh0F7zm6BO8APIGI-utt1EOG4GulIL0JQmA4Ck4OtkN_Z5rRwh30jZgPJnOEOt-UmqPSaQWhi7OOnSTXRfNO0-zppQ==",
+            "published_at": "N/A"
+          }
+        ]
+      },
+      "material_company_event": "On August 11, 2026, DoubleDown Interactive reported Q2 2026 revenue and earnings per share increases of 11.2% and 50.5% respectively.",
+      "material_company_event_review": "REPORTED",
+      "judgment_provenance": {
+        "model": "gemini-3.5-flash",
+        "judged_at": "2026-09-20T16:20:22.576499+00:00",
+        "fallback_used": false,
+        "fresh_this_run": false
+      },
+      "classification": {
+        "research_status": "COMPLETE",
+        "crypto_dependence": "NONE",
+        "business_reversal_risk": "LOW",
+        "entry_reversal_risk": "LOW",
+        "reversal_risk": "LOW",
+        "business_concentration": "LOW",
+        "binary_event_risk": "LOW",
+        "benchmark_outperformance_outlook": "UNCERTAIN",
+        "continuation_strength": "ADEQUATE",
+        "risk_basis": "NONE",
+        "catalyst_dependence": "LOW",
+        "mechanism_status": "NONE",
+        "normalization_probability": "NOT_APPLICABLE",
+        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+        "probability_indicator_type": "NONE",
+        "probability_basis": "NONE",
+        "risk_time_horizon": null,
+        "risk_materiality": "LOW",
+        "primary_risk_event_id": null,
+        "risk_exposure_group": "SOCIAL_CASINO_MARKET_DEMAND"
+      },
+      "benchmark_outperformance_basis": "Trailing 1-year excess return of 2.03% against VGT is marginal, and short-term 1-month excess is negative at -3.42%, making future outperformance uncertain despite solid Q2 2026 results.",
+      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
+      "final_score_components": {
+        "qvm": 66.50111269224844,
+        "reversal_risk": 3.0,
+        "benchmark_outlook": -4.0,
+        "continuation_strength": 0.0,
+        "catalyst_dependence": 0.0,
+        "business_concentration": 0.0,
+        "binary_event_risk": 0.0,
+        "mechanism_status": 1.0
+      }
+    },
     "ILMN": {
       "qvm_rank": 57,
       "qvm_score": 64.89820490200009,
@@ -6301,7 +6517,7 @@
       "research_provenance": {
         "model": "gemini-2.5-flash",
         "created_at": "2026-09-20T00:10:08.972847+00:00",
-        "age_hours_at_report": 16.18,
+        "age_hours_at_report": 16.45,
         "fresh_this_run": false,
         "search_queries": [
           "Centerra Gold Inc. CGAU investor relations latest results guidance",
@@ -6392,47 +6608,47 @@
         "mechanism_status": 0.0
       }
     },
-    "HAFN": {
-      "qvm_rank": 11,
-      "qvm_score": 73.2969510027909,
-      "quality_score": 69.40675750541311,
-      "value_score": 73.05684179946812,
-      "momentum_score": 77.24050210090711,
-      "quantitative_entry_risk": 65.28169014084507,
+    "SBLK": {
+      "qvm_rank": 12,
+      "qvm_score": 73.23364659485479,
+      "quality_score": 71.48933006589525,
+      "value_score": 63.87330646201941,
+      "momentum_score": 77.05803870888886,
+      "quantitative_entry_risk": 52.88732394366197,
       "overextension_penalty": 0.0,
       "sector": "Industrials",
       "market_cap": null,
-      "price": 10.119999885559082,
+      "price": 32.47999954223633,
       "returns": {
-        "1m": 35.618189593188454,
-        "3m": 40.978582302623344,
-        "6m": 58.729365000360126,
-        "9m": 108.20521604482276,
-        "1y": 65.359474
+        "1m": 11.385458546629113,
+        "3m": 26.253650791932603,
+        "6m": 52.7570980906253,
+        "9m": 89.9811612800155,
+        "1y": 69.696976
       },
       "price_path": {
-        "annualized_volatility": 35.69427916023094,
-        "downside_volatility": 23.124842679944948,
-        "max_drawdown": -27.993269765456763,
-        "positive_day_pct": 56.8,
-        "trend_r2": 0.09539206434958614,
-        "distance_50dma": 30.638853747833306,
-        "distance_200dma": 50.17390631810619,
+        "annualized_volatility": 32.97867107645833,
+        "downside_volatility": 20.789795946146196,
+        "max_drawdown": -17.48990008108692,
+        "positive_day_pct": 57.99999999999999,
+        "trend_r2": 0.8311807762087732,
+        "distance_50dma": 13.284149886391837,
+        "distance_200dma": 35.323312612788115,
         "distance_52w_high": 0.0,
-        "largest_5d_move": 14.371261051721952,
-        "momentum_acceleration": 33.66106048203854
+        "largest_5d_move": 13.012048649433595,
+        "momentum_acceleration": 4.920246344612967
       },
       "benchmark_excess_returns": {
-        "1m": 32.280916081974304,
-        "3m": 39.364119918299416,
-        "6m": 19.6538569663142,
-        "9m": 73.94504734251736,
-        "1y": 64.69034679342943
+        "1m": 8.048185035414964,
+        "3m": 24.639188407608675,
+        "6m": 13.681590056579374,
+        "9m": 55.72099257771009,
+        "1y": 44.25032562613977
       },
       "research_provenance": {
         "model": "gemini-2.5-flash",
-        "created_at": "2026-09-20T15:17:13.150848+00:00",
-        "age_hours_at_report": 1.06,
+        "created_at": "2026-09-20T15:17:13.150918+00:00",
+        "age_hours_at_report": 1.34,
         "fresh_this_run": false,
         "search_queries": [
           "International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement",
@@ -6451,31 +6667,35 @@
           "International Seaways, Inc. INSW latest earnings release revenue guidance investor relations SEC",
           "Tsakos Energy Navigation Limited TEN latest earnings release revenue guidance investor relations SEC"
         ],
-        "source_count": 4,
+        "source_count": 5,
         "source_publication_dates": [
           {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUnAfe1PhRovx_HHLbcCLpDz_CLZJ_C2xvq_dQF-XEOWs8Dx4-WN6rA6vFQdi12Lx8nwPshBekaP3fi0pnEAyKOSrNh-5f-If72hRBS1MzozPKVuZPPGl1z7Z2axh_HCfTUIELkAVMlROSg2x147LJoMPIBvegqw==",
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE1aEi43Oh-ke2ZkQkvTIKcb7oXn3ETCIx5m-jokaUaTZ3wTFtvfjg3x9JQVUSdAbF-hWq8Ic2l9gb37ohAoKzNT2YEXafZSfQVC1Pxqi5zUE7D-ejXf-jw6rD32ErxTGr0v9-wiVbt3gVPizJCt1d7bDIsRw==",
+            "published_at": "N/A"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFGeYj9pb2SAKcPZn-xTa-oosBQG7m_Dme-ZbLRoWO5in-XaLvVak1SglefJEtqexImiOrel3-01YprAZJxYvsSf7Lb8VIMJsz3LmmR-8xt3ZTX7lthIw13yVv57Ud_I9t-7ST3X8m4bPg",
+            "published_at": "N/A"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEVCu-OxvS2pEgHNToeF8ChC8Orjq3fDCJa8KK8l5azpondREMXhhq3ke6DU-2BO58_DUmevaoOUUQSVOtKheVz-rMOai8jPvsLtRs7IAcCLWQYr8U5edKFYbT1FCO51Xey9PHETAhct6N64TczCs3-xW_AzAHzpSMZUUgvzhRFhoH-jk_5JEHI4_hv02Py0ILRkRM=",
+            "published_at": "May 20 2026"
+          },
+          {
+            "url": "https://vertexaisearch.cloud.google.google.com/grounding-api-redirect/AUZIYQGuNPqI0z9VTfjWlApIG99FnOD8xQ6ssozDEPku-wz8psbf2dys-goh9Q4Ti_KdKbn-0528hyIBT3ob2A29Mj0BOftZGJw2EhQBSs-YeJkPQkluadmR2OVFBBtfqVuIfP1byQJWBGE",
             "published_at": "September 16 2026"
           },
           {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGbNOSBzXpq2-86dy71GjZVoWawJ6qan4r0mLwsB-NHZ7Dlk6TpefVDxJWp0HTeWGBNtVCiXMZ2cQEz4EEC4W4YO42e-jXAW_iwqGSoqJcLfdT2LmfI1nw9h9g39LHltnDgyxTC3Pgq02rfU_ajO1SSXSJwm61_UHm4yUZZz34jKvS8XxiVyW_OWlum4biM-1ai8ktyY87H5mTMufOjhn6YH4nRDoq8xNFfcxJQzpkgjA8LlqcjivzbnkBsYA-cddDTOqfzHgXcBM3rJk9_Qq0=",
-            "published_at": "August 28 2026"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG03bvoAm5bY61jPGhrgMJU2D_s56xyL4mMnaKkcqSoRm7RTvt31gaPQ4vgXCPH6k9CIu38gkFif8BeWDOo_HERryrCT6TPNKhZJx3XeThbbSvY5CPIARf7htu4Il_xyAcSWw==",
-            "published_at": "August 27 2026"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGW32trvBgj4ScDG8AZKif_5F1C4bAnAd2p_bTwv1LSjxiKEeBux0amPf2SkIloD-gc9UnEk_F5F7ty2ePXWvT-WYgKfX-zRbwZ5QHSLPKGgWSzcnRZaRq8x88srnmAYMfal0rr9ngTNANP4A==",
-            "published_at": "September 16 2026"
+            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFGC43un170Yl7Dt-J-8gSXxE95aNiWqFPjdn5NOLEPPlInU4HbralFAsSWf1kMdyz3dJzx0WQ0qLUvPbaYgW3UESYbg8_PgZbEUG0QsLdRWlr1qUYqZQT5zu1dgtOl4MOV8vzZ81krCrqoEKGO6hTLrC1p8RvsTpJw04DDk7P_b3lI-TqabeLy9n64YsG2BgoT2hfMRg8hVn1Ml62Ym-67kxCAPZgnFb34bjhUQ6IcR0UA",
+            "published_at": "September 15 2026"
           }
         ]
       },
-      "material_company_event": "On September 16, 2026, Hafnia acquired an additional 4.5 million TORM shares. On August 28, 2026, the company declared a dividend of $0.5003 per share for Q2 2026.",
+      "material_company_event": "On September 15, 2026, Star Bulk raised €107.8 million in an oversubscribed public offering to finance newbuilds and investments. On August 5, 2026, the Board declared a $0.90 per share dividend.",
       "material_company_event_review": "REPORTED",
       "judgment_provenance": {
         "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-20T16:20:22.575995+00:00",
+        "judged_at": "2026-09-20T16:36:41.536990+00:00",
         "fallback_used": false,
         "fresh_this_run": true
       },
@@ -6499,146 +6719,15 @@
         "risk_time_horizon": null,
         "risk_materiality": "LOW",
         "primary_risk_event_id": null,
-        "risk_exposure_group": "PRODUCT_TANKER_FREIGHT_RATES"
+        "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"
       },
-      "benchmark_outperformance_basis": "Strong trailing outperformance of 64.69% over 1 year and 39.36% over 3 months against VGT, supported by robust Q2 2026 net profit of $277.8 million and average TCE of $44,093 per day.",
+      "benchmark_outperformance_basis": "SBLK has consistently outperformed the VGT hurdle over the past 1, 3, 6, 9, and 12 months (e.g., 1-year excess return of 44.25%), supported by strong Q2 2026 adjusted EPS of $1.21 and fleet expansion funded by a €107.8 million public offering.",
       "decision": "SELECTED — LOW",
       "final_score_components": {
-        "qvm": 73.2969510027909,
+        "qvm": 73.23364659485479,
         "reversal_risk": 3.0,
         "benchmark_outlook": 5.0,
         "continuation_strength": 4.0,
-        "catalyst_dependence": 0.0,
-        "business_concentration": 0.0,
-        "binary_event_risk": 0.0,
-        "mechanism_status": 1.0
-      }
-    },
-    "DDI": {
-      "qvm_rank": 50,
-      "qvm_score": 66.50111269224844,
-      "quality_score": 74.83265809146796,
-      "value_score": 98.70431343712902,
-      "momentum_score": 51.01330046083324,
-      "quantitative_entry_risk": 48.45070422535211,
-      "overextension_penalty": 0.0,
-      "sector": "Communication Services",
-      "market_cap": null,
-      "price": 12.75,
-      "returns": {
-        "1m": -0.07837169829512103,
-        "3m": 11.744085631095036,
-        "6m": 52.60323995885332,
-        "9m": 54.54545454545454,
-        "1y": 35.638298
-      },
-      "price_path": {
-        "annualized_volatility": 33.07347463371485,
-        "downside_volatility": 17.575897352367228,
-        "max_drawdown": -12.882790207265549,
-        "positive_day_pct": 49.2,
-        "trend_r2": 0.701265421799179,
-        "distance_50dma": 4.467094789399306,
-        "distance_200dma": 23.34511976539173,
-        "distance_52w_high": -1.696224074783359,
-        "largest_5d_move": 24.46205963845052,
-        "momentum_acceleration": -5.8288941826657
-      },
-      "benchmark_excess_returns": {
-        "1m": -3.415645209509271,
-        "3m": 10.129623246771107,
-        "6m": 13.527731924807398,
-        "9m": 20.285285843149133,
-        "1y": 2.0357392425420784
-      },
-      "research_provenance": {
-        "model": "gemini-2.5-flash",
-        "created_at": "2026-09-20T00:10:08.972777+00:00",
-        "age_hours_at_report": 16.18,
-        "fresh_this_run": false,
-        "search_queries": [
-          "Centerra Gold Inc. CGAU investor relations latest results guidance",
-          "Riley Exploration Permian, Inc. REPX investor relations latest results guidance",
-          "Navios Maritime Partners L.P. NMM investor relations latest results guidance",
-          "Victory Capital Holdings, Inc. VCTR investor relations latest results guidance",
-          "Valero Energy Corporation VLO investor relations latest results guidance",
-          "Whitecap Resources Inc. WCPRF investor relations latest results guidance",
-          "Aura Minerals Inc. AUGO investor relations latest results guidance",
-          "Cmb.Tech NV CMBT investor relations latest results guidance",
-          "MeiraGTx Holdings plc MGTX investor relations latest results guidance",
-          "Par Pacific Holdings, Inc. PARR investor relations latest results guidance",
-          "APA Corporation APA investor relations latest results guidance",
-          "Hyperliquid Strategies Inc. PURR investor relations latest results guidance",
-          "DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance",
-          "Illumina, Inc. ILMN investor relations latest results guidance",
-          "Ardmore Shipping Corporation ASC investor relations latest results guidance",
-          "Victory Capital Holdings, Inc. VCTR latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Whitecap Resources Inc. WCPRF latest earnings release revenue guidance operating metrics investor relations SEC",
-          "MeiraGTx Holdings plc MGTX latest earnings release revenue guidance operating metrics investor relations SEC",
-          "Par Pacific Holdings, Inc. PARR latest earnings release revenue guidance operating metrics investor relations SEC",
-          "DoubleDown Interactive Co., Ltd. DDI latest earnings release revenue guidance operating metrics investor relations SEC"
-        ],
-        "source_count": 5,
-        "source_publication_dates": [
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFTgraIdR0fHw3xmxcDZW2VXG-ub5CZVS65OA22gioVzUabGMlDHTnTjdAlJFBODFuYK4qgd5xWrO3qcOIhcgV1uc-P3PSW37a13rAoVZhQS1kQwR6FAAoUzlJ4k7rgk6DU0EaywDLrAo2w1NKDi10S09SgU1O70ms=",
-            "published_at": "September 18 2026"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHSrX7Da2NHgmxQCO3mF0p1p-lU8uHAQUC9q0yGcEKovKvMjPaINacanYhEhqA4JzhRwf02P4TP4VlEDgioKbVuJTugO_QlzwovC0Eglf-JHNHqSXlHmJJ_EHcAPsVorEh6GJh0XGyuqBycojDswqUKvVmug7GC0lo6RYz4Hbi62bm4TE7Croqbt7Ymbtwk",
-            "published_at": "N/A"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGTMR2le5jSdNVTNZYPVaX1pxkU7mjK1_zt6Mnlx3GjceUaKLYBL0ei02XpBVV5TRYT-T3R8jrVtdJ5YwuBRFzzhWvWanbGjoBwANhD48I-Hv2_mr8ARSBDWsL9ZYU6NU5ukaEIzatbNdo3zFRPNPu1lrjg2lNmccCWbqFbgZmwLV7j",
-            "published_at": "N/A"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF-jStZauA5kI3hVF5KdCJC70S3dpAEzB1ipThLl5lsKjlfs15fesjMg_z7TF38KUiHDXeqJEUj8Go84cuqFrmwJS2Y6sYZg3TRGXAxPYUujw5kWI5bC7_pusO0J6GxIi0IhGsk4wh6W4q4aF2Vez18_9nGr3R19MDR2XZj7rsbXfdD45BIbXMEqGs3qTFCwP5Y0-JIKmlSzR-CUc5bMHIPHMZoQheEkpvbIUb9rfBu0JK0pZs4_hM=",
-            "published_at": "July 28 2026"
-          },
-          {
-            "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG2EXTyZFw_wVpw0mLiXstiY8KuyEgE0bF4u-hBIh0F7zm6BO8APIGI-utt1EOG4GulIL0JQmA4Ck4OtkN_Z5rRwh30jZgPJnOEOt-UmqPSaQWhi7OOnSTXRfNO0-zppQ==",
-            "published_at": "N/A"
-          }
-        ]
-      },
-      "material_company_event": "On August 11, 2026, DoubleDown Interactive reported Q2 2026 revenue and earnings per share increases of 11.2% and 50.5% respectively.",
-      "material_company_event_review": "REPORTED",
-      "judgment_provenance": {
-        "model": "gemini-3.5-flash",
-        "judged_at": "2026-09-20T16:20:22.576499+00:00",
-        "fallback_used": false,
-        "fresh_this_run": true
-      },
-      "classification": {
-        "research_status": "COMPLETE",
-        "crypto_dependence": "NONE",
-        "business_reversal_risk": "LOW",
-        "entry_reversal_risk": "LOW",
-        "reversal_risk": "LOW",
-        "business_concentration": "LOW",
-        "binary_event_risk": "LOW",
-        "benchmark_outperformance_outlook": "UNCERTAIN",
-        "continuation_strength": "ADEQUATE",
-        "risk_basis": "NONE",
-        "catalyst_dependence": "LOW",
-        "mechanism_status": "NONE",
-        "normalization_probability": "NOT_APPLICABLE",
-        "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-        "probability_indicator_type": "NONE",
-        "probability_basis": "NONE",
-        "risk_time_horizon": null,
-        "risk_materiality": "LOW",
-        "primary_risk_event_id": null,
-        "risk_exposure_group": "SOCIAL_CASINO_MARKET_DEMAND"
-      },
-      "benchmark_outperformance_basis": "Trailing 1-year excess return of 2.03% against VGT is marginal, and short-term 1-month excess is negative at -3.42%, making future outperformance uncertain despite solid Q2 2026 results.",
-      "decision": "NOT SELECTED — BELOW BENCHMARK FALLBACK BAR",
-      "final_score_components": {
-        "qvm": 66.50111269224844,
-        "reversal_risk": 3.0,
-        "benchmark_outlook": -4.0,
-        "continuation_strength": 0.0,
         "catalyst_dependence": 0.0,
         "business_concentration": 0.0,
         "binary_event_risk": 0.0,
@@ -6660,7 +6749,7 @@
       "benchmark_outperformance_basis": "SLDE has strong trailing excess returns (1y excess of 37.45%) and robust operating momentum with Q2 2026 revenue up 47.9% YoY and net income up 92.4% YoY, supporting continued outperformance.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "Reaffirmed full-year 2026 guidance for gross written premiums of $1.85-$1.95 billion and net income of $455-$470 million. Launched California E&S program.",
-      "research_age_hours": 16.3,
+      "research_age_hours": 16.57,
       "sources_with_publication_date": 5,
       "source_count": 5
     },
@@ -6677,9 +6766,26 @@
       "benchmark_outperformance_basis": "Strong trailing outperformance of 64.69% over 1 year and 39.36% over 3 months against VGT, supported by robust Q2 2026 net profit of $277.8 million and average TCE of $44,093 per day.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "On September 16, 2026, Hafnia acquired an additional 4.5 million TORM shares. On August 28, 2026, the company declared a dividend of $0.5003 per share for Q2 2026.",
-      "research_age_hours": 1.06,
+      "research_age_hours": 1.34,
       "sources_with_publication_date": 4,
       "source_count": 4
+    },
+    {
+      "symbol": "SBLK",
+      "benchmark_outlook": "LIKELY",
+      "benchmark_excess_returns": {
+        "1m": 8.048185035414964,
+        "3m": 24.639188407608675,
+        "6m": 13.681590056579374,
+        "9m": 55.72099257771009,
+        "1y": 44.25032562613977
+      },
+      "benchmark_outperformance_basis": "SBLK has consistently outperformed the VGT hurdle over the past 1, 3, 6, 9, and 12 months (e.g., 1-year excess return of 44.25%), supported by strong Q2 2026 adjusted EPS of $1.21 and fleet expansion funded by a €107.8 million public offering.",
+      "material_company_event_review": "REPORTED",
+      "material_company_event": "On September 15, 2026, Star Bulk raised €107.8 million in an oversubscribed public offering to finance newbuilds and investments. On August 5, 2026, the Board declared a $0.90 per share dividend.",
+      "research_age_hours": 1.34,
+      "sources_with_publication_date": 5,
+      "source_count": 5
     },
     {
       "symbol": "WDOFF",
@@ -6694,7 +6800,7 @@
       "benchmark_outperformance_basis": "WDOFF has strong trailing excess returns (1y excess of 50.56%) and robust operating momentum with Q2 2026 revenue up 28% YoY, supported by high-grade gold assets and exploration success.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "On September 10, 2026, announced significant gold intersections at Kiena Deep, confirming a new zone.",
-      "research_age_hours": 16.3,
+      "research_age_hours": 16.57,
       "sources_with_publication_date": 5,
       "source_count": 5
     },
@@ -6711,7 +6817,7 @@
       "benchmark_outperformance_basis": "AYA has exceptional trailing excess returns (1y excess of 110.65%) and record operational performance with Q2 2026 revenue up 151% YoY, driven by the Zgounder mine ramp-up.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "Q2 2026 delivered record operational and financial performance. Listed on Nasdaq and added to VanEck Gold Miners ETF.",
-      "research_age_hours": 16.3,
+      "research_age_hours": 16.57,
       "sources_with_publication_date": 5,
       "source_count": 5
     },
@@ -6728,7 +6834,7 @@
       "benchmark_outperformance_basis": "Strong 1-year excess return of 34.15% and 53% YoY revenue growth in Q2 2026, with raised full-year guidance and strategic acquisition of Cylinder Health.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "Acquired Cylinder Health, Inc. on September 1, 2026, expanding into gastrointestinal care. Raised full-year 2026 revenue guidance to $856-$860 million.",
-      "research_age_hours": 16.26,
+      "research_age_hours": 16.53,
       "sources_with_publication_date": 4,
       "source_count": 4
     },
@@ -6745,7 +6851,7 @@
       "benchmark_outperformance_basis": "FTNT has strong trailing excess returns (1y excess of 69.09%) and robust operating momentum with Q2 2026 revenue up 26% YoY and raised full-year guidance, supporting continued outperformance.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "On July 29, 2026, lifted full-year 2026 guidance to revenue of $8.020-$8.180 billion. Partnered with Anthropic, OpenAI, and NVIDIA for AI safety.",
-      "research_age_hours": 16.3,
+      "research_age_hours": 16.57,
       "sources_with_publication_date": 4,
       "source_count": 4
     },
@@ -6762,7 +6868,7 @@
       "benchmark_outperformance_basis": "CDNA has exceptional trailing excess returns (1y excess of 236.35%) and strong recurring revenue growth of 52% YoY in Q2 2026, supporting continued outperformance.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "Completed divestiture of Lab Products business on June 30, 2026, recognizing a $113 million gain on sale.",
-      "research_age_hours": 16.26,
+      "research_age_hours": 16.53,
       "sources_with_publication_date": 4,
       "source_count": 4
     },
@@ -6779,7 +6885,7 @@
       "benchmark_outperformance_basis": "Strong 1-year excess return of 30.36% and record Q2 2026 client assets of $346.1 billion, supported by the strategic acquisition of GC Ferry Holdings.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "On August 31, 2026, Victory Capital agreed to acquire GC Ferry Holdings, Inc. (First Eagle) in a deal involving cash, common shares, and preferred stock.",
-      "research_age_hours": 16.18,
+      "research_age_hours": 16.45,
       "sources_with_publication_date": 5,
       "source_count": 5
     },
@@ -6796,26 +6902,9 @@
       "benchmark_outperformance_basis": "Exceptional 1-year excess return of 73.95% and strong Q1 FY2026 revenue exceeding expectations, driven by diversified HR tech and staffing segments.",
       "material_company_event_review": "REPORTED",
       "material_company_event": "Announced receipt of dividends from consolidated subsidiaries on September 2, 2026.",
-      "research_age_hours": 16.26,
+      "research_age_hours": 16.53,
       "sources_with_publication_date": 4,
       "source_count": 4
-    },
-    {
-      "symbol": "DHT",
-      "benchmark_outlook": "LIKELY",
-      "benchmark_excess_returns": {
-        "1m": 14.187985854494151,
-        "3m": 23.93602971995429,
-        "6m": 9.852367637935323,
-        "9m": 74.017712183815,
-        "1y": 78.34387865589814
-      },
-      "benchmark_outperformance_basis": "DHT has delivered substantial 1-year excess returns of 78.3% over VGT, supported by exceptionally strong tanker market conditions and Q2 2026 net profit of $198.3 million.",
-      "material_company_event_review": "REPORTED",
-      "material_company_event": "On September 14, 2026, DHT Holdings secured a three-year time charter for the DHT Panther, providing fixed income.",
-      "research_age_hours": 16.26,
-      "sources_with_publication_date": 5,
-      "source_count": 5
     }
   ],
   "classifications": {
@@ -7068,6 +7157,31 @@
       "primary_risk_event_id": null,
       "risk_exposure_group": null,
       "source_count": 5
+    },
+    "HAFN": {
+      "qvm_rank": 11,
+      "qvm_score": 73.2969510027909,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "LIKELY",
+      "continuation_strength": "STRONG",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "NONE",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "PRODUCT_TANKER_FREIGHT_RATES",
+      "source_count": 4
     },
     "PBT": {
       "qvm_rank": 13,
@@ -7994,6 +8108,31 @@
       "risk_exposure_group": "REFINING_CRACK_SPREADS",
       "source_count": 4
     },
+    "DDI": {
+      "qvm_rank": 50,
+      "qvm_score": 66.50111269224844,
+      "research_status": "COMPLETE",
+      "crypto_dependence": "NONE",
+      "business_reversal_risk": "LOW",
+      "entry_reversal_risk": "LOW",
+      "reversal_risk": "LOW",
+      "business_concentration": "LOW",
+      "binary_event_risk": "LOW",
+      "benchmark_outperformance_outlook": "UNCERTAIN",
+      "continuation_strength": "ADEQUATE",
+      "risk_basis": "NONE",
+      "catalyst_dependence": "LOW",
+      "mechanism_status": "NONE",
+      "normalization_probability": "NOT_APPLICABLE",
+      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
+      "probability_indicator_type": "NONE",
+      "probability_basis": "NONE",
+      "risk_time_horizon": null,
+      "risk_materiality": "LOW",
+      "primary_risk_event_id": null,
+      "risk_exposure_group": "SOCIAL_CASINO_MARKET_DEMAND",
+      "source_count": 5
+    },
     "ILMN": {
       "qvm_rank": 57,
       "qvm_score": 64.89820490200009,
@@ -8019,9 +8158,9 @@
       "risk_exposure_group": "GENETIC_SEQUENCING_DEMAND",
       "source_count": 5
     },
-    "HAFN": {
-      "qvm_rank": 11,
-      "qvm_score": 73.2969510027909,
+    "SBLK": {
+      "qvm_rank": 12,
+      "qvm_score": 73.23364659485479,
       "research_status": "COMPLETE",
       "crypto_dependence": "NONE",
       "business_reversal_risk": "LOW",
@@ -8041,32 +8180,7 @@
       "risk_time_horizon": null,
       "risk_materiality": "LOW",
       "primary_risk_event_id": null,
-      "risk_exposure_group": "PRODUCT_TANKER_FREIGHT_RATES",
-      "source_count": 4
-    },
-    "DDI": {
-      "qvm_rank": 50,
-      "qvm_score": 66.50111269224844,
-      "research_status": "COMPLETE",
-      "crypto_dependence": "NONE",
-      "business_reversal_risk": "LOW",
-      "entry_reversal_risk": "LOW",
-      "reversal_risk": "LOW",
-      "business_concentration": "LOW",
-      "binary_event_risk": "LOW",
-      "benchmark_outperformance_outlook": "UNCERTAIN",
-      "continuation_strength": "ADEQUATE",
-      "risk_basis": "NONE",
-      "catalyst_dependence": "LOW",
-      "mechanism_status": "NONE",
-      "normalization_probability": "NOT_APPLICABLE",
-      "continuation_outlook": "CONTINUATION_MORE_LIKELY",
-      "probability_indicator_type": "NONE",
-      "probability_basis": "NONE",
-      "risk_time_horizon": null,
-      "risk_materiality": "LOW",
-      "primary_risk_event_id": null,
-      "risk_exposure_group": "SOCIAL_CASINO_MARKET_DEMAND",
+      "risk_exposure_group": "DRY_BULK_FREIGHT_RATES",
       "source_count": 5
     }
   },
@@ -8240,10 +8354,53 @@
       "type": "cautious_temporary_dependence_floor",
       "from": "MODERATE",
       "to": "MODERATE"
+    },
+    {
+      "symbol": "SBLK",
+      "type": "shared_event_omission_allowed_incompatible_transmission",
+      "compared_with": "SHIP",
+      "event_id": "GEOPOLITICAL_ENERGY_DISRUPTION",
+      "exposure_group": "DRY_BULK_FREIGHT_RATES",
+      "compatible": false,
+      "transmission_similarity": 0.6317266340929925,
+      "runner_up_similarity": 0.6293632422188614,
+      "margin": 0.002363391874131038,
+      "structural": {
+        "compatible": false,
+        "event_label_overlap": [
+          "ENERGY",
+          "GEOPOLITICAL"
+        ],
+        "exposure_overlap": [],
+        "industry_overlap": []
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "SBLK",
+      "type": "shared_event_omission_allowed_incompatible_transmission",
+      "compared_with": "SB",
+      "event_id": "GEOPOLITICAL_ENERGY_DISRUPTION",
+      "exposure_group": "DRY_BULK_FREIGHT_RATES",
+      "compatible": false,
+      "transmission_similarity": 0.6317266340929925,
+      "runner_up_similarity": 0.6293632422188614,
+      "margin": 0.002363391874131038,
+      "structural": {
+        "compatible": false,
+        "event_label_overlap": [
+          "ENERGY",
+          "GEOPOLITICAL"
+        ],
+        "exposure_overlap": [],
+        "industry_overlap": []
+      },
+      "model": "BAAI/bge-small-en-v1.5"
     }
   ],
   "reconciliation_counts": {
-    "cautious_temporary_dependence_floor": 28
+    "cautious_temporary_dependence_floor": 28,
+    "shared_event_omission_allowed_incompatible_transmission": 2
   },
   "duplicate_results": [],
   "duplicate_extra_block_count": 0,
@@ -8285,6 +8442,26 @@
       },
       "benchmark_outperformance_basis": "Strong trailing outperformance of 64.69% over 1 year and 39.36% over 3 months against VGT, supported by robust Q2 2026 net profit of $277.8 million and average TCE of $44,093 per day.",
       "material_company_event": "On September 16, 2026, Hafnia acquired an additional 4.5 million TORM shares. On August 28, 2026, the company declared a dividend of $0.5003 per share for Q2 2026.",
+      "continuation_strength": "STRONG",
+      "benchmark_outperformance_outlook": "LIKELY"
+    },
+    "SBLK": {
+      "qvm_rank": 12,
+      "sector_group": "Industrials",
+      "status": "SELECTED — LOW",
+      "final_selection_score": 86.23364659485479,
+      "final_score_components": {
+        "qvm": 73.23364659485479,
+        "reversal_risk": 3.0,
+        "benchmark_outlook": 5.0,
+        "continuation_strength": 4.0,
+        "catalyst_dependence": 0.0,
+        "business_concentration": 0.0,
+        "binary_event_risk": 0.0,
+        "mechanism_status": 1.0
+      },
+      "benchmark_outperformance_basis": "SBLK has consistently outperformed the VGT hurdle over the past 1, 3, 6, 9, and 12 months (e.g., 1-year excess return of 44.25%), supported by strong Q2 2026 adjusted EPS of $1.21 and fleet expansion funded by a €107.8 million public offering.",
+      "material_company_event": "On September 15, 2026, Star Bulk raised €107.8 million in an oversubscribed public offering to finance newbuilds and investments. On August 5, 2026, the Board declared a $0.90 per share dividend.",
       "continuation_strength": "STRONG",
       "benchmark_outperformance_outlook": "LIKELY"
     },
@@ -8491,7 +8668,7 @@
     "DHT": {
       "qvm_rank": 8,
       "sector_group": "Energy",
-      "status": "SELECTED — MODERATE",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 81.01087485625158,
       "final_score_components": {
         "qvm": 78.01087485625158,
@@ -8531,7 +8708,7 @@
     "TRMD": {
       "qvm_rank": 9,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 80.55127302853033,
       "final_score_components": {
         "qvm": 77.55127302853033,
@@ -8611,7 +8788,7 @@
     "TK": {
       "qvm_rank": 16,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 75.74562390240095,
       "final_score_components": {
         "qvm": 72.74562390240095,
@@ -8651,7 +8828,7 @@
     "VLO": {
       "qvm_rank": 21,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 75.53326309257201,
       "final_score_components": {
         "qvm": 71.53326309257201,
@@ -8671,7 +8848,7 @@
     "SHIP": {
       "qvm_rank": 17,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "final_selection_score": 75.51121700414754,
       "final_score_components": {
         "qvm": 72.51121700414754,
@@ -8691,7 +8868,7 @@
     "DINO": {
       "qvm_rank": 19,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 75.19205951458491,
       "final_score_components": {
         "qvm": 72.19205951458491,
@@ -8711,7 +8888,7 @@
     "CMBT": {
       "qvm_rank": 27,
       "sector_group": "Energy",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "NOT SELECTED — LOWER FINAL SCORE",
       "final_selection_score": 74.47572263968169,
       "final_score_components": {
         "qvm": 70.47572263968169,
@@ -8731,7 +8908,7 @@
     "NMM": {
       "qvm_rank": 28,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "final_selection_score": 74.32199649658178,
       "final_score_components": {
         "qvm": 70.32199649658178,
@@ -8751,7 +8928,7 @@
     "SB": {
       "qvm_rank": 35,
       "sector_group": "Industrials",
-      "status": "NOT SELECTED — SECOND RISK-EVENT QUALITY BAR",
+      "status": "SKIPPED — SECTOR CAPACITY",
       "final_selection_score": 72.2305408695724,
       "final_score_components": {
         "qvm": 69.2305408695724,
@@ -9248,17 +9425,6 @@
       "continuation_strength": "WEAK",
       "benchmark_outperformance_outlook": "UNLIKELY"
     },
-    "SBLK": {
-      "qvm_rank": 12,
-      "sector_group": "Industrials",
-      "status": "SKIPPED — CLASSIFICATION INVALID",
-      "final_selection_score": null,
-      "final_score_components": null,
-      "benchmark_outperformance_basis": null,
-      "material_company_event": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null
-    },
     "APA": {
       "qvm_rank": 52,
       "sector_group": "Energy",
@@ -9274,19 +9440,19 @@
   "selected_symbols": [
     "SLDE",
     "HAFN",
+    "SBLK",
     "WDOFF",
     "AYA",
     "HNGE",
     "FTNT",
     "CDNA",
     "VCTR",
-    "RCRUY",
-    "DHT"
+    "RCRUY"
   ],
   "portfolio_changes": {
     "added": [
       {
-        "symbol": "HAFN",
+        "symbol": "SBLK",
         "previous_status": "SKIPPED — CLASSIFICATION INVALID",
         "current_status": "SELECTED — LOW",
         "classification_fields_changed": []
@@ -9294,8 +9460,8 @@
     ],
     "removed": [
       {
-        "symbol": "PAYS",
-        "previous_status": "SELECTED — LOW",
+        "symbol": "DHT",
+        "previous_status": "SELECTED — MODERATE",
         "current_status": "NOT SELECTED — LOWER FINAL SCORE",
         "classification_fields_changed": []
       }

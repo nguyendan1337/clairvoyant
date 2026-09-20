@@ -3,12 +3,16 @@ Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
 Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.5_api_budget=8 (6 classification + 2 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
+
+1 Failed download:
+['SPMO']: OperationalError('database is locked')
+Could not calculate benchmark returns for SPMO: only 0 daily closes
 Effective 52-week stock hurdle: 32.60% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
 Top QVM pickle loaded successfully.
-Using cached top 75 QVM stocks (0.9h old).
+Using cached top 75 QVM stocks (1.3h old).
 
 Top QVM Stocks:
    Symbol   QVMScore   3M Return   1Y Return
@@ -25,402 +29,27 @@ Top QVM Stocks:
 74   RDVT  62.791503   39.698311   45.311911
 
 [75 rows x 4 columns]
-MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=0.8
-Using validated shared market context cache: caches/gemini_shared_market_context_cache.json
-Dynamic market risk-event catalog: 3 canonical event(s).
-RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=52 fresh=52 expired=0 contract=a4d152e3ea3f
-Validated grounded research [INSW]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to INSW: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [INSW]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=INSW evidence=hit judgment=hit
-Validated grounded research [ECO]: 5 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to ECO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [ECO]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=ECO evidence=hit judgment=hit
-Validated grounded research [TNK]: 5 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to TNK: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TNK]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=TNK evidence=hit judgment=hit
-Validated grounded research [LPG]: 3 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to LPG: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [LPG]: 3 distinct URLs
-RESEARCH CACHE HIT symbol=LPG evidence=hit judgment=hit
-Validated grounded research [TEN]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to TEN: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TEN]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=TEN evidence=hit judgment=hit
-Validated grounded research [FRO]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to FRO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [FRO]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=hit
-Validated grounded research [NAT]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to NAT: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [NAT]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=NAT evidence=hit judgment=hit
-Validated grounded research [DHT]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=DHT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [TRMD]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=TRMD evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [SLDE]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [SLDE]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=SLDE evidence=hit judgment=hit
-Validated grounded research [HAFN]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=HAFN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [SBLK]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SBLK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [PBT]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [PBT]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=PBT evidence=hit judgment=hit
-Validated grounded research [WDOFF]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [WDOFF]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=WDOFF evidence=hit judgment=hit
-Validated grounded research [AYA]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [AYA]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=AYA evidence=hit judgment=hit
-Validated grounded research [TK]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=TK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [SHIP]: 3 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SHIP evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [ARREF]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [ARREF]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=ARREF evidence=hit judgment=hit
-Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=DINO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [MAKO]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [MAKO]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=MAKO evidence=hit judgment=hit
-Validated grounded research [VLO]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=VLO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [STNG]: 3 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=STNG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to PTGX: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [PTGX]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=PTGX evidence=hit judgment=hit
-Validated grounded research [FTNT]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [FTNT]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=FTNT evidence=hit judgment=hit
-Validated grounded research [DSVSF]: 3 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to DSVSF: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DSVSF]: 3 distinct URLs
-RESEARCH CACHE HIT symbol=DSVSF evidence=hit judgment=hit
-Validated grounded research [CDNA]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [CDNA]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=CDNA evidence=hit judgment=hit
-Validated grounded research [CMBT]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=CMBT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [NMM]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=NMM evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [PARR]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to PARR: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [PARR]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=PARR evidence=hit judgment=hit
-Validated grounded research [REPX]: 5 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to REPX: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [REPX]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=REPX evidence=hit judgment=hit
-Validated grounded research [AUGO]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [AUGO]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=AUGO evidence=hit judgment=hit
-Validated grounded research [HNGE]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [HNGE]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=HNGE evidence=hit judgment=hit
-Validated grounded research [NUTX]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [NUTX]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=NUTX evidence=hit judgment=hit
-Validated grounded research [VCTR]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [VCTR]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=VCTR evidence=hit judgment=hit
-Validated grounded research [SB]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SB evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [RCRUY]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [RCRUY]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=RCRUY evidence=hit judgment=hit
-Validated grounded research [WCPRF]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to WCPRF: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [WCPRF]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=WCPRF evidence=hit judgment=hit
-Validated grounded research [MPC]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to MPC: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [MPC]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=MPC evidence=hit judgment=hit
-Validated grounded research [MGTX]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [MGTX]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=MGTX evidence=hit judgment=hit
-Validated grounded research [CVE]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to CVE: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [CVE]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=CVE evidence=hit judgment=hit
-Validated grounded research [BWLP]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to BWLP: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [BWLP]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=BWLP evidence=hit judgment=hit
-Validated grounded research [PURR]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [PURR]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=PURR evidence=hit judgment=hit
-Validated grounded research [SGYEF]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to SGYEF: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [SGYEF]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=SGYEF evidence=hit judgment=hit
-Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [PAYS]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=PAYS evidence=hit judgment=hit
-Validated grounded research [KRT]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [KRT]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=KRT evidence=hit judgment=hit
-Validated grounded research [CGAU]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [CGAU]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=CGAU evidence=hit judgment=hit
-Validated grounded research [ASC]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=ASC evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [ETON]: 4 distinct source URLs; awaiting judgment.
-Validated JSON sources [ETON]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=ETON evidence=hit judgment=hit
-Validated grounded research [PSX]: 4 distinct source URLs; awaiting judgment.
-Applied cautious temporary-dependence floor to PSX: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [PSX]: 4 distinct URLs
-RESEARCH CACHE HIT symbol=PSX evidence=hit judgment=hit
-Validated grounded research [DDI]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=DDI evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
-Validated grounded research [APA]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [APA]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=APA evidence=hit judgment=hit
-RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
-Validated grounded research [ILMN]: 5 distinct source URLs; awaiting judgment.
-Validated JSON sources [ILMN]: 5 distinct URLs
-RESEARCH CACHE HIT symbol=ILMN evidence=hit judgment=hit
-RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=YPF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=OILSF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=FSM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PARXF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=UGP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=JAZZ reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=KNSA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NESR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RDVT reason=symbol_not_cached
-Refreshing inconsistent cached judgment for APA: APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference.
-Cross-company similarity noted for TNK/TEN but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/HNGE but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/VCTR but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/RCRUY but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/CGAU but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for AUGO/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/VCTR but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/RCRUY but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/CGAU but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for VCTR/RCRUY but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for VCTR/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for VCTR/CGAU but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for VCTR/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for RCRUY/MGTX but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for RCRUY/CGAU but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for RCRUY/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for MGTX/CGAU but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for MGTX/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for CGAU/ETON but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Classifying cached PENDING_JUDGMENT research before new stock research: 15 candidate(s).
-Gemini 3.5 API budget: 1/8 total; 1/6 classification.
-Gemini classification request 1/6: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/3)
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Applied cautious temporary-dependence floor to DHT: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DHT]: 5 distinct URLs
-Applied cautious temporary-dependence floor to TRMD: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TRMD]: 4 distinct URLs
-Classification invalid for HAFN: HAFN material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for HAFN: {"error": "HAFN material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "MODERATE", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "LIKELY", "continuation_strength": "STRONG", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_ENERGY_DISRUPTION", "risk_exposure_group": "PRODUCT_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[]", "reversal_mechanism": "\"Normalization of exceptionally strong product tanker market conditions and a decline in spot freight rates.\"", "current_fact": "\"Q2 2026 average TCE was $44,093 per day.\"", "probability_evidence": "\"The product tanker market is experiencing exceptionally strong freight rates due to geopolitical conflicts.\"", "material_effect": "\"A decline in product tanker spot rates would materially reduce TCE earnings and net profit within 6-12 months.\""}}
-Reconciled dynamic primary_risk_event_id for SBLK: 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS' -> 'GEOPOLITICAL_ENERGY_DISRUPTION' (score=7.5, margin=7.5).
-Classification invalid for SBLK: SBLK material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for SBLK: {"error": "SBLK material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "MODERATE", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "LIKELY", "continuation_strength": "STRONG", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS", "risk_exposure_group": "DRY_BULK_FREIGHT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[]", "reversal_mechanism": "\"Decline in dry bulk freight rates due to slowing global trade or commodity demand.\"", "current_fact": "\"Q2 2026 net income was $144.9 million.\"", "probability_evidence": "\"The dry bulk shipping market is highly cyclical and dependent on global trade and commodity demand.\"", "material_effect": "\"A decline in dry bulk freight rates would materially reduce profitability within 6-12 months.\""}}
-Applied cautious temporary-dependence floor to TK: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TK]: 4 distinct URLs
-Reconciled dynamic primary_risk_event_id for SHIP: 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS' -> 'GEOPOLITICAL_ENERGY_DISRUPTION' (score=6.0, margin=6.0).
-Applied cautious temporary-dependence floor to SHIP: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [SHIP]: 3 distinct URLs
-Applied cautious temporary-dependence floor to DINO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DINO]: 4 distinct URLs
-Applied cautious temporary-dependence floor to VLO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [VLO]: 5 distinct URLs
-Applied cautious temporary-dependence floor to STNG: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [STNG]: 3 distinct URLs
-Reconciled dynamic primary_risk_event_id for CMBT: 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS' -> 'GEOPOLITICAL_ENERGY_DISRUPTION' (score=6.5, margin=6.5).
-Applied cautious temporary-dependence floor to CMBT: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [CMBT]: 5 distinct URLs
-Applied cautious temporary-dependence floor to NMM: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [NMM]: 5 distinct URLs
-Reconciled dynamic primary_risk_event_id for SB: 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS' -> 'GEOPOLITICAL_ENERGY_DISRUPTION' (score=6.0, margin=6.0).
-Applied cautious temporary-dependence floor to SB: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [SB]: 4 distinct URLs
-Applied cautious temporary-dependence floor to ASC: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [ASC]: 5 distinct URLs
-Classification invalid for DDI: DDI material entry/concentration risk lacks a supported causal chain: probability basis does not establish a current adverse change; preserving the draft rather than lowering component risks.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for DDI: {"error": "DDI material entry/concentration risk lacks a supported causal chain: probability basis does not establish a current adverse change; preserving the draft rather than lowering component risks.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "HIGH", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "WEAK", "risk_basis": "NORMALIZED_OPERATING_DETERIORATION", "catalyst_dependence": "LOW", "mechanism_status": "UNUSUALLY_PROBABLE", "normalization_probability": "NOT_APPLICABLE", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "OTHER_CURRENT_INDICATOR", "probability_basis": "EXTERNAL_EXPECTATION_ONLY", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "MODERATE", "primary_risk_event_id": null, "risk_exposure_group": null}, "evidence_excerpt": {"temporary_drivers": "[]", "reversal_mechanism": "\"Industry forecast of a >5% decline in global social casino revenue in 2026.\"", "current_fact": "\"Industry forecast of a >5% decline in global social casino revenue in 2026.\"", "probability_evidence": "\"Industry forecast of a >5% decline in global social casino revenue in 2026.\"", "material_effect": "\"A material decline in global social casino revenue within 6-12 months.\""}}
-Validated JSON sources [APA]: 5 distinct URLs
-Classification invalid for APA: APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for APA: {"error": "APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "LOW", "entry_reversal_risk": "LOW", "reversal_risk": "LOW", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "LIKELY", "continuation_strength": "ADEQUATE", "risk_basis": "NONE", "catalyst_dependence": "LOW", "mechanism_status": "NONE", "normalization_probability": "NOT_APPLICABLE", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": null, "risk_materiality": "LOW", "primary_risk_event_id": null, "risk_exposure_group": "CRUDE_OIL_PRICES"}, "evidence_excerpt": {"temporary_drivers": "[]", "reversal_mechanism": "\"No qualifying current reversal mechanism established\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "null"}}
-Portfolio meeting final quality bar: 10/10; freezing research.
-FINAL VALIDATED CANDIDATE COMPARISON
-  SLDE: final_score=87.65, qvm=75.65, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=None
-  WDOFF: final_score=85.14, qvm=73.14, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICES
-  AYA: final_score=85.06, qvm=73.06, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=SILVER_PRICES
-  ARREF: final_score=84.32, qvm=72.32, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=COPPER_PRICES
-  MAKO: final_score=83.95, qvm=71.95, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICES
-  AUGO: final_score=82.97, qvm=69.97, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
-  HNGE: final_score=82.75, qvm=69.75, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=DIGITAL_HEALTH_ADOPTION
-  FTNT: final_score=82.73, qvm=70.73, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CYBERSECURITY_SPENDING
-  CDNA: final_score=82.51, qvm=70.51, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=PRECISION_MEDICINE_DIAGNOSTICS
-  VCTR: final_score=82.45, qvm=69.45, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=ASSET_MANAGEMENT_FLOWS
-  RCRUY: final_score=82.20, qvm=69.20, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=None
-  DHT: final_score=81.01, qvm=78.01, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  CGAU: final_score=80.93, qvm=67.93, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
-  TRMD: final_score=80.55, qvm=77.55, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
-  ETON: final_score=80.32, qvm=67.32, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=None
-  PAYS: final_score=79.07, qvm=68.07, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=None
-  ILMN: final_score=75.90, qvm=64.90, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GENETIC_SEQUENCING_DEMAND
-  TK: final_score=75.75, qvm=72.75, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_AND_PRODUCT_TANKER_SPOT_RATES
-  INSW: final_score=75.57, qvm=84.57, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  VLO: final_score=75.53, qvm=71.53, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
-  SHIP: final_score=75.51, qvm=72.51, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=DRY_BULK_FREIGHT_RATES
-  DINO: final_score=75.19, qvm=72.19, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
-  CMBT: final_score=74.48, qvm=70.48, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=SHIPPING_FREIGHT_RATES
-  NMM: final_score=74.32, qvm=70.32, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=SHIPPING_FREIGHT_RATES
-  SB: final_score=72.23, qvm=69.23, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=DRY_BULK_FREIGHT_RATES
-  ECO: final_score=72.17, qvm=81.17, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  TNK: final_score=71.10, qvm=80.10, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  LPG: final_score=70.53, qvm=79.53, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=LPG_FREIGHT_RATES
-  PURR: final_score=70.17, qvm=68.17, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CRYPTO_ASSET_PRICES
-  TEN: final_score=70.04, qvm=79.04, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  REPX: final_score=70.01, qvm=70.01, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CRUDE_OIL_PRICES
-  FRO: final_score=69.99, qvm=78.99, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  NAT: final_score=69.86, qvm=78.86, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_TANKER_SPOT_RATES
-  WCPRF: final_score=69.18, qvm=69.18, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CRUDE_OIL_PRICES
-  MGTX: final_score=68.37, qvm=68.37, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=NONE, risk_event=None, return_driver=None
-  KRT: final_score=63.99, qvm=67.99, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=NONE, risk_event=None, return_driver=None
-  DSVSF: final_score=62.71, qvm=70.71, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_AND_SILVER_PRICES
-  PTGX: final_score=60.80, qvm=70.80, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': 0.0, 'binary_event_risk': -2.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=None, return_driver=BIOPHARMACEUTICAL_COLLABORATION_PAYMENTS
-  PARR: final_score=60.10, qvm=70.10, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
-  MPC: final_score=58.98, qvm=68.98, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
-  CVE: final_score=58.21, qvm=68.21, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_OIL_PRICES
-  SGYEF: final_score=58.07, qvm=68.07, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=CRUDE_OIL_AND_GAS_PRICES
-  NUTX: final_score=57.47, qvm=69.47, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': -5.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=ACTIVE, risk_event=None, return_driver=HEALTHCARE_DELIVERY_REVENUE
-  BWLP: final_score=57.20, qvm=68.20, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=LPG_FREIGHT_RATES
-  STNG: final_score=57.07, qvm=71.07, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
-  PSX: final_score=56.69, qvm=66.69, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -1.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=REFINING_CRACK_SPREADS
-  ASC: final_score=54.85, qvm=67.85, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=WEAK, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=GEOPOLITICAL_ENERGY_DISRUPTION, return_driver=PRODUCT_TANKER_SPOT_RATES
-  PBT: final_score=-942.83, qvm=73.17, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -1000.0, 'continuation_strength': -4.0, 'catalyst_dependence': -2.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': -5.0}, risk=MODERATE, continuation=WEAK, benchmark=UNLIKELY, mechanism=ACTIVE, risk_event=None, return_driver=OIL_AND_GAS_PRICES
-Research efficiency: 0 unique stocks, 0 requested searches, 0 repeated searches.
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/pandas/compat/_optional.py", line 158, in import_optional_dependency
+    module = importlib.import_module(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1140, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'tabulate'
 
-CONTEXT REVIEW
+The above exception was the direct cause of the following exception:
 
-|   QVM Rank | Symbol   | Sector Group           | Reversal Risk / Status                           |   Final Score | Continuation   | Benchmark Outlook   |   Sector Selected After |   Total Selected After | Explanation                                                                                                                                                                                                                                                                                                                                  |
-|-----------:|:---------|:-----------------------|:-------------------------------------------------|--------------:|:---------------|:--------------------|------------------------:|-----------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|         10 | SLDE     | Financial Services     | SELECTED — LOW                                   |       87.6456 | STRONG         | LIKELY              |                       1 |                      1 | Slide Insurance is demonstrating strong growth in revenue and net income, driven by policy expansion and improved underwriting. The company's focus on technology and market expansion supports its operating model, with no material temporary drivers identified, indicating low reversal risk.                                            |
-|         14 | WDOFF    | Basic Materials        | SELECTED — LOW                                   |       85.1375 | STRONG         | LIKELY              |                       1 |                      2 | Wesdome Gold Mines is showing consistent gold production and revenue growth, supported by its operating assets and exploration efforts. The reaffirmation of full-year guidance indicates a stable outlook, with no material temporary drivers identified, suggesting low reversal risk.                                                     |
-|         15 | AYA      | Basic Materials        | SELECTED — LOW                                   |       85.0647 | STRONG         | LIKELY              |                       2 |                      3 | Aya Gold & Silver is experiencing record operational and financial performance, significantly boosted by robust silver prices and the Zgounder mine ramp-up. While operational improvements are durable, the reliance on robust silver prices suggests low reversal risk, as no immediate normalization is indicated.                        |
-|         18 | ARREF    | Basic Materials        | SKIPPED — SECTOR CAPACITY                        |       84.3199 | STRONG         | LIKELY              |                       2 |                      3 | Amerigo Resources is demonstrating consistent copper production and strong cash flow generation, which it returns to shareholders. The company's unique business model provides a stable operating base, with no material temporary drivers identified, suggesting low reversal risk.                                                        |
-|         20 | MAKO     | Basic Materials        | SKIPPED — SECTOR CAPACITY                        |       83.9478 | STRONG         | LIKELY              |                       2 |                      3 | Mako Mining is demonstrating strong operational and financial performance with record production and revenue. The company is actively pursuing growth through acquisitions and aims to lower its cost of capital, with no material temporary drivers identified, suggesting low reversal risk.                                               |
-|         31 | AUGO     | Basic Materials        | SKIPPED — SECTOR CAPACITY                        |       82.9736 | STRONG         | LIKELY              |                       2 |                      3 | Aura Minerals reported strong Q2 2026 production, reaffirming full-year guidance, and is focused on operational improvements and project development to drive future growth. The company also announced a dividend and share buyback program, supporting a low reversal risk.                                                                |
-|         32 | HNGE     | Healthcare             | SELECTED — LOW                                   |       82.7501 | STRONG         | LIKELY              |                       1 |                      4 | Hinge Health reported strong Q2 2026 revenue growth and raised full-year guidance, demonstrating continued momentum in its digital healthcare platform. The company's expansion into new care areas and consistent client growth support a low reversal risk.                                                                                |
-|         24 | FTNT     | Technology             | SELECTED — LOW                                   |       82.735  | STRONG         | LIKELY              |                       1 |                      5 | Fortinet is demonstrating strong financial performance with significant revenue and EPS growth, driven by robust demand for its cybersecurity solutions and strategic innovation. The company has raised its full-year guidance, indicating confidence in continued market strength, with low reversal risk.                                 |
-|         26 | CDNA     | Healthcare             | SELECTED — LOW                                   |       82.5089 | STRONG         | LIKELY              |                       2 |                      6 | CareDx reported strong Q2 2026 revenue growth of 52% YoY, driven by its core testing services. Although GAAP net income was boosted by a non-recurring $113 million gain from a divestiture, the recurring business is highly robust, indicating low reversal risk under the non-recurring comparison rule.                                  |
-|         34 | VCTR     | Financial Services     | SELECTED — LOW                                   |       82.4506 | STRONG         | LIKELY              |                       2 |                      7 | Victory Capital reported record Q2 2026 financial results, driven by increased client assets and positive net inflows. The company is expanding through strategic acquisitions and maintains a strong investment performance record across its diverse asset management platform.                                                            |
-|         36 | RCRUY    | Communication Services | SELECTED — LOW                                   |       82.1981 | STRONG         | LIKELY              |                       1 |                      8 | Recruit Holdings reported strong Q1 FY2026 revenue, exceeding expectations, and anticipates continued growth across its segments. The company's diversified business model and focus on efficiency support a low reversal risk.                                                                                                              |
-|          8 | DHT      | Energy                 | SELECTED — MODERATE                              |       81.0109 | STRONG         | LIKELY              |                       1 |                      9 | DHT Holdings is experiencing exceptionally strong tanker market conditions with high spot rates, leading to record Q2 2026 net profit. While momentum is strong and supported by a new three-year charter, the reliance on temporary geopolitical drivers and elevated spot rates presents a moderate reversal risk if conditions normalize. |
-|         46 | CGAU     | Basic Materials        | SKIPPED — SECTOR CAPACITY                        |       80.9297 | STRONG         | LIKELY              |                       2 |                      9 | Centerra Gold reported strong Q2 2026 operational results with increased gold production guidance for the full year. The company maintains a strong balance sheet and is executing a self-funded growth strategy across its gold and copper assets, supported by consistent shareholder returns.                                             |
-|          9 | TRMD     | Energy                 | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       80.5513 | STRONG         | LIKELY              |                       1 |                      9 | TORM plc achieved record Q2 2026 financial performance and upgraded its full-year 2026 guidance, driven by exceptionally strong freight markets and geopolitical disruptions. The reliance on these elevated, temporary market conditions presents a moderate reversal risk if rates normalize.                                              |
-|         48 | ETON     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       80.321  | STRONG         | LIKELY              |                       2 |                      9 | Eton Pharmaceuticals demonstrated exceptional product sales growth of 99% in Q2 2026 and raised its full-year guidance. With a growing rare disease portfolio and no established reversal mechanisms, the continuation thesis remains highly robust.                                                                                         |
-|         44 | PAYS     | Technology             | SELECTED — LOW                                   |       79.0655 | STRONG         | LIKELY              |                       2 |                     10 | Paysign reported strong Q2 2026 revenue growth of 48.1% and raised full-year guidance, driven by its plasma and patient affordability segments. While there is an implied H2 earnings deceleration and customer concentration, no active reversal is established.                                                                            |
-|         57 | ILMN     | Healthcare             | SKIPPED — SECTOR CAPACITY                        |       75.8982 | STRONG         | LIKELY              |                       2 |                     10 | Illumina reported strong Q2 2026 revenue and raised its full-year guidance, driven by high demand for its NovaSeq X platforms and growth in clinical sequencing. While research markets remain soft, the company is expanding into new growth areas like multiomics.                                                                         |
-|         16 | TK       | Energy                 | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       75.7456 | STRONG         | LIKELY              |                       1 |                     10 | Teekay Corporation's Q2 2026 results were boosted by record spot tanker rates, driven by geopolitical disruptions. This reliance on elevated, temporary market conditions presents a moderate reversal risk if rates normalize.                                                                                                              |
-|          1 | INSW     | Energy                 | NOT SELECTED — UNCERTAIN MODERATE-RISK CASE      |       75.5734 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | International Seaways' strong performance is heavily reliant on elevated TCE rates driven by geopolitical disruptions. While momentum remains strong, the potential normalization of these rates represents a material reversal risk over the next 6-12 months.                                                                              |
-|         21 | VLO      | Energy                 | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       75.5333 | STRONG         | LIKELY              |                       1 |                     10 | Valero Energy reported strong Q2 2026 results driven by robust refining operations and expects structurally higher margins due to tight global supply and constrained refining capacity. The reliance on these elevated, temporary market conditions presents a moderate reversal risk if rates normalize.                                   |
-|         17 | SHIP     | Industrials            | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       75.5112 | STRONG         | LIKELY              |                       0 |                     10 | Seanergy Maritime reported record Q2 2026 results, driven by a strong Capesize freight market. The company's reliance on these elevated market conditions presents a moderate reversal risk if freight rates normalize.                                                                                                                      |
-|         19 | DINO     | Energy                 | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       75.1921 | STRONG         | LIKELY              |                       1 |                     10 | HF Sinclair reported strong Q2 2026 results, driven by robust refining margins and tight global product markets. While management expects constructive conditions, the reliance on these potentially temporary factors presents a moderate reversal risk if conditions normalize.                                                            |
-|         27 | CMBT     | Energy                 | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       74.4757 | STRONG         | LIKELY              |                       1 |                     10 | Cmb.Tech reported strong Q2 2026 net profit and revenue, benefiting from robust shipping markets and asset sales. While the company has a stable contract backlog and is investing in new technologies, a potential tanker oversupply in 2027-2028 could pressure future freight rates.                                                      |
-|         28 | NMM      | Industrials            | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       74.322  | STRONG         | LIKELY              |                       0 |                     10 | Navios Maritime Partners reported strong Q2 2026 results with record contracted revenue backlog and a new $200 million unit repurchase program. The company benefits from tight vessel supply and elevated rates driven by ongoing geopolitical disruptions in key shipping lanes.                                                           |
-|         35 | SB       | Industrials            | NOT SELECTED — SECOND RISK-EVENT QUALITY BAR     |       72.2305 | STRONG         | LIKELY              |                       0 |                     10 | Safe Bulkers reported strong Q2 2026 Adjusted EBITDA, benefiting from healthy spot rates in the dry bulk market. However, management's concerns about China demand and trade tensions present a moderate reversal risk if rates decline.                                                                                                     |
-|          2 | ECO      | Industrials            | NOT SELECTED — UNCERTAIN MODERATE-RISK CASE      |       72.1731 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Okeanis Eco Tankers has achieved record results due to exceptionally high spot tanker rates. However, these rates are driven by temporary geopolitical factors, posing a hypothetical reversal risk if conditions normalize.                                                                                                                 |
-|          3 | TNK      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       71.1034 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Teekay Tankers' record earnings are driven by elevated spot tanker rates and a non-recurring vessel sale gain. The potential normalization of these rates represents a material operating risk over the next 6-12 months.                                                                                                                    |
-|          4 | LPG      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       70.5262 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Dorian LPG's strong performance is driven by record VLGC freight rates resulting from geopolitical disruptions. The potential normalization of these rates represents a material reversal risk over the next 6-12 months.                                                                                                                    |
-|         42 | PURR     | Financial Services     | EXCLUDED — CRYPTO DEPENDENCE                     |       70.1677 | STRONG         | LIKELY              |                       2 |                     10 | Hyperliquid Strategies reported strong fiscal 2026 net income and high profit margins, driven by its crypto asset management business and the Hyperliquid perpetuals DEX. However, the company's extreme concentration in HYPE tokens and potential deferred tax liabilities present a moderate reversal risk.                               |
-|          5 | TEN      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       70.0404 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Tsakos Energy Navigation's strong results are driven by elevated tanker rates and a non-recurring vessel sale gain. The potential normalization of these rates represents a material operating risk over the next 6-12 months.                                                                                                               |
-|         30 | REPX     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       70.01   | ADEQUATE       | LIKELY              |                       1 |                     10 | Riley Exploration Permian reported a 35% increase in Q2 2026 operating cash flow, driven by high oil prices, and raised its full-year oil production guidance. The company is focused on predictable asset growth and shareholder returns, but remains exposed to the risk of oil price normalization.                                       |
-|          6 | FRO      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       69.9866 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Frontline's record profits are driven by elevated tanker rates. The potential normalization of these rates represents a material operating risk over the next 6-12 months.                                                                                                                                                                   |
-|          7 | NAT      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       69.8586 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Nordic American Tankers' strong performance is driven by elevated Suezmax tanker rates. The potential normalization of these rates represents a material operating risk over the next 6-12 months.                                                                                                                                           |
-|         37 | WCPRF    | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       69.1814 | ADEQUATE       | LIKELY              |                       1 |                     10 | Whitecap Resources delivered record Q2 2026 financial and operating results, driven by strong commodity prices and operational efficiencies, leading to increased production guidance. The company maintains a strong balance sheet and is strategically positioned to benefit from additional crude oil egress.                             |
-|         39 | MGTX     | Healthcare             | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       68.3665 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | MeiraGTx has strong financial backing with a recent $400 million strategic investment and positive clinical progress, including FDA Breakthrough Therapy Designation. There are no established material reversal mechanisms over the next 6-12 months.                                                                                       |
-|         45 | KRT      | Consumer Cyclical      | NOT SELECTED — WEAK CONTINUATION                 |       63.9938 | WEAK           | UNCERTAIN           |                       0 |                     10 | Karat Packaging's Q2 2026 results were boosted by non-recurring tariff refunds. While profitability will decrease as these refunds disappear, the recurring business remains healthy with 9.9% year-over-year sales growth, representing a non-recurring comparison concern rather than operating deterioration.                             |
-|         25 | DSVSF    | Basic Materials        | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       62.7054 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Discovery Mining reported record Q2 2026 revenue, partly driven by a significant increase in realized gold prices. While the company has growth initiatives, its reliance on volatile commodity prices presents a moderate reversal risk if prices decline.                                                                                  |
-|         23 | PTGX     | Healthcare             | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       60.8044 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Protagonist Therapeutics' Q2 2026 net income was significantly boosted by non-recurring collaboration payments. With R&D expenses expected to increase, the absence of similar large payments in future periods presents a moderate reversal risk to profitability.                                                                          |
-|         29 | PARR     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       60.1042 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Par Pacific reported strong Q2 2026 results, driven by favorable refining margins. However, its profitability is materially supported by elevated refining margins, which could normalize within 6-12 months, presenting a moderate reversal risk.                                                                                           |
-|         38 | MPC      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       58.9834 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Marathon Petroleum delivered very strong Q2 2026 results, driven by robust refining and marketing performance. However, its profitability is materially supported by these strong market conditions, which could normalize within 6-12 months.                                                                                               |
-|         40 | CVE      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       58.2061 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Cenovus Energy reported strong Q2 2026 results, driven by increased production and higher benchmark oil prices. While the company has increased guidance, its profitability is materially supported by currently elevated crude oil prices, which could normalize.                                                                           |
-|         43 | SGYEF    | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       58.0715 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Surge Energy reported strong Q2 2026 results, including 48% YoY revenue growth. While the company has raised guidance, its performance is materially supported by currently elevated crude oil and natural gas prices, which could normalize.                                                                                                |
-|         33 | NUTX     | Healthcare             | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       57.4654 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Nutex Health reported a significant increase in Q2 2026 net income, but H1 2026 revenue declined 6% YoY due to collection timing. While new hospital openings are planned, persistent revenue challenges or collection issues present a moderate reversal risk.                                                                              |
-|         41 | BWLP     | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       57.1966 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | BW LPG reported strong Q2 2026 profits driven by extreme market volatility and high freight rates. While the company has a robust fleet, its current performance is materially dependent on these temporary favorable market conditions, which could normalize.                                                                              |
-|         22 | STNG     | Energy                 | NOT SELECTED — WEAK CONTINUATION                 |       57.0665 | WEAK           | UNCERTAIN           |                       1 |                     10 | Scorpio Tankers reported strong Q2 2026 net income, but it was significantly boosted by a non-recurring gain on vessel sales. Combined with recent 6-month underperformance relative to VGT, the continuation case is weak, and the reliance on temporary market conditions and non-recurring items presents a moderate reversal risk.       |
-|         49 | PSX      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR      |       56.6853 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | Phillips 66 delivered strong Q2 2026 results across all segments, benefiting from favorable market conditions. However, its performance is materially supported by these conditions, and a normalization of refining margins could lead to a reversal within 6-12 months.                                                                    |
-|         47 | ASC      | Industrials            | NOT SELECTED — WEAK CONTINUATION                 |       54.8477 | WEAK           | UNCERTAIN           |                       0 |                     10 | Ardmore Shipping reported strong Q2 2026 adjusted earnings and TCE rates, benefiting from highly supportive market conditions driven by geopolitical disruptions and elevated refining margins. However, its recent 6-month underperformance and reliance on temporary drivers present a moderate reversal risk.                             |
-|         13 | PBT      | Energy                 | NOT SELECTED — BENCHMARK OUTPERFORMANCE UNLIKELY |     -942.829  | WEAK           | UNLIKELY            |                       1 |                     10 | Permian Basin Royalty Trust's August 2026 distribution was impacted by the Waddell Ranch properties being in an excess cost position. This active deterioration in a key asset, coupled with sensitivity to commodity prices, indicates a moderate reversal risk for future distributions.                                                   |
-|         11 | HAFN     | Industrials            | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       0 |                     10 | Judgment did not pass final validation: HAFN material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.                                                                                                                       |
-|         12 | SBLK     | Industrials            | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       0 |                     10 | Judgment did not pass final validation: SBLK material entry/concentration risk lacks a supported causal chain: no qualifying current probability indicator; preserving the draft rather than lowering component risks.                                                                                                                       |
-|         50 | DDI      | Communication Services | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       1 |                     10 | Judgment did not pass final validation: DDI material entry/concentration risk lacks a supported causal chain: probability basis does not establish a current adverse change; preserving the draft rather than lowering component risks.                                                                                                      |
-|         52 | APA      | Energy                 | SKIPPED — CLASSIFICATION INVALID                 |      nan      | nan            | nan                 |                       1 |                     10 | Judgment did not pass final validation: APA omits documented shared event GEOPOLITICAL_ENERGY_DISRUPTION for comparable exposure CRUDE_OIL_PRICES; current research must establish the event treatment or a sourced company_difference.                                                                                                      |
-
-CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN
-  No comparable classification fields changed.
-PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN
-  Added DHT: SKIPPED — CLASSIFICATION INVALID -> SELECTED — MODERATE
-  Removed APA: SELECTED — LOW -> SKIPPED — CLASSIFICATION INVALID
-NO-CALL NORMALIZATION SUMMARY
-  cautious_temporary_dependence_floor: 28
-  dynamic_risk_event_id_reconciliation: 4
-Gemini 3.5 API budget: 2/8 total; 1/2 summary.
-Gemini logical request 1/8: final HTML summary (gemini-3.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
-Gemini usage [final HTML summary]: prompt_tokens=18410, tool_tokens=0, cached_tokens=None, thinking_tokens=12362, output_tokens=2070, total_tokens=32842
-Google searches performed [final HTML summary]: 0
-Grounding citation chunks exposed [final HTML summary]: 0
-Using Gemini-written HTML summary.
-SELECTED EVIDENCE AUDIT (missing event/date fields are unknown)
-  {"symbol": "SLDE", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 7.453136150336498, "3m": 46.149160298755014, "6m": 13.833209069679164, "9m": 1.4836393612859808, "1y": 37.44867343129428}, "benchmark_outperformance_basis": "SLDE has strong trailing excess returns (1y excess of 37.45%) and robust operating momentum with Q2 2026 revenue up 47.9% YoY and net income up 92.4% YoY, supporting continued outperformance.", "material_company_event_review": "REPORTED", "material_company_event": "Reaffirmed full-year 2026 guidance for gross written premiums of $1.85-$1.95 billion and net income of $455-$470 million. Launched California E&S program.", "research_age_hours": 15.86, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "WDOFF", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -0.3401693016483458, "3m": 40.86870330905944, "6m": 21.50930287525238, "9m": 19.460379973444553, "1y": 50.56350307037954}, "benchmark_outperformance_basis": "WDOFF has strong trailing excess returns (1y excess of 50.56%) and robust operating momentum with Q2 2026 revenue up 28% YoY, supported by high-grade gold assets and exploration success.", "material_company_event_review": "REPORTED", "material_company_event": "On September 10, 2026, announced significant gold intersections at Kiena Deep, confirming a new zone.", "research_age_hours": 15.86, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "AYA", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 2.383376577248703, "3m": 42.55980010028272, "6m": 87.15660052775104, "9m": 63.929244702304686, "1y": 110.64791076934361}, "benchmark_outperformance_basis": "AYA has exceptional trailing excess returns (1y excess of 110.65%) and record operational performance with Q2 2026 revenue up 151% YoY, driven by the Zgounder mine ramp-up.", "material_company_event_review": "REPORTED", "material_company_event": "Q2 2026 delivered record operational and financial performance. Listed on Nasdaq and added to VanEck Gold Miners ETF.", "research_age_hours": 15.86, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "HNGE", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 7.501313830068474, "3m": 36.221417977458984, "6m": 84.3237446696253, "9m": 63.44816780994232, "1y": 34.154579197466006}, "benchmark_outperformance_basis": "Strong 1-year excess return of 34.15% and 53% YoY revenue growth in Q2 2026, with raised full-year guidance and strategic acquisition of Cylinder Health.", "material_company_event_review": "REPORTED", "material_company_event": "Acquired Cylinder Health, Inc. on September 1, 2026, expanding into gastrointestinal care. Raised full-year 2026 revenue guidance to $856-$860 million.", "research_age_hours": 15.82, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "FTNT", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 9.296192832676004, "3m": 15.202373058886756, "6m": 69.57313220448607, "9m": 79.69800995028656, "1y": 69.08630976411362}, "benchmark_outperformance_basis": "FTNT has strong trailing excess returns (1y excess of 69.09%) and robust operating momentum with Q2 2026 revenue up 26% YoY and raised full-year guidance, supporting continued outperformance.", "material_company_event_review": "REPORTED", "material_company_event": "On July 29, 2026, lifted full-year 2026 guidance to revenue of $8.020-$8.180 billion. Partnered with Anthropic, OpenAI, and NVIDIA for AI safety.", "research_age_hours": 15.86, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "CDNA", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 11.219014865600958, "3m": 113.27577103099367, "6m": 174.80206064468638, "9m": 141.93276338189233, "1y": 236.3513966043444}, "benchmark_outperformance_basis": "CDNA has exceptional trailing excess returns (1y excess of 236.35%) and strong recurring revenue growth of 52% YoY in Q2 2026, supporting continued outperformance.", "material_company_event_review": "REPORTED", "material_company_event": "Completed divestiture of Lab Products business on June 30, 2026, recognizing a $113 million gain on sale.", "research_age_hours": 15.82, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "VCTR", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -8.67999922105906, "3m": 21.150118985633185, "6m": 18.78102063571722, "9m": 37.66674326318079, "1y": 30.361602133935214}, "benchmark_outperformance_basis": "Strong 1-year excess return of 30.36% and record Q2 2026 client assets of $346.1 billion, supported by the strategic acquisition of GC Ferry Holdings.", "material_company_event_review": "REPORTED", "material_company_event": "On August 31, 2026, Victory Capital agreed to acquire GC Ferry Holdings, Inc. (First Eagle) in a deal involving cash, common shares, and preferred stock.", "research_age_hours": 15.74, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "RCRUY", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 5.645943044873054, "3m": 54.097804530414635, "6m": 150.30849711054572, "9m": 67.75263374245127, "1y": 73.94823464032049}, "benchmark_outperformance_basis": "Exceptional 1-year excess return of 73.95% and strong Q1 FY2026 revenue exceeding expectations, driven by diversified HR tech and staffing segments.", "material_company_event_review": "REPORTED", "material_company_event": "Announced receipt of dividends from consolidated subsidiaries on September 2, 2026.", "research_age_hours": 15.82, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "DHT", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 14.187985854494151, "3m": 23.93602971995429, "6m": 9.852367637935323, "9m": 74.017712183815, "1y": 78.34387865589814}, "benchmark_outperformance_basis": "DHT has delivered substantial 1-year excess returns of 78.3% over VGT, supported by exceptionally strong tanker market conditions and Q2 2026 net profit of $198.3 million.", "material_company_event_review": "REPORTED", "material_company_event": "On September 14, 2026, DHT Holdings secured a three-year time charter for the DHT Panther, providing fixed income.", "research_age_hours": 15.82, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "PAYS", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -14.046387656785424, "3m": 66.50542720773736, "6m": 242.96783808728242, "9m": 95.1078589946651, "1y": 86.97301230398291}, "benchmark_outperformance_basis": "PAYS has delivered substantial 1-year benchmark excess return of 87.0% and strong Q2 2026 revenue growth of 48.1% YoY, supported by raised full-year guidance.", "material_company_event_review": "REPORTED", "material_company_event": "On August 5, 2026, Paysign raised full-year 2026 revenue guidance to $114-$117 million and diluted EPS guidance to $0.35-$0.37, reflecting strong Q2 results.", "research_age_hours": 0.59, "sources_with_publication_date": 4, "source_count": 4}
-CACHE EFFECTIVENESS SUMMARY
-  market: {"path": "caches/gemini_shared_market_context_cache.json", "file_existed": true, "entries_loaded": 1, "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "prompt_hash": "77401ca43504e4d243d356511fe2417af9b471721b7439fef260be2bf2f0844e", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "ttl_hours": 12.0, "hit": true, "miss_reason": null, "age_hours": 0.8, "file_size_bytes": 81894}
-  stock research: {"path": "caches/gemini_stock_research_cache_hardened.json", "file_existed": true, "research_contract_hash": "a4d152e3ea3f0d09d82ff59dbf1c9128050b3bfd1857e8a2087907e39ba2ca22", "research_schema_hash": "8988d4b4fda2ad21e3be72297033d7c3dcba977156cbec7347800805e6125b7a", "judgment_contract_hash": "394c87193eecafdb75db38b00fa85b813bf5d462cf03d64eeda1a740d47683f5", "ttl_hours": 24.0, "entries_loaded": 52, "entries_fresh": 52, "entries_expired": 0, "evidence_hits": 52, "judgment_hits": 38, "judgment_refreshes": 15, "misses": 23, "validation_failures": 0, "miss_reasons": {"symbol_not_cached": 23}, "entries_after_run": 52, "deferred_entries_after_run": 0, "newly_researched_symbols": [], "file_size_bytes": 649539}
-GEMINI EFFICIENCY SUMMARY
-  requests used: 1/8
-  stock research calls: 0/6
-  actual API attempts by model family: Gemini 3.5=2/8, Gemini 2.5=0/8
-  newly validated stocks: 0
-  exposed searches per newly validated stock: 0.00
-  duplicate extra result blocks: 0
-  tokens: prompt=18410, tool=0, thinking=12362, output=2070, total=32842
-Saved comprehensive run report: run_reports/stock_run_report.json
-Generated research with model(s): gemini-2.5-flash, gemini-3.5-flash
-Selected symbols: SLDE, WDOFF, AYA, HNGE, FTNT, CDNA, VCTR, RCRUY, DHT, PAYS
-Elapsed time: 150 seconds
-
-
+Traceback (most recent call last):
+  File "/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py", line 6160, in <module>
+    top_stocks[cols_for_eval].to_markdown(index=False),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/pandas/core/frame.py", line 2983, in to_markdown
+    tabulate = import_optional_dependency("tabulate")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/pandas/compat/_optional.py", line 161, in import_optional_dependency
+    raise ImportError(msg) from err
+ImportError: `Import tabulate` failed.  Use pip or conda to install the tabulate package.

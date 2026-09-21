@@ -804,10 +804,22 @@ prompt_etf_judgment: |
   BENCHMARK OUTPERFORMANCE
   benchmark_outperformance_outlook must be LIKELY, UNCERTAIN or UNLIKELY. Also return
   benchmark_outperformance_confidence as LOW, MEDIUM or HIGH. HIGH confidence on
-  UNLIKELY requires explicit ETF-specific evidence that the current holdings/exposure
-  drivers are materially less favorable than the configured benchmarks over the next
-  6-12 months; generic style rotation risk or absence of proof of outperformance is not
-  enough. Use the supplied excess-return matrix versus EACH benchmark plus grounded continuation
+  UNLIKELY is a deliberately narrow classification: it requires explicit current
+  ETF-specific or exposure-specific evidence that the fund's actual holdings, index
+  construction or dominant economic driver is materially less favorable than the
+  configured benchmarks over the next 6-12 months. Generic style-rotation risk, broad
+  market uncertainty, trailing underperformance, valuation alone, or absence of proof
+  of future outperformance is not enough. In those cases use UNCERTAIN, or UNLIKELY
+  with LOW/MEDIUM confidence when a weaker negative case is supported.
+
+  For every ETF return benchmark_negative_evidence_scope as ETF_SPECIFIC,
+  EXPOSURE_SPECIFIC, GENERIC or NONE and benchmark_negative_evidence as a concise
+  current fact/inference or null. UNLIKELY/HIGH requires ETF_SPECIFIC or
+  EXPOSURE_SPECIFIC plus a non-null benchmark_negative_evidence statement. Python
+  will conservatively reduce unsupported UNLIKELY/HIGH confidence rather than treating
+  it as a hard negative.
+
+  Use the supplied excess-return matrix versus EACH benchmark plus grounded continuation
   evidence. Do not use LIKELY merely because reversal risk is LOW. For LIKELY,
   benchmark_outperformance_basis must explain why the current holdings/exposure
   driver can plausibly support continued excess returns. A positive trailing
@@ -827,6 +839,23 @@ prompt_etf_judgment: |
   Do not use ticker, issuer or generic broad-market labels when a more specific
   shared mechanism is established. Set null only when no material common driver
   can be established from the supplied research.
+
+  PRIOR-CLASSIFICATION CONSISTENCY / HYSTERESIS
+  Each candidate may include previous_classification from the last successful run.
+  Treat it as a prior, not ground truth. When the grounded evidence, quantitative
+  benchmark-relative picture and market context are substantially unchanged, preserve
+  the prior reversal risk, continuation strength and benchmark outlook/confidence.
+  Change a material decision field only when current supplied evidence materially
+  changes the 6-12 month case or when correcting a prior judgment that violates these
+  rules. Wording differences alone are not new evidence.
+
+  If a decision field changes, classification_change_reason must state why. If the
+  change is driven by a newly supplied fact or changed condition, material_new_evidence
+  must identify it concisely. If the change is only a rule correction, state that in
+  classification_change_reason and use null for material_new_evidence. In particular,
+  do not move a prior LIKELY/UNCERTAIN judgment to UNLIKELY/HIGH merely because the
+  affirmative outperformance case is less certain; UNLIKELY/HIGH still requires the
+  explicit negative-evidence gate above.
 
   PEER CONSISTENCY
   Compare ETFs with materially overlapping holdings or the same return driver.
@@ -865,6 +894,8 @@ prompt_etf_judgment: |
     "benchmark_outperformance_outlook": "LIKELY | UNCERTAIN | UNLIKELY",
     "benchmark_outperformance_confidence": "LOW | MEDIUM | HIGH",
     "benchmark_outperformance_basis": "Concise basis using benchmark excess returns plus durable exposure evidence",
+    "benchmark_negative_evidence_scope": "ETF_SPECIFIC | EXPOSURE_SPECIFIC | GENERIC | NONE",
+    "benchmark_negative_evidence": "Concise current negative evidence or null",
     "continuation_strength": "STRONG | ADEQUATE | WEAK",
     "primary_reversal_channel": "TEMPORARY_DRIVER_NORMALIZATION | EXPOSURE_DETERIORATION | CATALYST_EXHAUSTION | VALUATION_RERATING | CONCENTRATION | MOMENTUM_FRAGILITY | NONE",
     "risk_exposure_group": "UPPER_SNAKE_CASE | null",

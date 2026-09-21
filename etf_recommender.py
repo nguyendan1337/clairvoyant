@@ -4193,6 +4193,42 @@ def etf_passes_benchmark_override(candidate, research):
     )
 
 
+def conservative_enum_typo_correction(token, allowed):
+    """Repair only an unambiguous one/two-edit typo in a fixed enum.
+
+    This is intentionally stricter than fuzzy semantic matching: it is used only
+    after exact aliases fail, requires a unique nearest enum, and never changes
+    free-form or risk-event identity fields.
+    """
+    token = str(token or '').strip().upper()
+    if not token or token in allowed:
+        return token
+
+    def edit_distance(left, right):
+        previous = list(range(len(right) + 1))
+        for i, left_char in enumerate(left, start=1):
+            current = [i]
+            for j, right_char in enumerate(right, start=1):
+                current.append(min(
+                    current[-1] + 1,
+                    previous[j] + 1,
+                    previous[j - 1] + (left_char != right_char),
+                ))
+            previous = current
+        return previous[-1]
+
+    ranked = sorted(
+        (edit_distance(token, candidate), candidate)
+        for candidate in allowed
+    )
+    best_distance, best_value = ranked[0]
+    second_distance = ranked[1][0] if len(ranked) > 1 else 99
+    max_distance = 1 if len(token) <= 5 else 2
+    if best_distance <= max_distance and second_distance >= best_distance + 2:
+        return best_value
+    return token
+
+
 def normalize_etf_judgment_patch(symbol, patch, research):
     """Normalize harmless judge enum aliases and validate one ETF without affecting peers."""
     if not isinstance(patch, dict):
@@ -4206,11 +4242,21 @@ def normalize_etf_judgment_patch(symbol, patch, research):
         aliases = aliases or {}
         normalized = aliases.get(token, token)
         if normalized not in allowed:
+            typo_corrected = conservative_enum_typo_correction(
+                normalized, allowed
+            )
+            if typo_corrected in allowed and typo_corrected != normalized:
+                print(
+                    f'Corrected unambiguous ETF judgment enum typo [{symbol}] '
+                    f'{field}: {raw!r} -> {typo_corrected}'
+                )
+                normalized = typo_corrected
+        if normalized not in allowed:
             raise ValueError(
                 f'{symbol} judgment returned invalid {field}={raw!r}; '
                 f'expected one of {sorted(allowed)}.'
             )
-        if token != normalized:
+        if token != normalized and aliases.get(token, token) == normalized:
             print(
                 f'Normalized ETF judgment enum [{symbol}] {field}: '
                 f'{raw!r} -> {normalized}'
@@ -4234,6 +4280,11 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     }
     confidence_aliases = {'MODERATE': 'MEDIUM'}
     concentration_aliases = {'MINIMAL': 'LOW', 'MEDIUM': 'MODERATE', 'ELEVATED': 'HIGH'}
+    negative_scope_aliases = {
+        'ETF': 'ETF_SPECIFIC', 'FUND_SPECIFIC': 'ETF_SPECIFIC',
+        'EXPOSURE': 'EXPOSURE_SPECIFIC', 'MARKET_ONLY': 'GENERIC',
+        'MARKET': 'GENERIC', 'GENERAL': 'GENERIC',
+    }
 
     risk_default = research.get('reversal_risk') or 'LOW'
     exposure_risk = enum_value(
@@ -4263,6 +4314,28 @@ def normalize_etf_judgment_patch(symbol, patch, research):
         'benchmark_outperformance_confidence', 'MEDIUM',
         {'LOW', 'MEDIUM', 'HIGH'}, confidence_aliases,
     )
+    negative_evidence_scope = enum_value(
+        'benchmark_negative_evidence_scope', 'NONE',
+        {'ETF_SPECIFIC', 'EXPOSURE_SPECIFIC', 'GENERIC', 'NONE'},
+        negative_scope_aliases,
+    )
+    negative_evidence = str(
+        patch.get('benchmark_negative_evidence') or ''
+    ).strip() or None
+    if (
+        benchmark_outlook == 'UNLIKELY'
+        and benchmark_confidence == 'HIGH'
+        and (
+            negative_evidence_scope not in {'ETF_SPECIFIC', 'EXPOSURE_SPECIFIC'}
+            or not negative_evidence
+        )
+    ):
+        print(
+            f'Calibrated ETF benchmark confidence [{symbol}]: '
+            'UNLIKELY/HIGH -> UNLIKELY/MEDIUM because explicit ETF/exposure-'
+            'specific negative evidence was not supplied.'
+        )
+        benchmark_confidence = 'MEDIUM'
     holdings_conc = enum_value(
         'holdings_concentration', 'LOW', {'LOW', 'MODERATE', 'HIGH'},
         concentration_aliases,
@@ -4280,6 +4353,8 @@ def normalize_etf_judgment_patch(symbol, patch, research):
         'continuation_strength': continuation,
         'benchmark_outperformance_outlook': benchmark_outlook,
         'benchmark_outperformance_confidence': benchmark_confidence,
+        'benchmark_negative_evidence_scope': negative_evidence_scope,
+        'benchmark_negative_evidence': negative_evidence,
         'holdings_concentration': holdings_conc,
         'construction_concentration': construction_conc,
     })
@@ -4469,7 +4544,7 @@ def judge_etf_research_pool(
         symbol: {
             key: research.get(key) for key in (
                 'reversal_risk', 'continuation_strength',
-                'benchmark_outperformance_outlook', 'benchmark_outperformance_confidence', 'risk_exposure_group'
+                'benchmark_outperformance_outlook', 'benchmark_outperformance_confidence', 'benchmark_negative_evidence_scope', 'risk_exposure_group'
             )
         }
         for symbol, research in judged.items()
@@ -4825,6 +4900,12 @@ def judge_etf_research_pool(
                 'benchmark_outperformance_outlook': benchmark_outlook,
                 'benchmark_outperformance_confidence': benchmark_confidence,
                 'benchmark_outperformance_basis': patch.get('benchmark_outperformance_basis'),
+                'benchmark_negative_evidence_scope': patch.get(
+                    'benchmark_negative_evidence_scope'
+                ),
+                'benchmark_negative_evidence': patch.get(
+                    'benchmark_negative_evidence'
+                ),
                 'continuation_strength': continuation,
                 'primary_reversal_channel': patch.get('primary_reversal_channel'),
                 'classification_change_reason': patch.get('classification_change_reason'),
@@ -4887,7 +4968,7 @@ def judge_etf_research_pool(
             prior_peer_patches[symbol] = {
                 key: research.get(key) for key in (
                     'reversal_risk','continuation_strength',
-                    'benchmark_outperformance_outlook','benchmark_outperformance_confidence','risk_exposure_group'
+                    'benchmark_outperformance_outlook','benchmark_outperformance_confidence','benchmark_negative_evidence_scope','risk_exposure_group'
                 )
             }
         print(
@@ -6520,6 +6601,11 @@ while (
         + json.dumps(retry_payload, ensure_ascii=False)
         + '\n\nPRIOR_GROUNDING_SOURCE_URLS:\n'
         + json.dumps(prior_grounding_urls, ensure_ascii=False)
+        + '\n\nPROBABILITY_BASIS_ENUM_REMINDER:\n'
+        + 'For probability_basis use exactly one of: OFFICIAL_GUIDANCE, '
+          'REALIZED_OPERATING_DATA, CONTRACT_OR_POLICY_TIMELINE, '
+          'SUPPLY_DEMAND_DATA, HOLDINGS_OR_EARNINGS_DATA, '
+          'VALUATION_OR_FLOW_DATA, MULTI_SOURCE_DIRECTIONAL_EVIDENCE, NONE.'
     )
     print('\n...calling Gemini for ETF batch: '
           + ', '.join(str(candidate['Symbol']) for candidate in batch) + '...\n')

@@ -28,6 +28,7 @@ from yfinance import ETFQuery
 
 YF_CACHE_FILE = 'caches/etf_yf_cache.json'
 YF_CACHE_EXPIRY_DAYS = 1
+FUND_CACHE_EXPIRY_DAYS = 3
 TOP_QVM_CACHE_FILE = 'caches/top_qvm_etfs_cache.pkl'
 TOP_QVM_CACHE_EXPIRY_HOURS = 6
 TOP_QVM_CACHE_VERSION = 14
@@ -76,8 +77,20 @@ sys.stderr = TeeStream(sys.stderr, _etf_run_log)
 classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
+classification_quota_exhausted = False
 summary_35_api_attempts_used = 0
+classification_validation_rounds = {}
+classification_validation_diagnostics = []
+classification_scheduling_diagnostics = []
 runtime_reconciliation_diagnostics = []
+cache_diagnostics = {
+    'yfinance_metadata': {'status': 'not_run'},
+    'fund_data': {'status': 'not_run'},
+}
+api_attempt_diagnostics = []
+stage_diagnostics = []
+active_stage = 'startup'
+active_stage_started = time.perf_counter()
 
 
 class TotalRuntimeTimeout(BaseException):
@@ -154,7 +167,7 @@ class GeminiRequestBudget:
         )
 
     def can_reserve(self, category):
-        if self.total_used >= self.total:
+        if self.total_used >= self.total or self.api_attempts >= self.max_api_attempts:
             return False
         if category == 'research':
             required_reserve = 0 if self.release_summary_for_research else self.reserved_summary
@@ -424,12 +437,23 @@ def call_gemini_json(
     allow_partial=False,
 ):
     last_error = None
+    api_category = 'market' if category == 'context' else category
+    if api_attempt_budget.remaining(model, api_category) <= 0:
+        raise GeminiApiAttemptBudgetExhausted(
+            f'No {model} {api_category} API attempts remain before {stage}.'
+        )
     budget.reserve(category)
     logical_request = budget.total_used
     for attempt in range(1, int(max_attempts) + 1):
-        api_category = 'market' if category == 'context' else category
         api_attempt_budget.reserve(model, api_category, stage)
         budget.record_api_attempt(category)
+        attempt_started = time.perf_counter()
+        attempt_diag = {
+            'stage': stage, 'model': model, 'category': category,
+            'logical_call': logical_request, 'api_attempt': budget.api_attempts,
+            'success': False,
+        }
+        api_attempt_diagnostics.append(attempt_diag)
         print(
             f'Gemini logical request {logical_request}/{budget.total}: {stage} '
             f'({model}, API attempt {attempt}/{max_attempts}; '
@@ -462,12 +486,16 @@ def call_gemini_json(
                 data = {'results': partial}
             metadata['api_attempts_used'] = attempt
             metadata['logical_request_number'] = logical_request
+            attempt_diag['success'] = True
             return data, model, metadata
         except Exception as exc:
             last_error = exc
+            attempt_diag['error'] = str(exc)
             print(f'Gemini {stage} attempt {attempt}/{max_attempts} failed: {exc}')
             if (
                 is_daily_quota_error(exc)
+                or budget.api_attempts >= budget.max_api_attempts
+                or api_attempt_budget.remaining(model, api_category) <= 0
                 or attempt >= int(max_attempts)
                 or not is_transient_gemini_error(exc)
             ):
@@ -476,6 +504,8 @@ def call_gemini_json(
             delay = max(1.0, min(float(max_delay), base_delay * random.uniform(0.75, 1.5)))
             print(f'Retrying transient Gemini failure in {delay:.1f}s...')
             time.sleep(delay)
+        finally:
+            attempt_diag['elapsed_seconds'] = round(time.perf_counter() - attempt_started, 3)
     raise RuntimeError(f'Gemini {stage} failed: {last_error}')
 
 
@@ -501,8 +531,10 @@ def save_json_object_atomic(path, value):
         with open(temporary, 'w', encoding='utf-8') as handle:
             json.dump(value, handle, indent=2, ensure_ascii=False)
         os.replace(temporary, path)
+        return True
     except Exception as exc:
         print(f'Could not save {path}: {exc}')
+        return False
 
 
 def parse_utc_timestamp(value):
@@ -520,7 +552,13 @@ def cache_entry_is_fresh(entry, ttl_hours):
         parse_utc_timestamp(entry.get('timestamp') or entry.get('created_at'))
         if isinstance(entry, dict) else None
     )
-    return bool(timestamp and datetime.now(UTC) - timestamp < timedelta(hours=ttl_hours))
+    return bool(timestamp and timedelta(0) <= datetime.now(UTC) - timestamp < timedelta(hours=ttl_hours))
+
+
+def cache_age_hours(value):
+    timestamp = parse_utc_timestamp(value)
+    return ((datetime.now(UTC) - timestamp).total_seconds() / 3600
+            if timestamp else None)
 
 
 def stable_json_hash(value):
@@ -529,6 +567,109 @@ def stable_json_hash(value):
         default=str,
     )
     return hashlib.sha256(encoded.encode('utf-8')).hexdigest()
+
+
+RUN_ID = (
+    f"{os.environ['GITHUB_RUN_ID']}-{os.getenv('GITHUB_RUN_ATTEMPT', '1')}"
+    if os.getenv('GITHUB_RUN_ID') else datetime.now(UTC).strftime('%Y%m%dT%H%M%S.%fZ')
+)
+RUN_PROVENANCE = {
+    'run_id': RUN_ID, 'github_sha': os.getenv('GITHUB_SHA'),
+    'github_run_attempt': os.getenv('GITHUB_RUN_ATTEMPT'),
+}
+
+
+def write_run_checkpoint(status='RUNNING', error=None):
+    """Best-effort diagnostics must never replace an application exception."""
+    try:
+        state = globals()
+        budget = state.get('request_budget')
+        snapshot = {
+            'schema_version': 2, 'run_id': RUN_ID,
+            'updated_at': datetime.now(UTC).isoformat(), 'status': status,
+            'active_stage': active_stage,
+            'elapsed_seconds': round(time.perf_counter() - state.get('start_time', active_stage_started), 3),
+            'active_stage_seconds': round(time.perf_counter() - active_stage_started, 3),
+            'provenance': RUN_PROVENANCE, 'stages': stage_diagnostics,
+            'cache': cache_diagnostics,
+            'budget_25': dict(vars(budget)) if budget else {},
+            'per_model_api_attempts': (
+                state['api_attempt_budget'].snapshot()
+                if state.get('api_attempt_budget') else {}
+            ),
+            'classification_api_attempts': classification_api_attempts_used,
+            'classification_validation': classification_validation_diagnostics,
+            'classification_calls': classification_call_diagnostics,
+            'api_attempts': api_attempt_diagnostics,
+            'batches': state.get('batch_research_diagnostics', []),
+            'validated_symbols': sorted(state.get('research_by_symbol', {})),
+            'selected_symbols': [str(x['candidate']['Symbol']) for x in state.get('selected', [])],
+            'error': error,
+        }
+        save_json_object_atomic(RUN_REPORTS_DIR / 'etf_run_checkpoint.json', snapshot)
+        if status == 'FAILED':
+            save_json_object_atomic(RUN_REPORTS_DIR / 'etf_run_failure.json', snapshot)
+    except Exception as exc:
+        print(f'Warning: ETF checkpoint unavailable: {exc}')
+
+
+def set_run_stage(stage):
+    global active_stage, active_stage_started
+    now = time.perf_counter()
+    stage_diagnostics.append({
+        'stage': active_stage, 'elapsed_seconds': round(now - active_stage_started, 3),
+    })
+    active_stage, active_stage_started = stage, now
+    print(f'ETF STAGE {stage} run_id={RUN_ID}')
+    write_run_checkpoint()
+
+
+def build_coverage_diagnostics(candidates, research, requests, attempts, selected_symbols, actionable_symbols, attempt_limit):
+    """Separate work never attempted from work attempted but still unusable."""
+    selected_symbols, actionable_symbols = set(selected_symbols), set(actionable_symbols)
+    counts, lifecycle = {}, {}
+    for candidate in candidates:
+        symbol = str(candidate['Symbol']).upper()
+        result = research.get(symbol, {})
+        if symbol in selected_symbols:
+            state = 'SELECTED'
+        elif result.get('judgment_model'):
+            state = 'JUDGED_NOT_SELECTED'
+        elif result:
+            state = 'VALIDATED_UNJUDGED'
+        elif attempts.get(symbol, 0) >= attempt_limit:
+            state = 'VALIDATION_EXHAUSTED'
+        elif requests.get(symbol, 0):
+            state = 'REQUESTED_UNVALIDATED'
+        else:
+            state = 'NEVER_REQUESTED'
+        counts[state] = counts.get(state, 0) + 1
+        lifecycle[symbol] = {
+            'state': state, 'requests': requests.get(symbol, 0),
+            'charged_research_attempts': attempts.get(symbol, 0),
+            'actionable_for_research': symbol in actionable_symbols,
+            'judgment_validation_rounds': classification_validation_rounds.get(symbol, 0),
+            'judgment_error': result.get('judgment_validation_error'),
+        }
+    return {
+        'counts': counts, 'candidates': lifecycle,
+        'actionable_never_requested': [s for s, v in lifecycle.items()
+                                       if v['actionable_for_research'] and v['state'] == 'NEVER_REQUESTED'],
+        'actionable_retryable': [s for s, v in lifecycle.items()
+                                if v['actionable_for_research'] and v['state'] == 'REQUESTED_UNVALIDATED'],
+        'validated_unjudged': [s for s, v in lifecycle.items() if v['state'] == 'VALIDATED_UNJUDGED'],
+    }
+
+
+_original_exception_hook = sys.excepthook
+
+
+def report_uncaught_failure(exc_type, exc_value, traceback):
+    write_run_checkpoint('FAILED', f'{exc_type.__name__}: {exc_value}')
+    _original_exception_hook(exc_type, exc_value, traceback)
+
+
+sys.excepthook = report_uncaught_failure
 
 
 def update_html_page(
@@ -576,8 +717,11 @@ def update_html_page(
     )
     html_output = html_output.replace('<!--FULL_DF_TABLE_HERE-->', df_html_table)
     html_output = html_output.replace('<!--MODEL_USED_HERE-->', model_used)
-    with open(display_page, 'w', encoding='utf-8') as f:
+    # Leave the prior complete page untouched if rendering/writing fails.
+    temporary = f'{display_page}.tmp'
+    with open(temporary, 'w', encoding='utf-8') as f:
         f.write(html_output)
+    os.replace(temporary, display_page)
 
 
 def extract_number_with_suffix(value):
@@ -637,13 +781,15 @@ def load_json_cache(path, expiry_days):
         print(f'Could not load {path}: {exc}')
         return {}
     fresh_cache = {}
+    if not isinstance(cache, dict):
+        return fresh_cache
     now = datetime.now(UTC)
     for key, entry in cache.items():
         try:
             timestamp = datetime.fromisoformat(entry['timestamp'])
             if timestamp.tzinfo is None:
                 timestamp = timestamp.replace(tzinfo=UTC)
-            if now - timestamp < timedelta(days=expiry_days):
+            if timedelta(0) <= now - timestamp < timedelta(days=expiry_days):
                 fresh_cache[key] = entry
         except Exception:
             continue
@@ -651,11 +797,7 @@ def load_json_cache(path, expiry_days):
 
 
 def save_json_cache(path, cache):
-    try:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(cache, f)
-    except Exception as exc:
-        print(f'Could not save {path}: {exc}')
+    return save_json_object_atomic(path, cache)
 
 
 def load_top_qvm_cache(requested_top_n, requested_research_pool_limit):
@@ -897,13 +1039,18 @@ def json_safe_scalar(value):
 def append_structured_fund_data(df, cache_file=YF_CACHE_FILE, delay=0.2):
     """Add best-effort holdings/exposure data for the final research universe."""
     df = df.copy()
-    cache = load_json_cache(cache_file, YF_CACHE_EXPIRY_DAYS)
+    cache = load_json_cache(cache_file, max(YF_CACHE_EXPIRY_DAYS, FUND_CACHE_EXPIRY_DAYS))
     fund_data_by_symbol = {}
+    fund_cache_stats = {'status': 'completed', 'hits': 0, 'live_requests': 0, 'incomplete_symbols': []}
     print(f'Fetching structured fund data for {len(df)} ETF research candidates...')
     for symbol in tqdm(df['Symbol'].astype(str).str.upper().tolist()):
         entry = cache.get(symbol, {})
         fund_data = entry.get('fund_data')
-        if fund_data is None:
+        fund_fresh = cache_entry_is_fresh(
+            {'timestamp': entry.get('fund_timestamp')}, FUND_CACHE_EXPIRY_DAYS * 24
+        )
+        if not fund_data or not fund_fresh:
+            fund_cache_stats['live_requests'] += 1
             fund_data = {}
             try:
                 funds = yf.Ticker(symbol).funds_data
@@ -924,10 +1071,18 @@ def append_structured_fund_data(df, cache_file=YF_CACHE_FILE, delay=0.2):
             entry['fund_data'] = fund_data
             entry.setdefault('info', {})
             entry['timestamp'] = datetime.now(UTC).isoformat()
+            if any(fund_data.values()):
+                entry['fund_timestamp'] = entry['timestamp']
+            else:
+                fund_cache_stats['incomplete_symbols'].append(symbol)
             cache[symbol] = entry
             time.sleep(delay + random.uniform(0, 0.15))
+        else:
+            fund_cache_stats['hits'] += 1
         fund_data_by_symbol[symbol] = fund_data or {}
-    save_json_cache(cache_file, cache)
+    fund_cache_stats['save_succeeded'] = save_json_cache(cache_file, cache)
+    cache_diagnostics['fund_data'] = fund_cache_stats
+    print('ETF FUND CACHE ' + json.dumps(fund_cache_stats))
     for column in ('FundOverview', 'AssetClasses', 'SectorWeightings', 'TopHoldings'):
         df[column] = df['Symbol'].map(
             lambda symbol: fund_data_by_symbol.get(str(symbol).upper(), {}).get(column)
@@ -1227,7 +1382,7 @@ def append_etf_yfinance_data(
         dict.fromkeys(list(priority_symbols) + ranked_for_info)
     )
     print(
-        'Fetching yfinance metadata for '
+        'Resolving yfinance metadata (cache first) for '
         + (
             f'top {len(selected_for_info)} momentum candidates...'
             if info_limit > 0
@@ -1272,23 +1427,38 @@ def append_etf_yfinance_data(
         'averageVolume10days', 'threeYearAverageReturn',
         'fiveYearAverageReturn', 'trailingPE', 'priceToBook',
     )
-    for symbol in tqdm(selected_for_info):
+    metadata_stats = {
+        'status': 'completed',
+        'eligible': len(selected_for_info), 'hits': 0, 'live_requests': 0,
+        'failed_symbols': [], 'incomplete_symbols': [],
+        'ttl_hours': YF_CACHE_EXPIRY_DAYS * 24,
+    }
+    for symbol in tqdm(selected_for_info, desc='ETF metadata (cache + live)'):
         try:
             entry = cache.get(symbol) if isinstance(cache.get(symbol), dict) else {}
             info = entry.get('info') if isinstance(entry.get('info'), dict) else {}
             info_is_usable = (
                 any(info.get(field) is not None for field in identity_fields)
                 and any(info.get(field) is not None for field in scoring_fields)
+                and cache_entry_is_fresh(
+                    {'timestamp': entry.get('info_timestamp')}, YF_CACHE_EXPIRY_DAYS * 24
+                )
             )
             if not info_is_usable:
+                metadata_stats['live_requests'] += 1
                 ticker = yf.Ticker(symbol)
                 raw_info = ticker.info or {}
                 info = {field: raw_info.get(field) for field in info_fields}
+                if not (any(info.get(field) is not None for field in identity_fields)
+                        and any(info.get(field) is not None for field in scoring_fields)):
+                    metadata_stats['incomplete_symbols'].append(symbol)
                 entry['info'] = info
                 entry['info_timestamp'] = datetime.now(UTC).isoformat()
                 entry['timestamp'] = entry['info_timestamp']
                 cache[symbol] = entry
                 time.sleep(delay + random.uniform(0, 0.3))
+            else:
+                metadata_stats['hits'] += 1
             data_map[symbol].update(
                 {
                     'Name': info.get('longName') or info.get('shortName'),
@@ -1323,8 +1493,11 @@ def append_etf_yfinance_data(
                 }
             )
         except Exception as exc:
+            metadata_stats['failed_symbols'].append(symbol)
             print(f'Error retrieving yfinance metadata for {symbol}: {exc}')
-    save_json_cache(YF_CACHE_FILE, cache)
+    metadata_stats['save_succeeded'] = save_json_cache(YF_CACHE_FILE, cache)
+    cache_diagnostics['yfinance_metadata'] = metadata_stats
+    print('ETF METADATA CACHE ' + json.dumps(metadata_stats))
     columns = [
         'Name',
         'Category',
@@ -1897,6 +2070,50 @@ MARKET_CONTEXT_SCHEMA_FIELDS = (
 )
 
 
+def market_cache_contract(prompt_template, model):
+    schema_hash = stable_json_hash(MARKET_CONTEXT_SCHEMA_FIELDS)
+    contract_hash = stable_json_hash({
+        'contract': 'shared_stock_etf_market_context_v1',
+        'model': model, 'google_search': True,
+        'prompt_template': prompt_template.strip(), 'schema_hash': schema_hash,
+    })
+    return contract_hash, schema_hash
+
+
+def read_shared_market_cache(path, prompt_template, model, ttl_hours):
+    contract_hash, schema_hash = market_cache_contract(prompt_template, model)
+    cache = load_json_object(path)
+    entries = cache.get('entries')
+    if not isinstance(entries, dict):
+        entries = {}
+    cache['entries'] = entries
+    entry = entries.get(contract_hash)
+    diag = {
+        'path': str(Path(path).resolve()), 'contract_hash': contract_hash,
+        'schema_hash': schema_hash, 'entries': len(entries), 'hit': False,
+        'age_hours': None, 'ttl_hours': ttl_hours, 'reason': 'contract_not_found',
+    }
+    context = None
+    if not Path(path).exists():
+        diag['reason'] = 'file_missing'
+    elif not entries:
+        diag['reason'] = 'legacy_empty_or_malformed_cache'
+    if isinstance(entry, dict):
+        diag['age_hours'] = cache_age_hours(entry.get('created_at') or entry.get('timestamp'))
+        if entry.get('model') != model:
+            diag['reason'] = 'model_mismatch'
+        elif not cache_entry_is_fresh(entry, ttl_hours):
+            diag['reason'] = 'expired_or_invalid_timestamp'
+        else:
+            try:
+                context = validate_current_market_context(entry.get('data') or entry.get('market_context'))
+                diag.update(hit=True, reason='validated_shared_contract')
+            except Exception as exc:
+                diag['reason'] = 'validation_failed'
+                diag['error'] = str(exc)
+    return cache, context, diag
+
+
 def validate_market_context(data):
     if not isinstance(data, dict):
         raise ValueError('Market context must be a JSON object.')
@@ -1964,7 +2181,9 @@ def validate_market_context(data):
 
 def validate_current_market_context(data):
     """Validate the exact shared stock/ETF market-context contract."""
-    data = validate_market_context(data)
+    # Validate the original contract before normalization can hide omissions,
+    # replace malformed fields, or discard source publication dates.
+    validate_market_context(data)
     required = set(MARKET_CONTEXT_SCHEMA_FIELDS)
     missing = required.difference(data)
     if missing:
@@ -1973,8 +2192,10 @@ def validate_current_market_context(data):
         )
     if data.get('market_status') not in {'STRONG', 'MIXED', 'WEAK'}:
         raise ValueError('Market context has an invalid market_status.')
+    if not isinstance(data.get('sector_context'), dict):
+        raise ValueError('Market context requires sector_context object.')
     normalized_context = {
-        str(key).strip().casefold(): str(value).strip()
+        str(key).strip().casefold(): str(value or '').strip()
         for key, value in data.get('sector_context', {}).items()
     }
     missing_sectors = [
@@ -1990,17 +2211,20 @@ def validate_current_market_context(data):
         raise ValueError(
             'Market context requires factor_and_theme_context object.'
         )
-    if len({source['url'] for source in data['sources']}) < 6:
-        raise ValueError(
-            'Market context requires at least 6 distinct source URLs.'
-        )
+    validate_sources(data['sources'], 'Shared market context', minimum=6, maximum=10)
+    if not isinstance(data['sources'], list) or any(
+        not isinstance(source, dict) or not str(source.get('title') or '').strip()
+        or not str(source.get('url') or '').strip().startswith(('https://', 'http://'))
+        for source in data['sources']
+    ):
+        raise ValueError('Shared market sources require explicit title and URL fields.')
     if str(data.get('market_summary') or '').strip() != str(
         data.get('market_intro') or ''
     ).strip():
         raise ValueError(
             'market_summary and market_intro must be identical.'
         )
-    return data
+    return dict(data)
 
 
 def query_matches_etf(query, candidate):
@@ -2532,6 +2756,7 @@ def _risk_event_structural_compatibility(result, raw_event_id, event):
 
 def _semantic_risk_event_scores(result, raw_event_id, catalog):
     """Rank current market events by identity and economic transmission."""
+    global _fastembed_model, _fastembed_unavailable_reason
     model = _get_fastembed_model()
     if model is None:
         return None
@@ -2607,6 +2832,9 @@ def _semantic_risk_event_scores(result, raw_event_id, catalog):
         )
         return scored
     except Exception as exc:
+        _fastembed_model = None
+        _fastembed_unavailable_reason = f'{type(exc).__name__}: {exc}'
+        _risk_event_embedding_cache.clear()
         print(
             'FastEmbed ETF risk-event scoring failed; using deterministic '
             f'lexical fallback: {type(exc).__name__}: {exc}'
@@ -3408,6 +3636,7 @@ def enqueue_consistency_repairs(
         ]
         research_cache['deferred_entries'][cache_key] = {
             'timestamp': datetime.now(UTC).isoformat(),
+            'evidence_timestamp': research_cache['entries'].get(cache_key, {}).get('timestamp'),
             'error': conflict['message'],
             'draft': prior,
             'peer_classifications': conflict.get('peer_classifications', []),
@@ -3730,6 +3959,68 @@ def print_replacement_diagnostics(records):
         )
 
 
+def assemble_research_batch(
+    pending, fresh_candidates, limit, fresh_attempts, repair_attempts,
+    fresh_limit, repair_limit, transport_fraction,
+):
+    """Prune before sizing, fill spare slots, and never send a symbol twice.
+
+    Fresh candidates are already ranked/filtered by portfolio policy. This
+    helper only controls work scheduling, not eligibility or selection.
+    Transport retries get a soft cap when alternative work exists.
+    """
+    limit = max(0, int(limit))
+    seen, exhausted, duplicates = set(), [], []
+    ready = []
+    for item in pending:
+        symbol = str(item['candidate']['Symbol']).upper()
+        attempts = fresh_attempts if item.get('needs_research') else repair_attempts
+        ceiling = fresh_limit if item.get('needs_research') else repair_limit
+        if attempts.get(symbol, 0) >= ceiling:
+            exhausted.append(symbol)
+            continue
+        if symbol in seen:
+            duplicates.append(symbol)
+            continue
+        seen.add(symbol)
+        ready.append(item)
+    fresh = []
+    for candidate in fresh_candidates:
+        symbol = str(candidate['Symbol']).upper()
+        if symbol in seen or fresh_attempts.get(symbol, 0) >= fresh_limit:
+            continue
+        seen.add(symbol)
+        fresh.append({'candidate': candidate, 'needs_research': True, 'targeted_backfill': True})
+    # Repairs retain priority. Preserve rank/order within each class.
+    ready.sort(key=lambda item: bool(item.get('needs_research')))
+    transport_cap = max(1, int(round(limit * transport_fraction)))
+    batch_items, remaining, transport_deferred = [], [], []
+    transport_used = 0
+    for item in ready:
+        if len(batch_items) >= limit:
+            remaining.append(item)
+        elif item.get('transport_failure') and fresh and transport_used >= transport_cap:
+            transport_deferred.append(item)
+        else:
+            batch_items.append(item)
+            transport_used += int(bool(item.get('transport_failure')))
+    fresh_added = fresh[:max(0, limit - len(batch_items))]
+    batch_items.extend(fresh_added)
+    # The transport cap must not leave otherwise usable capacity idle.
+    take = max(0, limit - len(batch_items))
+    batch_items.extend(transport_deferred[:take])
+    remaining = transport_deferred[take:] + remaining
+    return batch_items, remaining, {
+        'planned_capacity': limit, 'actual_size': len(batch_items),
+        'unused_capacity': max(0, limit - len(batch_items)),
+        'exhausted_removed': sorted(set(exhausted)),
+        'duplicates_removed': sorted(set(duplicates)),
+        'available_fresh_candidates': len(fresh),
+        'fresh_added': [str(x['candidate']['Symbol']).upper() for x in fresh_added],
+        'transport_deferred': [str(x['candidate']['Symbol']).upper() for x in transport_deferred[take:]],
+    }
+
+
 def queue_portfolio_challengers(candidate_records, research_by_symbol, selected, pending_retries, queued_symbols):
     """Queue the strongest unresearched ETFs that can plausibly displace an incumbent."""
     if not challenger_research_enabled or len(selected) < target_selected_etfs:
@@ -4022,6 +4313,9 @@ def judge_etf_research_pool(
 ):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
+    global classification_quota_exhausted
+    if classification_quota_exhausted:
+        return research_by_symbol
     candidate_by_symbol = {
         str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
     }
@@ -4032,10 +4326,19 @@ def judge_etf_research_pool(
             str(candidate['Symbol']).upper() in research_by_symbol
             and not research_by_symbol[str(candidate['Symbol']).upper()].get('judgment_model')
             and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
+            and classification_validation_rounds.get(str(candidate['Symbol']).upper(), 0)
+            < max_judgment_validation_rounds_per_etf
         )
     ]
     if not symbols:
         return research_by_symbol
+    # Stable sort preserves rank within a round, across scheduler invocations.
+    symbols.sort(key=lambda symbol: classification_validation_rounds.get(symbol, 0))
+    classification_scheduling_diagnostics.append({
+        'pending': len(symbols), 'force': force,
+        'target': classification_batch_target,
+        'action': 'classify' if force or len(symbols) >= classification_batch_target else 'accumulate',
+    })
     if not force and len(symbols) < classification_batch_target:
         print(
             f'Accumulating ETF judgment candidates: {len(symbols)}/'
@@ -4067,6 +4370,9 @@ def judge_etf_research_pool(
             break
         if classification_api_attempts_used >= max_classification_api_attempts_per_run:
             print('ETF classification API-attempt budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
+            break
+        if api_attempt_budget.remaining(classification_model, 'classification') <= 0:
+            print('ETF model-family classification budget exhausted; remaining ETFs stay unjudged.')
             break
         classification_logical_calls_used += 1
         compact = []
@@ -4126,6 +4432,7 @@ def judge_etf_research_pool(
             for attempt in range(1, attempts + 1):
                 if classification_api_attempts_used >= max_classification_api_attempts_per_run:
                     break
+                attempt_started = time.perf_counter()
                 stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
                 try:
                     api_attempt_budget.reserve(
@@ -4170,9 +4477,16 @@ def judge_etf_research_pool(
                     if not isinstance(patches, list):
                         raise ValueError('ETF judgment response lacks a usable results/classifications list.')
                     patch_by_symbol = {
-                        str(item.get('symbol') or '').upper(): item
+                        str(item.get('symbol') or '').strip().upper(): item
                         for item in patches if isinstance(item, dict)
+                        and str(item.get('symbol') or '').strip().upper() in batch_symbols
                     }
+                    # Ambiguous duplicate patches are isolated, not last-write-wins.
+                    returned_symbols = [str(p.get('symbol') or '').strip().upper()
+                                        for p in patches if isinstance(p, dict)]
+                    duplicates = {s for s in batch_symbols if returned_symbols.count(s) > 1}
+                    for symbol in duplicates:
+                        patch_by_symbol.pop(symbol, None)
                     missing = [symbol for symbol in batch_symbols if symbol not in patch_by_symbol]
                     if missing:
                         print(
@@ -4188,40 +4502,57 @@ def judge_etf_research_pool(
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
                         'success': True, 'fallback': model_index > 0,
+                        'returned_symbols': sorted(patch_by_symbol),
+                        'missing_symbols': missing, 'duplicate_symbols': sorted(duplicates),
+                        'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'metadata': metadata,
                     })
                     patches = patch_by_symbol
                     break
                 except Exception as exc:
+                    patches = None
                     last_error = exc
                     classification_call_diagnostics.append({
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
                         'success': False, 'fallback': model_index > 0,
+                        'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'error': str(exc),
                     })
                     print(f'Warning: {stage} failed: {exc}')
                     # A valid JSON response with the wrong schema is structural, not
                     # transient. Repeating the same model/prompt usually reproduces it,
                     # so move directly to the fallback model instead of burning budget.
-                    if isinstance(exc, ValueError):
+                    if is_daily_quota_error(exc):
+                        classification_quota_exhausted = True
+                        break
+                    if isinstance(exc, ValueError) or not is_transient_gemini_error(exc):
                         break
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
-            if patches is not None:
+            if patches is not None or classification_quota_exhausted:
                 break
         if patches is None:
             print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
-            continue
+            if classification_quota_exhausted:
+                break
+            # A wholly malformed response must not starve untouched peers.
+            # Treat the batch as missing patches and apply the same bounded
+            # validation rounds used for partial responses.
+            patches = {}
         valid_patch_count = 0
         invalid_patch_symbols = []
         for symbol in batch_symbols:
+            classification_validation_rounds[symbol] = classification_validation_rounds.get(symbol, 0) + 1
             patch = patches.get(symbol)
             if patch is None:
                 invalid_patch_symbols.append(symbol)
                 research = dict(judged[symbol])
-                research['judgment_validation_error'] = 'Gemini omitted the ETF judgment patch.'
+                research['judgment_validation_error'] = (
+                    f'Judgment response unavailable: {last_error}'
+                    if used_model is None else 'Gemini omitted the ETF judgment patch.'
+                )
                 judged[symbol] = research
                 continue
             research = dict(judged[symbol])
@@ -4344,7 +4675,18 @@ def judge_etf_research_pool(
                 'ETF judgment catch-up required for: '
                 + ', '.join(invalid_patch_symbols)
             )
-        symbols = symbols[len(batch_symbols):]
+        retryable = [s for s in invalid_patch_symbols
+                     if classification_validation_rounds[s] < max_judgment_validation_rounds_per_etf]
+        classification_validation_diagnostics.append({
+            'logical_call': classification_logical_calls_used,
+            'requested': list(batch_symbols), 'validated_count': valid_patch_count,
+            'invalid_or_missing_symbols': invalid_patch_symbols,
+            'retryable_symbols': retryable,
+            'exhausted_symbols': sorted(set(invalid_patch_symbols) - set(retryable)),
+        })
+        write_run_checkpoint()
+        # Classify untouched peers before retrying malformed/omitted patches.
+        symbols = symbols[len(batch_symbols):] + retryable
         start += len(batch_symbols)
         if not force and len(symbols) < classification_batch_target:
             break
@@ -4906,6 +5248,8 @@ signal.alarm(TOTAL_RUNTIME_TIMEOUT_SECONDS)
 config_path = SCRIPT_DIR / 'etf_config.yml'
 with config_path.open('r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
+YF_CACHE_EXPIRY_DAYS = max(1, int(config.get('etf_yf_cache_expiry_days', 7)))
+FUND_CACHE_EXPIRY_DAYS = max(1, int(config.get('etf_fund_cache_expiry_days', 3)))
 required_prompt_keys = {
     'prompt_market_context', 'prompt_etf_batch', 'prompt_etf_judgment',
     'prompt_html_summary'
@@ -4928,9 +5272,13 @@ initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
 classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
-classification_fallback_model = str(config.get('classification_fallback_model', model_primary))
+classification_fallback_model = str(config.get('classification_fallback_model', classification_model))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
+if any('3.5' not in model for model in (classification_model, classification_fallback_model, summary_model)):
+    raise ValueError('Classification and primary summary models must use the separately budgeted Gemini 3.5 family.')
+if any('2.5' not in model for model in (model_primary, model_fallback, summary_fallback_model)):
+    raise ValueError('Research/context and summary fallback models must use the separately budgeted Gemini 2.5 family.')
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
 classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
 classification_attempts = max(1, int(config.get('classification_attempts', 2)))
@@ -4965,6 +5313,7 @@ if (
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
 classification_min_intermediate_batch = max(1, int(config.get('classification_min_intermediate_batch', 15)))
+max_judgment_validation_rounds_per_etf = max(1, int(config.get('max_judgment_validation_rounds_per_etf', 2)))
 thinking_budget = config.get('thinking_budget', 12288)
 summary_thinking_budget = config.get('summary_thinking_budget', 4096)
 gemini_max_output_tokens = config.get('gemini_max_output_tokens', 49152)
@@ -5078,7 +5427,7 @@ market_context_cache_file = config.get(
     'market_context_cache_file',
     'caches/gemini_shared_market_context_cache.json',
 )
-research_cache_hours = config.get('gemini_research_cache_hours', 12)
+research_cache_hours = config.get('gemini_research_cache_hours', 30)
 market_context_cache_hours = config.get('market_context_cache_hours', 12)
 cache_version = config.get('cache_version', 1)
 research_cache_version = config.get(
@@ -5086,6 +5435,11 @@ research_cache_version = config.get(
 )
 run_report_file = config.get('run_diagnostics_file', 'run_reports/etf_run_report.json')
 previous_diagnostics = load_json_object(run_report_file)
+RUN_PROVENANCE.update({
+    'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    'config_sha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
+})
+set_run_stage('universe_and_quantitative_data')
 print(f'Run report: {Path(run_report_file).resolve()}')
 print(f'Run log: {ETF_RUN_LOG_FILE.resolve()}')
 benchmark_etfs = [
@@ -5103,6 +5457,10 @@ research_pool_limit = min(
 qvm_weights = config.get('qvm_weights', {'Quality': 0.35, 'Value': 0.10, 'Momentum': 0.55})
 min_quality = config.get('min_quality', 35)
 top_etfs = load_top_qvm_cache(top_n, research_pool_limit)
+cache_diagnostics['top_qvm'] = {
+    'hit': top_etfs is not None, 'path': TOP_QVM_CACHE_FILE,
+    'ttl_hours': TOP_QVM_CACHE_EXPIRY_HOURS,
+}
 if top_etfs is None:
     seed_histories = download_price_history(benchmark_etfs, period='13mo')
     seed_benchmark_metrics = get_benchmark_data(seed_histories, benchmark_etfs)
@@ -5335,7 +5693,7 @@ if benchmark_qvm_values:
 gemini_columns = [
     col
     for col in [
-        'Role', 'Symbol', 'Name', 'Category', 'FundFamily', 'QVMScore',
+        'Role', 'Symbol', 'Name', 'Category', 'LegalType', 'FundFamily', 'QVMScore',
         'ResearchAdmission',
         'QualityScore', 'ValueScore', 'MomentumScore',
         'BenchmarkRelativeScore', 'AUM', 'ExpenseRatio', 'AverageVolume',
@@ -5393,122 +5751,58 @@ call_diagnostics = []
 batch_research_diagnostics = []
 models_used = []
 
-# Use the stock recommender's exact content-addressed shared market contract.
-# The prompt template and schema hash intentionally exclude CURRENT_DATE_UTC so
-# both daily jobs resolve the same fresh entry within the configured TTL.
+# The stock and ETF runs share the exact prompt/schema/model contract.
+# The current date is supplied to Gemini but is not part of the cache key.
+set_run_stage('market_context')
 market_prompt_template = config['prompt_market_context'].strip()
-market_schema_hash = stable_json_hash(MARKET_CONTEXT_SCHEMA_FIELDS)
-market_contract_hash = stable_json_hash({
-    'contract': 'shared_stock_etf_market_context_v1',
-    'model': model_primary,
-    'google_search': True,
-    'prompt_template': market_prompt_template,
-    'schema_hash': market_schema_hash,
-})
-market_prompt = (
-    market_prompt_template
-    + f'\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n'
+market_cache, market_context, market_cache_diag = read_shared_market_cache(
+    market_context_cache_file, market_prompt_template, model_primary,
+    market_context_cache_hours,
 )
-market_prompt_hash = stable_json_hash(market_prompt_template)
-market_file_exists = os.path.exists(market_context_cache_file)
-market_cache = load_json_object(market_context_cache_file)
-market_entries = market_cache.get('entries')
-if not isinstance(market_entries, dict):
-    market_entries = {}
-market_cache = {'file_format_version': 1, 'entries': market_entries}
-market_entry = market_entries.get(market_contract_hash)
-market_context = None
-market_model = None
-market_cache_age = None
-market_miss_reason = (
-    'file_missing_fresh_seed'
-    if not market_file_exists else 'contract_not_cached'
-)
-if isinstance(market_entry, dict):
-    timestamp = parse_utc_timestamp(
-        market_entry.get('timestamp') or market_entry.get('created_at')
-    )
-    if timestamp is not None:
-        market_cache_age = (
-            datetime.now(UTC) - timestamp
-        ).total_seconds() / 3600
-    if not cache_entry_is_fresh(market_entry, market_context_cache_hours):
-        market_miss_reason = 'expired'
-    elif market_entry.get('model') != model_primary:
-        market_miss_reason = 'model_mismatch'
-    else:
-        try:
-            market_context = validate_current_market_context(
-                market_entry.get('data') or market_entry['market_context']
-            )
-            market_model = market_entry['model']
-            market_miss_reason = None
-        except (KeyError, TypeError, ValueError) as exc:
-            market_miss_reason = f'validation_failed: {exc}'
-print(
-    'MARKET CACHE ' + ('HIT' if market_context is not None else 'MISS')
-    + f' path={market_context_cache_file} entries={len(market_entries)}'
-    + f' contract={market_contract_hash[:12]} age_hours={market_cache_age}'
-    + ('' if market_miss_reason is None else f' reason={market_miss_reason}')
-)
+cache_diagnostics['market'] = market_cache_diag
+market_contract_hash = market_cache_diag['contract_hash']
+print('MARKET CACHE ' + ('HIT ' if market_context is not None else 'MISS ')
+      + json.dumps(market_cache_diag))
 if market_context is None:
+    market_prompt = market_prompt_template + (
+        f'\n\nCURRENT_DATE_UTC: {datetime.now(UTC).date().isoformat()}\n'
+    )
     data, used_model, metadata = call_gemini_json(
-        client,
-        model_primary,
-        market_prompt,
+        client, model_primary, market_prompt,
         build_gemini_config(
-            thinking_budget,
-            enable_search=True,
-            response_mime_type=None,
+            thinking_budget, enable_search=True, response_mime_type=None,
             max_output_tokens=gemini_max_output_tokens,
         ),
-        'ETF market context',
-        request_budget,
-        'context',
-        max_transient_api_attempts,
-        initial_delay,
-        max_transient_delay,
+        'ETF market context', request_budget, 'context',
+        max_transient_api_attempts, initial_delay, max_transient_delay,
     )
     if not metadata.get('search_queries') and metadata.get('tool_tokens', 0) <= 0:
         raise RuntimeError('Gemini returned ungrounded ETF market context.')
     market_context = validate_current_market_context(data)
-    market_model = used_model
     models_used.append(used_model)
     call_diagnostics.append({'stage': 'market context', **metadata})
     if len(metadata.get('search_queries', [])) > 8:
-        print(
-            'Market-context search overrun: Gemini exposed '
-            f'{len(metadata.get("search_queries", []))} queries; '
-            'prompt maximum is 8.'
-        )
+        print(f'Market-context search overrun: {len(metadata["search_queries"])} exposed; prompt maximum is 8.')
     now_iso = datetime.now(UTC).isoformat()
-    market_entries[market_contract_hash] = {
-        'created_at': now_iso,
-        'contract_hash': market_contract_hash,
-        'prompt_hash': market_prompt_hash,
-        'schema_hash': market_schema_hash,
-        'model': used_model,
-        'data': market_context,
+    market_cache['entries'][market_contract_hash] = {
+        'created_at': now_iso, 'contract_hash': market_contract_hash,
+        'prompt_hash': stable_json_hash(market_prompt_template),
+        'schema_hash': market_cache_diag['schema_hash'],
+        'model': used_model, 'data': market_context,
         'market_context': market_context,
         'research_metadata': {
             'search_queries': metadata.get('search_queries', []),
             'tool_tokens': metadata.get('tool_tokens', 0),
         },
     }
-    save_json_object_atomic(
-        market_context_cache_file,
-        market_cache,
+    market_cache['file_format_version'] = 1
+    market_cache_diag['save_succeeded'] = save_json_object_atomic(
+        market_context_cache_file, market_cache
     )
-    print(
-        f'MARKET CACHE SAVED contract={market_contract_hash[:12]} '
-        f'entries={len(market_entries)} exposed_search_queries='
-        f'{len(metadata.get("search_queries") or [])}'
-    )
-else:
-    print(
-        f'Using validated shared market context cache: '
-        f'{market_context_cache_file}'
-    )
+    print('MARKET CACHE SAVE ' + json.dumps({
+        'contract': market_contract_hash, 'succeeded': market_cache_diag['save_succeeded'],
+    }))
+set_run_stage('research_cache')
 
 market_context_hash = stable_json_hash(market_context)
 active_risk_events = market_context.get('active_risk_events') or []
@@ -5516,6 +5810,11 @@ active_risk_events = market_context.get('active_risk_events') or []
 research_prompt_hash = stable_json_hash(
     {'version': research_cache_version, 'prompt': config['prompt_etf_batch']}
 )
+research_contract_hash = stable_json_hash({
+    'prompt_hash': research_prompt_hash, 'model': model_primary,
+    'minimum_sources': config.get('min_etf_sources', 2),
+    'maximum_sources': config.get('max_etf_sources', 5),
+})
 research_cache = load_json_object(
     research_cache_file,
     {'version': research_cache_version, 'entries': {}, 'deferred_entries': {}},
@@ -5526,8 +5825,15 @@ if research_cache.get('version') != research_cache_version:
         'entries': {},
         'deferred_entries': {},
     }
-research_cache.setdefault('entries', {})
-research_cache.setdefault('deferred_entries', {})
+for bucket in ('entries', 'deferred_entries'):
+    entries = research_cache.get(bucket)
+    research_cache[bucket] = entries if isinstance(entries, dict) else {}
+research_cache_diag = {
+    'path': research_cache_file, 'ttl_hours': research_cache_hours,
+    'contract_hash': research_contract_hash, 'hits': 0, 'misses': 0,
+    'symbols': {}, 'save_succeeded': None,
+}
+cache_diagnostics['etf_research'] = research_cache_diag
 
 candidate_by_symbol = {
     str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
@@ -5556,8 +5862,13 @@ for candidate in candidate_records:
     )
     cache_keys[symbol] = cache_key
     entry = research_cache['entries'].get(cache_key)
+    if not isinstance(entry, dict):
+        entry = None
     compatible_cache = False
-    if entry and entry.get('market_context_hash') != market_context_hash:
+    if entry and (
+        entry.get('research_contract_hash', research_contract_hash) != research_contract_hash
+        or entry.get('market_context_hash') != market_context_hash
+    ):
         entry = None
     if not entry:
         matching_entries = [
@@ -5565,8 +5876,12 @@ for candidate in candidate_records:
             for prior_entry in research_cache['entries'].values()
             if (
                 isinstance(prior_entry, dict)
+                and prior_entry.get('research_contract_hash') == research_contract_hash
+                and prior_entry.get('fund_identity') == {
+                    field: candidate.get(field) for field in ('Name', 'Category', 'LegalType')
+                }
                 and cache_entry_is_fresh(prior_entry, research_cache_hours)
-                and prior_entry.get('market_context_hash') == market_context_hash
+                and isinstance(prior_entry.get('research'), dict)
                 and str(
                     (prior_entry.get('research') or {}).get('symbol') or ''
                 ).strip().upper() == symbol
@@ -5578,18 +5893,47 @@ for candidate in candidate_records:
                 key=lambda item: str(item.get('timestamp') or ''),
             )
             compatible_cache = True
+    cache_result = {
+        'hit': False, 'reason': 'missing_or_incompatible',
+        'age_hours': cache_age_hours(entry.get('timestamp')) if isinstance(entry, dict) else None,
+    }
+    research_cache_diag['symbols'][symbol] = cache_result
     if entry and cache_entry_is_fresh(entry, research_cache_hours):
         try:
-            research_by_symbol[symbol] = validate_etf_result(
+            cached_research = validate_etf_result(
                 entry.get('research'), candidate,
                 config.get('min_etf_sources', 2),
                 config.get('max_etf_sources', 5),
                 active_risk_events,
             )
+            # Evidence is reusable, yesterday's authoritative decision is not.
+            cached_research.pop('judgment_model', None)
+            cached_research.pop('judgment_validation_error', None)
+            cached_research['evidence_collected_at'] = entry.get('timestamp')
+            cached_research['evidence_market_context_changed'] = (
+                entry.get('market_context_hash') != market_context_hash
+            )
+            research_by_symbol[symbol] = cached_research
+            # Preserve evidence age when a compatible older key is reused.
+            # Consistency repairs look up this run's key for provenance.
+            research_cache['entries'][cache_key] = dict(entry)
+            cache_result.update(
+                hit=True, reason='compatible' if compatible_cache else 'exact',
+                market_context_changed=entry.get('market_context_hash') != market_context_hash,
+                evidence_timestamp=entry.get('timestamp'),
+            )
             cache_label = 'compatible validated' if compatible_cache else 'validated'
             print(f'Using {cache_label} ETF research cache for {symbol}.')
         except Exception as exc:
+            cache_result.update(reason='validation_failed', error=str(exc))
             print(f'Ignoring invalid ETF research cache for {symbol}: {exc}')
+    elif entry:
+        cache_result['reason'] = 'expired_or_invalid_timestamp'
+    research_cache_diag['hits' if cache_result['hit'] else 'misses'] += 1
+
+print('ETF RESEARCH CACHE ' + json.dumps({
+    k: v for k, v in research_cache_diag.items() if k != 'symbols'
+}))
 
 cursor = 0
 pending_retries = []
@@ -5599,6 +5943,8 @@ sector_capacity_skipped_symbols_this_run = set()
 factor_family_capacity_skipped_symbols_this_run = set()
 quantitative_floor_skipped_symbols_this_run = set()
 research_attempts_by_symbol = {}
+research_requests_by_symbol = {}
+last_research_errors = {}
 structural_repairs_by_symbol = {}
 consistency_reviewed_symbols = set()
 researched_this_run = set()
@@ -5640,7 +5986,7 @@ queued_initial_repairs = enqueue_consistency_repairs(
     max_structural_repairs_per_etf,
 )
 if queued_initial_repairs:
-    save_json_object_atomic(research_cache_file, research_cache)
+    research_cache_diag['save_succeeded'] = save_json_object_atomic(research_cache_file, research_cache)
     selected = preview_portfolio(
         candidate_records,
         research_by_symbol,
@@ -5669,13 +6015,10 @@ if research_by_symbol:
         max_moderate_per_risk_event,
         require_judgment=True,
     )
-    if len(selected) < initial_provisional_count:
-        reopened = initial_provisional_count - len(selected)
-        judgment_reopened_slots += reopened
-        print(
-            f'Authoritative ETF judgment reopened {reopened} cached/provisional '
-            f'portfolio slot(s); continuing research/backfill.'
-        )
+    print(
+        f'Cached evidence preview: provisional={initial_provisional_count}, '
+        f'authoritative={len(selected)}; unjudged evidence is not a reopened slot.'
+    )
 if len(selected) >= target_selected_etfs:
     queue_portfolio_challengers(
         candidate_records, research_by_symbol, selected, pending_retries,
@@ -5691,6 +6034,7 @@ request_budget.release_summary_for_research = (
 while (
     (len(selected) < target_selected_etfs or bool(pending_retries))
     and request_budget.can_reserve('research')
+    and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
 ):
     if len(selected) >= target_selected_etfs and pending_retries:
@@ -5728,33 +6072,30 @@ while (
         research_batch_limit = min(
             gemini_batch_size, max(8, open_slots * 3)
         )
-    pending_symbols = {
-        str(item['candidate']['Symbol']).upper() for item in pending_retries
+    selected_sectors = {
+        candidate_sector_group(item['candidate']).casefold() for item in selected
     }
-    if len(selected) < target_selected_etfs and len(pending_retries) < research_batch_limit:
-        selected_sectors = {
-            candidate_sector_group(item['candidate']).casefold() for item in selected
-        }
-        selected_families = {
-            etf_factor_family(item['candidate'], item.get('research')) for item in selected
-        }
+    selected_families = {
+        etf_factor_family(item['candidate'], item.get('research')) for item in selected
+    }
 
-        def scheduling_priority(candidate):
-            sector_open = (
-                candidate_sector_group(candidate).casefold() not in selected_sectors
-            )
-            family_open = etf_factor_family(candidate) not in selected_families
-            open_capacity_bonus = 2.0 if sector_open and family_open else 0.75 if sector_open else 0.0
-            return (
-                etf_optimistic_final_score(candidate) + open_capacity_bonus,
-                quantitative_challenger_score(candidate),
-                -rank_by_symbol[str(candidate['Symbol']).upper()],
-            )
+    def scheduling_priority(candidate):
+        sector_open = candidate_sector_group(candidate).casefold() not in selected_sectors
+        family_open = etf_factor_family(candidate) not in selected_families
+        bonus = 2.0 if sector_open and family_open else 0.75 if sector_open else 0.0
+        return (
+            etf_optimistic_final_score(candidate) + bonus,
+            quantitative_challenger_score(candidate),
+            -rank_by_symbol[str(candidate['Symbol']).upper()],
+        )
 
-        best_unresearched = []
+    best_unresearched = []
+    if len(selected) < target_selected_etfs:
         for candidate in candidate_records:
             symbol = str(candidate['Symbol']).upper()
-            if symbol in research_by_symbol or symbol in pending_symbols:
+            if symbol in research_by_symbol:
+                continue
+            if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
                 continue
             if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
                 quantitative_floor_skipped_symbols_this_run.add(symbol)
@@ -5768,311 +6109,60 @@ while (
                 factor_family_capacity_skipped_symbols_this_run.add(symbol)
                 continue
             best_unresearched.append(candidate)
-        best_unresearched.sort(key=scheduling_priority, reverse=True)
-        additions = best_unresearched[:max(0, research_batch_limit - len(pending_retries))]
-        for candidate in additions:
-            pending_retries.append({
-                'candidate': candidate,
-                'needs_research': True,
-                'targeted_backfill': True,
-            })
-        if additions:
-            print(
-                'Targeted ETF research queue: '
-                + ', '.join(str(item['Symbol']) for item in additions)
-            )
-    # The global priority queue above supersedes the old forward-only cursor.
-    cursor = len(candidate_records)
-    batch = []
-    retry_symbols = set()
-    retry_fresh_symbols = set()
-    transport_retry_symbols = set()
-    provisional_counts = {}
-    dedicated_basic_repair_batch = False
-
-    # Put evidence-completion repairs first, but use spare batch capacity for
-    # fresh candidates. This avoids spending an entire 2.5 call on one small
-    # repair while still keeping the repair payload at the front of the prompt.
-    basic_repair_pending = []
-    other_pending = []
-    for retry in pending_retries:
-        candidate = retry['candidate']
-        symbol = str(candidate['Symbol']).upper()
-        deferred = research_cache['deferred_entries'].get(cache_keys.get(symbol), {})
-        is_basic_repair = (
-            not retry.get('needs_research')
-            and str(deferred.get('error') or '').startswith('BASIC_METADATA_REPAIR:')
-        )
-        (basic_repair_pending if is_basic_repair else other_pending).append(retry)
-    if basic_repair_pending:
-        pending_retries = basic_repair_pending + other_pending
-    max_transport_retries_in_batch = max(
-        1, int(round(gemini_batch_size * transport_retry_batch_fraction))
+    best_unresearched.sort(key=scheduling_priority, reverse=True)
+    batch_items, pending_retries, queue_stats = assemble_research_batch(
+        pending_retries, best_unresearched, research_batch_limit,
+        research_attempts_by_symbol, structural_repairs_by_symbol,
+        max_fresh_research_attempts_per_etf, max_structural_repairs_per_etf,
+        transport_retry_batch_fraction,
     )
-    deferred_transport_retries = []
-    while pending_retries and len(batch) < research_batch_limit:
-        retry = pending_retries[0]
-        candidate = retry['candidate']
-        symbol = str(candidate['Symbol']).upper()
-        deferred = research_cache['deferred_entries'].get(cache_keys.get(symbol), {})
-        retry_is_basic_repair = (
-            not retry.get('needs_research')
-            and str(deferred.get('error') or '').startswith('BASIC_METADATA_REPAIR:')
-        )
-        if dedicated_basic_repair_batch and not retry_is_basic_repair:
-            break
-        pending_retries.pop(0)
-        transport_failure = bool(retry.get('transport_failure'))
-        if (
-            transport_failure
-            and len(transport_retry_symbols) >= max_transport_retries_in_batch
-            and cursor < len(candidate_records)
-        ):
-            deferred_transport_retries.append(retry)
-            continue
-        if (
-            retry['needs_research']
-            and research_attempts_by_symbol.get(symbol, 0)
-            >= max_fresh_research_attempts_per_etf
-        ):
-            continue
-        if (
-            not retry['needs_research']
-            and structural_repairs_by_symbol.get(symbol, 0)
-            >= max_structural_repairs_per_etf
-        ):
-            continue
-        if retry.get('portfolio_challenger'):
-            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-        batch.append(candidate)
-        retry_symbols.add(symbol)
-        if retry['needs_research']:
-            retry_fresh_symbols.add(symbol)
-        if transport_failure:
-            transport_retry_symbols.add(symbol)
-        provisional = provisional_exposure_group(candidate)
-        provisional_counts[provisional] = provisional_counts.get(provisional, 0) + 1
-    if deferred_transport_retries:
-        pending_retries = deferred_transport_retries + pending_retries
-    while (
-        not dedicated_basic_repair_batch
-        and len(selected) < target_selected_etfs
-        and cursor < len(candidate_records)
-        and len(batch) < gemini_batch_size
-    ):
-        candidate = candidate_records[cursor]
-        cursor += 1
-        symbol = str(candidate['Symbol']).upper()
-        if symbol in research_by_symbol or symbol in {str(x['Symbol']).upper() for x in batch}:
-            continue
-        if etf_optimistic_final_score(candidate) < minimum_final_selection_score:
-            quantitative_floor_skipped_symbols_this_run.add(symbol)
-            continue
-        if lower_ranked_candidate_blocked_by_sector_capacity(
-            candidate,
-            selected,
-            rank_by_symbol,
-            max_etfs_per_sector_group,
-        ):
-            sector_capacity_skipped_symbols_this_run.add(symbol)
-            continue
-        if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-            factor_family_capacity_skipped_symbols_this_run.add(symbol)
-            continue
-        provisional = provisional_exposure_group(candidate)
-        selectable_in_provisional = 0
-        for researched_symbol, researched in research_by_symbol.items():
-            researched_candidate = candidate_by_symbol.get(researched_symbol)
-            if not researched_candidate:
-                continue
-            if provisional_exposure_group(researched_candidate) != provisional:
-                continue
-            if researched.get('eligible', True) and str(
-                researched.get('reversal_risk') or ''
-            ).upper() in SELECTABLE_RISKS:
-                selectable_in_provisional += 1
-        effective_provisional_cap = (
-            max_candidates_per_provisional_group
-            if selectable_in_provisional > 0
-            else max_candidates_per_provisional_group + 2
-        )
-        if provisional_counts.get(provisional, 0) >= effective_provisional_cap:
-            deferred_excess_candidates.append(candidate)
-            deferred_excess_symbols_this_run.add(symbol)
-            continue
-        record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-        batch.append(candidate)
-        provisional_counts[provisional] = provisional_counts.get(provisional, 0) + 1
-    if (
-        len(selected) < target_selected_etfs
-        and cursor >= len(candidate_records)
-        and len(batch) < gemini_batch_size
-    ):
-        deferred_round = list(deferred_excess_candidates)
-        deferred_excess_candidates = []
-        for candidate in deferred_round:
-            if len(batch) >= gemini_batch_size:
-                deferred_excess_candidates.append(candidate)
-                continue
-            symbol = str(candidate['Symbol']).upper()
-            if symbol in research_by_symbol or symbol in {str(x['Symbol']).upper() for x in batch}:
-                continue
-            if lower_ranked_candidate_blocked_by_sector_capacity(
-                candidate,
-                selected,
-                rank_by_symbol,
-                max_etfs_per_sector_group,
-            ):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                factor_family_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            provisional = provisional_exposure_group(candidate)
-            if provisional_counts.get(provisional, 0) >= max_candidates_per_provisional_group:
-                deferred_excess_candidates.append(candidate)
-                continue
-            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-            batch.append(candidate)
-            provisional_counts[provisional] = provisional_counts.get(provisional, 0) + 1
-    if (
-        len(selected) < target_selected_etfs
-        and cursor >= len(candidate_records)
-        and len(batch) < gemini_batch_size
-    ):
-        # Diversity is advisory. Once no ordinary candidates remain, fill every
-        # open slot from the deferred ranked stream instead of making a smaller
-        # call solely because a provisional group reached its soft cap.
-        while deferred_excess_candidates and len(batch) < gemini_batch_size:
-            candidate = deferred_excess_candidates.pop(0)
-            symbol = str(candidate['Symbol']).upper()
-            if symbol in research_by_symbol or symbol in {
-                str(item['Symbol']).upper() for item in batch
-            }:
-                continue
-            if lower_ranked_candidate_blocked_by_sector_capacity(
-                candidate,
-                selected,
-                rank_by_symbol,
-                max_etfs_per_sector_group,
-            ):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                factor_family_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-            batch.append(candidate)
-    if (
-        len(selected) < target_selected_etfs
-        and not batch
-        and deferred_excess_candidates
-    ):
-        # All remaining candidates share already-full provisional groups. Relax
-        # the advisory batching cap so the ranked stream can still finish.
-        remaining_deferred = []
-        for candidate in deferred_excess_candidates:
-            symbol = str(candidate['Symbol']).upper()
-            if lower_ranked_candidate_blocked_by_sector_capacity(
-                candidate,
-                selected,
-                rank_by_symbol,
-                max_etfs_per_sector_group,
-            ):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                factor_family_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            if len(batch) < gemini_batch_size:
-                record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-                batch.append(candidate)
-            else:
-                remaining_deferred.append(candidate)
-        deferred_excess_candidates = remaining_deferred
-    if not batch and len(selected) < target_selected_etfs:
-        # Final ranked catch-up pass. Re-scan the whole reserve against the CURRENT
-        # authoritative portfolio so a candidate skipped behind a once-full sector
-        # is not permanently lost if later judgment reopened that sector.
-        for candidate in candidate_records:
-            if len(batch) >= gemini_batch_size:
-                break
-            symbol = str(candidate['Symbol']).upper()
-            if symbol in research_by_symbol or symbol in {str(x['Symbol']).upper() for x in batch}:
-                continue
-            if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
-                quantitative_floor_skipped_symbols_this_run.add(symbol)
-                continue
-            if lower_ranked_candidate_blocked_by_sector_capacity(
-                candidate, selected, rank_by_symbol, max_etfs_per_sector_group
-            ):
-                sector_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            if lower_ranked_candidate_blocked_by_factor_family_capacity(candidate, selected):
-                factor_family_capacity_skipped_symbols_this_run.add(symbol)
-                continue
-            record_capacity_challenger(candidate, selected, capacity_challenger_tests)
-            batch.append(candidate)
-        if batch:
-            print(
-                'ETF reserve catch-up reopened ranked candidates after authoritative '
-                'portfolio changes: ' + ', '.join(str(item['Symbol']) for item in batch)
-            )
-    if not batch:
-        remaining_calls = request_budget.research_limit - request_budget.research_used
-        actionable_remaining = []
-        sector_blocked_remaining = []
-        factor_blocked_remaining = []
-        for candidate in candidate_records:
-            symbol = str(candidate['Symbol']).upper()
-            if symbol in research_by_symbol:
-                continue
-            if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
-                continue
-            if lower_ranked_candidate_blocked_by_sector_capacity(
-                candidate, selected, rank_by_symbol, max_etfs_per_sector_group
-            ):
-                sector_blocked_remaining.append(symbol)
-            elif lower_ranked_candidate_blocked_by_factor_family_capacity(
-                candidate, selected
-            ):
-                factor_blocked_remaining.append(symbol)
-            else:
-                actionable_remaining.append(symbol)
-        print(
-            'ETF candidate reserve exhausted: '
-            f'{len(candidate_records)} total candidates, '
-            f'{len(research_by_symbol)} with validated research, '
-            f'{len(selected)}/{target_selected_etfs} selectable, '
-            f'{len(sector_blocked_remaining)} remaining candidates blocked by full sectors, '
-            f'{len(factor_blocked_remaining)} blocked by full factor families, '
-            f'{len(actionable_remaining)} actionable unresearched candidates, '
-            f'{remaining_calls} research calls still available.'
-        )
-        if actionable_remaining and remaining_calls > 0:
-            print('WARNING — actionable ETF candidates remain despite an empty batch: ' + ', '.join(actionable_remaining[:20]))
-        break
-
+    batch = [item['candidate'] for item in batch_items]
+    dedicated_basic_repair_batch = False
     fresh_symbols = [
-        str(candidate['Symbol']).upper() for candidate in batch
-        if (
-            str(candidate['Symbol']).upper() not in retry_symbols
-            or str(candidate['Symbol']).upper() in retry_fresh_symbols
-        )
+        str(item['candidate']['Symbol']).upper() for item in batch_items
+        if item.get('needs_research')
     ]
-    repair_only_symbols = retry_symbols - retry_fresh_symbols
-    if (
-        not dedicated_basic_repair_batch
-        and not fresh_symbols
-        and len(batch) < min_structural_repair_batch_size
-        and len(selected) + len(batch) < target_selected_etfs
-    ):
-        print(
-            'Deferring undersized structural-repair-only batch because even '
-            'perfect repairs could not complete the portfolio: '
-            + ', '.join(str(candidate['Symbol']) for candidate in batch)
+    repair_only_symbols = {
+        str(item['candidate']['Symbol']).upper() for item in batch_items
+        if not item.get('needs_research')
+    }
+    retry_fresh_symbols = {
+        symbol for symbol in fresh_symbols if research_requests_by_symbol.get(symbol, 0) > 0
+    }
+    first_time_symbols = set(fresh_symbols) - retry_fresh_symbols
+    transport_retry_symbols = {
+        str(item['candidate']['Symbol']).upper() for item in batch_items
+        if item.get('transport_failure')
+    }
+    queue_stats.update({
+        'first_time_symbols': sorted(first_time_symbols),
+        'fresh_retry_symbols': sorted(retry_fresh_symbols),
+        'repair_only_symbols': sorted(repair_only_symbols),
+        'selected_before': len(selected),
+        'pending_judgment': sum(not r.get('judgment_model') for r in research_by_symbol.values()),
+    })
+    print('ETF RESEARCH QUEUE ' + json.dumps(queue_stats))
+    if not batch:
+        judged_before_tail = sum(bool(r.get('judgment_model')) for r in research_by_symbol.values())
+        set_run_stage('classification_empty_queue_tail')
+        research_by_symbol = safe_judge_etf_research_pool(
+            client, candidate_records, research_by_symbol, market_context, force=True,
         )
+        selected = preview_portfolio(
+            candidate_records, research_by_symbol, target_selected_etfs,
+            max_etfs_per_sector_group, max_moderate_per_risk_event, require_judgment=True,
+        )
+        if sum(bool(r.get('judgment_model')) for r in research_by_symbol.values()) > judged_before_tail:
+            # A newly judged tail may reopen sector/factor capacity. Re-scan it.
+            continue
+        print('No research candidates remain within current eligibility and per-ETF attempt limits.')
         break
+    for candidate in batch:
+        record_capacity_challenger(candidate, selected, capacity_challenger_tests)
+        symbol = str(candidate['Symbol']).upper()
+        research_requests_by_symbol[symbol] = research_requests_by_symbol.get(symbol, 0) + 1
+    # A small repair tail is useful even if it cannot fill every open slot.
+    # It is sent only after all actionable fresh alternatives have been considered.
     retry_payload = []
     fresh_retry_payload = []
     prior_grounding_urls = []
@@ -6127,6 +6217,9 @@ while (
     )
     print('\n...calling Gemini for ETF batch: '
           + ', '.join(str(candidate['Symbol']) for candidate in batch) + '...\n')
+    set_run_stage(f'research_batch_{request_budget.research_used + 1}')
+    batch_started = time.perf_counter()
+    search_attempts += len(fresh_symbols)
     try:
         data, used_model, metadata = call_gemini_json(
             client,
@@ -6152,7 +6245,6 @@ while (
         call_diagnostics.append({'stage': stage, **metadata})
         if fresh_symbols and not metadata.get('search_queries') and metadata.get('tool_tokens', 0) <= 0:
             raise RuntimeError('Gemini returned an ungrounded ETF research batch.')
-        search_attempts += len(fresh_symbols)
         data, applied_repair_patches = merge_structural_repair_patches(
             data,
             retry_payload,
@@ -6278,9 +6370,25 @@ while (
                         structural_repairs_by_symbol.get(symbol, 0) + 1
                     )
             if symbol in valid:
+                last_research_errors.pop(symbol, None)
+                valid[symbol].pop('judgment_model', None)
+                valid[symbol].pop('judgment_validation_error', None)
+                classification_validation_rounds.pop(symbol, None)
                 research_by_symbol[symbol] = valid[symbol]
+                prior_evidence = research_cache['deferred_entries'].get(cache_keys[symbol], {})
+                evidence_timestamp = (
+                    datetime.now(UTC).isoformat() if symbol in fresh_symbols else
+                    prior_evidence.get('evidence_timestamp') or prior_evidence.get('timestamp')
+                    or datetime.now(UTC).isoformat()
+                )
+                valid[symbol]['evidence_collected_at'] = evidence_timestamp
+                valid[symbol]['evidence_market_context_changed'] = False
                 research_cache['entries'][cache_keys[symbol]] = {
-                    'timestamp': datetime.now(UTC).isoformat(),
+                    'timestamp': evidence_timestamp,
+                    'research_contract_hash': research_contract_hash,
+                    'fund_identity': {
+                        field: candidate.get(field) for field in ('Name', 'Category', 'LegalType')
+                    },
                     'market_context_hash': market_context_hash,
                     'research': valid[symbol],
                 }
@@ -6290,6 +6398,7 @@ while (
                     challenger_researched_symbols.add(symbol)
             else:
                 error = errors.get(symbol, 'Invalid ETF research.')
+                last_research_errors[symbol] = error
                 print(f'Deferred ETF research [{symbol}]: {error}')
                 prior_deferred = research_cache['deferred_entries'].get(
                     cache_keys[symbol], {}
@@ -6312,6 +6421,10 @@ while (
                 )
                 research_cache['deferred_entries'][cache_keys[symbol]] = {
                     'timestamp': datetime.now(UTC).isoformat(),
+                    'evidence_timestamp': (
+                        datetime.now(UTC).isoformat() if symbol in fresh_symbols else
+                        prior_deferred.get('evidence_timestamp') or prior_deferred.get('timestamp')
+                    ),
                     'error': cached_error,
                     'draft': drafts.get(symbol),
                     'grounding_source_urls': grounding_for_repair,
@@ -6382,6 +6495,9 @@ while (
                     })
         batch_stats = {
             'stage': stage,
+            'queue': queue_stats,
+            'elapsed_seconds': round(time.perf_counter() - batch_started, 3),
+            'first_time_research_requested': len(first_time_symbols),
             'batch_size': len(batch),
             'fresh_research_requested': len(fresh_symbols),
             'fresh_retry_requested': len(retry_fresh_symbols),
@@ -6392,6 +6508,7 @@ while (
             'deferred': len(errors),
             'validated_symbols': sorted(valid),
             'deferred_symbols': sorted(errors),
+            'validation_errors': dict(errors),
             'raw_result_shapes': raw_result_shapes,
             'grounding_url_count': len(metadata.get('source_urls', [])),
             'applied_repair_patches': applied_repair_patches,
@@ -6407,7 +6524,7 @@ while (
         print(f'  validated: {batch_stats["validated"]}')
         print(f'  deferred: {batch_stats["deferred"]}')
         print_validated_research_inspection(batch, valid)
-        save_json_object_atomic(research_cache_file, research_cache)
+        research_cache_diag['save_succeeded'] = save_json_object_atomic(research_cache_file, research_cache)
     except Exception as exc:
         print(f'ETF batch failed without validated output: {exc}')
         research_quota_exhausted = is_daily_quota_error(exc)
@@ -6416,6 +6533,10 @@ while (
         )
         batch_research_diagnostics.append({
             'stage': stage,
+            'queue': queue_stats,
+            'elapsed_seconds': round(time.perf_counter() - batch_started, 3),
+            'first_time_research_requested': len(first_time_symbols),
+            'requested_symbols': [str(x['Symbol']).upper() for x in batch],
             'batch_size': len(batch),
             'fresh_research_requested': len(fresh_symbols),
             'fresh_retry_requested': len(retry_fresh_symbols),
@@ -6427,6 +6548,7 @@ while (
         })
         for candidate in batch:
             symbol = str(candidate['Symbol']).upper()
+            last_research_errors[symbol] = str(exc)
             needs_research = symbol in fresh_symbols
             if response_level_failure:
                 # Gemini never produced usable ETF-level research. Do not charge
@@ -6489,7 +6611,7 @@ while (
         max_structural_repairs_per_etf,
     )
     if queued_repairs:
-        save_json_object_atomic(research_cache_file, research_cache)
+        research_cache_diag['save_succeeded'] = save_json_object_atomic(research_cache_file, research_cache)
         provisional_selected = preview_portfolio(
             candidate_records,
             research_by_symbol,
@@ -6503,6 +6625,7 @@ while (
     judged_before = sum(
         1 for research in research_by_symbol.values() if research.get('judgment_model')
     )
+    authoritative_count_before_judgment = len(selected)
     pending_judgment_count = sum(
         1 for candidate in candidate_records
         if (
@@ -6511,15 +6634,24 @@ while (
             and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
         )
     )
-    remaining_research_calls = max(
-        0, request_budget.research_limit - request_budget.research_used
-    )
+    remaining_research_calls = max(0, min(
+        request_budget.research_limit - request_budget.research_used,
+        request_budget.max_api_attempts - request_budget.api_attempts,
+        api_attempt_budget.remaining(model_primary, 'research'),
+    ))
     force_judgment = (
         pending_judgment_count >= classification_min_intermediate_batch
         and len(selected) + pending_judgment_count >= target_selected_etfs
     ) or (
         pending_judgment_count > 0 and remaining_research_calls <= 1
     ) or not request_budget.can_reserve('research')
+    set_run_stage('classification_after_research')
+    print('ETF JUDGMENT SCHEDULER ' + json.dumps({
+        'pending': pending_judgment_count, 'force': force_judgment,
+        'batch_target': classification_batch_target,
+        'intermediate_minimum': classification_min_intermediate_batch,
+        'remaining_research_calls': remaining_research_calls,
+    }))
     research_by_symbol = safe_judge_etf_research_pool(
         client, candidate_records, research_by_symbol, market_context,
         force=force_judgment,
@@ -6542,14 +6674,14 @@ while (
         max_moderate_per_risk_event,
         require_judgment=True,
     )
-    if len(selected) < provisional_count:
-        reopened = provisional_count - len(selected)
+    if len(selected) < authoritative_count_before_judgment:
+        reopened = authoritative_count_before_judgment - len(selected)
         judgment_reopened_slots += reopened
         if len(selected) < target_selected_etfs:
             authoritative_backfill_batches += 1
         print(
             f'Authoritative ETF judgment reopened {reopened} portfolio slot(s) '
-            f'({provisional_count}->{len(selected)}); research remains open until '
+            f'({authoritative_count_before_judgment}->{len(selected)}); research remains open until '
             f'{target_selected_etfs} authoritative/effective selections are restored '
             'or the research budget is exhausted.'
         )
@@ -6570,6 +6702,7 @@ while (
 
 # Final forced catch-up handles a deliberately accumulated tail. Because the
 # judge skips judged symbols, this cannot introduce repeated classification drift.
+set_run_stage('classification_final_tail')
 pre_final_selected_count = len(selected)
 research_by_symbol = safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=True,
@@ -6600,11 +6733,15 @@ remaining_unresearched = sum(
     if str(candidate['Symbol']).upper() not in research_by_symbol
 )
 actionable_unresearched = []
+exhausted_unvalidated = []
 sector_capacity_blocked_unresearched = []
 factor_family_blocked_unresearched = []
 for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     if symbol in research_by_symbol:
+        continue
+    if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
+        exhausted_unvalidated.append(symbol)
         continue
     if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
         continue
@@ -6620,6 +6757,7 @@ if (
     len(selected) < target_selected_etfs
     and actionable_unresearched
     and request_budget.can_reserve('research')
+    and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
 ):
     print(
@@ -6630,14 +6768,16 @@ if (
 
 research_budget_exhausted = (
     len(selected) < target_selected_etfs
-    and not request_budget.can_reserve('research')
+    and (not request_budget.can_reserve('research')
+         or api_attempt_budget.remaining(model_primary, 'research') <= 0)
 )
 if research_budget_exhausted:
     print(
-        'ETF research stopped because the logical Gemini research-call budget '
-        'is exhausted. Summary capacity was releasable during the shortfall.'
-        if summary_reservation_releasable_on_shortfall
-        else 'ETF research stopped because no research call remains after preserving the summary reservation.'
+        'ETF research budget stop: '
+        f'logical={request_budget.research_used}/{request_budget.research_limit}, '
+        f'total_logical={request_budget.total_used}/{request_budget.total}, '
+        f'API_attempts={request_budget.api_attempts}/{request_budget.max_api_attempts}; '
+        f'research_API_remaining={api_attempt_budget.remaining(model_primary, "research")}.'
     )
 partial_portfolio = len(selected) < target_selected_etfs
 if partial_portfolio:
@@ -6704,6 +6844,7 @@ print('\n' + context_review + '\n')
 
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
+set_run_stage('summary')
 if config.get('final_summary_enabled', True):
     selected_summary_input = build_summary_input(selected)
     summary_prompt = (
@@ -6768,7 +6909,8 @@ if config.get('final_summary_enabled', True):
             'ETF 3.5 summary reservation was unavailable; trying the 2.5 fallback.'
         )
 
-    if summary_data is None and request_budget.total_used < request_budget.total:
+    if (summary_data is None and request_budget.can_reserve('summary')
+            and api_attempt_budget.remaining(summary_fallback_model, 'summary') > 0):
         try:
             summary_data, used_model, metadata = call_gemini_json(
                 client,
@@ -6844,6 +6986,7 @@ df_html_table = df_html.to_html(
     classes='recommendations-table',
     border=0,
 )
+set_run_stage('publish_html')
 update_html_page(
     final_recommendations,
     df_html_table,
@@ -6940,16 +7083,50 @@ else:
     print('ETF runtime reconciliation summary: no label repairs were needed.')
 
 diagnostics = {
+    'schema_version': 2,
+    'run_id': RUN_ID,
+    'provenance': RUN_PROVENANCE,
+    'cache': cache_diagnostics,
+    'stages': stage_diagnostics,
+    'api_attempts': api_attempt_diagnostics,
+    'semantic_matcher': {
+        'model': FASTEMBED_MODEL_NAME,
+        'loaded': _fastembed_model is not None,
+        'unavailable_reason': _fastembed_unavailable_reason,
+    },
+    'coverage': build_coverage_diagnostics(
+        candidate_records, research_by_symbol, research_requests_by_symbol,
+        research_attempts_by_symbol, [x['candidate']['Symbol'] for x in selected],
+        actionable_unresearched, max_fresh_research_attempts_per_etf,
+    ),
     'generated_at': datetime.now(UTC).isoformat(),
     'status': 'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS',
     'selection_target': target_selected_etfs,
     'selection_count': len(selected),
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
+    'operational_health': {
+        'research_stop_reason': (
+            'daily_quota_exhausted' if research_quota_exhausted else
+            'portfolio_target_met' if not partial_portfolio else
+            'api_or_logical_budget_exhausted' if research_budget_exhausted else
+            'no_actionable_work_within_attempt_limits'
+        ),
+        'classification_quota_exhausted': classification_quota_exhausted,
+        'classification_api_attempts_remaining': api_attempt_budget.remaining(
+            classification_model, 'classification'
+        ),
+        'research_api_attempts_remaining': api_attempt_budget.remaining(
+            model_primary, 'research'
+        ),
+    },
     'selection_control': {
         'provisional_portfolio_peak': provisional_portfolio_peak,
         'judgment_reopened_slots': judgment_reopened_slots,
         'authoritative_backfill_batches': authoritative_backfill_batches,
         'remaining_unresearched_candidates': remaining_unresearched,
+        'remaining_unvalidated_candidates': remaining_unresearched,
+        'actionable_retryable_or_unrequested': actionable_unresearched,
+        'validation_exhausted_symbols': exhausted_unvalidated,
         'minimum_final_selection_score': minimum_final_selection_score,
         'max_classification_logical_calls_per_run': max_classification_logical_calls_per_run,
         'max_classification_api_attempts_per_run': max_classification_api_attempts_per_run,
@@ -6976,10 +7153,15 @@ diagnostics = {
         ),
         'context_api_attempts': request_budget.context_api_attempts,
         'per_model_api_attempts': api_attempt_budget.snapshot(),
+        'classification_logical_calls': classification_logical_calls_used,
+        'classification_api_attempts': classification_api_attempts_used,
         'summary_reservation_releasable_on_shortfall': summary_reservation_releasable_on_shortfall,
     },
     'research': {
-        'unique_etfs_requested': len(researched_this_run),
+        'unique_etfs_requested': len(research_requests_by_symbol),
+        'unique_etfs_with_charged_search': len(researched_this_run),
+        'requests_by_symbol': research_requests_by_symbol,
+        'last_validation_or_transport_error': last_research_errors,
         'requested_searches': search_attempts,
         'charged_search_attempts': charged_search_attempts,
         'repeated_searches': max(
@@ -7010,6 +7192,8 @@ diagnostics = {
     'decision_ledger': decision_ledger,
     'context_review': context_review,
     'classification_calls': classification_call_diagnostics,
+    'classification_validation': classification_validation_diagnostics,
+    'classification_scheduling': classification_scheduling_diagnostics,
     'candidate_analysis': {
         str(candidate['Symbol']).upper(): {
             'qvm_score': candidate.get('QVMScore'),
@@ -7048,10 +7232,17 @@ diagnostics = {
     },
     'calls': call_diagnostics,
 }
-save_json_object_atomic(
-    config.get('run_diagnostics_file', 'caches/etf_run_diagnostics.json'),
+report_saved = save_json_object_atomic(
+    run_report_file,
     diagnostics,
 )
+print('ETF COVERAGE ' + json.dumps({
+    'counts': diagnostics['coverage']['counts'],
+    'actionable_never_requested': diagnostics['coverage']['actionable_never_requested'],
+    'actionable_retryable': diagnostics['coverage']['actionable_retryable'],
+    'validated_unjudged': diagnostics['coverage']['validated_unjudged'],
+    'report_saved': report_saved,
+}))
 print(
     'ETF selection-control summary:\n'
     f'  provisional portfolio peak: {provisional_portfolio_peak}/{target_selected_etfs}\n'
@@ -7067,8 +7258,10 @@ print(
     + f'  max factor-family exposure: {max_etfs_per_factor_family}\n'
     f'  slots reopened by authoritative judgment: {judgment_reopened_slots}\n'
     f'  authoritative backfill batches: {authoritative_backfill_batches}\n'
-    f'  remaining unresearched candidates: {remaining_unresearched}\n'
-    f'  actionable unresearched candidates: {len(actionable_unresearched)}\n'
+    f'  remaining unvalidated candidates: {remaining_unresearched}\n'
+    f'  actionable never-requested candidates: {len(diagnostics["coverage"]["actionable_never_requested"])}\n'
+    f'  actionable retryable candidates: {len(diagnostics["coverage"]["actionable_retryable"])}\n'
+    f'  validation-exhausted candidates: {len(exhausted_unvalidated)}\n'
     f'  sector-capacity-blocked unresearched candidates: '
     f'{len(sector_capacity_blocked_unresearched)}\n'
     f'  factor-family-blocked unresearched candidates: '
@@ -7092,4 +7285,6 @@ print(
 )
 end_time = time.perf_counter()
 print(f'Elapsed time: {round(end_time - start_time)} seconds\n')
+set_run_stage('complete')
+write_run_checkpoint(diagnostics['status'])
 signal.alarm(0)

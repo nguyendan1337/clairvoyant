@@ -144,6 +144,8 @@ max_3_5_summary_calls_per_run: 1
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
+# Malformed or omitted patches are retried behind untouched candidates.
+max_judgment_validation_rounds_per_etf: 2
 gemini_batch_size: 15
 target_selected_etfs: 10
 # This is a ceiling, not a requirement for five exact pairs.
@@ -241,12 +243,17 @@ max_etf_sources: 5
 final_summary_enabled: true
 
 top_qvm_cache_expiry_hours: 6
+# Price history and the six-hour QVM cache keep their existing refresh rules.
+# Metadata and holdings use independent timestamps so one cannot refresh the other.
+etf_yf_cache_expiry_days: 7
+etf_fund_cache_expiry_days: 3
 market_context_cache_file: caches/gemini_shared_market_context_cache.json
 etf_research_cache_file: caches/gemini_etf_research_cache.json
 run_diagnostics_file: run_reports/etf_run_report.json
 run_log_file: run_reports/etf_run.log
 market_context_cache_hours: 12
-gemini_research_cache_hours: 12
+# Carry validated evidence across daily runs, then rejudge against today's context.
+gemini_research_cache_hours: 30
 cache_version: 4
 # ETF research remains separate; only the content-addressed market cache is
 # shared with the stock recommender.

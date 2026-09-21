@@ -1,31 +1,11 @@
-ETF STAGE universe_and_quantitative_data run_id=35647853464-1
+ETF STAGE universe_and_quantitative_data run_id=35664903303-1
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run.log
 Checking top ETF QVM cache: caches/top_qvm_etfs_cache.pkl
-Top ETF QVM cache is stale (7.0h old).
-Downloading ETF price history for 2 symbols...
-Benchmark-relative discovery floors: 1Y 15.00%, 3M -6.33%.
-Fetched 250 ETF screener rows at offset 0.
-Fetched 250 ETF screener rows at offset 250.
-Fetched 250 ETF screener rows at offset 500.
-Fetched 250 ETF screener rows at offset 750.
-Fetched 250 ETF screener rows at offset 1000.
-Fetched 14 ETF screener rows at offset 1250.
-
-Raw ETF universe: 1257
-After basic ETF filtering: 699
-Downloading ETF price history for 699 symbols...
-Computing ETF momentum metrics...
-Resolving yfinance metadata (cache first) for all 699 filtered momentum candidates...
-ETF metadata (cache + live):   0%|          | 0/699 [00:00<?, ?it/s]ETF metadata (cache + live):  18%|█▊        | 128/699 [00:00<00:04, 132.35it/s]ETF metadata (cache + live):  41%|████▏     | 290/699 [00:01<00:02, 168.50it/s]ETF metadata (cache + live):  68%|██████▊   | 473/699 [00:02<00:01, 190.28it/s]ETF metadata (cache + live):  75%|███████▍  | 522/699 [00:03<00:01, 141.39it/s]ETF metadata (cache + live):  77%|███████▋  | 541/699 [00:04<00:01, 94.27it/s] ETF metadata (cache + live):  94%|█████████▍| 657/699 [00:05<00:00, 106.70it/s]ETF metadata (cache + live): 100%|██████████| 699/699 [00:05<00:00, 132.80it/s]
-ETF METADATA CACHE {"status": "completed", "eligible": 699, "hits": 693, "live_requests": 6, "failed_symbols": [], "incomplete_symbols": ["SEURF"], "ttl_hours": 168, "save_succeeded": true}
-Excluded obvious non-U.S.-equity ETF mandates after metadata: BWET, UGA, USO, BNO, DBE, DBO, ARTY, BOAT, USL, GSG, PIT, PDBC, DBC, SLVP, OILK, PICK, GTEK, USCI, IXC, HGER, SEA, COMT, CPER, THNQ, LENS, IXN, EPOL, SDCI, SPTE, HTEC, NBCM, FFEM, COMB, RING, BULD, GSIB, JADE, GNR, GVAL, GREK, GEME, CMDT, QQQS, VPL, FITE, DBB, EYLD, NRES, SOYB, GUNR, USE, ENOR, AMZA, EMXF, COPY, PIPE, PLTM, ESGE, PPLT, WEAT, CMDY, GLTR, BCI, EIRL, DFAE, JHAI, CMCI, ZSC, ARGT, COM, IVLU, NORW, KNO, ENFR, AVGV, COMD, EDGH, ISTM, ASGM, RAAX, FTGC, RLY, INFL, MLPX, GOAU, HAWX, ESGG, EWQQF, MXI, IOO, TMLP, GMOM, EFV, EFAS, DIVD, JPXN, TAGS, GGTL, YSAG, THD, AVGE, FGD, PWRZ, FEOE, RGEF, DEW, DBEF, BINT, TPYP, EWC, HERD, AMLP, KROP, CGNG, FGSM, BBCA, TRFM, AAVM, HEFA, DBP, EWK, FLCA, ACWX, PWQQF, WRND, MLPA, DGT, GLOF, USAI, IXJ, GLDM, BAR, IAUM, AAAU, GCOW, SGOL, OUNZ, IAU, FGDL, RGLO, GLD, FEGE, EWI, CGGO, AQLT, WDIV, SPGM, KEAT, HARD, SFGV, BCD, ACWI, KLMT, HSCZ, IPAC
-Final benchmark-relative floors: 3M 3.47%, 1Y 31.01%.
-ETF research candidates: 100 (0 strict benchmark-superior, 10 benchmark-competitive backfill, 90 additional top-QVM reserve; top-QVM target: 100).
-Saved top ETF QVM cache to caches/top_qvm_etfs_cache.pkl.
+Using cached top 102 ETF QVM candidates (2.9h old).
 Fetching structured fund data for 102 ETF research candidates...
-  0%|          | 0/102 [00:00<?, ?it/s] 38%|███▊      | 39/102 [00:00<00:00, 141.72it/s] 54%|█████▍    | 55/102 [00:00<00:00, 76.92it/s]  65%|██████▍   | 66/102 [00:01<00:00, 50.68it/s] 79%|███████▉  | 81/102 [00:01<00:00, 51.04it/s] 85%|████████▌ | 87/102 [00:02<00:00, 16.71it/s] 89%|████████▉ | 91/102 [00:03<00:00, 16.24it/s] 92%|█████████▏| 94/102 [00:03<00:00, 12.44it/s] 95%|█████████▌| 97/102 [00:04<00:00, 11.10it/s] 97%|█████████▋| 99/102 [00:05<00:00,  8.12it/s] 99%|█████████▉| 101/102 [00:05<00:00,  6.27it/s]100%|██████████| 102/102 [00:06<00:00,  5.72it/s]100%|██████████| 102/102 [00:06<00:00, 16.88it/s]
-ETF FUND CACHE {"status": "completed", "hits": 85, "live_requests": 17, "incomplete_symbols": ["GARP"], "save_succeeded": true}
+  0%|          | 0/102 [00:00<?, ?it/s] 38%|███▊      | 39/102 [00:00<00:01, 39.93it/s]100%|██████████| 102/102 [00:00<00:00, 104.37it/s]
+ETF FUND CACHE {"status": "completed", "hits": 101, "live_requests": 1, "incomplete_symbols": ["GARP"], "save_succeeded": true}
 Excluded ETFs below 80% equity assets: ETHB, IALT, ZCSH, BHYP
 
 Top ETF QVM candidates:
@@ -129,224 +109,120 @@ CANDIDATE    OIH 44.954067     40.674231   55.390805      45.780010             
 CANDIDATE    IJR 44.923805     61.751925   83.175151      27.260210                6.642066  -2.077645  14.107231  18.313218
 CANDIDATE   QQQJ 44.560911     37.547141   61.804598      45.889003               45.756458   0.662138  21.778629  23.273846
 Benchmark-QVM override floor: 60.84 (weaker benchmark QVM 63.84 minus 3.00 margin).
-ETF STAGE market_context run_id=35647853464-1
-MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 9.037187113611111, "ttl_hours": 12, "reason": "validated_shared_contract"}
-ETF STAGE research_cache run_id=35647853464-1
-Using compatible validated ETF research cache for VLUE.
+ETF STAGE market_context run_id=35664903303-1
+MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 11.984261005277776, "ttl_hours": 12, "reason": "validated_shared_contract"}
+ETF STAGE research_cache run_id=35664903303-1
+Using validated ETF research cache for VLUE.
 Using compatible validated ETF research cache for VFLO.
-Using compatible validated ETF research cache for XLK.
-Using compatible validated ETF research cache for XLE.
+Using validated ETF research cache for XLK.
+Using validated ETF research cache for XLE.
 Using compatible validated ETF research cache for DIVB.
-Using compatible validated ETF research cache for FTEC.
-Using compatible validated ETF research cache for CRAK.
-Using compatible validated ETF research cache for VONV.
-Using compatible validated ETF research cache for IWX.
-Using compatible validated ETF research cache for IWD.
-Using compatible validated ETF research cache for AVLV.
-Using compatible validated ETF research cache for IYW.
+Using validated ETF research cache for FTEC.
+Using validated ETF research cache for CRAK.
+Using validated ETF research cache for VONV.
+Using validated ETF research cache for IWX.
+Using validated ETF research cache for IWD.
+Using validated ETF research cache for AVLV.
+Using validated ETF research cache for IYW.
 Using compatible validated ETF research cache for SCHD.
-Using compatible validated ETF research cache for FNDX.
-Using compatible validated ETF research cache for SPYG.
+Using validated ETF research cache for FNDX.
+Using validated ETF research cache for SPYG.
 Using compatible validated ETF research cache for XBI.
-Using compatible validated ETF research cache for QQQM.
-Using compatible validated ETF research cache for RSPT.
-Using compatible validated ETF research cache for VOOG.
+Using validated ETF research cache for QQQM.
+Using validated ETF research cache for RSPT.
+Using validated ETF research cache for VOOG.
 Using compatible validated ETF research cache for DYNF.
-Using compatible validated ETF research cache for SEIV.
-Using compatible validated ETF research cache for IUSG.
-Using compatible validated ETF research cache for QQQ.
-Using compatible validated ETF research cache for FENY.
-Using compatible validated ETF research cache for CIBR.
-Using compatible validated ETF research cache for VDE.
-Using compatible validated ETF research cache for DFLV.
-Using compatible validated ETF research cache for IVW.
-Using compatible validated ETF research cache for COPX.
-Using compatible validated ETF research cache for IGM.
-Using compatible validated ETF research cache for VTV.
-Using compatible validated ETF research cache for DFUV.
-Using compatible validated ETF research cache for PVAL.
-Using compatible validated ETF research cache for JQUA.
+Using validated ETF research cache for SEIV.
+Using validated ETF research cache for IUSG.
+Using validated ETF research cache for QQQ.
+Using validated ETF research cache for FENY.
+Using validated ETF research cache for CIBR.
+Using validated ETF research cache for VDE.
+Using validated ETF research cache for DFLV.
+Using validated ETF research cache for IVW.
+Using validated ETF research cache for COPX.
+Using validated ETF research cache for IGM.
+Using validated ETF research cache for VTV.
+Using validated ETF research cache for DFUV.
+Using validated ETF research cache for PVAL.
+Using validated ETF research cache for JQUA.
 Using compatible validated ETF research cache for ARKG.
-Using compatible validated ETF research cache for GDX.
-Using compatible validated ETF research cache for GARP.
-Using compatible validated ETF research cache for XOP.
+Using validated ETF research cache for GDX.
+Using validated ETF research cache for GARP.
+Using validated ETF research cache for XOP.
 Using compatible validated ETF research cache for IBB.
 Using compatible validated ETF research cache for AVUS.
-Using compatible validated ETF research cache for PRF.
-Using compatible validated ETF research cache for IYE.
-Using compatible validated ETF research cache for ONEQ.
-Using compatible validated ETF research cache for MGV.
+Using validated ETF research cache for PRF.
+Using validated ETF research cache for IYE.
+Using validated ETF research cache for ONEQ.
+Using validated ETF research cache for MGV.
 Using compatible validated ETF research cache for JMOM.
-Using compatible validated ETF research cache for HACK.
+Using validated ETF research cache for HACK.
 Using compatible validated ETF research cache for IHE.
-Using compatible validated ETF research cache for HDV.
-Using compatible validated ETF research cache for SPUS.
-Using compatible validated ETF research cache for CGDV.
-Using compatible validated ETF research cache for FNDB.
+Using validated ETF research cache for HDV.
+Using validated ETF research cache for SPUS.
+Using validated ETF research cache for CGDV.
+Using validated ETF research cache for FNDB.
+Using validated ETF research cache for NULV.
 Using compatible validated ETF research cache for XLV.
-Using compatible validated ETF research cache for DFAC.
+Using validated ETF research cache for DFAC.
 Using compatible validated ETF research cache for SIL.
-Using compatible validated ETF research cache for AIQ.
-Using compatible validated ETF research cache for SKYY.
-Using compatible validated ETF research cache for QGRW.
-Using compatible validated ETF research cache for SPHB.
-Using compatible validated ETF research cache for WTV.
-Using compatible validated ETF research cache for MTUM.
-Using compatible validated ETF research cache for BUG.
-Using compatible validated ETF research cache for RWL.
-Using compatible validated ETF research cache for IGE.
-Using compatible validated ETF research cache for SNPE.
-Using compatible validated ETF research cache for DSI.
-Using compatible validated ETF research cache for VHT.
-Using compatible validated ETF research cache for FXN.
-Using compatible validated ETF research cache for SCHV.
-Using compatible validated ETF research cache for FTXN.
-Using compatible validated ETF research cache for COWZ.
-Using compatible validated ETF research cache for THRO.
-Using compatible validated ETF research cache for PWV.
-Using compatible validated ETF research cache for FHLC.
-Using compatible validated ETF research cache for AVUV.
-Using compatible validated ETF research cache for RPV.
-Using compatible validated ETF research cache for IYZ.
-Using compatible validated ETF research cache for DFSV.
-Using compatible validated ETF research cache for IWN.
-Using compatible validated ETF research cache for FDL.
-ETF RESEARCH CACHE {"path": "caches/gemini_etf_research_cache.json", "ttl_hours": 30, "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4", "hits": 79, "misses": 17, "save_succeeded": null}
+Using validated ETF research cache for AIQ.
+Using validated ETF research cache for SKYY.
+Using validated ETF research cache for QGRW.
+Using validated ETF research cache for SPHB.
+Using validated ETF research cache for WTV.
+Using validated ETF research cache for MTUM.
+Using validated ETF research cache for BUG.
+Using validated ETF research cache for RWL.
+Using validated ETF research cache for IGE.
+Using validated ETF research cache for SNPE.
+Using validated ETF research cache for DSI.
+Using validated ETF research cache for VOE.
+Using validated ETF research cache for VHT.
+Using validated ETF research cache for FXN.
+Using validated ETF research cache for SCHV.
+Using validated ETF research cache for FTXN.
+Using validated ETF research cache for COWZ.
+Using validated ETF research cache for THRO.
+Using validated ETF research cache for PWV.
+Using validated ETF research cache for BLCR.
+Using validated ETF research cache for DCOR.
+Using validated ETF research cache for FHLC.
+Using validated ETF research cache for QLTY.
+Using validated ETF research cache for RDVY.
+Using validated ETF research cache for APUE.
+Using validated ETF research cache for AVUV.
+Using validated ETF research cache for RPV.
+Using validated ETF research cache for IYZ.
+Using validated ETF research cache for DFSV.
+Using validated ETF research cache for IWS.
+Using validated ETF research cache for IWN.
+Using validated ETF research cache for FDL.
+Using validated ETF research cache for JAVA.
+Using validated ETF research cache for SCHA.
+ETF RESEARCH CACHE {"path": "caches/gemini_etf_research_cache.json", "ttl_hours": 30, "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4", "hits": 89, "misses": 7, "save_succeeded": null}
 Gemini 3.5 API budget: 1/7 total; 1/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 1/6: ETF judgment initial 1-30 (gemini-3.5-flash, attempt 1/2)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Gemini usage [ETF judgment initial 1-30 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=58592, tool_tokens=0, cached_tokens=0, thinking_tokens=19964, output_tokens=8143, total_tokens=86699
-Gemini response [ETF judgment initial 1-30 (gemini-3.5-flash, attempt 1/2)]: chars=31600, finish=['FinishReason.STOP'], grounding_urls=0
+Gemini usage [ETF judgment initial 1-30 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=59566, tool_tokens=0, cached_tokens=0, thinking_tokens=14911, output_tokens=8896, total_tokens=83373
+Gemini response [ETF judgment initial 1-30 (gemini-3.5-flash, attempt 1/2)]: chars=33885, finish=['FinishReason.STOP'], grounding_urls=0
 ETF judgment batch field validation: 30/30 usable; 0 isolated/unjudged.
 Gemini 3.5 API budget: 2/7 total; 2/6 classification.
 Gemini ETF classification logical call 2/6; API attempt 2/6: ETF judgment initial 31-60 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment initial 31-60 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=61067, tool_tokens=0, cached_tokens=0, thinking_tokens=11039, output_tokens=8365, total_tokens=80471
-Gemini response [ETF judgment initial 31-60 (gemini-3.5-flash, attempt 1/2)]: chars=32667, finish=['FinishReason.STOP'], grounding_urls=0
+Gemini usage [ETF judgment initial 31-60 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=61901, tool_tokens=0, cached_tokens=0, thinking_tokens=10654, output_tokens=8779, total_tokens=81334
+Gemini response [ETF judgment initial 31-60 (gemini-3.5-flash, attempt 1/2)]: chars=33257, finish=['FinishReason.STOP'], grounding_urls=0
 ETF judgment batch field validation: 30/30 usable; 0 isolated/unjudged.
-Cached evidence preview: provisional=10, authoritative=6; unjudged evidence is not a reopened slot.
-ETF STAGE classification_before_new_research run_id=35647853464-1
 Gemini 3.5 API budget: 3/7 total; 3/6 classification.
-Gemini ETF classification logical call 3/6; API attempt 3/6: ETF judgment initial 1-19 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment initial 1-19 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=42042, tool_tokens=0, cached_tokens=0, thinking_tokens=5722, output_tokens=4737, total_tokens=52501
-Gemini response [ETF judgment initial 1-19 (gemini-3.5-flash, attempt 1/2)]: chars=17869, finish=['FinishReason.STOP'], grounding_urls=0
-Warning: invalid ETF judgment patch [FTXN] was isolated without discarding peer judgments: FTXN judgment returned invalid continuation_strength='ADEATE'; expected one of ['ADEQUATE', 'STRONG', 'WEAK'].
-ETF judgment batch field validation: 18/19 usable; 1 isolated/unjudged.
-ETF judgment catch-up required for: FTXN
-Gemini 3.5 API budget: 4/7 total; 4/6 classification.
-Gemini ETF classification logical call 4/6; API attempt 4/6: ETF judgment invalid_patch_recovery 20-20 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment invalid_patch_recovery 20-20 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=9520, tool_tokens=0, cached_tokens=0, thinking_tokens=1273, output_tokens=313, total_tokens=11106
-Gemini response [ETF judgment invalid_patch_recovery 20-20 (gemini-3.5-flash, attempt 1/2)]: chars=1174, finish=['FinishReason.STOP'], grounding_urls=0
-ETF judgment batch field validation: 1/1 usable; 0 isolated/unjudged.
-ETF RESEARCH QUEUE {"planned_capacity": 12, "actual_size": 10, "unused_capacity": 2, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 10, "fresh_added": ["NULV", "VOE", "BLCR", "DCOR", "APUE", "QLTY", "RDVY", "IWS", "SCHA", "JAVA"], "transport_deferred": [], "first_time_symbols": ["APUE", "BLCR", "DCOR", "IWS", "JAVA", "NULV", "QLTY", "RDVY", "SCHA", "VOE"], "fresh_retry_symbols": [], "repair_only_symbols": [], "selected_before": 6, "pending_judgment": 0}
-
-...calling Gemini for ETF batch: NULV, VOE, BLCR, DCOR, APUE, QLTY, RDVY, IWS, SCHA, JAVA...
-
-ETF STAGE research_batch_1 run_id=35647853464-1
-Gemini 2.5 API budget: 1/8 total; 1/6 research.
-Gemini logical request 1/8: ETF batch ranks 52-93 (gemini-2.5-flash, API attempt 1/3; total API attempts=1)
-Gemini usage [ETF batch ranks 52-93]: prompt_tokens=26785, tool_tokens=28360, cached_tokens=0, thinking_tokens=13635, output_tokens=11513, total_tokens=80293
-Google searches performed [ETF batch ranks 52-93]: 10
-  Search: Nuveen ESG Large-Cap Value ETF NULV factsheet holdings sector weights index exposure performance drivers outlook
-  Search: Vanguard Morningstar Mid-Cap Value ETF VOE factsheet holdings sector weights index exposure performance drivers outlook
-  Search: iShares Large Cap Core Active ETF BLCR factsheet holdings sector weights index exposure performance drivers outlook
-  Search: Dimensional US Core Equity 1 ETF DCOR factsheet holdings sector weights index exposure performance drivers outlook
-  Search: ActivePassive U.S. Equity ETF APUE factsheet holdings sector weights index exposure performance drivers outlook
-  Search: GMO U.S. Quality ETF QLTY factsheet holdings sector weights index exposure performance drivers outlook
-  Search: First Trust Rising Dividend Achievers ETF RDVY factsheet holdings sector weights index exposure performance drivers outlook
-  Search: iShares Russell Mid-Cap Value ETF IWS factsheet holdings sector weights index exposure performance drivers outlook
-  Search: Schwab U.S. Small-Cap ETF SCHA factsheet holdings sector weights index exposure performance drivers outlook
-  Search: JPMorgan Active Value ETF JAVA factsheet holdings sector weights index exposure performance drivers outlook
-Gemini response [ETF batch ranks 52-93]: chars=33127, finish=['FinishReason.STOP'], grounding_urls=33
-ETF response-shape inspection:
-  VOE: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=99, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=MARKET_ONLY, adverse_observed=False, mechanism_chars=210, probability=POSSIBLE, materiality=MODERATE
-  BLCR: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=93, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=183, probability=POSSIBLE, materiality=MODERATE
-  APUE: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=99, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=171, probability=POSSIBLE, materiality=MODERATE
-  QLTY: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=201, probability=POSSIBLE, materiality=MODERATE
-  RDVY: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=98, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=194, probability=POSSIBLE, materiality=MODERATE
-  IWS: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=MARKET_ONLY, adverse_observed=False, mechanism_chars=210, probability=POSSIBLE, materiality=MODERATE
-  SCHA: present=True, fields=32, sources=list[4], benchmark=FAIL, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=MARKET_ONLY, adverse_observed=False, mechanism_chars=188, probability=POSSIBLE, materiality=MODERATE
-Validated ETF research [NULV]: 4 distinct URLs
-Deferred ETF research [VOE]: VOE has invalid probability_basis.
-Deferred ETF research [BLCR]: BLCR has invalid probability_basis.
-Validated ETF research [DCOR]: 4 distinct URLs
-Deferred ETF research [APUE]: APUE has invalid probability_basis.
-Deferred ETF research [QLTY]: QLTY has invalid probability_basis.
-Deferred ETF research [RDVY]: RDVY has invalid probability_basis.
-Deferred ETF research [IWS]: IWS has invalid probability_basis.
-Deferred ETF research [SCHA]: SCHA has invalid probability_basis.
-Validated ETF research [JAVA]: 4 distinct URLs
-Batch research summary:
-  candidates: 10
-  fresh research requested: 10
-  fresh-search retries: 0
-  repair-only candidates: 0
-  validated: 3
-  deferred: 7
-Validated ETF classification inspection:
-  NULV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MINIMAL, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=US_LARGE_CAP_ESG_VALUE; mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  DCOR: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=SEVERE, model_eligible=None, python_eligible=False, portfolio_group=Large Blend, canonical_sector=N/A, style=Large Blend, exposure=US_CORE_EQUITY_ACTIVE; mechanism=OBSERVED, probability=LIKELY, materiality=HIGH, dependence=HIGH, basis=NONRECURRING_COMPARISON_ONLY; Excluded by Python because the evidence-derived reversal risk is SEVERE (mechanism=OBSERVED, probability=LIKELY, materiality=HIGH, dependence=HIGH, basis=NONRECURRING_COMPARISON_ONLY).
-    reversal evidence: The fund is being delisted on September 25, 2026, which will result in the termination of the ETF and return of capital to shareholders.; probability: The delisting date of September 25, 2026, is a concrete policy timeline.; effect: The delisting will result in the termination of the ETF, forcing shareholders to liquidate their positions and potentially incur transaction costs or realize gains/losses.
-  JAVA: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=US_LARGE_CAP_ACTIVE_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-ETF STAGE classification_after_research run_id=35647853464-1
-ETF JUDGMENT SCHEDULER {"pending": 3, "force": false, "batch_target": 25, "intermediate_minimum": 15, "remaining_research_calls": 5}
-Accumulating ETF judgment candidates: 3/25; no 3.5 call yet.
-Portfolio preview after batch: provisional=8/10, authoritative/effective=6/10, newly_judged=0.
-ETF RESEARCH QUEUE {"planned_capacity": 12, "actual_size": 7, "unused_capacity": 5, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 0, "fresh_added": [], "transport_deferred": [], "first_time_symbols": [], "fresh_retry_symbols": [], "repair_only_symbols": ["APUE", "BLCR", "IWS", "QLTY", "RDVY", "SCHA", "VOE"], "selected_before": 6, "pending_judgment": 3}
-
-...calling Gemini for ETF batch: VOE, BLCR, APUE, QLTY, RDVY, IWS, SCHA...
-
-ETF STAGE research_batch_2 run_id=35647853464-1
-Gemini 2.5 API budget: 2/8 total; 2/6 research.
-Gemini logical request 2/8: ETF batch ranks 69-93 (gemini-2.5-flash, API attempt 1/3; total API attempts=2)
-Gemini usage [ETF batch ranks 69-93]: prompt_tokens=33824, tool_tokens=0, cached_tokens=0, thinking_tokens=2642, output_tokens=251, total_tokens=36717
-Gemini response [ETF batch ranks 69-93]: chars=709, finish=['FinishReason.STOP'], grounding_urls=0
-ETF structural-repair response inspection:
-  APUE: GENERAL compact patch merged; fields=probability_basis
-  BLCR: GENERAL compact patch merged; fields=probability_basis
-  IWS: GENERAL compact patch merged; fields=probability_basis
-  QLTY: GENERAL compact patch merged; fields=probability_basis
-  RDVY: GENERAL compact patch merged; fields=probability_basis
-  SCHA: GENERAL compact patch merged; fields=probability_basis
-  VOE: GENERAL compact patch merged; fields=probability_basis
-Validated ETF research [VOE]: 4 distinct URLs
-Validated ETF research [BLCR]: 4 distinct URLs
-Validated ETF research [APUE]: 4 distinct URLs
-Validated ETF research [QLTY]: 4 distinct URLs
-Validated ETF research [RDVY]: 4 distinct URLs
-Validated ETF research [IWS]: 4 distinct URLs
-Validated ETF research [SCHA]: 4 distinct URLs
-Batch research summary:
-  candidates: 7
-  fresh research requested: 0
-  fresh-search retries: 0
-  repair-only candidates: 7
-  validated: 7
-  deferred: 0
-Validated ETF classification inspection:
-  VOE: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Mid-Cap Value, canonical_sector=N/A, style=Mid-Cap Value, exposure=US_MID_CAP_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  BLCR: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=True, portfolio_group=Large Blend, canonical_sector=N/A, style=Large Blend, exposure=US_LARGE_CAP_ACTIVE_CORE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-    reversal evidence: Narrow market leadership and high concentration in mega-cap tech stocks could lead to underperformance if market breadth widens or these dominant stocks face a significant correction.; probability: Market context notes narrow market leadership and strong AI-driven earnings, implying concentration risk.; effect: If market leadership broadens beyond mega-cap tech, or if AI-driven growth moderates, the fund's concentrated holdings could lag broader benchmarks.
-  APUE: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=True, portfolio_group=Large Blend, canonical_sector=N/A, style=Large Blend, exposure=US_EQUITY_ACTIVE_PASSIVE_BLEND; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-    reversal evidence: High concentration in mega-cap technology stocks, particularly those benefiting from AI, creates vulnerability if market leadership broadens or AI-driven growth moderates.; probability: Market context highlights strong AI-driven earnings but also notes narrow market leadership.; effect: A rotation away from mega-cap tech or a slowdown in AI-driven growth could cause this fund to underperform broader market benchmarks.
-  QLTY: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Quality, canonical_sector=N/A, style=Quality, exposure=US_QUALITY_EQUITY_ACTIVE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  RDVY: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Dividend, canonical_sector=N/A, style=Dividend, exposure=US_RISING_DIVIDEND_ACHIEVERS; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  IWS: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Mid-Cap Value, canonical_sector=N/A, style=Mid-Cap Value, exposure=US_MID_CAP_VALUE; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  SCHA: admission=BACKFILL, benchmark=FAIL, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=False, portfolio_group=Small Blend, canonical_sector=N/A, style=Small Blend, exposure=US_SMALL_CAP_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-ETF STAGE classification_after_research run_id=35647853464-1
-ETF JUDGMENT SCHEDULER {"pending": 10, "force": false, "batch_target": 25, "intermediate_minimum": 15, "remaining_research_calls": 4}
-Accumulating ETF judgment candidates: 10/25; no 3.5 call yet.
-Portfolio preview after batch: provisional=10/10, authoritative/effective=6/10, newly_judged=0.
-ETF RESEARCH QUEUE {"planned_capacity": 12, "actual_size": 0, "unused_capacity": 12, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 0, "fresh_added": [], "transport_deferred": [], "first_time_symbols": [], "fresh_retry_symbols": [], "repair_only_symbols": [], "selected_before": 6, "pending_judgment": 10}
-ETF STAGE classification_empty_queue_tail run_id=35647853464-1
-Gemini 3.5 API budget: 5/7 total; 5/6 classification.
-Gemini ETF classification logical call 5/6; API attempt 5/6: ETF judgment initial 1-10 (gemini-3.5-flash, attempt 1/2)
-Gemini usage [ETF judgment initial 1-10 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=21875, tool_tokens=0, cached_tokens=0, thinking_tokens=5825, output_tokens=2811, total_tokens=30511
-Gemini response [ETF judgment initial 1-10 (gemini-3.5-flash, attempt 1/2)]: chars=10467, finish=['FinishReason.STOP'], grounding_urls=0
-ETF judgment batch field validation: 10/10 usable; 0 isolated/unjudged.
+Gemini ETF classification logical call 3/6; API attempt 3/6: ETF judgment initial 61-89 (gemini-3.5-flash, attempt 1/2)
+Gemini usage [ETF judgment initial 61-89 (gemini-3.5-flash, attempt 1/2)]: prompt_tokens=61924, tool_tokens=0, cached_tokens=0, thinking_tokens=16781, output_tokens=8625, total_tokens=87330
+Gemini response [ETF judgment initial 61-89 (gemini-3.5-flash, attempt 1/2)]: chars=32986, finish=['FinishReason.STOP'], grounding_urls=0
+ETF judgment batch field validation: 29/29 usable; 0 isolated/unjudged.
+Cached evidence preview: provisional=10, authoritative=6; unjudged evidence is not a reopened slot.
 ETF RESEARCH QUEUE {"planned_capacity": 12, "actual_size": 0, "unused_capacity": 12, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 0, "fresh_added": [], "transport_deferred": [], "first_time_symbols": [], "fresh_retry_symbols": [], "repair_only_symbols": [], "selected_before": 6, "pending_judgment": 0}
-ETF STAGE classification_empty_queue_tail run_id=35647853464-1
+ETF STAGE classification_empty_queue_tail run_id=35664903303-1
 No research candidates remain within current eligibility and per-ETF attempt limits.
-ETF STAGE classification_final_tail run_id=35647853464-1
+ETF STAGE classification_final_tail run_id=35664903303-1
 ETF portfolio shortfall: 6 of 10 requested ETFs passed validated research and portfolio rules. Publishing the validated selections without adding unresearched or ineligible ETFs.
 ETF cross-candidate consistency warnings:
   - VFLO: normalized Mid-Cap Value to Free Cash Flow.
@@ -386,30 +262,30 @@ ETF cross-candidate consistency warnings:
   - FXN: normalized Equity Energy to Energy.
   - FTXN: normalized Equity Energy to Energy.
   - FHLC: normalized Health to Healthcare.
+  - QLTY: normalized Large Blend to Quality.
+  - RDVY: normalized Large Value to Dividend.
   - RPV: normalized Mid-Cap Value to Large Value.
   - IYZ: normalized Communications to Technology.
   - FDL: normalized Large Value to Dividend.
-  - QLTY: normalized Large Blend to Quality.
-  - RDVY: normalized Large Value to Dividend.
 ETF replacement audit:
   RSPT vs FTEC [SECTOR]: INCUMBENT_RETAINED; merit=76.32 vs 78.82 (gap=-2.50); QVM=66.32 vs 70.82; benchmark_relative=93.73 vs 88.75; final=71.32/66.00 vs 74.82/66.00; continuation=STRONG vs STRONG; benchmark=LIKELY/HIGH vs LIKELY/HIGH; risk=MODERATE vs MODERATE.
   IYW vs FTEC [SECTOR]: INCUMBENT_RETAINED; merit=76.05 vs 78.82 (gap=-2.77); QVM=68.05 vs 70.82; benchmark_relative=89.67 vs 88.75; final=72.05/66.00 vs 74.82/66.00; continuation=STRONG vs STRONG; benchmark=LIKELY/HIGH vs LIKELY/HIGH; risk=MODERATE vs MODERATE.
   CIBR vs FTEC [SECTOR]: INCUMBENT_RETAINED; merit=75.12 vs 78.82 (gap=-3.70); QVM=65.12 vs 70.82; benchmark_relative=95.20 vs 88.75; final=70.12/66.00 vs 74.82/66.00; continuation=STRONG vs STRONG; benchmark=LIKELY/HIGH vs LIKELY/HIGH; risk=MODERATE vs MODERATE.
   IGM vs FTEC [SECTOR]: INCUMBENT_RETAINED; merit=71.89 vs 78.82 (gap=-6.93); QVM=62.89 vs 70.82; benchmark_relative=87.08 vs 88.75; final=67.89/66.00 vs 74.82/66.00; continuation=STRONG vs STRONG; benchmark=LIKELY/HIGH vs LIKELY/HIGH; risk=MODERATE vs MODERATE.
 ETF portfolio-rule inspection:
-  rank=2 VFLO: SELECTED — LOW; portfolio_group=Free Cash Flow; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; VFLO's free cash flow focus offers resilience across tech, energy, and healthcare, supporting strong continuation potential over the next six to twelve months, though a broader economic slowdown remains a moderate risk.
-  rank=3 XLK: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; XLK benefits from AI-driven growth and robust mega-cap earnings, supporting strong continuation over the next six to twelve months, but high concentration and valuation overextension present moderate reversal risks.
+  rank=2 VFLO: SELECTED — LOW; portfolio_group=Free Cash Flow; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; VFLO's free cash flow focus offers resilience, but a broader economic slowdown could pressure its diversified holdings.
+  rank=3 XLK: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; XLK benefits from AI-driven growth, but a slowdown or valuation concerns could significantly impact its concentrated tech holdings.
   rank=7 CRAK: NOT SELECTED — INELIGIBLE; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS; Excluded because current holdings do not satisfy the U.S.-equity mandate. CRAK tracks the MVIS Global Oil Refiners Index, which includes global stocks earning at least 50% of revenue from oil refining. Top holdings include non-US companies.
-  rank=6 FTEC: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; FTEC benefits from AI-driven growth and robust mega-cap earnings, supporting strong continuation over the next six to twelve months, but high concentration and valuation overextension present moderate reversal risks.
-  rank=16 XBI: SELECTED — MODERATE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; XBI offers strong continuation potential driven by biotech innovation and equal-weight upside, though high R&D costs and regulatory hurdles present moderate reversal risks over the next six to twelve months.
+  rank=6 FTEC: SELECTED — MODERATE; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; FTEC benefits from AI-driven growth, but a slowdown or valuation concerns could significantly impact its concentrated tech holdings.
+  rank=16 XBI: SELECTED — MODERATE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; XBI offers diversified exposure to the innovative but high-risk biotech sector, where R&D and regulatory challenges pose a hypothetical moderate reversal risk.
   rank=18 RSPT: SKIPPED — SECTOR CAPACITY; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; 2 selected ETFs already use the Technology sector/category.
   rank=12 IYW: SKIPPED — SECTOR CAPACITY; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; 2 selected ETFs already use the Technology sector/category.
   rank=25 CIBR: SKIPPED — SECTOR CAPACITY; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; 2 selected ETFs already use the Technology sector/category.
   rank=30 IGM: SKIPPED — SECTOR CAPACITY; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; 2 selected ETFs already use the Technology sector/category.
   rank=29 COPX: NOT SELECTED — INELIGIBLE; portfolio_group=Basic Materials; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks a market-cap-weighted index of *global* copper mining companies. While it has strong North American exposure, it is technically a global fund. Top holdings include companies listed on TSX, ASX, LSE, and WSE.
-  rank=5 DIVB: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; DIVB's dividend focus offers stability and steady income in a mixed market, but style headwinds relative to high-growth tech make benchmark outperformance uncertain over the next six to twelve months.
+  rank=5 DIVB: SELECTED — LOW; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; DIVB's dividend focus offers stability, but a broad economic downturn could pressure dividend sustainability and fund performance.
   rank=35 ARKG: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Final continuation score 65.38 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=MEDIUM, risk=MODERATE.
-  rank=39 IBB: SELECTED — MODERATE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; IBB benefits from biotech innovation, but faces hypothetical moderate risks from regulatory changes and high R&D costs. Strong trailing returns and robust momentum support a favorable outlook, backed by secular demand and ongoing therapeutic breakthroughs.
+  rank=39 IBB: SELECTED — MODERATE; portfolio_group=Healthcare; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; IBB benefits from biotech innovation, but faces hypothetical moderate risks from regulatory changes and high R&D costs.
   rank=46 HACK: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Final continuation score 62.50 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=HIGH, risk=MODERATE.
   rank=4 XLE: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS; Final continuation score 63.20 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.
   rank=56 AIQ: NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Final continuation score 60.20 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=MEDIUM, risk=MODERATE.
@@ -495,27 +371,27 @@ ETF portfolio-rule inspection:
   rank=78 DCOR: NOT SELECTED — INELIGIBLE; portfolio_group=Large Blend; mechanism=OBSERVED, probability=LIKELY, materiality=HIGH, dependence=HIGH, basis=NONRECURRING_COMPARISON_ONLY; Excluded by authoritative ETF judgment because reversal risk is SEVERE.
 
 Final ETF selections: VFLO, XLK, FTEC, XBI, DIVB, IBB
-Research efficiency: 10 unique ETFs, 10 requested searches, 10 charged search attempts, 0 repeated searches.
+Research efficiency: 0 unique ETFs, 0 requested searches, 0 charged search attempts, 0 repeated searches.
 
 CONTEXT REVIEW
 
-Research summary: 89 ETFs have validated research (10 researched and validated this run, 79 supplied by validated cache); 10 charged ETF search attempts, 7 structural repair attempts, 2 research batches, 0 accepted exclusion-only evidence warnings.
+Research summary: 89 ETFs have validated research (0 researched and validated this run, 89 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.
 Selected ETFs: VFLO, XLK, FTEC, XBI, DIVB, IBB
 |   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                              |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                      | Explanation                                                                                                                                                                                                                                                                                           |
 |-----------:|:---------|:----------------|:----------------------------------------------------|------------------------:|-----------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | VFLO's free cash flow focus offers resilience across tech, energy, and healthcare, supporting strong continuation potential over the next six to twelve months, though a broader economic slowdown remains a moderate risk.                                                                           |
-|          3 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | XLK benefits from AI-driven growth and robust mega-cap earnings, supporting strong continuation over the next six to twelve months, but high concentration and valuation overextension present moderate reversal risks.                                                                               |
+|          2 | VFLO     | Free Cash Flow  | SELECTED — LOW                                      |                       1 |                      1 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | VFLO's free cash flow focus offers resilience, but a broader economic slowdown could pressure its diversified holdings.                                                                                                                                                                               |
+|          3 | XLK      | Technology      | SELECTED — MODERATE                                 |                       1 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | XLK benefits from AI-driven growth, but a slowdown or valuation concerns could significantly impact its concentrated tech holdings.                                                                                                                                                                   |
 |          7 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE                           |                       0 |                      2 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS     | Excluded because current holdings do not satisfy the U.S.-equity mandate. CRAK tracks the MVIS Global Oil Refiners Index, which includes global stocks earning at least 50% of revenue from oil refining. Top holdings include non-US companies.                                                      |
-|          6 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | FTEC benefits from AI-driven growth and robust mega-cap earnings, supporting strong continuation over the next six to twelve months, but high concentration and valuation overextension present moderate reversal risks.                                                                              |
-|         16 | XBI      | Healthcare      | SELECTED — MODERATE                                 |                       1 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | XBI offers strong continuation potential driven by biotech innovation and equal-weight upside, though high R&D costs and regulatory hurdles present moderate reversal risks over the next six to twelve months.                                                                                       |
+|          6 | FTEC     | Technology      | SELECTED — MODERATE                                 |                       2 |                      3 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                                | FTEC benefits from AI-driven growth, but a slowdown or valuation concerns could significantly impact its concentrated tech holdings.                                                                                                                                                                  |
+|         16 | XBI      | Healthcare      | SELECTED — MODERATE                                 |                       1 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | XBI offers diversified exposure to the innovative but high-risk biotech sector, where R&D and regulatory challenges pose a hypothetical moderate reversal risk.                                                                                                                                       |
 |         18 | RSPT     | Technology      | SKIPPED — SECTOR CAPACITY                           |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | 2 selected ETFs already use the Technology sector/category.                                                                                                                                                                                                                                           |
 |         12 | IYW      | Technology      | SKIPPED — SECTOR CAPACITY                           |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | 2 selected ETFs already use the Technology sector/category.                                                                                                                                                                                                                                           |
 |         25 | CIBR     | Technology      | SKIPPED — SECTOR CAPACITY                           |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | 2 selected ETFs already use the Technology sector/category.                                                                                                                                                                                                                                           |
 |         30 | IGM      | Technology      | SKIPPED — SECTOR CAPACITY                           |                       2 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | 2 selected ETFs already use the Technology sector/category.                                                                                                                                                                                                                                           |
 |         29 | COPX     | Basic Materials | NOT SELECTED — INELIGIBLE                           |                       0 |                      4 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks a market-cap-weighted index of *global* copper mining companies. While it has strong North American exposure, it is technically a global fund. Top holdings include companies listed on TSX, ASX, LSE, and WSE. |
-|          5 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | DIVB's dividend focus offers stability and steady income in a mixed market, but style headwinds relative to high-growth tech make benchmark outperformance uncertain over the next six to twelve months.                                                                                              |
+|          5 | DIVB     | Dividend        | SELECTED — LOW                                      |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | DIVB's dividend focus offers stability, but a broad economic downturn could pressure dividend sustainability and fund performance.                                                                                                                                                                    |
 |         35 | ARKG     | Healthcare      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       1 |                      5 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 65.38 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                      |
-|         39 | IBB      | Healthcare      | SELECTED — MODERATE                                 |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                     | IBB benefits from biotech innovation, but faces hypothetical moderate risks from regulatory changes and high R&D costs. Strong trailing returns and robust momentum support a favorable outlook, backed by secular demand and ongoing therapeutic breakthroughs.                                      |
+|         39 | IBB      | Healthcare      | SELECTED — MODERATE                                 |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                     | IBB benefits from biotech innovation, but faces hypothetical moderate risks from regulatory changes and high R&D costs.                                                                                                                                                                               |
 |         46 | HACK     | Technology      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Final continuation score 62.50 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=HIGH, risk=MODERATE.                                                                                                                                                        |
 |          4 | XLE      | Energy          | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       0 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS     | Final continuation score 63.20 is below the calibrated ETF floor 66.00; continuation=ADEQUATE, benchmark=UNCERTAIN, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                 |
 |         56 | AIQ      | Technology      | NOT SELECTED — FINAL SCORE BELOW CALIBRATED MINIMUM |                       2 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                            | Final continuation score 60.20 is below the calibrated ETF floor 66.00; continuation=STRONG, benchmark=LIKELY, confidence=MEDIUM, risk=MODERATE.                                                                                                                                                      |
@@ -600,86 +476,15 @@ Selected ETFs: VFLO, XLK, FTEC, XBI, DIVB, IBB
 |         91 | FDL      | Dividend        | NOT SELECTED — INELIGIBLE                           |                       1 |                      6 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.                                                                                                                                                                                |
 |         78 | DCOR     | Large Blend     | NOT SELECTED — INELIGIBLE                           |                       0 |                      6 | mechanism=OBSERVED, probability=LIKELY, materiality=HIGH, dependence=HIGH, basis=NONRECURRING_COMPARISON_ONLY                                                        | Excluded by authoritative ETF judgment because reversal risk is SEVERE.                                                                                                                                                                                                                               |
 
-ETF STAGE summary run_id=35647853464-1
-Gemini 3.5 API budget: 6/7 total; 1/1 summary.
-Gemini 3.5 summary call 6/7: ETF HTML summary (gemini-3.5-flash)
-Gemini usage [ETF HTML summary]: prompt_tokens=8881, tool_tokens=0, cached_tokens=0, thinking_tokens=6709, output_tokens=1477, total_tokens=17067
-Gemini response [ETF HTML summary]: chars=6935, finish=['FinishReason.STOP'], grounding_urls=0
+ETF STAGE summary run_id=35664903303-1
+Gemini 3.5 API budget: 4/7 total; 1/1 summary.
+Gemini 3.5 summary call 4/7: ETF HTML summary (gemini-3.5-flash)
+Gemini usage [ETF HTML summary]: prompt_tokens=8789, tool_tokens=0, cached_tokens=0, thinking_tokens=7940, output_tokens=1523, total_tokens=18252
+Gemini response [ETF HTML summary]: chars=7153, finish=['FinishReason.STOP'], grounding_urls=0
 Using Gemini 3.5-written ETF HTML summary.
-Generated by model(s): gemini-3.5-flash, gemini-2.5-flash
-ETF STAGE publish_html run_id=35647853464-1
-Classification changes versus prior ETF run:
-  AIQ: risk_exposure_group
-  ARKG: risk_exposure_group
-  AVLV: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  AVUS: risk_exposure_group
-  AVUV: risk_exposure_group
-  BUG: risk_exposure_group
-  CGDV: risk_exposure_group
-  CIBR: risk_exposure_group
-  COWZ: risk_exposure_group
-  CRAK: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  DFLV: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  DFSV: risk_exposure_group
-  DFUV: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  DSI: risk_exposure_group
-  DYNF: reversal_risk, exposure_reversal_risk, risk_exposure_group
-  FDL: risk_exposure_group
-  FENY: risk_exposure_group
-  FHLC: risk_exposure_group
-  FNDB: risk_exposure_group
-  FNDX: risk_exposure_group
-  FTEC: risk_exposure_group
-  FTXN: risk_exposure_group
-  FXN: risk_exposure_group
-  GARP: risk_exposure_group
-  GDX: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  HACK: risk_exposure_group
-  HDV: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  IBB: risk_exposure_group
-  IGE: risk_exposure_group
-  IGM: entry_reversal_risk, risk_exposure_group
-  IHE: risk_exposure_group
-  IUSG: reversal_risk, exposure_reversal_risk, risk_exposure_group
-  IVW: reversal_risk, exposure_reversal_risk, risk_exposure_group
-  IWD: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  IWN: risk_exposure_group
-  IWX: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  IYE: risk_exposure_group
-  IYW: risk_exposure_group
-  IYZ: risk_exposure_group
-  JMOM: risk_exposure_group
-  JQUA: risk_exposure_group
-  MGV: risk_exposure_group
-  ONEQ: risk_exposure_group
-  PRF: risk_exposure_group
-  PVAL: exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  PWV: risk_exposure_group
-  QGRW: risk_exposure_group
-  QQQ: risk_exposure_group
-  QQQM: risk_exposure_group
-  RPV: risk_exposure_group
-  RSPT: risk_exposure_group
-  RWL: risk_exposure_group
-  SCHV: risk_exposure_group
-  SEIV: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  SIL: risk_exposure_group
-  SKYY: risk_exposure_group
-  SPUS: risk_exposure_group
-  SPYG: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  VDE: risk_exposure_group
-  VFLO: research_admission
-  VHT: risk_exposure_group
-  VLUE: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  VONV: reversal_risk, exposure_reversal_risk, entry_reversal_risk, continuation_strength, benchmark_outperformance_outlook, holdings_concentration, construction_concentration, primary_reversal_channel, judgment_model, risk_exposure_group
-  VOOG: reversal_risk, exposure_reversal_risk, risk_exposure_group
-  VTV: risk_exposure_group
-  WTV: risk_exposure_group
-  XBI: risk_exposure_group
-  XLE: research_admission, risk_exposure_group
-  XLK: risk_exposure_group
-  XLV: risk_exposure_group
-  XOP: risk_exposure_group
+Generated by model(s): gemini-3.5-flash
+ETF STAGE publish_html run_id=35664903303-1
+Classification consistency: no changes among comparable cached ETFs.
 ETF runtime reconciliation summary: no label repairs were needed.
 ETF COVERAGE {"counts": {"JUDGED_NOT_SELECTED": 83, "SELECTED": 6, "NEVER_REQUESTED": 7}, "actionable_never_requested": [], "actionable_retryable": [], "validated_unjudged": [], "report_saved": true}
 ETF selection-control summary:
@@ -699,14 +504,14 @@ ETF selection-control summary:
   sector-capacity-blocked unresearched candidates: 4
   factor-family-blocked unresearched candidates: 0
 Gemini request budget:
-  logical calls: 2/8
-  ETF research logical calls: 2/6
+  logical calls: 0/8
+  ETF research logical calls: 0/6
   summary logical calls: 0
-  ETF judgment logical calls: 5/6
-  ETF judgment API attempts: 5/6
+  ETF judgment logical calls: 3/6
+  ETF judgment API attempts: 3/6
   ETF 3.5 summary API attempts: 1/1
-  total Gemini 3.5 API attempts: 6/7
-  actual API attempts: 2/8 (research=2, context=0, summary=0)
-Elapsed time: 433 seconds
+  total Gemini 3.5 API attempts: 4/7
+  actual API attempts: 0/8 (research=0, context=0, summary=0)
+Elapsed time: 257 seconds
 
-ETF STAGE complete run_id=35647853464-1
+ETF STAGE complete run_id=35664903303-1

@@ -78,6 +78,8 @@ classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
 classification_quota_exhausted = False
+classification_provider_failures = {}
+classification_fallback_api_attempts_used = 0
 summary_35_api_attempts_used = 0
 classification_validation_rounds = {}
 classification_validation_diagnostics = []
@@ -162,6 +164,7 @@ class GeminiRequestBudget:
         self.research_api_attempts = 0
         self.summary_api_attempts = 0
         self.context_api_attempts = 0
+        self.classification_api_attempts = 0
         self.max_api_attempts = int(
             total if max_api_attempts is None else max_api_attempts
         )
@@ -202,6 +205,8 @@ class GeminiRequestBudget:
             self.research_api_attempts += 1
         elif category == 'summary':
             self.summary_api_attempts += 1
+        elif category == 'classification':
+            self.classification_api_attempts += 1
         else:
             self.context_api_attempts += 1
 
@@ -600,6 +605,7 @@ def write_run_checkpoint(status='RUNNING', error=None):
             'classification_api_attempts': classification_api_attempts_used,
             'classification_validation': classification_validation_diagnostics,
             'classification_calls': classification_call_diagnostics,
+            'classification_provider_failures': classification_provider_failures,
             'runtime_reconciliations': runtime_reconciliation_diagnostics,
             'api_attempts': api_attempt_diagnostics,
             'batches': state.get('batch_research_diagnostics', []),
@@ -4474,6 +4480,42 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     return normalized
 
 
+def available_classification_models():
+    """Return judges that can still be called within both workload and family caps."""
+    if (classification_quota_exhausted
+            or classification_logical_calls_used >= max_classification_logical_calls_per_run
+            or classification_api_attempts_used >= max_classification_api_attempts_per_run):
+        return []
+    available = []
+    for model in dict.fromkeys((classification_model, classification_fallback_model)):
+        if model in classification_provider_failures:
+            continue
+        if api_attempt_budget.remaining(model, 'classification') <= 0:
+            continue
+        if GeminiApiAttemptBudget.model_family(model) == '2.5':
+            budget = globals().get('request_budget')
+            if (classification_fallback_api_attempts_used >= max_2_5_classification_fallback_calls_per_run
+                    or budget is None or not budget.can_reserve('classification')):
+                continue
+        available.append(model)
+    return available
+
+
+def research_has_judgment_capacity():
+    """Never spend research calls when no judge can use their results."""
+    models = available_classification_models()
+    if any(GeminiApiAttemptBudget.model_family(model) != '2.5' for model in models):
+        return True
+    # Research and the emergency judge share 2.5 capacity. Leave at least one
+    # actual request for judgment; a deterministic summary needs no reservation.
+    return bool(models) and (
+        api_attempt_budget.family_limits.get('2.5', 0)
+        - api_attempt_budget.family_used.get('2.5', 0) > 1
+        and request_budget.max_api_attempts - request_budget.api_attempts > 1
+        and request_budget.total - request_budget.total_used > 1
+    )
+
+
 def safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
 ):
@@ -4502,9 +4544,10 @@ def safe_judge_etf_research_pool(
 def judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
 ):
-    """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
+    """Judge grounded evidence, with bounded no-Search fallback during outages."""
     global classification_logical_calls_used, classification_api_attempts_used
     global classification_quota_exhausted
+    global classification_fallback_api_attempts_used
     if classification_quota_exhausted:
         return research_by_symbol
     candidate_by_symbol = {
@@ -4566,8 +4609,9 @@ def judge_etf_research_pool(
             for symbol in symbols:
                 record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
-        if api_attempt_budget.remaining(classification_model, 'classification') <= 0:
-            print('ETF model-family classification budget exhausted; remaining ETFs stay unjudged.')
+        models = available_classification_models()
+        if not models:
+            print('ETF classification unavailable or exhausted; remaining ETFs stay unjudged.')
             for symbol in symbols:
                 record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
@@ -4618,16 +4662,21 @@ def judge_etf_research_pool(
             + '\n\nPEER_CLASSIFICATIONS_FROM_EARLIER_BATCHES:\n' + json.dumps(prior_peer_patches, ensure_ascii=False)
             + '\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n' + json.dumps(compact, ensure_ascii=False)
         )
-        models = [classification_model]
-        if classification_fallback_model not in models:
-            models.append(classification_fallback_model)
         patches = None
         used_model = None
         last_error = None
+        response_received = False
         for model_index, model_name in enumerate(models):
-            attempts = classification_attempts if model_index == 0 else 1
+            fallback = model_name != classification_model
+            family = GeminiApiAttemptBudget.model_family(model_name)
+            attempts = classification_attempts if not fallback else 1
             for attempt in range(1, attempts + 1):
                 if classification_api_attempts_used >= max_classification_api_attempts_per_run:
+                    break
+                if family == '2.5' and (
+                    classification_fallback_api_attempts_used >= max_2_5_classification_fallback_calls_per_run
+                    or not request_budget.can_reserve('classification')
+                ):
                     break
                 attempt_started = time.perf_counter()
                 stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
@@ -4643,12 +4692,16 @@ def judge_etf_research_pool(
                         'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used,
                         'symbols': list(batch_symbols),
-                        'success': False, 'fallback': model_index > 0,
+                        'success': False, 'fallback': fallback,
                         'error': str(exc),
                         'status': 'API_BUDGET_EXHAUSTED',
                     })
                     print(f'ETF API-attempt budget stopped {stage}: {exc}')
                     break
+                if family == '2.5':
+                    request_budget.reserve('classification')
+                    request_budget.record_api_attempt('classification')
+                    classification_fallback_api_attempts_used += 1
                 classification_api_attempts_used += 1
                 print(
                     f'Gemini ETF classification logical call '
@@ -4662,10 +4715,14 @@ def judge_etf_research_pool(
                             classification_thinking_budget,
                             enable_search=False,
                             response_mime_type='application/json',
-                            max_output_tokens=classification_max_output_tokens,
+                            max_output_tokens=(
+                                min(classification_max_output_tokens, gemini_max_output_tokens)
+                                if family == '2.5' else classification_max_output_tokens
+                            ),
                         ),
                         contents=prompt,
                     )
+                    response_received = True
                     metadata = extract_gemini_metadata(response)
                     metadata['response_text_chars'] = len(getattr(response, 'text', '') or '')
                     print_gemini_metadata(stage, metadata)
@@ -4698,7 +4755,7 @@ def judge_etf_research_pool(
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
-                        'success': True, 'fallback': model_index > 0,
+                        'success': True, 'fallback': fallback,
                         'returned_symbols': sorted(patch_by_symbol),
                         'missing_symbols': missing, 'duplicate_symbols': sorted(duplicates),
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
@@ -4713,7 +4770,7 @@ def judge_etf_research_pool(
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
-                        'success': False, 'fallback': model_index > 0,
+                        'success': False, 'fallback': fallback,
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'error': str(exc),
                     })
@@ -4722,17 +4779,41 @@ def judge_etf_research_pool(
                     # transient. Repeating the same model/prompt usually reproduces it,
                     # so move directly to the fallback model instead of burning budget.
                     if is_daily_quota_error(exc):
-                        classification_quota_exhausted = True
+                        classification_provider_failures[model_name] = {
+                            'reason': 'daily_quota_exhausted', 'error': str(exc),
+                        }
                         break
                     if isinstance(exc, ValueError) or not is_transient_gemini_error(exc):
+                        if not isinstance(exc, ValueError):
+                            classification_provider_failures[model_name] = {
+                                'reason': 'nonretryable_provider_error', 'error': str(exc),
+                            }
                         break
+                    if attempt >= attempts:
+                        classification_provider_failures[model_name] = {
+                            'reason': 'transient_attempts_exhausted', 'error': str(exc),
+                        }
+                        print(f'ETF judge circuit opened for {model_name}; no more requests to it this run.')
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
-            if patches is not None or classification_quota_exhausted:
+            if patches is not None:
                 break
         if patches is None:
             print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
-            if classification_quota_exhausted:
+            classification_quota_exhausted = all(
+                classification_provider_failures.get(model, {}).get('reason') == 'daily_quota_exhausted'
+                for model in dict.fromkeys((classification_model, classification_fallback_model))
+            )
+            if not response_received:
+                # No response means no candidate validation occurred. In
+                # particular, six 503s must never exhaust ETF repair rounds.
+                classification_validation_diagnostics.append({
+                    'logical_call': classification_logical_calls_used,
+                    'requested': list(batch_symbols), 'validated_count': 0,
+                    'provider_unavailable': True, 'validation_rounds_consumed': 0,
+                    'error': str(last_error),
+                })
+                write_run_checkpoint()
                 break
             # A wholly malformed response must not starve untouched peers.
             # Treat the batch as missing patches and apply the same bounded
@@ -5479,8 +5560,13 @@ classification_model = str(config.get('classification_model', 'gemini-3.5-flash'
 classification_fallback_model = str(config.get('classification_fallback_model', classification_model))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
-if any('3.5' not in model for model in (classification_model, classification_fallback_model, summary_model)):
-    raise ValueError('Classification and primary summary models must use the separately budgeted Gemini 3.5 family.')
+if any('3.5' not in model for model in (classification_model, summary_model)):
+    raise ValueError('Primary classification and summary models must use the separately budgeted Gemini 3.5 family.')
+if GeminiApiAttemptBudget.model_family(classification_fallback_model) not in {'2.5', '3.5'}:
+    raise ValueError('Classification fallback must use a budgeted Gemini 2.5 or 3.5 model.')
+max_2_5_classification_fallback_calls_per_run = min(2, max(0, int(config.get(
+    'max_2_5_classification_fallback_calls_per_run', 2
+))))
 if any('2.5' not in model for model in (model_primary, model_fallback, summary_fallback_model)):
     raise ValueError('Research/context and summary fallback models must use the separately budgeted Gemini 2.5 family.')
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
@@ -5949,6 +6035,7 @@ api_attempt_budget = GeminiApiAttemptBudget(
         ('2.5', 'market'): max_2_5_market_calls_per_run,
         ('2.5', 'research'): max_2_5_research_calls_per_run,
         ('2.5', 'summary'): max_2_5_summary_fallback_calls_per_run,
+        ('2.5', 'classification'): max_2_5_classification_fallback_calls_per_run,
     },
 )
 call_diagnostics = []
@@ -6265,6 +6352,7 @@ while (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
+    and research_has_judgment_capacity()
 ):
     if len(selected) >= target_selected_etfs and pending_retries:
         actionable_pending = []
@@ -7040,6 +7128,7 @@ if (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
+    and research_has_judgment_capacity()
 ):
     print(
         'WARNING — ETF backfill invariant: portfolio is short while actionable '
@@ -7065,8 +7154,9 @@ if partial_portfolio:
     print(
         'ETF portfolio shortfall: '
         f'{len(selected)} of {target_selected_etfs} requested ETFs passed '
-        'validated research and portfolio rules. Publishing the validated '
-        'selections without adding unresearched or ineligible ETFs.'
+        'validated research and portfolio rules. '
+        + ('Publishing only the validated selections.' if selected else
+           'The empty result will not replace the existing page.')
     )
 consistency_warnings = audit_etf_consistency(candidate_records, research_by_symbol)
 research_disposition = {}
@@ -7123,10 +7213,15 @@ context_review = build_context_review(
 )
 print('\n' + context_review + '\n')
 
+publication_allowed = bool(selected)
+publication_failure_reason = None if publication_allowed else (
+    'No validated ETF selections were produced. Keeping the existing page unchanged; '
+    'provider failures or incomplete judgment must not publish an empty portfolio.'
+)
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
 set_run_stage('summary')
-if config.get('final_summary_enabled', True):
+if publication_allowed and config.get('final_summary_enabled', True):
     selected_summary_input = build_summary_input(selected)
     summary_prompt = (
         config['prompt_html_summary'].rstrip()
@@ -7137,8 +7232,7 @@ if config.get('final_summary_enabled', True):
     )
     summary_data = None
     if (
-        classification_api_attempts_used + summary_35_api_attempts_used
-        < max_gemini_35_calls_per_run
+        summary_model not in classification_provider_failures
         and api_attempt_budget.remaining(summary_model, 'summary') > 0
     ):
         api_attempt_budget.reserve(
@@ -7146,9 +7240,7 @@ if config.get('final_summary_enabled', True):
         )
         summary_35_api_attempts_used += 1
         stage = 'ETF HTML summary'
-        total_35_attempt = (
-            classification_api_attempts_used + summary_35_api_attempts_used
-        )
+        total_35_attempt = api_attempt_budget.family_used.get('3.5', 0)
         print(
             f'Gemini 3.5 summary call {total_35_attempt}/'
             f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
@@ -7268,13 +7360,16 @@ df_html_table = df_html.to_html(
     border=0,
 )
 set_run_stage('publish_html')
-update_html_page(
-    final_recommendations,
-    df_html_table,
-    'etf_page_template.html',
-    'etf_index.html',
-    model_used,
-)
+if publication_allowed:
+    update_html_page(
+        final_recommendations,
+        df_html_table,
+        'etf_page_template.html',
+        'etf_index.html',
+        model_used,
+    )
+else:
+    print('ETF PUBLICATION BLOCKED: ' + publication_failure_reason)
 # previous_diagnostics was loaded before the run so classification drift
 # compares against the prior execution rather than the report being written now.
 current_classifications = {
@@ -7381,7 +7476,10 @@ diagnostics = {
         actionable_unresearched, max_fresh_research_attempts_per_etf,
     ),
     'generated_at': datetime.now(UTC).isoformat(),
-    'status': 'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS',
+    'status': ('FAILED' if not publication_allowed else
+               'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS'),
+    'publication_allowed': publication_allowed,
+    'publication_failure_reason': publication_failure_reason,
     'selection_target': target_selected_etfs,
     'selection_count': len(selected),
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
@@ -7389,10 +7487,13 @@ diagnostics = {
         'research_stop_reason': (
             'daily_quota_exhausted' if research_quota_exhausted else
             'portfolio_target_met' if not partial_portfolio else
+            'classification_unavailable_or_exhausted' if not research_has_judgment_capacity() else
             'api_or_logical_budget_exhausted' if research_budget_exhausted else
             'no_actionable_work_within_attempt_limits'
         ),
         'classification_quota_exhausted': classification_quota_exhausted,
+        'classification_provider_failures': classification_provider_failures,
+        'available_classification_models': available_classification_models(),
         'classification_api_attempts_remaining': api_attempt_budget.remaining(
             classification_model, 'classification'
         ),
@@ -7429,9 +7530,8 @@ diagnostics = {
         'research_api_attempts': request_budget.research_api_attempts,
         'summary_api_attempts': request_budget.summary_api_attempts,
         'summary_35_api_attempts': summary_35_api_attempts_used,
-        'total_35_api_attempts': (
-            classification_api_attempts_used + summary_35_api_attempts_used
-        ),
+        'total_35_api_attempts': api_attempt_budget.family_used.get('3.5', 0),
+        'classification_fallback_api_attempts': classification_fallback_api_attempts_used,
         'context_api_attempts': request_budget.context_api_attempts,
         'per_model_api_attempts': api_attempt_budget.snapshot(),
         'classification_logical_calls': classification_logical_calls_used,
@@ -7557,15 +7657,18 @@ print(
     f'  ETF judgment API attempts: {classification_api_attempts_used}/{max_classification_api_attempts_per_run}\n'
     f'  ETF 3.5 summary API attempts: {summary_35_api_attempts_used}/1\n'
     f'  total Gemini 3.5 API attempts: '
-    f'{classification_api_attempts_used + summary_35_api_attempts_used}/'
+    f'{api_attempt_budget.family_used.get("3.5", 0)}/'
     f'{max_gemini_35_calls_per_run}\n'
     f'  actual API attempts: {request_budget.api_attempts}/{request_budget.max_api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '
+    f'classification_fallback={request_budget.classification_api_attempts}, '
     f'summary={request_budget.summary_api_attempts})'
 )
 end_time = time.perf_counter()
 print(f'Elapsed time: {round(end_time - start_time)} seconds\n')
-set_run_stage('complete')
+set_run_stage('complete' if publication_allowed else 'failed')
 write_run_checkpoint(diagnostics['status'])
 signal.alarm(0)
+if not publication_allowed:
+    raise RuntimeError(publication_failure_reason)

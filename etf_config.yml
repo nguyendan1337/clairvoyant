@@ -124,7 +124,10 @@ model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
 # Gemini 3.5 Flash is the authoritative no-Search ETF continuation/risk judge.
 classification_model: gemini-3.5-flash
-classification_fallback_model: gemini-3.5-flash
+# Bounded no-Search fallback only when the primary judge cannot return a
+# usable response. It uses the same judgment prompt and validators.
+classification_fallback_model: gemini-2.5-flash
+max_2_5_classification_fallback_calls_per_run: 2
 # The HTML summary normally uses the seventh 3.5 call. If that call fails,
 # retry once on 2.5 Flash using the reserved eighth 2.5-stage call.
 summary_model: gemini-3.5-flash
@@ -132,8 +135,9 @@ summary_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
 classification_attempts: 2
-# Six calls are available to judgment, including retries. One additional 3.5
-# call is reserved exclusively for the HTML summary.
+# Six total attempts are available to judgment, including provider retries and
+# fallback attempts. The fallback also shares the existing eight-call 2.5 cap.
+# One additional 3.5 call is reserved exclusively for the HTML summary.
 max_classification_logical_calls_per_run: 6
 max_classification_api_attempts_per_run: 6
 # Hard model-family and workload ceilings count actual HTTP attempts, including

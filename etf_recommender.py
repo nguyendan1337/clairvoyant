@@ -78,10 +78,10 @@ classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
 classification_quota_exhausted = False
-classification_provider_failures = {}
-classification_fallback_api_attempts_used = 0
 summary_35_api_attempts_used = 0
-classification_validation_rounds = {}
+classification_omission_rounds = {}
+classification_invalid_patch_rounds = {}
+classification_retry_kind = {}
 classification_validation_diagnostics = []
 classification_scheduling_diagnostics = []
 runtime_reconciliation_diagnostics = []
@@ -164,7 +164,6 @@ class GeminiRequestBudget:
         self.research_api_attempts = 0
         self.summary_api_attempts = 0
         self.context_api_attempts = 0
-        self.classification_api_attempts = 0
         self.max_api_attempts = int(
             total if max_api_attempts is None else max_api_attempts
         )
@@ -205,8 +204,6 @@ class GeminiRequestBudget:
             self.research_api_attempts += 1
         elif category == 'summary':
             self.summary_api_attempts += 1
-        elif category == 'classification':
-            self.classification_api_attempts += 1
         else:
             self.context_api_attempts += 1
 
@@ -605,8 +602,6 @@ def write_run_checkpoint(status='RUNNING', error=None):
             'classification_api_attempts': classification_api_attempts_used,
             'classification_validation': classification_validation_diagnostics,
             'classification_calls': classification_call_diagnostics,
-            'classification_provider_failures': classification_provider_failures,
-            'runtime_reconciliations': runtime_reconciliation_diagnostics,
             'api_attempts': api_attempt_diagnostics,
             'batches': state.get('batch_research_diagnostics', []),
             'validated_symbols': sorted(state.get('research_by_symbol', {})),
@@ -655,7 +650,8 @@ def build_coverage_diagnostics(candidates, research, requests, attempts, selecte
             'state': state, 'requests': requests.get(symbol, 0),
             'charged_research_attempts': attempts.get(symbol, 0),
             'actionable_for_research': symbol in actionable_symbols,
-            'judgment_validation_rounds': classification_validation_rounds.get(symbol, 0),
+            'judgment_omission_rounds': classification_omission_rounds.get(symbol, 0),
+            'judgment_invalid_patch_rounds': classification_invalid_patch_rounds.get(symbol, 0),
             'judgment_error': result.get('judgment_validation_error'),
         }
     return {
@@ -2967,179 +2963,8 @@ def reconcile_dynamic_risk_event_id(result, active_risk_events):
     return best_event_id
 
 
-def reject_risk_event_applicability(result, candidate, stage, condition):
-    """Reject one assignment without changing its evidence or risk rating."""
-    symbol = str(result.get('symbol') or candidate.get('Symbol') or '').upper()
-    event_id = str(result.get('primary_risk_event_id') or '').strip()
-    diagnostic = {
-        'type': 'risk_event_applicability_failure', 'symbol': symbol,
-        'event_id': event_id, 'validation_stage': stage,
-        'failed_condition': condition, 'repair_status': 'awaiting_scheduler',
-    }
-    runtime_reconciliation_diagnostics.append(diagnostic)
-    print('ETF EVENT APPLICABILITY ' + json.dumps(diagnostic))
-    raise ValueError(
-        f'{symbol} risk-event applicability failed for primary_risk_event_id '
-        f'{event_id!r} at {stage}: {condition}. Use only supplied grounded '
-        'evidence to repair the inconsistent assignment; do not invent evidence '
-        'or lower risk merely to pass validation.'
-    )
-
-
-def record_risk_event_repair_status(symbol, stage, status):
-    """Attach the existing scheduler's outcome to this validation failure."""
-    for diagnostic in reversed(runtime_reconciliation_diagnostics):
-        if (diagnostic.get('type') == 'risk_event_applicability_failure'
-                and diagnostic.get('symbol') == symbol
-                and diagnostic.get('validation_stage') == stage):
-            if diagnostic.get('repair_status') != status:
-                diagnostic['repair_status'] = status
-                print('ETF EVENT APPLICABILITY ' + json.dumps(diagnostic))
-            break
-
-
-def validate_risk_event_atomic_support(result, candidate, stage):
-    """Run before normalization can erase a contradictory event assignment."""
-    if not str(result.get('primary_risk_event_id') or '').strip():
-        return
-    if result.get('mechanism_status') not in {'HYPOTHETICAL', 'OBSERVED'}:
-        reject_risk_event_applicability(
-            result, candidate, stage,
-            'mechanism_status does not support a shared adverse mechanism',
-        )
-    if result.get('risk_basis') not in {
-        'NORMALIZED_EXPOSURE_DETERIORATION', 'TEMPORARY_DRIVER_NORMALIZATION',
-        'NONRECURRING_COMPARISON_ONLY',
-    }:
-        reject_risk_event_applicability(
-            result, candidate, stage, 'risk_basis does not support the event',
-        )
-
-
-def risk_event_evidence_terms(value):
-    """Compare narrative evidence, excluding labels and generic finance words."""
-    generic = {
-        'MARKET', 'MARKETS', 'PRICE', 'PRICES', 'RATE', 'RATES', 'HIGH', 'LOW',
-        'GLOBAL', 'SUPPLY', 'DEMAND', 'CONDITIONS', 'ECONOMIC', 'ECONOMY',
-        'INDUSTRY', 'INDUSTRIES', 'FUND', 'FUNDS', 'ETF', 'EQUITY', 'EQUITIES',
-        'HOLDING', 'HOLDINGS', 'PORTFOLIO', 'EXPOSURE', 'RETURN', 'RETURNS',
-        'EARNINGS', 'PROFIT', 'PROFITS', 'MARGIN', 'MARGINS', 'VALUATION',
-        'INDEX', 'WEIGHT', 'WEIGHTS', 'STOCK', 'STOCKS', 'SHARE', 'SHARES',
-        'SECTOR', 'SECTORS', 'THEIR', 'THIS', 'THAT', 'THOSE', 'WHICH',
-        'ITS', 'HAS', 'HAVE', 'NOT', 'BUT', 'CAN', 'WILL', 'WERE', 'WAS',
-        'LOWER', 'HIGHER', 'FALL', 'FALLING', 'RISE', 'RISING', 'INCREASE',
-        'DECREASE', 'DECLINE', 'REDUCE', 'REDUCING', 'REDUCED', 'SUPPORT',
-        'SUPPORTS', 'BENEFIT', 'BENEFITS', 'CAUSE', 'CAUSES', 'LEAD', 'LEADS',
-        'AFFECT', 'AFFECTS', 'IMPACT', 'IMPACTS', 'COMPANIES', 'COMPANY',
-        'CONCENTRATED', 'CONCENTRATION', 'CONTINUED', 'CONTINUING',
-    }
-    # Preserve short acronyms such as AI without making U.S. a causal bridge.
-    acronyms = set(re.findall(r'\b[A-Z]{2}\b', str(value or ''))) - {'US', 'UK'}
-    return (_risk_event_terms(value) | acronyms) - generic
-
-
-def material_effect_has_adverse_direction(value):
-    """Require explicit harm to fund outcomes, not a signless price movement.
-
-    This is a conservative completeness guard, not an economic truth model.
-    Ambiguous/negated outcomes return to the existing evidence-only repair path.
-    """
-    text = re.sub(r'\s+', ' ', str(value or '').casefold()).replace('’', "'")
-    outcome = (
-        r'(?:earnings|profits?|profitability|margins?|revenues?|cash flows?|returns?|nav|'
-        r'valuations?|share prices?|stock prices?|holdings|constituents|portfolio|'
-        r'performance|distributions?|dividends?)'
-    )
-    adverse = (
-        r'(?:hurt\w*|harm\w*|damag\w*|pressur\w*|weaken\w*|erod\w*|'
-        r'compress\w*|reduc\w*|lower\w*|depress\w*|impair\w*|undermin\w*)'
-    )
-    patterns = (
-        rf'\b{adverse}\b(?:[\s-]+[\w\x27-]+){{0,5}}[\s-]+{outcome}\b',
-        rf'\b{outcome}\b(?:[\s-]+[\w\x27-]+){{0,4}}[\s-]+'
-        r'(?:fall\w*|declin\w*|deteriorat\w*|contract\w*|suffer\w*|shrink\w*)\b',
-        r'\b(?:underperform\w*|lag(?:s|ged|ging)?|drawdowns?|losses|de[- ]?rating)\b',
-    )
-    for pattern in patterns:
-        for match in re.finditer(pattern, text):
-            prefix = text[max(0, match.start() - 70):match.start()]
-            prefix = re.split(r'[.;,:!?]', prefix)[-1]
-            prefix = ' '.join(prefix.split()[-5:])
-            span = prefix + ' ' + match.group()
-            if re.search(
-                r"\b(?:no|not|never|without|neither|nor|unlikely|unclear|"
-                r"limited|minimal|negligible|immaterial|avoid\w*|prevent\w*|"
-                r"offset\w*|mitigat\w*|isn't|doesn't|wouldn't|won't|cannot|can't)\b",
-                span,
-            ):
-                continue
-            positive = r'(?:help\w*|benefit\w*|improv\w*|support\w*|boost\w*|lift\w*|ris\w*|gains?)'
-            if re.search(rf'\b{positive}\s+or\s+', span):
-                continue
-            suffix = text[match.end():]
-            if re.match(rf'\s+or\s+{positive}\b', suffix):
-                continue
-            if re.match(
-                r'\s+(?:(?:are|is|were|was|remain|remains|would|will|can|could|may|'
-                r'be|have|has|been|expected|considered)\s+){0,4}'
-                r'(?:not|unlikely|negligible|immaterial|avoided|prevented|limited|minimal|offset)\b',
-                suffix,
-            ):
-                continue
-            # A fall in input costs that boosts profits has the opposite sign.
-            if re.search(r'\b(?:costs?|boost\w*|benefit\w*|lift\w*|improv\w*|support\w*)\b', match.group()):
-                continue
-            return True
-    return False
-
-
-def validate_risk_event_applicability(result, candidate, event, stage):
-    """Require grounded support for canonical and reconciled event identities."""
-    validate_risk_event_atomic_support(result, candidate, stage)
-    fail = lambda reason: reject_risk_event_applicability(result, candidate, stage, reason)
-    if result.get('risk_materiality') not in {'MODERATE', 'HIGH'}:
-        fail('risk_materiality does not establish a material shared event')
-    if (result.get('driver_dependence') not in {'LOW', 'MODERATE', 'HIGH'}
-            or (result.get('risk_basis') == 'TEMPORARY_DRIVER_NORMALIZATION'
-                and result.get('driver_dependence') == 'LOW')):
-        fail('driver_dependence does not support the claimed risk_basis')
-    if result.get('evidence_scope') not in {'FUND_SPECIFIC', 'EXPOSURE_SPECIFIC'}:
-        fail('evidence_scope lacks fund-specific or exposure-specific support')
-    if result.get('probability_basis') in {None, '', 'NONE'}:
-        fail('probability_basis does not support the claimed mechanism')
-    for field in ('holdings_evidence', 'current_driver_evidence',
-                  'reversal_mechanism', 'material_effect', 'probability_evidence'):
-        if not isinstance(result.get(field), str) or len(result[field].strip()) < 15:
-            fail(f'{field} lacks concrete supporting evidence')
-
-    # A canonical ID, risk group, category, name, or judgment explanation must
-    # not supply its own proof. Use grounded narratives and supplied holdings.
-    transmission = ' '.join(result[field] for field in (
-        'reversal_mechanism', 'material_effect',
-    ))
-    exposure = result['holdings_evidence'] + ' ' + ' '.join(
-        str(candidate.get(field) or '') for field in (
-            'SectorWeightings', 'TopHoldings',
-        )
-    )
-    if not (risk_event_evidence_terms(exposure) & risk_event_evidence_terms(transmission)):
-        fail('holdings_evidence lacks a concrete exposure bridge to reversal_mechanism/material_effect')
-    catalog_evidence = ' '.join([
-        str(event.get('description') or ''),
-        str(event.get('normalization_risk') or ''),
-        ' '.join(str(x) for x in (event.get('affected_industries') or [])),
-        ' '.join(str(x) for x in (event.get('beneficiaries') or [])),
-    ])
-    if not (risk_event_evidence_terms(transmission) & risk_event_evidence_terms(catalog_evidence)):
-        fail('reversal_mechanism/material_effect do not connect to the catalog event evidence')
-    if not material_effect_has_adverse_direction(result['material_effect']):
-        fail('material_effect lacks an unambiguous adverse direction for the ETF')
-
-
-def reconcile_etf_risk_event_fields(
-    result, candidate, active_risk_events, validation_stage='research',
-):
-    """Reconcile event identity and validate applicability without rewriting risk."""
+def reconcile_etf_risk_event_fields(result, candidate, active_risk_events):
+    """Reconcile only event identity; leave Gemini's investment judgment intact."""
     result = dict(result)
     match_context = dict(result)
     match_context['_portfolio_group'] = str(
@@ -3178,20 +3003,14 @@ def reconcile_etf_risk_event_fields(
             'risk event without risk_exposure_group.'
         )
     result['risk_exposure_group'] = exposure_group
-    if event_id:
-        event = next(event for event in active_risk_events
-                     if isinstance(event, dict)
-                     and str(event.get('event_id') or '').strip() == event_id)
-        validate_risk_event_applicability(result, candidate, event, validation_stage)
     return result
 
 
 def validate_etf_result(
     result, candidate, minimum_sources=2, maximum_sources=5,
-    active_risk_events=None, validation_stage='research',
+    active_risk_events=None,
 ):
     result = normalize_etf_result(result)
-    validate_risk_event_atomic_support(result, candidate, validation_stage)
     result = normalize_hypothetical_consistency(result)
     symbol = str(candidate['Symbol']).upper()
     if result['symbol'] != symbol:
@@ -3214,7 +3033,7 @@ def validate_etf_result(
     result = bind_mechanism_evidence_source(result)
     if active_risk_events is not None:
         result = reconcile_etf_risk_event_fields(
-            result, candidate, active_risk_events, validation_stage
+            result, candidate, active_risk_events
         )
     if result.get('benchmark_assessment') not in {'PASS', 'FAIL'}:
         raise ValueError(f'{symbol} has invalid benchmark_assessment.')
@@ -3544,19 +3363,6 @@ def merge_structural_repair_patches(data, repair_payload):
                 'mechanism_evidence_source_index',
                 'evidence_scope', 'mandate_assessment', 'mandate_evidence',
                 'us_equity_weight_estimate', 'mandate_basis', 'explanation',
-            })
-        if 'risk-event applicability' in validation_error:
-            # Only the disputed event/evidence fields may be repaired. Sources,
-            # mandate, benchmark outlook and unrelated classifications stay put.
-            allowed_fields.update({
-                'primary_risk_event_id', 'risk_exposure_group', 'risk_basis',
-                'mechanism_status', 'reversal_mechanism', 'material_effect',
-                'holdings_evidence', 'current_driver_evidence', 'probability_basis',
-                'probability_evidence', 'normalization_probability',
-                'risk_materiality', 'driver_dependence', 'evidence_scope',
-                'adverse_change_observed', 'adverse_change_date',
-                'adverse_change_indicator', 'mechanism_evidence_source',
-                'mechanism_evidence_source_index',
             })
         merged = dict(prior)
         changed_fields = []
@@ -4480,50 +4286,77 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     return normalized
 
 
-def available_classification_models():
-    """Return judges that can still be called within both workload and family caps."""
-    if (classification_quota_exhausted
-            or classification_logical_calls_used >= max_classification_logical_calls_per_run
-            or classification_api_attempts_used >= max_classification_api_attempts_per_run):
-        return []
-    available = []
-    for model in dict.fromkeys((classification_model, classification_fallback_model)):
-        if model in classification_provider_failures:
-            continue
-        if api_attempt_budget.remaining(model, 'classification') <= 0:
-            continue
-        if GeminiApiAttemptBudget.model_family(model) == '2.5':
-            budget = globals().get('request_budget')
-            if (classification_fallback_api_attempts_used >= max_2_5_classification_fallback_calls_per_run
-                    or budget is None or not budget.can_reserve('classification')):
-                continue
-        available.append(model)
-    return available
+ETF_JUDGMENT_RESEARCH_FIELDS = (
+    'fund_name', 'exposure_group', 'holdings_evidence',
+    'current_driver_evidence', 'mandate_assessment', 'mandate_evidence',
+    'us_equity_weight_estimate', 'mandate_basis', 'benchmark_assessment',
+    'continuation_outlook', 'reversal_mechanism', 'mechanism_status',
+    'adverse_change_observed', 'adverse_change_date',
+    'adverse_change_indicator', 'evidence_scope',
+    'normalization_probability', 'probability_basis',
+    'probability_evidence', 'material_effect', 'risk_time_horizon',
+    'risk_materiality', 'driver_dependence', 'risk_basis',
+    'primary_risk_event_id', 'risk_exposure_group', 'reversal_risk',
+    'eligible', 'eligibility_reason', 'explanation',
+)
 
 
-def research_has_judgment_capacity():
-    """Never spend research calls when no judge can use their results."""
-    models = available_classification_models()
-    if any(GeminiApiAttemptBudget.model_family(model) != '2.5' for model in models):
-        return True
-    # Research and the emergency judge share 2.5 capacity. Leave at least one
-    # actual request for judgment; a deterministic summary needs no reservation.
-    return bool(models) and (
-        api_attempt_budget.family_limits.get('2.5', 0)
-        - api_attempt_budget.family_used.get('2.5', 0) > 1
-        and request_budget.max_api_attempts - request_budget.api_attempts > 1
-        and request_budget.total - request_budget.total_used > 1
+def build_etf_judgment_research_projection(research):
+    """Keep decision evidence while excluding sources and pipeline metadata."""
+    return {
+        field: research.get(field)
+        for field in ETF_JUDGMENT_RESEARCH_FIELDS
+        if field in research
+    }
+
+
+def build_etf_judgment_market_context(market_context):
+    """Remove source lists and duplicate prose from the no-Search judge payload."""
+    return {
+        field: market_context.get(field)
+        for field in (
+            'market_status', 'market_summary', 'sector_context',
+            'factor_and_theme_context', 'active_risk_events',
+        )
+        if field in market_context
+    }
+
+
+def judgment_retry_is_available(symbol, kind):
+    if kind == 'omission':
+        return (
+            classification_omission_rounds.get(symbol, 0)
+            < max_judgment_omission_rounds_per_etf
+        )
+    if kind == 'invalid':
+        return (
+            classification_invalid_patch_rounds.get(symbol, 0)
+            < max_judgment_invalid_patch_rounds_per_etf
+        )
+    return True
+
+
+def has_retryable_judgment_recovery(research_by_symbol):
+    return any(
+        research
+        and not research.get('judgment_model')
+        and classification_retry_kind.get(symbol) in {'omission', 'invalid'}
+        and judgment_retry_is_available(
+            symbol, classification_retry_kind.get(symbol)
+        )
+        for symbol, research in research_by_symbol.items()
     )
 
 
 def safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
+    recovery_only=False,
 ):
     """Contain any unexpected judge failure so one classification bug cannot abort the run."""
     try:
         return judge_etf_research_pool(
             client, candidate_records, research_by_symbol, market_context,
-            force=force,
+            force=force, recovery_only=recovery_only,
         )
     except BaseException as exc:
         if isinstance(exc, (KeyboardInterrupt, SystemExit, TotalRuntimeTimeout)):
@@ -4543,39 +4376,92 @@ def safe_judge_etf_research_pool(
 
 def judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
+    recovery_only=False,
 ):
-    """Judge grounded evidence, with bounded no-Search fallback during outages."""
+    """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
     global classification_quota_exhausted
-    global classification_fallback_api_attempts_used
     if classification_quota_exhausted:
         return research_by_symbol
     candidate_by_symbol = {
         str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
     }
     judged = dict(research_by_symbol)
-    symbols = [
+    eligible_symbols = [
         str(candidate['Symbol']).upper() for candidate in candidate_records
         if (
             str(candidate['Symbol']).upper() in research_by_symbol
             and not research_by_symbol[str(candidate['Symbol']).upper()].get('judgment_model')
             and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
-            and classification_validation_rounds.get(str(candidate['Symbol']).upper(), 0)
-            < max_judgment_validation_rounds_per_etf
         )
     ]
-    if not symbols:
+    if not eligible_symbols:
         return research_by_symbol
-    # Stable sort preserves rank within a round, across scheduler invocations.
-    symbols.sort(key=lambda symbol: classification_validation_rounds.get(symbol, 0))
+    untouched_symbols = [
+        symbol for symbol in eligible_symbols
+        if classification_retry_kind.get(symbol) is None
+    ]
+    omission_symbols = [
+        symbol for symbol in eligible_symbols
+        if classification_retry_kind.get(symbol) == 'omission'
+        and judgment_retry_is_available(symbol, 'omission')
+    ]
+    invalid_symbols = [
+        symbol for symbol in eligible_symbols
+        if classification_retry_kind.get(symbol) == 'invalid'
+        and judgment_retry_is_available(symbol, 'invalid')
+    ]
+    if recovery_only:
+        untouched_symbols = []
+    authoritative_selected = preview_portfolio(
+        candidate_records, judged, target_selected_etfs,
+        max_etfs_per_sector_group, max_moderate_per_risk_event,
+        require_judgment=True,
+    )
+    local_rank_by_symbol = {
+        str(candidate['Symbol']).upper(): rank
+        for rank, candidate in enumerate(candidate_records, start=1)
+    }
+
+    def recovery_priority(symbol):
+        candidate = candidate_by_symbol[symbol]
+        can_improve = pending_candidate_can_improve_full_portfolio(
+            candidate, authoritative_selected, local_rank_by_symbol,
+            max_etfs_per_sector_group,
+        )
+        return (
+            bool(can_improve), etf_optimistic_final_score(candidate),
+            float(candidate.get('QVMScore') or 0.0),
+            -local_rank_by_symbol[symbol],
+        )
+
+    omission_symbols.sort(key=recovery_priority, reverse=True)
+    invalid_symbols.sort(key=recovery_priority, reverse=True)
+    pending_count = (
+        len(omission_symbols) + len(invalid_symbols)
+        if recovery_only else len(eligible_symbols)
+    )
     classification_scheduling_diagnostics.append({
-        'pending': len(symbols), 'force': force,
+        'pending': pending_count, 'force': force,
+        'recovery_only': recovery_only,
+        'untouched': len(untouched_symbols),
+        'omitted': len(omission_symbols),
+        'invalid': len(invalid_symbols),
         'target': classification_batch_target,
-        'action': 'classify' if force or len(symbols) >= classification_batch_target else 'accumulate',
+        'action': (
+            'recover' if recovery_only and pending_count
+            else 'classify' if force or len(untouched_symbols) >= classification_batch_target
+            else 'accumulate'
+        ),
     })
-    if not force and len(symbols) < classification_batch_target:
+    if recovery_only and not (omission_symbols or invalid_symbols):
+        return research_by_symbol
+    if (
+        not recovery_only and not force
+        and len(untouched_symbols) < classification_batch_target
+    ):
         print(
-            f'Accumulating ETF judgment candidates: {len(symbols)}/'
+            f'Accumulating ETF judgment candidates: {len(untouched_symbols)}/'
             f'{classification_batch_target}; no 3.5 call yet.'
         )
         return research_by_symbol
@@ -4590,30 +4476,66 @@ def judge_etf_research_pool(
         if research.get('judgment_model')
     }
     start = 0
-    while symbols and (force or len(symbols) >= classification_batch_target):
-        batch_symbols = symbols[:classification_batch_soft_max]
-        tail = len(symbols) - len(batch_symbols)
-        if 0 < tail < classification_min_intermediate_batch:
-            keep = max(
-                classification_min_intermediate_batch,
-                len(batch_symbols) - (classification_min_intermediate_batch - tail),
-            )
-            batch_symbols = batch_symbols[:keep]
+    while untouched_symbols or omission_symbols or invalid_symbols:
+        if untouched_symbols:
+            if recovery_only:
+                break
+            if not force and len(untouched_symbols) < classification_batch_target:
+                break
+            batch_kind = 'initial'
+            batch_symbols = untouched_symbols[:classification_batch_soft_max]
+            tail = len(untouched_symbols) - len(batch_symbols)
+            if 0 < tail < classification_min_intermediate_batch:
+                keep = max(
+                    classification_min_intermediate_batch,
+                    len(batch_symbols) - (
+                        classification_min_intermediate_batch - tail
+                    ),
+                )
+                batch_symbols = batch_symbols[:keep]
+            untouched_symbols = untouched_symbols[len(batch_symbols):]
+        elif omission_symbols:
+            batch_kind = 'omission_recovery'
+            batch_symbols = omission_symbols[:classification_omission_retry_batch_max]
+            omission_symbols = omission_symbols[len(batch_symbols):]
+        else:
+            batch_kind = 'invalid_patch_recovery'
+            batch_symbols = invalid_symbols[:classification_invalid_retry_batch_max]
+            invalid_symbols = invalid_symbols[len(batch_symbols):]
+        if batch_kind != 'initial' and len(batch_symbols) == 1:
+            lone_symbol = batch_symbols[0]
+            lone_candidate = candidate_by_symbol[lone_symbol]
+            if (
+                len(authoritative_selected) >= target_selected_etfs
+                and not pending_candidate_can_improve_full_portfolio(
+                    lone_candidate, authoritative_selected,
+                    local_rank_by_symbol, max_etfs_per_sector_group,
+                )
+            ):
+                print(
+                    'Skipping lone ETF judgment recovery that cannot improve '
+                    f'the full portfolio: {lone_symbol}'
+                )
+                break
         if classification_logical_calls_used >= max_classification_logical_calls_per_run:
             print('ETF logical classification-call budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
-            for symbol in symbols:
-                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
         if classification_api_attempts_used >= max_classification_api_attempts_per_run:
             print('ETF classification API-attempt budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
-            for symbol in symbols:
-                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
-        models = available_classification_models()
-        if not models:
-            print('ETF classification unavailable or exhausted; remaining ETFs stay unjudged.')
-            for symbol in symbols:
-                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
+        if api_attempt_budget.remaining(classification_model, 'classification') <= 0:
+            print('ETF model-family classification budget exhausted; remaining ETFs stay unjudged.')
+            break
+        if (
+            batch_kind == 'initial'
+            and classification_api_attempts_used
+            >= max_classification_api_attempts_per_run
+            - classification_reserved_recovery_calls
+        ):
+            print(
+                'ETF judgment recovery reserve reached; leaving the remaining '
+                'untouched ETFs pending so a compact recovery call stays available.'
+            )
             break
         classification_logical_calls_used += 1
         compact = []
@@ -4651,35 +4573,52 @@ def judge_etf_research_pool(
                     }
                     for benchmark in benchmark_etfs
                 },
-                'grounded_research': research,
+                'grounded_research': build_etf_judgment_research_projection(
+                    research
+                ),
                 'previous_classification': (previous_diagnostics.get('classifications', {}) or {}).get(symbol),
             })
+        compact_market_context = build_etf_judgment_market_context(
+            market_context
+        )
         prompt = (
             config['prompt_etf_judgment'].rstrip()
             + '\n\nCURRENT_DATE_UTC: ' + datetime.now(UTC).date().isoformat()
             + '\n\nCONFIGURED_BENCHMARKS:\n' + json.dumps(benchmark_etfs)
-            + '\n\nMARKET_CONTEXT:\n' + json.dumps(market_context, ensure_ascii=False)
+            + '\n\nMARKET_CONTEXT:\n' + json.dumps(compact_market_context, ensure_ascii=False)
             + '\n\nPEER_CLASSIFICATIONS_FROM_EARLIER_BATCHES:\n' + json.dumps(prior_peer_patches, ensure_ascii=False)
+            + '\n\nEXPECTED_RESULT_COUNT: ' + str(len(batch_symbols))
+            + '\nEXPECTED_SYMBOLS: ' + json.dumps(batch_symbols)
             + '\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n' + json.dumps(compact, ensure_ascii=False)
         )
+        models = [classification_model]
         patches = None
         used_model = None
         last_error = None
-        response_received = False
+        response_missing_symbols = set()
+        response_duplicate_symbols = set()
         for model_index, model_name in enumerate(models):
-            fallback = model_name != classification_model
-            family = GeminiApiAttemptBudget.model_family(model_name)
-            attempts = classification_attempts if not fallback else 1
+            attempts = classification_attempts if model_index == 0 else 1
             for attempt in range(1, attempts + 1):
                 if classification_api_attempts_used >= max_classification_api_attempts_per_run:
                     break
-                if family == '2.5' and (
-                    classification_fallback_api_attempts_used >= max_2_5_classification_fallback_calls_per_run
-                    or not request_budget.can_reserve('classification')
+                if (
+                    batch_kind == 'initial'
+                    and classification_api_attempts_used
+                    >= max_classification_api_attempts_per_run
+                    - classification_reserved_recovery_calls
                 ):
+                    last_error = RuntimeError(
+                        'Reserved the final classification API attempt for '
+                        'omission/invalid-patch recovery.'
+                    )
                     break
                 attempt_started = time.perf_counter()
-                stage = f'ETF judgment {start + 1}-{start + len(batch_symbols)} ({model_name}, attempt {attempt}/{attempts})'
+                stage = (
+                    f'ETF judgment {batch_kind} {start + 1}-'
+                    f'{start + len(batch_symbols)} '
+                    f'({model_name}, attempt {attempt}/{attempts})'
+                )
                 try:
                     api_attempt_budget.reserve(
                         model_name, 'classification', stage
@@ -4692,16 +4631,13 @@ def judge_etf_research_pool(
                         'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used,
                         'symbols': list(batch_symbols),
-                        'success': False, 'fallback': fallback,
+                        'batch_kind': batch_kind,
+                        'success': False, 'fallback': model_index > 0,
                         'error': str(exc),
                         'status': 'API_BUDGET_EXHAUSTED',
                     })
                     print(f'ETF API-attempt budget stopped {stage}: {exc}')
                     break
-                if family == '2.5':
-                    request_budget.reserve('classification')
-                    request_budget.record_api_attempt('classification')
-                    classification_fallback_api_attempts_used += 1
                 classification_api_attempts_used += 1
                 print(
                     f'Gemini ETF classification logical call '
@@ -4715,14 +4651,10 @@ def judge_etf_research_pool(
                             classification_thinking_budget,
                             enable_search=False,
                             response_mime_type='application/json',
-                            max_output_tokens=(
-                                min(classification_max_output_tokens, gemini_max_output_tokens)
-                                if family == '2.5' else classification_max_output_tokens
-                            ),
+                            max_output_tokens=classification_max_output_tokens,
                         ),
                         contents=prompt,
                     )
-                    response_received = True
                     metadata = extract_gemini_metadata(response)
                     metadata['response_text_chars'] = len(getattr(response, 'text', '') or '')
                     print_gemini_metadata(stage, metadata)
@@ -4738,10 +4670,16 @@ def judge_etf_research_pool(
                     # Ambiguous duplicate patches are isolated, not last-write-wins.
                     returned_symbols = [str(p.get('symbol') or '').strip().upper()
                                         for p in patches if isinstance(p, dict)]
+                    unexpected = sorted({
+                        symbol for symbol in returned_symbols
+                        if symbol and symbol not in batch_symbols
+                    })
                     duplicates = {s for s in batch_symbols if returned_symbols.count(s) > 1}
                     for symbol in duplicates:
                         patch_by_symbol.pop(symbol, None)
                     missing = [symbol for symbol in batch_symbols if symbol not in patch_by_symbol]
+                    response_missing_symbols = set(missing)
+                    response_duplicate_symbols = set(duplicates)
                     if missing:
                         print(
                             'Warning: ETF judgment omitted symbols; preserving returned peers '
@@ -4755,9 +4693,14 @@ def judge_etf_research_pool(
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
-                        'success': True, 'fallback': fallback,
+                        'batch_kind': batch_kind,
+                        'success': True, 'fallback': model_index > 0,
                         'returned_symbols': sorted(patch_by_symbol),
                         'missing_symbols': missing, 'duplicate_symbols': sorted(duplicates),
+                        'unexpected_symbols': unexpected,
+                        'requested_count': len(batch_symbols),
+                        'returned_count': len(patch_by_symbol),
+                        'prompt_chars': len(prompt),
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'metadata': metadata,
                     })
@@ -4770,7 +4713,10 @@ def judge_etf_research_pool(
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
                         'api_attempt': classification_api_attempts_used, 'symbols': list(batch_symbols),
-                        'success': False, 'fallback': fallback,
+                        'batch_kind': batch_kind,
+                        'success': False, 'fallback': model_index > 0,
+                        'requested_count': len(batch_symbols),
+                        'prompt_chars': len(prompt),
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'error': str(exc),
                     })
@@ -4779,41 +4725,17 @@ def judge_etf_research_pool(
                     # transient. Repeating the same model/prompt usually reproduces it,
                     # so move directly to the fallback model instead of burning budget.
                     if is_daily_quota_error(exc):
-                        classification_provider_failures[model_name] = {
-                            'reason': 'daily_quota_exhausted', 'error': str(exc),
-                        }
+                        classification_quota_exhausted = True
                         break
                     if isinstance(exc, ValueError) or not is_transient_gemini_error(exc):
-                        if not isinstance(exc, ValueError):
-                            classification_provider_failures[model_name] = {
-                                'reason': 'nonretryable_provider_error', 'error': str(exc),
-                            }
                         break
-                    if attempt >= attempts:
-                        classification_provider_failures[model_name] = {
-                            'reason': 'transient_attempts_exhausted', 'error': str(exc),
-                        }
-                        print(f'ETF judge circuit opened for {model_name}; no more requests to it this run.')
                     if attempt < attempts:
                         time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
-            if patches is not None:
+            if patches is not None or classification_quota_exhausted:
                 break
         if patches is None:
             print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
-            classification_quota_exhausted = all(
-                classification_provider_failures.get(model, {}).get('reason') == 'daily_quota_exhausted'
-                for model in dict.fromkeys((classification_model, classification_fallback_model))
-            )
-            if not response_received:
-                # No response means no candidate validation occurred. In
-                # particular, six 503s must never exhaust ETF repair rounds.
-                classification_validation_diagnostics.append({
-                    'logical_call': classification_logical_calls_used,
-                    'requested': list(batch_symbols), 'validated_count': 0,
-                    'provider_unavailable': True, 'validation_rounds_consumed': 0,
-                    'error': str(last_error),
-                })
-                write_run_checkpoint()
+            if classification_quota_exhausted:
                 break
             # A wholly malformed response must not starve untouched peers.
             # Treat the batch as missing patches and apply the same bounded
@@ -4821,16 +4743,31 @@ def judge_etf_research_pool(
             patches = {}
         valid_patch_count = 0
         invalid_patch_symbols = []
+        omitted_patch_symbols = []
         for symbol in batch_symbols:
-            classification_validation_rounds[symbol] = classification_validation_rounds.get(symbol, 0) + 1
             patch = patches.get(symbol)
             if patch is None:
                 invalid_patch_symbols.append(symbol)
                 research = dict(judged[symbol])
-                research['judgment_validation_error'] = (
-                    f'Judgment response unavailable: {last_error}'
-                    if used_model is None else 'Gemini omitted the ETF judgment patch.'
-                )
+                if used_model is not None and symbol not in response_duplicate_symbols:
+                    classification_omission_rounds[symbol] = (
+                        classification_omission_rounds.get(symbol, 0) + 1
+                    )
+                    classification_retry_kind[symbol] = 'omission'
+                    omitted_patch_symbols.append(symbol)
+                    research['judgment_validation_error'] = (
+                        'Gemini omitted the ETF judgment patch.'
+                    )
+                else:
+                    classification_invalid_patch_rounds[symbol] = (
+                        classification_invalid_patch_rounds.get(symbol, 0) + 1
+                    )
+                    classification_retry_kind[symbol] = 'invalid'
+                    research['judgment_validation_error'] = (
+                        'Gemini returned duplicate ETF judgment patches.'
+                        if symbol in response_duplicate_symbols
+                        else f'Judgment response unavailable: {last_error}'
+                    )
                 judged[symbol] = research
                 continue
             research = dict(judged[symbol])
@@ -4838,6 +4775,10 @@ def judge_etf_research_pool(
                 patch = normalize_etf_judgment_patch(symbol, patch, research)
             except Exception as exc:
                 invalid_patch_symbols.append(symbol)
+                classification_invalid_patch_rounds[symbol] = (
+                    classification_invalid_patch_rounds.get(symbol, 0) + 1
+                )
+                classification_retry_kind[symbol] = 'invalid'
                 research['judgment_validation_error'] = str(exc)
                 judged[symbol] = research
                 classification_call_diagnostics.append({
@@ -4897,10 +4838,13 @@ def judge_etf_research_pool(
                     research,
                     candidate_by_symbol[symbol],
                     market_context.get('active_risk_events') or [],
-                    validation_stage='judgment',
                 )
             except Exception as exc:
                 invalid_patch_symbols.append(symbol)
+                classification_invalid_patch_rounds[symbol] = (
+                    classification_invalid_patch_rounds.get(symbol, 0) + 1
+                )
+                classification_retry_kind[symbol] = 'invalid'
                 prior_research = dict(judged[symbol])
                 prior_research['judgment_validation_error'] = str(exc)
                 judged[symbol] = prior_research
@@ -4917,12 +4861,12 @@ def judge_etf_research_pool(
                     ),
                 })
                 print(
-                    f'Warning: ETF judgment event validation [{symbol}] was '
+                    f'Warning: ETF judgment event identity [{symbol}] was '
                     f'isolated without discarding peer judgments: {exc}'
                 )
                 continue
             valid_patch_count += 1
-            record_risk_event_repair_status(symbol, 'judgment', 'repaired')
+            classification_retry_kind.pop(symbol, None)
             # Reset only judgment-owned exclusion state before applying the new
             # authoritative patch; grounded mandate/research exclusions remain intact.
             prior_reason = str(research.get('eligibility_reason') or '')
@@ -4955,26 +4899,49 @@ def judge_etf_research_pool(
                 'ETF judgment catch-up required for: '
                 + ', '.join(invalid_patch_symbols)
             )
-        retryable = [s for s in invalid_patch_symbols
-                     if classification_validation_rounds[s] < max_judgment_validation_rounds_per_etf]
-        for symbol in invalid_patch_symbols:
-            record_risk_event_repair_status(
-                symbol, 'judgment',
-                'queued_bounded_catch_up' if symbol in retryable else 'attempts_exhausted',
-            )
+        retryable_omissions = [
+            symbol for symbol in omitted_patch_symbols
+            if judgment_retry_is_available(symbol, 'omission')
+        ]
+        retryable_invalid = [
+            symbol for symbol in invalid_patch_symbols
+            if symbol not in omitted_patch_symbols
+            and judgment_retry_is_available(symbol, 'invalid')
+        ]
+        exhausted = sorted(
+            set(invalid_patch_symbols)
+            - set(retryable_omissions)
+            - set(retryable_invalid)
+        )
         classification_validation_diagnostics.append({
             'logical_call': classification_logical_calls_used,
+            'batch_kind': batch_kind,
             'requested': list(batch_symbols), 'validated_count': valid_patch_count,
             'invalid_or_missing_symbols': invalid_patch_symbols,
-            'retryable_symbols': retryable,
-            'exhausted_symbols': sorted(set(invalid_patch_symbols) - set(retryable)),
+            'omitted_symbols': omitted_patch_symbols,
+            'retryable_omissions': retryable_omissions,
+            'retryable_invalid_patches': retryable_invalid,
+            'exhausted_symbols': exhausted,
         })
         write_run_checkpoint()
-        # Classify untouched peers before retrying malformed/omitted patches.
-        symbols = symbols[len(batch_symbols):] + retryable
+        # Untouched peers remain ahead of recovery work. Omitted and malformed
+        # responses enter isolated small queues and are never mixed together.
+        omission_symbols.extend(
+            symbol for symbol in retryable_omissions
+            if symbol not in omission_symbols
+        )
+        invalid_symbols.extend(
+            symbol for symbol in retryable_invalid
+            if symbol not in invalid_symbols
+        )
+        authoritative_selected = preview_portfolio(
+            candidate_records, judged, target_selected_etfs,
+            max_etfs_per_sector_group, max_moderate_per_risk_event,
+            require_judgment=True,
+        )
+        omission_symbols.sort(key=recovery_priority, reverse=True)
+        invalid_symbols.sort(key=recovery_priority, reverse=True)
         start += len(batch_symbols)
-        if not force and len(symbols) < classification_batch_target:
-            break
     return judged
 
 
@@ -5557,16 +5524,10 @@ initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
 classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
-classification_fallback_model = str(config.get('classification_fallback_model', classification_model))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
 if any('3.5' not in model for model in (classification_model, summary_model)):
-    raise ValueError('Primary classification and summary models must use the separately budgeted Gemini 3.5 family.')
-if GeminiApiAttemptBudget.model_family(classification_fallback_model) not in {'2.5', '3.5'}:
-    raise ValueError('Classification fallback must use a budgeted Gemini 2.5 or 3.5 model.')
-max_2_5_classification_fallback_calls_per_run = min(2, max(0, int(config.get(
-    'max_2_5_classification_fallback_calls_per_run', 2
-))))
+    raise ValueError('Classification and primary summary models must use the separately budgeted Gemini 3.5 family.')
 if any('2.5' not in model for model in (model_primary, model_fallback, summary_fallback_model)):
     raise ValueError('Research/context and summary fallback models must use the separately budgeted Gemini 2.5 family.')
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
@@ -5603,7 +5564,26 @@ if (
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
 classification_min_intermediate_batch = max(1, int(config.get('classification_min_intermediate_batch', 15)))
-max_judgment_validation_rounds_per_etf = max(1, int(config.get('max_judgment_validation_rounds_per_etf', 2)))
+classification_reserved_recovery_calls = max(
+    0, int(config.get('classification_reserved_recovery_calls', 1))
+)
+if classification_reserved_recovery_calls >= max_classification_api_attempts_per_run:
+    raise ValueError(
+        'classification_reserved_recovery_calls must be smaller than the '
+        'classification API-attempt ceiling.'
+    )
+classification_omission_retry_batch_max = max(
+    1, int(config.get('classification_omission_retry_batch_max', 6))
+)
+classification_invalid_retry_batch_max = max(
+    1, int(config.get('classification_invalid_retry_batch_max', 6))
+)
+max_judgment_omission_rounds_per_etf = max(
+    1, int(config.get('max_judgment_omission_rounds_per_etf', 3))
+)
+max_judgment_invalid_patch_rounds_per_etf = max(
+    1, int(config.get('max_judgment_invalid_patch_rounds_per_etf', 2))
+)
 thinking_budget = config.get('thinking_budget', 12288)
 summary_thinking_budget = config.get('summary_thinking_budget', 4096)
 gemini_max_output_tokens = config.get('gemini_max_output_tokens', 49152)
@@ -6035,7 +6015,6 @@ api_attempt_budget = GeminiApiAttemptBudget(
         ('2.5', 'market'): max_2_5_market_calls_per_run,
         ('2.5', 'research'): max_2_5_research_calls_per_run,
         ('2.5', 'summary'): max_2_5_summary_fallback_calls_per_run,
-        ('2.5', 'classification'): max_2_5_classification_fallback_calls_per_run,
     },
 )
 call_diagnostics = []
@@ -6131,7 +6110,6 @@ candidate_by_symbol = {
 }
 cache_keys = {}
 research_by_symbol = {}
-cache_applicability_repairs = []
 for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     signature = {
@@ -6218,27 +6196,6 @@ for candidate in candidate_records:
             print(f'Using {cache_label} ETF research cache for {symbol}.')
         except Exception as exc:
             cache_result.update(reason='validation_failed', error=str(exc))
-            if 'risk-event applicability' in str(exc) and isinstance(entry.get('research'), dict):
-                # This evidence is still fresh and grounded. Repair only the
-                # inconsistent assignment through the existing no-search queue.
-                # Keep its original age; neither validation nor repair refreshes it.
-                draft = entry['research']
-                prior_urls = [
-                    source.get('url') if isinstance(source, dict) else source
-                    for source in (draft.get('sources') or [])
-                    if isinstance(source, (dict, str))
-                ]
-                research_cache['deferred_entries'][cache_key] = {
-                    'timestamp': entry.get('timestamp'),
-                    'evidence_timestamp': entry.get('timestamp'),
-                    'error': str(exc), 'draft': dict(draft),
-                    'grounding_source_urls': [url for url in prior_urls if url],
-                }
-                cache_applicability_repairs.append({
-                    'candidate': candidate, 'needs_research': False,
-                })
-                cache_result['repair_queued'] = True
-                record_risk_event_repair_status(symbol, 'research', 'queued_bounded_structural_repair')
             print(f'Ignoring invalid ETF research cache for {symbol}: {exc}')
     elif entry:
         cache_result['reason'] = 'expired_or_invalid_timestamp'
@@ -6249,10 +6206,7 @@ print('ETF RESEARCH CACHE ' + json.dumps({
 }))
 
 cursor = 0
-pending_retries = list(cache_applicability_repairs)
-event_applicability_repair_symbols = {
-    str(item['candidate']['Symbol']).upper() for item in cache_applicability_repairs
-}
+pending_retries = []
 deferred_excess_candidates = []
 deferred_excess_symbols_this_run = set()
 sector_capacity_skipped_symbols_this_run = set()
@@ -6335,6 +6289,26 @@ if research_by_symbol:
         f'Cached evidence preview: provisional={initial_provisional_count}, '
         f'authoritative={len(selected)}; unjudged evidence is not a reopened slot.'
     )
+# Finish already-paid-for 3.5 work before considering any new 2.5 research.
+# force=True drains the untouched tail first, then uses isolated small recovery
+# batches for omissions or malformed patches.
+if (
+    len(selected) < target_selected_etfs
+    and any(
+        research and not research.get('judgment_model')
+        for research in research_by_symbol.values()
+    )
+):
+    set_run_stage('classification_before_new_research')
+    research_by_symbol = safe_judge_etf_research_pool(
+        client, candidate_records, research_by_symbol, market_context,
+        force=True,
+    )
+    selected = preview_portfolio(
+        candidate_records, research_by_symbol, target_selected_etfs,
+        max_etfs_per_sector_group, max_moderate_per_risk_event,
+        require_judgment=True,
+    )
 if len(selected) >= target_selected_etfs:
     queue_portfolio_challengers(
         candidate_records, research_by_symbol, selected, pending_retries,
@@ -6352,8 +6326,23 @@ while (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
-    and research_has_judgment_capacity()
 ):
+    if has_retryable_judgment_recovery(research_by_symbol):
+        set_run_stage('classification_recovery_before_research')
+        research_by_symbol = safe_judge_etf_research_pool(
+            client, candidate_records, research_by_symbol, market_context,
+            force=True,
+        )
+        selected = preview_portfolio(
+            candidate_records, research_by_symbol, target_selected_etfs,
+            max_etfs_per_sector_group, max_moderate_per_risk_event,
+            require_judgment=True,
+        )
+        if len(selected) >= target_selected_etfs:
+            queue_portfolio_challengers(
+                candidate_records, research_by_symbol, selected,
+                pending_retries, challenger_queued_symbols,
+            )
     if len(selected) >= target_selected_etfs and pending_retries:
         actionable_pending = []
         skipped_pending = []
@@ -6411,10 +6400,6 @@ while (
         for candidate in candidate_records:
             symbol = str(candidate['Symbol']).upper()
             if symbol in research_by_symbol:
-                continue
-            if symbol in event_applicability_repair_symbols:
-                # This ETF already has grounded evidence. Only its bounded
-                # structural repair may run; do not rediscover it as fresh work.
                 continue
             if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
                 continue
@@ -6691,11 +6676,12 @@ while (
                         structural_repairs_by_symbol.get(symbol, 0) + 1
                     )
             if symbol in valid:
-                record_risk_event_repair_status(symbol, 'research', 'repaired')
                 last_research_errors.pop(symbol, None)
                 valid[symbol].pop('judgment_model', None)
                 valid[symbol].pop('judgment_validation_error', None)
-                classification_validation_rounds.pop(symbol, None)
+                classification_omission_rounds.pop(symbol, None)
+                classification_invalid_patch_rounds.pop(symbol, None)
+                classification_retry_kind.pop(symbol, None)
                 research_by_symbol[symbol] = valid[symbol]
                 prior_evidence = research_cache['deferred_entries'].get(cache_keys[symbol], {})
                 evidence_timestamp = (
@@ -6720,8 +6706,6 @@ while (
                     challenger_researched_symbols.add(symbol)
             else:
                 error = errors.get(symbol, 'Invalid ETF research.')
-                if 'risk-event applicability' in error:
-                    event_applicability_repair_symbols.add(symbol)
                 last_research_errors[symbol] = error
                 print(f'Deferred ETF research [{symbol}]: {error}')
                 prior_deferred = research_cache['deferred_entries'].get(
@@ -6758,7 +6742,7 @@ while (
                     draft=drafts.get(symbol),
                     grounding_urls=grounding_for_repair,
                 )
-                if dedicated_basic_repair_batch and 'risk-event applicability' not in error:
+                if dedicated_basic_repair_batch:
                     # A failed evidence-only repair has already used its cheap
                     # structural attempt. Escalate directly to the ETF's final
                     # permitted fresh search rather than queueing another repair.
@@ -6775,10 +6759,6 @@ while (
                     )
                 elif source_error:
                     needs_research = not has_repair_evidence
-                if symbol in event_applicability_repair_symbols:
-                    needs_research = False
-                    basic_metadata_repair = False
-                    source_error = False
                 used_attempts = (
                     research_attempts_by_symbol.get(symbol, 0)
                     if needs_research
@@ -6794,7 +6774,6 @@ while (
                         'candidate': candidate,
                         'needs_research': needs_research,
                     })
-                    record_risk_event_repair_status(symbol, 'research', 'queued_bounded_structural_repair')
                 elif (
                     basic_metadata_repair
                     and not needs_research
@@ -6822,8 +6801,6 @@ while (
                         'candidate': candidate,
                         'needs_research': True,
                     })
-                if used_attempts >= attempt_limit and symbol in event_applicability_repair_symbols:
-                    record_risk_event_repair_status(symbol, 'research', 'attempts_exhausted')
         batch_stats = {
             'stage': stage,
             'queue': queue_stats,
@@ -7057,42 +7034,6 @@ if len(selected) < pre_final_selected_count:
         'The accumulated tail was judged only after research closed.'
     )
 
-# Close diagnostic-only repair states after both research and final judgment.
-# A queued repair is not a promise that call capacity will remain to execute it.
-for event_diagnostic in runtime_reconciliation_diagnostics:
-    if (event_diagnostic.get('type') != 'risk_event_applicability_failure'
-            or not str(event_diagnostic.get('repair_status') or '').startswith('queued_')):
-        continue
-    symbol = event_diagnostic['symbol']
-    judgment_stage = event_diagnostic['validation_stage'] == 'judgment'
-    recovered = research_by_symbol.get(symbol)
-    if recovered and (not judgment_stage or recovered.get('judgment_model')):
-        repair_status = 'repaired'
-    elif ((judgment_stage and classification_quota_exhausted)
-          or (not judgment_stage and research_quota_exhausted)):
-        repair_status = 'quota_exhausted'
-    elif judgment_stage:
-        repair_status = (
-            'attempts_exhausted'
-            if classification_validation_rounds.get(symbol, 0) >= max_judgment_validation_rounds_per_etf
-            else 'budget_exhausted'
-            if (classification_logical_calls_used >= max_classification_logical_calls_per_run
-                or classification_api_attempts_used >= max_classification_api_attempts_per_run
-                or api_attempt_budget.remaining(classification_model, 'classification') <= 0)
-            else 'unjudged_at_run_end'
-        )
-    else:
-        repair_status = (
-            'attempts_exhausted'
-            if structural_repairs_by_symbol.get(symbol, 0) >= max_structural_repairs_per_etf
-            else 'budget_exhausted'
-            if (not request_budget.can_reserve('research')
-                or api_attempt_budget.remaining(model_primary, 'research') <= 0)
-            else 'not_attempted_before_research_closed'
-        )
-    event_diagnostic['repair_status'] = repair_status
-    print('ETF EVENT APPLICABILITY ' + json.dumps(event_diagnostic))
-
 # Regression invariant: do not silently claim that research was unnecessary if
 # authoritative judgment has reopened slots while candidate/call capacity remains.
 remaining_unresearched = sum(
@@ -7107,9 +7048,7 @@ for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     if symbol in research_by_symbol:
         continue
-    if (research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf
-            or (symbol in event_applicability_repair_symbols
-                and structural_repairs_by_symbol.get(symbol, 0) >= max_structural_repairs_per_etf)):
+    if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
         exhausted_unvalidated.append(symbol)
         continue
     if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:
@@ -7128,7 +7067,6 @@ if (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
-    and research_has_judgment_capacity()
 ):
     print(
         'WARNING — ETF backfill invariant: portfolio is short while actionable '
@@ -7154,9 +7092,8 @@ if partial_portfolio:
     print(
         'ETF portfolio shortfall: '
         f'{len(selected)} of {target_selected_etfs} requested ETFs passed '
-        'validated research and portfolio rules. '
-        + ('Publishing only the validated selections.' if selected else
-           'The empty result will not replace the existing page.')
+        'validated research and portfolio rules. Publishing the validated '
+        'selections without adding unresearched or ineligible ETFs.'
     )
 consistency_warnings = audit_etf_consistency(candidate_records, research_by_symbol)
 research_disposition = {}
@@ -7213,15 +7150,10 @@ context_review = build_context_review(
 )
 print('\n' + context_review + '\n')
 
-publication_allowed = bool(selected)
-publication_failure_reason = None if publication_allowed else (
-    'No validated ETF selections were produced. Keeping the existing page unchanged; '
-    'provider failures or incomplete judgment must not publish an empty portfolio.'
-)
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
 set_run_stage('summary')
-if publication_allowed and config.get('final_summary_enabled', True):
+if config.get('final_summary_enabled', True):
     selected_summary_input = build_summary_input(selected)
     summary_prompt = (
         config['prompt_html_summary'].rstrip()
@@ -7232,7 +7164,8 @@ if publication_allowed and config.get('final_summary_enabled', True):
     )
     summary_data = None
     if (
-        summary_model not in classification_provider_failures
+        classification_api_attempts_used + summary_35_api_attempts_used
+        < max_gemini_35_calls_per_run
         and api_attempt_budget.remaining(summary_model, 'summary') > 0
     ):
         api_attempt_budget.reserve(
@@ -7240,7 +7173,9 @@ if publication_allowed and config.get('final_summary_enabled', True):
         )
         summary_35_api_attempts_used += 1
         stage = 'ETF HTML summary'
-        total_35_attempt = api_attempt_budget.family_used.get('3.5', 0)
+        total_35_attempt = (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        )
         print(
             f'Gemini 3.5 summary call {total_35_attempt}/'
             f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
@@ -7360,16 +7295,13 @@ df_html_table = df_html.to_html(
     border=0,
 )
 set_run_stage('publish_html')
-if publication_allowed:
-    update_html_page(
-        final_recommendations,
-        df_html_table,
-        'etf_page_template.html',
-        'etf_index.html',
-        model_used,
-    )
-else:
-    print('ETF PUBLICATION BLOCKED: ' + publication_failure_reason)
+update_html_page(
+    final_recommendations,
+    df_html_table,
+    'etf_page_template.html',
+    'etf_index.html',
+    model_used,
+)
 # previous_diagnostics was loaded before the run so classification drift
 # compares against the prior execution rather than the report being written now.
 current_classifications = {
@@ -7476,10 +7408,7 @@ diagnostics = {
         actionable_unresearched, max_fresh_research_attempts_per_etf,
     ),
     'generated_at': datetime.now(UTC).isoformat(),
-    'status': ('FAILED' if not publication_allowed else
-               'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS'),
-    'publication_allowed': publication_allowed,
-    'publication_failure_reason': publication_failure_reason,
+    'status': 'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS',
     'selection_target': target_selected_etfs,
     'selection_count': len(selected),
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
@@ -7487,13 +7416,10 @@ diagnostics = {
         'research_stop_reason': (
             'daily_quota_exhausted' if research_quota_exhausted else
             'portfolio_target_met' if not partial_portfolio else
-            'classification_unavailable_or_exhausted' if not research_has_judgment_capacity() else
             'api_or_logical_budget_exhausted' if research_budget_exhausted else
             'no_actionable_work_within_attempt_limits'
         ),
         'classification_quota_exhausted': classification_quota_exhausted,
-        'classification_provider_failures': classification_provider_failures,
-        'available_classification_models': available_classification_models(),
         'classification_api_attempts_remaining': api_attempt_budget.remaining(
             classification_model, 'classification'
         ),
@@ -7530,8 +7456,9 @@ diagnostics = {
         'research_api_attempts': request_budget.research_api_attempts,
         'summary_api_attempts': request_budget.summary_api_attempts,
         'summary_35_api_attempts': summary_35_api_attempts_used,
-        'total_35_api_attempts': api_attempt_budget.family_used.get('3.5', 0),
-        'classification_fallback_api_attempts': classification_fallback_api_attempts_used,
+        'total_35_api_attempts': (
+            classification_api_attempts_used + summary_35_api_attempts_used
+        ),
         'context_api_attempts': request_budget.context_api_attempts,
         'per_model_api_attempts': api_attempt_budget.snapshot(),
         'classification_logical_calls': classification_logical_calls_used,
@@ -7657,18 +7584,15 @@ print(
     f'  ETF judgment API attempts: {classification_api_attempts_used}/{max_classification_api_attempts_per_run}\n'
     f'  ETF 3.5 summary API attempts: {summary_35_api_attempts_used}/1\n'
     f'  total Gemini 3.5 API attempts: '
-    f'{api_attempt_budget.family_used.get("3.5", 0)}/'
+    f'{classification_api_attempts_used + summary_35_api_attempts_used}/'
     f'{max_gemini_35_calls_per_run}\n'
     f'  actual API attempts: {request_budget.api_attempts}/{request_budget.max_api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '
-    f'classification_fallback={request_budget.classification_api_attempts}, '
     f'summary={request_budget.summary_api_attempts})'
 )
 end_time = time.perf_counter()
 print(f'Elapsed time: {round(end_time - start_time)} seconds\n')
-set_run_stage('complete' if publication_allowed else 'failed')
+set_run_stage('complete')
 write_run_checkpoint(diagnostics['status'])
 signal.alarm(0)
-if not publication_allowed:
-    raise RuntimeError(publication_failure_reason)

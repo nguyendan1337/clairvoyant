@@ -814,10 +814,13 @@ prompt_etf_judgment: |
 
   For every ETF return benchmark_negative_evidence_scope as ETF_SPECIFIC,
   EXPOSURE_SPECIFIC, GENERIC or NONE and benchmark_negative_evidence as a concise
-  current fact/inference or null. UNLIKELY/HIGH requires ETF_SPECIFIC or
-  EXPOSURE_SPECIFIC plus a non-null benchmark_negative_evidence statement. Python
-  will conservatively reduce unsupported UNLIKELY/HIGH confidence rather than treating
-  it as a hard negative.
+  current fact/inference or null. UNLIKELY/HIGH is intentionally cross-stage and
+  requires ALL of the following: ETF_SPECIFIC or EXPOSURE_SPECIFIC negative evidence;
+  grounded_research.benchmark_assessment is FAIL; and either continuation_strength is
+  WEAK or grounded_research already contains an OBSERVED adverse mechanism/current
+  adverse change. Do not manufacture or relabel evidence to satisfy this gate. If any
+  requirement is absent, use UNLIKELY with MEDIUM/LOW confidence or UNCERTAIN as the
+  evidence supports. Python independently enforces this corroboration rule.
 
   Use the supplied excess-return matrix versus EACH benchmark plus grounded continuation
   evidence. Do not use LIKELY merely because reversal risk is LOW. For LIKELY,
@@ -842,7 +845,10 @@ prompt_etf_judgment: |
 
   PRIOR-CLASSIFICATION CONSISTENCY / HYSTERESIS
   Each candidate may include previous_classification from the last successful run.
-  Treat it as a prior, not ground truth. When the grounded evidence, quantitative
+  Treat it as a prior, not ground truth. When a classification contract changes,
+  Python intentionally removes the prior benchmark outlook/confidence so those fields
+  are re-baselined under the new rules; do not infer or reconstruct the removed prior.
+  When a compatible benchmark prior is present and the grounded evidence, quantitative
   benchmark-relative picture and market context are substantially unchanged, preserve
   the prior reversal risk, continuation strength and benchmark outlook/confidence.
   Change a material decision field only when current supplied evidence materially

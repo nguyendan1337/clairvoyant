@@ -85,6 +85,11 @@ classification_retry_kind = {}
 classification_validation_diagnostics = []
 classification_scheduling_diagnostics = []
 runtime_reconciliation_diagnostics = []
+benchmark_high_negative_diagnostics = {
+    'raw': 0,
+    'corroborated': 0,
+    'downgraded': 0,
+}
 cache_diagnostics = {
     'yfinance_metadata': {'status': 'not_run'},
     'fund_data': {'status': 'not_run'},
@@ -4322,20 +4327,53 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     negative_evidence = str(
         patch.get('benchmark_negative_evidence') or ''
     ).strip() or None
-    if (
-        benchmark_outlook == 'UNLIKELY'
-        and benchmark_confidence == 'HIGH'
-        and (
-            negative_evidence_scope not in {'ETF_SPECIFIC', 'EXPOSURE_SPECIFIC'}
-            or not negative_evidence
+
+    # A HIGH-confidence negative is intentionally a cross-stage conclusion, not
+    # something the 3.5 judge may self-certify. Grounded 2.5 research must have
+    # independently failed the benchmark thesis, and either the judge must find
+    # continuation WEAK or the grounded research must already contain an
+    # observed adverse mechanism. Otherwise keep UNLIKELY but cap confidence at
+    # MEDIUM so the view receives a bounded penalty rather than a hard exclusion.
+    if benchmark_outlook == 'UNLIKELY' and benchmark_confidence == 'HIGH':
+        benchmark_high_negative_diagnostics['raw'] += 1
+        grounded_benchmark_fail = (
+            str(research.get('benchmark_assessment') or '').upper() == 'FAIL'
         )
-    ):
-        print(
-            f'Calibrated ETF benchmark confidence [{symbol}]: '
-            'UNLIKELY/HIGH -> UNLIKELY/MEDIUM because explicit ETF/exposure-'
-            'specific negative evidence was not supplied.'
+        grounded_observed_adverse = bool(
+            research.get('adverse_change_observed') is True
+            or str(research.get('mechanism_status') or '').upper() == 'OBSERVED'
         )
-        benchmark_confidence = 'MEDIUM'
+        negative_evidence_supported = (
+            negative_evidence_scope in {'ETF_SPECIFIC', 'EXPOSURE_SPECIFIC'}
+            and bool(negative_evidence)
+        )
+        hard_negative_corroborated = (
+            negative_evidence_supported
+            and grounded_benchmark_fail
+            and (continuation == 'WEAK' or grounded_observed_adverse)
+        )
+        if hard_negative_corroborated:
+            benchmark_high_negative_diagnostics['corroborated'] += 1
+        else:
+            benchmark_high_negative_diagnostics['downgraded'] += 1
+            missing = []
+            if not negative_evidence_supported:
+                missing.append('specific negative evidence')
+            if not grounded_benchmark_fail:
+                missing.append('grounded 2.5 benchmark FAIL')
+            if continuation != 'WEAK' and not grounded_observed_adverse:
+                missing.append('WEAK continuation or grounded observed adverse mechanism')
+            reason = ', '.join(missing) or 'cross-stage corroboration'
+            print(
+                f'Calibrated ETF benchmark confidence [{symbol}]: '
+                f'UNLIKELY/HIGH -> UNLIKELY/MEDIUM; missing {reason}.'
+            )
+            runtime_reconciliation_diagnostics.append({
+                'type': 'benchmark_high_negative_downgrade',
+                'symbol': symbol,
+                'reason': reason,
+            })
+            benchmark_confidence = 'MEDIUM'
     holdings_conc = enum_value(
         'holdings_concentration', 'LOW', {'LOW', 'MODERATE', 'HIGH'},
         concentration_aliases,
@@ -4359,6 +4397,29 @@ def normalize_etf_judgment_patch(symbol, patch, research):
         'construction_concentration': construction_conc,
     })
     return normalized
+
+
+def sanitize_previous_etf_classification(
+    symbol, previous_diagnostics, benchmark_prior_compatible,
+):
+    """Return a prior without carrying stale benchmark judgments across contracts."""
+    previous = (
+        (previous_diagnostics.get('classifications', {}) or {}).get(symbol)
+        if isinstance(previous_diagnostics, dict) else None
+    )
+    if not isinstance(previous, dict):
+        return None
+    prior = dict(previous)
+    if not benchmark_prior_compatible:
+        for field in (
+            'benchmark_outperformance_outlook',
+            'benchmark_outperformance_confidence',
+            'benchmark_outperformance_basis',
+            'benchmark_negative_evidence_scope',
+            'benchmark_negative_evidence',
+        ):
+            prior.pop(field, None)
+    return prior or None
 
 
 ETF_JUDGMENT_RESEARCH_FIELDS = (
@@ -4651,7 +4712,11 @@ def judge_etf_research_pool(
                 'grounded_research': build_etf_judgment_research_projection(
                     research
                 ),
-                'previous_classification': (previous_diagnostics.get('classifications', {}) or {}).get(symbol),
+                'previous_classification': sanitize_previous_etf_classification(
+                    symbol,
+                    previous_diagnostics,
+                    classification_prior_compatible,
+                ),
             })
         compact_market_context = build_etf_judgment_market_context(
             market_context
@@ -5786,6 +5851,25 @@ research_cache_version = config.get(
 )
 run_report_file = config.get('run_diagnostics_file', 'run_reports/etf_run_report.json')
 previous_diagnostics = load_json_object(run_report_file)
+classification_contract_hash = stable_json_hash({
+    'version': 2,
+    'model': classification_model,
+    'prompt': config['prompt_etf_judgment'],
+    'hard_negative_gate': 'cross_stage_v2',
+})
+previous_classification_contract_hash = str(
+    previous_diagnostics.get('classification_contract_hash') or ''
+)
+classification_prior_compatible = bool(
+    previous_classification_contract_hash
+    and previous_classification_contract_hash == classification_contract_hash
+)
+if previous_diagnostics.get('classifications') and not classification_prior_compatible:
+    print(
+        'ETF classification contract changed; prior reversal/continuation '
+        'judgments remain available, but prior benchmark outlook/confidence '
+        'will be reset for this re-baselining run.'
+    )
 RUN_PROVENANCE.update({
     'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     'config_sha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
@@ -7403,8 +7487,10 @@ current_classifications = {
         'entry_reversal_risk': research.get('entry_reversal_risk'),
         'continuation_strength': research.get('continuation_strength'),
         'benchmark_outperformance_outlook': research.get('benchmark_outperformance_outlook'),
-            'benchmark_outperformance_confidence': research.get('benchmark_outperformance_confidence'),
+        'benchmark_outperformance_confidence': research.get('benchmark_outperformance_confidence'),
         'benchmark_outperformance_basis': research.get('benchmark_outperformance_basis'),
+        'benchmark_negative_evidence_scope': research.get('benchmark_negative_evidence_scope'),
+        'benchmark_negative_evidence': research.get('benchmark_negative_evidence'),
         'holdings_concentration': research.get('holdings_concentration'),
         'construction_concentration': research.get('construction_concentration'),
         'primary_reversal_channel': research.get('primary_reversal_channel'),
@@ -7437,7 +7523,9 @@ comparison_fields = {
     'portfolio_group', 'canonical_sector', 'style_category',
     'research_admission', 'python_eligible', 'reversal_risk',
     'exposure_reversal_risk', 'entry_reversal_risk', 'continuation_strength',
-    'benchmark_outperformance_outlook', 'holdings_concentration',
+    'benchmark_outperformance_outlook', 'benchmark_outperformance_confidence',
+    'benchmark_negative_evidence_scope', 'benchmark_negative_evidence',
+    'holdings_concentration',
     'construction_concentration', 'primary_reversal_channel', 'judgment_model',
     'risk_basis',
     'mechanism_status', 'normalization_probability', 'benchmark_assessment',
@@ -7475,10 +7563,19 @@ if reconciliation_counts:
         print(f'  {item_type}: {count}')
 else:
     print('ETF runtime reconciliation summary: no label repairs were needed.')
+print(
+    'ETF benchmark HIGH-negative calibration: '
+    f'raw={benchmark_high_negative_diagnostics["raw"]}, '
+    f'corroborated={benchmark_high_negative_diagnostics["corroborated"]}, '
+    f'downgraded={benchmark_high_negative_diagnostics["downgraded"]}.'
+)
 
 diagnostics = {
     'schema_version': 2,
     'run_id': RUN_ID,
+    'classification_contract_hash': classification_contract_hash,
+    'classification_prior_compatible': classification_prior_compatible,
+    'benchmark_high_negative': dict(benchmark_high_negative_diagnostics),
     'provenance': RUN_PROVENANCE,
     'cache': cache_diagnostics,
     'stages': stage_diagnostics,

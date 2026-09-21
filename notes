@@ -17,5 +17,25 @@ SAVED PORTFOLIOS 9/19/26:
 - stocks: SLDE, FTNT, AYA, SBLK, DSVSF, CDNA, VCTR, HNGE, REPX, GSL
 - etfs: XLE, DIVB, VFLO, AVLV, XLK, XBI, SEIV, RSPT
 
+SAVED PORTFOLIOS 9/20/26:
+- stocks: SLDE, HAFN, SBLK, WDOFF, AYA, HNGE, FTNT, CDNA, VCTR, RCRUY
+- etfs: VFLO, XLK, FTEC, DIVB, AVLV, XLE, SEIV, XBI
+
 Features to add/Improvements to make:
-- remove web scraping and replace with yfinance in stock recommender, filter some here too
+- it is currently at or near production state
+- watch the runs and after monitoring a while come up with refinements
+
+How it currently works:
+- download fundamentals from yfinance
+- compute qvm scores with q 45, v 10, m 45 weights
+- choose the top 75 qvm scorers
+- call gemini 2.5 to get market and world news context
+- call gemini 2.5 in batches to get stock research and news
+- give research to gemini 3.5 for classification of continuation and risk
+- gemini's returns and risk events may not match for python use, use embeddings and semantic similarity to reconcile meanings instead of word comparisons
+- python changes scores based on research, selects the top 10, limits amount per sector and risk event
+- generates web page
+- results after calls are cached every step to prevent costly repeated calls, also repaired if gemini's returns are bad
+- extensive logging so that chatgpt can analyze the operational robustness and results and suggest refinements, fixes, changes, etc
+- automated to run at lowest gemini usage to avoid 503s
+- philosophy: find stocks that are at least as good as the benchmark etfs (spmo, vgt, divb, vflo), are doing well and will continue to do well, wont go negative after buying

@@ -600,6 +600,7 @@ def write_run_checkpoint(status='RUNNING', error=None):
             'classification_api_attempts': classification_api_attempts_used,
             'classification_validation': classification_validation_diagnostics,
             'classification_calls': classification_call_diagnostics,
+            'runtime_reconciliations': runtime_reconciliation_diagnostics,
             'api_attempts': api_attempt_diagnostics,
             'batches': state.get('batch_research_diagnostics', []),
             'validated_symbols': sorted(state.get('research_by_symbol', {})),
@@ -2960,8 +2961,179 @@ def reconcile_dynamic_risk_event_id(result, active_risk_events):
     return best_event_id
 
 
-def reconcile_etf_risk_event_fields(result, candidate, active_risk_events):
-    """Reconcile only event identity; leave Gemini's investment judgment intact."""
+def reject_risk_event_applicability(result, candidate, stage, condition):
+    """Reject one assignment without changing its evidence or risk rating."""
+    symbol = str(result.get('symbol') or candidate.get('Symbol') or '').upper()
+    event_id = str(result.get('primary_risk_event_id') or '').strip()
+    diagnostic = {
+        'type': 'risk_event_applicability_failure', 'symbol': symbol,
+        'event_id': event_id, 'validation_stage': stage,
+        'failed_condition': condition, 'repair_status': 'awaiting_scheduler',
+    }
+    runtime_reconciliation_diagnostics.append(diagnostic)
+    print('ETF EVENT APPLICABILITY ' + json.dumps(diagnostic))
+    raise ValueError(
+        f'{symbol} risk-event applicability failed for primary_risk_event_id '
+        f'{event_id!r} at {stage}: {condition}. Use only supplied grounded '
+        'evidence to repair the inconsistent assignment; do not invent evidence '
+        'or lower risk merely to pass validation.'
+    )
+
+
+def record_risk_event_repair_status(symbol, stage, status):
+    """Attach the existing scheduler's outcome to this validation failure."""
+    for diagnostic in reversed(runtime_reconciliation_diagnostics):
+        if (diagnostic.get('type') == 'risk_event_applicability_failure'
+                and diagnostic.get('symbol') == symbol
+                and diagnostic.get('validation_stage') == stage):
+            if diagnostic.get('repair_status') != status:
+                diagnostic['repair_status'] = status
+                print('ETF EVENT APPLICABILITY ' + json.dumps(diagnostic))
+            break
+
+
+def validate_risk_event_atomic_support(result, candidate, stage):
+    """Run before normalization can erase a contradictory event assignment."""
+    if not str(result.get('primary_risk_event_id') or '').strip():
+        return
+    if result.get('mechanism_status') not in {'HYPOTHETICAL', 'OBSERVED'}:
+        reject_risk_event_applicability(
+            result, candidate, stage,
+            'mechanism_status does not support a shared adverse mechanism',
+        )
+    if result.get('risk_basis') not in {
+        'NORMALIZED_EXPOSURE_DETERIORATION', 'TEMPORARY_DRIVER_NORMALIZATION',
+        'NONRECURRING_COMPARISON_ONLY',
+    }:
+        reject_risk_event_applicability(
+            result, candidate, stage, 'risk_basis does not support the event',
+        )
+
+
+def risk_event_evidence_terms(value):
+    """Compare narrative evidence, excluding labels and generic finance words."""
+    generic = {
+        'MARKET', 'MARKETS', 'PRICE', 'PRICES', 'RATE', 'RATES', 'HIGH', 'LOW',
+        'GLOBAL', 'SUPPLY', 'DEMAND', 'CONDITIONS', 'ECONOMIC', 'ECONOMY',
+        'INDUSTRY', 'INDUSTRIES', 'FUND', 'FUNDS', 'ETF', 'EQUITY', 'EQUITIES',
+        'HOLDING', 'HOLDINGS', 'PORTFOLIO', 'EXPOSURE', 'RETURN', 'RETURNS',
+        'EARNINGS', 'PROFIT', 'PROFITS', 'MARGIN', 'MARGINS', 'VALUATION',
+        'INDEX', 'WEIGHT', 'WEIGHTS', 'STOCK', 'STOCKS', 'SHARE', 'SHARES',
+        'SECTOR', 'SECTORS', 'THEIR', 'THIS', 'THAT', 'THOSE', 'WHICH',
+        'ITS', 'HAS', 'HAVE', 'NOT', 'BUT', 'CAN', 'WILL', 'WERE', 'WAS',
+        'LOWER', 'HIGHER', 'FALL', 'FALLING', 'RISE', 'RISING', 'INCREASE',
+        'DECREASE', 'DECLINE', 'REDUCE', 'REDUCING', 'REDUCED', 'SUPPORT',
+        'SUPPORTS', 'BENEFIT', 'BENEFITS', 'CAUSE', 'CAUSES', 'LEAD', 'LEADS',
+        'AFFECT', 'AFFECTS', 'IMPACT', 'IMPACTS', 'COMPANIES', 'COMPANY',
+        'CONCENTRATED', 'CONCENTRATION', 'CONTINUED', 'CONTINUING',
+    }
+    # Preserve short acronyms such as AI without making U.S. a causal bridge.
+    acronyms = set(re.findall(r'\b[A-Z]{2}\b', str(value or ''))) - {'US', 'UK'}
+    return (_risk_event_terms(value) | acronyms) - generic
+
+
+def material_effect_has_adverse_direction(value):
+    """Require explicit harm to fund outcomes, not a signless price movement.
+
+    This is a conservative completeness guard, not an economic truth model.
+    Ambiguous/negated outcomes return to the existing evidence-only repair path.
+    """
+    text = re.sub(r'\s+', ' ', str(value or '').casefold()).replace('’', "'")
+    outcome = (
+        r'(?:earnings|profits?|profitability|margins?|revenues?|cash flows?|returns?|nav|'
+        r'valuations?|share prices?|stock prices?|holdings|constituents|portfolio|'
+        r'performance|distributions?|dividends?)'
+    )
+    adverse = (
+        r'(?:hurt\w*|harm\w*|damag\w*|pressur\w*|weaken\w*|erod\w*|'
+        r'compress\w*|reduc\w*|lower\w*|depress\w*|impair\w*|undermin\w*)'
+    )
+    patterns = (
+        rf'\b{adverse}\b(?:[\s-]+[\w\x27-]+){{0,5}}[\s-]+{outcome}\b',
+        rf'\b{outcome}\b(?:[\s-]+[\w\x27-]+){{0,4}}[\s-]+'
+        r'(?:fall\w*|declin\w*|deteriorat\w*|contract\w*|suffer\w*|shrink\w*)\b',
+        r'\b(?:underperform\w*|lag(?:s|ged|ging)?|drawdowns?|losses|de[- ]?rating)\b',
+    )
+    for pattern in patterns:
+        for match in re.finditer(pattern, text):
+            prefix = text[max(0, match.start() - 70):match.start()]
+            prefix = re.split(r'[.;,:!?]', prefix)[-1]
+            prefix = ' '.join(prefix.split()[-5:])
+            span = prefix + ' ' + match.group()
+            if re.search(
+                r"\b(?:no|not|never|without|neither|nor|unlikely|unclear|"
+                r"limited|minimal|negligible|immaterial|avoid\w*|prevent\w*|"
+                r"offset\w*|mitigat\w*|isn't|doesn't|wouldn't|won't|cannot|can't)\b",
+                span,
+            ):
+                continue
+            positive = r'(?:help\w*|benefit\w*|improv\w*|support\w*|boost\w*|lift\w*|ris\w*|gains?)'
+            if re.search(rf'\b{positive}\s+or\s+', span):
+                continue
+            suffix = text[match.end():]
+            if re.match(rf'\s+or\s+{positive}\b', suffix):
+                continue
+            if re.match(
+                r'\s+(?:(?:are|is|were|was|remain|remains|would|will|can|could|may|'
+                r'be|have|has|been|expected|considered)\s+){0,4}'
+                r'(?:not|unlikely|negligible|immaterial|avoided|prevented|limited|minimal|offset)\b',
+                suffix,
+            ):
+                continue
+            # A fall in input costs that boosts profits has the opposite sign.
+            if re.search(r'\b(?:costs?|boost\w*|benefit\w*|lift\w*|improv\w*|support\w*)\b', match.group()):
+                continue
+            return True
+    return False
+
+
+def validate_risk_event_applicability(result, candidate, event, stage):
+    """Require grounded support for canonical and reconciled event identities."""
+    validate_risk_event_atomic_support(result, candidate, stage)
+    fail = lambda reason: reject_risk_event_applicability(result, candidate, stage, reason)
+    if result.get('risk_materiality') not in {'MODERATE', 'HIGH'}:
+        fail('risk_materiality does not establish a material shared event')
+    if (result.get('driver_dependence') not in {'LOW', 'MODERATE', 'HIGH'}
+            or (result.get('risk_basis') == 'TEMPORARY_DRIVER_NORMALIZATION'
+                and result.get('driver_dependence') == 'LOW')):
+        fail('driver_dependence does not support the claimed risk_basis')
+    if result.get('evidence_scope') not in {'FUND_SPECIFIC', 'EXPOSURE_SPECIFIC'}:
+        fail('evidence_scope lacks fund-specific or exposure-specific support')
+    if result.get('probability_basis') in {None, '', 'NONE'}:
+        fail('probability_basis does not support the claimed mechanism')
+    for field in ('holdings_evidence', 'current_driver_evidence',
+                  'reversal_mechanism', 'material_effect', 'probability_evidence'):
+        if not isinstance(result.get(field), str) or len(result[field].strip()) < 15:
+            fail(f'{field} lacks concrete supporting evidence')
+
+    # A canonical ID, risk group, category, name, or judgment explanation must
+    # not supply its own proof. Use grounded narratives and supplied holdings.
+    transmission = ' '.join(result[field] for field in (
+        'reversal_mechanism', 'material_effect',
+    ))
+    exposure = result['holdings_evidence'] + ' ' + ' '.join(
+        str(candidate.get(field) or '') for field in (
+            'SectorWeightings', 'TopHoldings',
+        )
+    )
+    if not (risk_event_evidence_terms(exposure) & risk_event_evidence_terms(transmission)):
+        fail('holdings_evidence lacks a concrete exposure bridge to reversal_mechanism/material_effect')
+    catalog_evidence = ' '.join([
+        str(event.get('description') or ''),
+        str(event.get('normalization_risk') or ''),
+        ' '.join(str(x) for x in (event.get('affected_industries') or [])),
+        ' '.join(str(x) for x in (event.get('beneficiaries') or [])),
+    ])
+    if not (risk_event_evidence_terms(transmission) & risk_event_evidence_terms(catalog_evidence)):
+        fail('reversal_mechanism/material_effect do not connect to the catalog event evidence')
+    if not material_effect_has_adverse_direction(result['material_effect']):
+        fail('material_effect lacks an unambiguous adverse direction for the ETF')
+
+
+def reconcile_etf_risk_event_fields(
+    result, candidate, active_risk_events, validation_stage='research',
+):
+    """Reconcile event identity and validate applicability without rewriting risk."""
     result = dict(result)
     match_context = dict(result)
     match_context['_portfolio_group'] = str(
@@ -3000,14 +3172,20 @@ def reconcile_etf_risk_event_fields(result, candidate, active_risk_events):
             'risk event without risk_exposure_group.'
         )
     result['risk_exposure_group'] = exposure_group
+    if event_id:
+        event = next(event for event in active_risk_events
+                     if isinstance(event, dict)
+                     and str(event.get('event_id') or '').strip() == event_id)
+        validate_risk_event_applicability(result, candidate, event, validation_stage)
     return result
 
 
 def validate_etf_result(
     result, candidate, minimum_sources=2, maximum_sources=5,
-    active_risk_events=None,
+    active_risk_events=None, validation_stage='research',
 ):
     result = normalize_etf_result(result)
+    validate_risk_event_atomic_support(result, candidate, validation_stage)
     result = normalize_hypothetical_consistency(result)
     symbol = str(candidate['Symbol']).upper()
     if result['symbol'] != symbol:
@@ -3030,7 +3208,7 @@ def validate_etf_result(
     result = bind_mechanism_evidence_source(result)
     if active_risk_events is not None:
         result = reconcile_etf_risk_event_fields(
-            result, candidate, active_risk_events
+            result, candidate, active_risk_events, validation_stage
         )
     if result.get('benchmark_assessment') not in {'PASS', 'FAIL'}:
         raise ValueError(f'{symbol} has invalid benchmark_assessment.')
@@ -3360,6 +3538,19 @@ def merge_structural_repair_patches(data, repair_payload):
                 'mechanism_evidence_source_index',
                 'evidence_scope', 'mandate_assessment', 'mandate_evidence',
                 'us_equity_weight_estimate', 'mandate_basis', 'explanation',
+            })
+        if 'risk-event applicability' in validation_error:
+            # Only the disputed event/evidence fields may be repaired. Sources,
+            # mandate, benchmark outlook and unrelated classifications stay put.
+            allowed_fields.update({
+                'primary_risk_event_id', 'risk_exposure_group', 'risk_basis',
+                'mechanism_status', 'reversal_mechanism', 'material_effect',
+                'holdings_evidence', 'current_driver_evidence', 'probability_basis',
+                'probability_evidence', 'normalization_probability',
+                'risk_materiality', 'driver_dependence', 'evidence_scope',
+                'adverse_change_observed', 'adverse_change_date',
+                'adverse_change_indicator', 'mechanism_evidence_source',
+                'mechanism_evidence_source_index',
             })
         merged = dict(prior)
         changed_fields = []
@@ -4367,12 +4558,18 @@ def judge_etf_research_pool(
             batch_symbols = batch_symbols[:keep]
         if classification_logical_calls_used >= max_classification_logical_calls_per_run:
             print('ETF logical classification-call budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
+            for symbol in symbols:
+                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
         if classification_api_attempts_used >= max_classification_api_attempts_per_run:
             print('ETF classification API-attempt budget exhausted; remaining ETFs stay unjudged and cannot enter the final portfolio.')
+            for symbol in symbols:
+                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
         if api_attempt_budget.remaining(classification_model, 'classification') <= 0:
             print('ETF model-family classification budget exhausted; remaining ETFs stay unjudged.')
+            for symbol in symbols:
+                record_risk_event_repair_status(symbol, 'judgment', 'budget_exhausted')
             break
         classification_logical_calls_used += 1
         compact = []
@@ -4619,6 +4816,7 @@ def judge_etf_research_pool(
                     research,
                     candidate_by_symbol[symbol],
                     market_context.get('active_risk_events') or [],
+                    validation_stage='judgment',
                 )
             except Exception as exc:
                 invalid_patch_symbols.append(symbol)
@@ -4638,11 +4836,12 @@ def judge_etf_research_pool(
                     ),
                 })
                 print(
-                    f'Warning: ETF judgment event identity [{symbol}] was '
+                    f'Warning: ETF judgment event validation [{symbol}] was '
                     f'isolated without discarding peer judgments: {exc}'
                 )
                 continue
             valid_patch_count += 1
+            record_risk_event_repair_status(symbol, 'judgment', 'repaired')
             # Reset only judgment-owned exclusion state before applying the new
             # authoritative patch; grounded mandate/research exclusions remain intact.
             prior_reason = str(research.get('eligibility_reason') or '')
@@ -4677,6 +4876,11 @@ def judge_etf_research_pool(
             )
         retryable = [s for s in invalid_patch_symbols
                      if classification_validation_rounds[s] < max_judgment_validation_rounds_per_etf]
+        for symbol in invalid_patch_symbols:
+            record_risk_event_repair_status(
+                symbol, 'judgment',
+                'queued_bounded_catch_up' if symbol in retryable else 'attempts_exhausted',
+            )
         classification_validation_diagnostics.append({
             'logical_call': classification_logical_calls_used,
             'requested': list(batch_symbols), 'validated_count': valid_patch_count,
@@ -5840,6 +6044,7 @@ candidate_by_symbol = {
 }
 cache_keys = {}
 research_by_symbol = {}
+cache_applicability_repairs = []
 for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     signature = {
@@ -5926,6 +6131,27 @@ for candidate in candidate_records:
             print(f'Using {cache_label} ETF research cache for {symbol}.')
         except Exception as exc:
             cache_result.update(reason='validation_failed', error=str(exc))
+            if 'risk-event applicability' in str(exc) and isinstance(entry.get('research'), dict):
+                # This evidence is still fresh and grounded. Repair only the
+                # inconsistent assignment through the existing no-search queue.
+                # Keep its original age; neither validation nor repair refreshes it.
+                draft = entry['research']
+                prior_urls = [
+                    source.get('url') if isinstance(source, dict) else source
+                    for source in (draft.get('sources') or [])
+                    if isinstance(source, (dict, str))
+                ]
+                research_cache['deferred_entries'][cache_key] = {
+                    'timestamp': entry.get('timestamp'),
+                    'evidence_timestamp': entry.get('timestamp'),
+                    'error': str(exc), 'draft': dict(draft),
+                    'grounding_source_urls': [url for url in prior_urls if url],
+                }
+                cache_applicability_repairs.append({
+                    'candidate': candidate, 'needs_research': False,
+                })
+                cache_result['repair_queued'] = True
+                record_risk_event_repair_status(symbol, 'research', 'queued_bounded_structural_repair')
             print(f'Ignoring invalid ETF research cache for {symbol}: {exc}')
     elif entry:
         cache_result['reason'] = 'expired_or_invalid_timestamp'
@@ -5936,7 +6162,10 @@ print('ETF RESEARCH CACHE ' + json.dumps({
 }))
 
 cursor = 0
-pending_retries = []
+pending_retries = list(cache_applicability_repairs)
+event_applicability_repair_symbols = {
+    str(item['candidate']['Symbol']).upper() for item in cache_applicability_repairs
+}
 deferred_excess_candidates = []
 deferred_excess_symbols_this_run = set()
 sector_capacity_skipped_symbols_this_run = set()
@@ -6094,6 +6323,10 @@ while (
         for candidate in candidate_records:
             symbol = str(candidate['Symbol']).upper()
             if symbol in research_by_symbol:
+                continue
+            if symbol in event_applicability_repair_symbols:
+                # This ETF already has grounded evidence. Only its bounded
+                # structural repair may run; do not rediscover it as fresh work.
                 continue
             if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
                 continue
@@ -6370,6 +6603,7 @@ while (
                         structural_repairs_by_symbol.get(symbol, 0) + 1
                     )
             if symbol in valid:
+                record_risk_event_repair_status(symbol, 'research', 'repaired')
                 last_research_errors.pop(symbol, None)
                 valid[symbol].pop('judgment_model', None)
                 valid[symbol].pop('judgment_validation_error', None)
@@ -6398,6 +6632,8 @@ while (
                     challenger_researched_symbols.add(symbol)
             else:
                 error = errors.get(symbol, 'Invalid ETF research.')
+                if 'risk-event applicability' in error:
+                    event_applicability_repair_symbols.add(symbol)
                 last_research_errors[symbol] = error
                 print(f'Deferred ETF research [{symbol}]: {error}')
                 prior_deferred = research_cache['deferred_entries'].get(
@@ -6434,7 +6670,7 @@ while (
                     draft=drafts.get(symbol),
                     grounding_urls=grounding_for_repair,
                 )
-                if dedicated_basic_repair_batch:
+                if dedicated_basic_repair_batch and 'risk-event applicability' not in error:
                     # A failed evidence-only repair has already used its cheap
                     # structural attempt. Escalate directly to the ETF's final
                     # permitted fresh search rather than queueing another repair.
@@ -6451,6 +6687,10 @@ while (
                     )
                 elif source_error:
                     needs_research = not has_repair_evidence
+                if symbol in event_applicability_repair_symbols:
+                    needs_research = False
+                    basic_metadata_repair = False
+                    source_error = False
                 used_attempts = (
                     research_attempts_by_symbol.get(symbol, 0)
                     if needs_research
@@ -6466,6 +6706,7 @@ while (
                         'candidate': candidate,
                         'needs_research': needs_research,
                     })
+                    record_risk_event_repair_status(symbol, 'research', 'queued_bounded_structural_repair')
                 elif (
                     basic_metadata_repair
                     and not needs_research
@@ -6493,6 +6734,8 @@ while (
                         'candidate': candidate,
                         'needs_research': True,
                     })
+                if used_attempts >= attempt_limit and symbol in event_applicability_repair_symbols:
+                    record_risk_event_repair_status(symbol, 'research', 'attempts_exhausted')
         batch_stats = {
             'stage': stage,
             'queue': queue_stats,
@@ -6726,6 +6969,42 @@ if len(selected) < pre_final_selected_count:
         'The accumulated tail was judged only after research closed.'
     )
 
+# Close diagnostic-only repair states after both research and final judgment.
+# A queued repair is not a promise that call capacity will remain to execute it.
+for event_diagnostic in runtime_reconciliation_diagnostics:
+    if (event_diagnostic.get('type') != 'risk_event_applicability_failure'
+            or not str(event_diagnostic.get('repair_status') or '').startswith('queued_')):
+        continue
+    symbol = event_diagnostic['symbol']
+    judgment_stage = event_diagnostic['validation_stage'] == 'judgment'
+    recovered = research_by_symbol.get(symbol)
+    if recovered and (not judgment_stage or recovered.get('judgment_model')):
+        repair_status = 'repaired'
+    elif ((judgment_stage and classification_quota_exhausted)
+          or (not judgment_stage and research_quota_exhausted)):
+        repair_status = 'quota_exhausted'
+    elif judgment_stage:
+        repair_status = (
+            'attempts_exhausted'
+            if classification_validation_rounds.get(symbol, 0) >= max_judgment_validation_rounds_per_etf
+            else 'budget_exhausted'
+            if (classification_logical_calls_used >= max_classification_logical_calls_per_run
+                or classification_api_attempts_used >= max_classification_api_attempts_per_run
+                or api_attempt_budget.remaining(classification_model, 'classification') <= 0)
+            else 'unjudged_at_run_end'
+        )
+    else:
+        repair_status = (
+            'attempts_exhausted'
+            if structural_repairs_by_symbol.get(symbol, 0) >= max_structural_repairs_per_etf
+            else 'budget_exhausted'
+            if (not request_budget.can_reserve('research')
+                or api_attempt_budget.remaining(model_primary, 'research') <= 0)
+            else 'not_attempted_before_research_closed'
+        )
+    event_diagnostic['repair_status'] = repair_status
+    print('ETF EVENT APPLICABILITY ' + json.dumps(event_diagnostic))
+
 # Regression invariant: do not silently claim that research was unnecessary if
 # authoritative judgment has reopened slots while candidate/call capacity remains.
 remaining_unresearched = sum(
@@ -6740,7 +7019,9 @@ for candidate in candidate_records:
     symbol = str(candidate['Symbol']).upper()
     if symbol in research_by_symbol:
         continue
-    if research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf:
+    if (research_attempts_by_symbol.get(symbol, 0) >= max_fresh_research_attempts_per_etf
+            or (symbol in event_applicability_repair_symbols
+                and structural_repairs_by_symbol.get(symbol, 0) >= max_structural_repairs_per_etf)):
         exhausted_unvalidated.append(symbol)
         continue
     if etf_optimistic_final_score(candidate) + score_comparison_epsilon < minimum_final_selection_score:

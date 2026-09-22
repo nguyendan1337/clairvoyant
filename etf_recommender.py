@@ -84,6 +84,7 @@ classification_invalid_patch_rounds = {}
 classification_retry_kind = {}
 classification_validation_diagnostics = []
 classification_scheduling_diagnostics = []
+accepted_raw_benchmark_judgments = {}
 runtime_reconciliation_diagnostics = []
 benchmark_high_negative_diagnostics = {
     'raw': 0,
@@ -4911,6 +4912,10 @@ def judge_etf_research_pool(
                 judged[symbol] = research
                 continue
             research = dict(judged[symbol])
+            raw_benchmark_judgment = {
+                'outlook': patch.get('benchmark_outperformance_outlook'),
+                'confidence': patch.get('benchmark_outperformance_confidence'),
+            }
             try:
                 patch = normalize_etf_judgment_patch(symbol, patch, research)
             except Exception as exc:
@@ -5030,6 +5035,7 @@ def judge_etf_research_pool(
                 research['eligible'] = False
                 research['eligibility_reason'] = 'Excluded because authoritative judgment finds benchmark outperformance unlikely over 6-12 months with HIGH confidence.'
             judged[symbol] = research
+            accepted_raw_benchmark_judgments[symbol] = raw_benchmark_judgment
             prior_peer_patches[symbol] = {
                 key: research.get(key) for key in (
                     'reversal_risk','continuation_strength',
@@ -7570,6 +7576,62 @@ print(
     f'downgraded={benchmark_high_negative_diagnostics["downgraded"]}.'
 )
 
+# Observational audit only: build it after selection and summary work has finished.
+# Exposure labels are overlap clues, not verified index or holdings identities.
+selected_fund_audit = []
+for item in selected:
+    candidate, research = item['candidate'], item['research']
+    symbol = str(candidate['Symbol']).upper()
+    raw = accepted_raw_benchmark_judgments.get(symbol)
+    adjustments = [
+        reconciliation for reconciliation in runtime_reconciliation_diagnostics
+        if reconciliation.get('symbol') == symbol
+        and reconciliation.get('type') == 'benchmark_high_negative_downgrade'
+    ]
+    driver = normalized_return_driver_key(research)
+    family = etf_factor_family(candidate, research)
+    sector = candidate_sector_group(candidate)
+    event = research.get('primary_risk_event_id')
+    score = etf_final_score(candidate, research)
+    floor = etf_required_final_score(research, candidate)
+    peers = [peer for peer in selected if peer is not item]
+    selected_fund_audit.append({
+        'symbol': symbol,
+        'name': candidate.get('Name'),
+        'gemini_raw_benchmark_judgment': raw,
+        'raw_judgment_available': raw is not None,
+        'final_benchmark_judgment': {
+            'outlook': research.get('benchmark_outperformance_outlook'),
+            'confidence': research.get('benchmark_outperformance_confidence'),
+        },
+        'python_benchmark_confidence_adjustments': adjustments,
+        'final_selection_score': score,
+        'required_selection_score': floor,
+        'score_above_floor': score - floor,
+        'selection_merit': etf_selection_merit(candidate, research),
+        'portfolio_group': sector,
+        'factor_family': family,
+        'return_driver_group': driver,
+        'primary_risk_event_id': event,
+        'shared_factor_family_with': [
+            str(peer['candidate']['Symbol']).upper() for peer in peers
+            if etf_factor_family(peer['candidate'], peer['research']) == family
+        ],
+        'shared_return_driver_with': [
+            str(peer['candidate']['Symbol']).upper() for peer in peers
+            if driver and normalized_return_driver_key(peer['research']) == driver
+        ],
+        'shared_risk_event_with': [
+            str(peer['candidate']['Symbol']).upper() for peer in peers
+            if event and peer['research'].get('primary_risk_event_id') == event
+        ],
+        'verified_underlying_index': None,
+        'verified_index_or_holdings_overlap': 'unknown',
+    })
+print('ETF selected fund audit (shared labels do not establish index or holdings overlap):')
+for row in selected_fund_audit:
+    print('  ' + json.dumps(row, sort_keys=True, default=str))
+
 diagnostics = {
     'schema_version': 2,
     'run_id': RUN_ID,
@@ -7681,6 +7743,7 @@ diagnostics = {
     'consistency_warnings': consistency_warnings,
     'research_disposition': research_disposition,
     'decision_ledger': decision_ledger,
+    'selected_fund_audit': selected_fund_audit,
     'context_review': context_review,
     'classification_calls': classification_call_diagnostics,
     'classification_validation': classification_validation_diagnostics,

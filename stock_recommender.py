@@ -4119,13 +4119,19 @@ def call_gemini_json(
 
 
 CACHE_FILE = cache_file_path("yf_cache.json")
-CACHE_EXPIRY_DAYS = 1
+CACHE_EXPIRY_HOURS = 36.0
 
 
 
 # ---------- yfinance CACHE HELPERS ----------
 def load_cache():
+    global yfinance_cache_load_diagnostics
     if not os.path.exists(CACHE_FILE):
+        yfinance_cache_load_diagnostics = {
+            "file_existed": False, "entries_loaded": 0, "fresh": 0,
+            "expired": 0, "invalid": 0, "ttl_hours": CACHE_EXPIRY_HOURS,
+        }
+        print("YFINANCE FUNDAMENTALS CACHE " + json.dumps(yfinance_cache_load_diagnostics))
         return {}
 
     try:
@@ -4137,6 +4143,10 @@ def load_cache():
                 f"Warning: {CACHE_FILE} does not contain a JSON object. "
                 "Ignoring it."
             )
+            yfinance_cache_load_diagnostics = {
+                "file_existed": True, "entries_loaded": 0, "fresh": 0,
+                "expired": 0, "invalid": 1, "ttl_hours": CACHE_EXPIRY_HOURS,
+            }
             return {}
 
     except (json.JSONDecodeError, OSError) as e:
@@ -4144,10 +4154,16 @@ def load_cache():
             f"Warning: could not read {CACHE_FILE}: {e}. "
             "Ignoring the invalid cache and rebuilding it."
         )
+        yfinance_cache_load_diagnostics = {
+            "file_existed": True, "entries_loaded": 0, "fresh": 0,
+            "expired": 0, "invalid": 1, "ttl_hours": CACHE_EXPIRY_HOURS,
+        }
         return {}
 
     fresh_cache = {}
     now = datetime.now(UTC)
+    expired_count = 0
+    invalid_count = 0
 
     for ticker, entry in cache.items():
         try:
@@ -4156,11 +4172,20 @@ def load_cache():
             if ts.tzinfo is None:
                 ts = ts.replace(tzinfo=UTC)
 
-            if now - ts < timedelta(days=CACHE_EXPIRY_DAYS):
+            if now - ts < timedelta(hours=CACHE_EXPIRY_HOURS):
                 fresh_cache[ticker] = entry
+            else:
+                expired_count += 1
         except (KeyError, TypeError, ValueError):
+            invalid_count += 1
             continue
 
+    yfinance_cache_load_diagnostics = {
+        "file_existed": True, "entries_loaded": len(cache),
+        "fresh": len(fresh_cache), "expired": expired_count,
+        "invalid": invalid_count, "ttl_hours": CACHE_EXPIRY_HOURS,
+    }
+    print("YFINANCE FUNDAMENTALS CACHE " + json.dumps(yfinance_cache_load_diagnostics))
     return fresh_cache
 
 
@@ -4511,6 +4536,7 @@ def append_qvm_data_yfinance(
     }
     cache_hit_symbols = []
     live_fetch_symbols = []
+    incomplete_cache_entries = 0
     for symbol in selected_for_info:
         cached_info = (
             cache.get(symbol, {}).get("info", {})
@@ -4519,13 +4545,16 @@ def append_qvm_data_yfinance(
         if cached_info and required_cached_fields.issubset(cached_info):
             cache_hit_symbols.append(symbol)
         else:
+            if cached_info:
+                incomplete_cache_entries += 1
             live_fetch_symbols.append(symbol)
 
     print(
         "Fundamentals plan: "
         f"eligible={len(selected_for_info)}, "
         f"cache_hits={len(cache_hit_symbols)}, "
-        f"live_fetches={len(live_fetch_symbols)}."
+        f"live_fetches={len(live_fetch_symbols)}, "
+        f"incomplete_cached_entries={incomplete_cache_entries}."
     )
 
     fundamentals_fetch_failures = []
@@ -4640,6 +4669,8 @@ def append_qvm_data_yfinance(
     yfinance_fundamentals_diagnostics = {
         "eligible_symbols": len(selected_for_info),
         "cache_hits": len(cache_hit_symbols),
+        "cache_load": dict(yfinance_cache_load_diagnostics),
+        "incomplete_cached_entries": incomplete_cache_entries,
         "live_fetches": len(live_fetch_symbols),
         "fetch_successes": len(live_fetch_symbols) - len({
             item["symbol"] for item in fundamentals_fetch_failures
@@ -5957,6 +5988,7 @@ min_3_month_return = float(config.get("min_3_month_return", 0.0))
 stock_screener_page_size = int(config.get("stock_screener_page_size", 250))
 configured_max_info_calls = config.get("max_info_calls")
 max_info_calls = None if configured_max_info_calls is None else int(configured_max_info_calls)
+CACHE_EXPIRY_HOURS = max(1.0, float(config.get("yfinance_fundamentals_cache_hours", CACHE_EXPIRY_HOURS)))
 max_retries = config["max_retries"]
 initial_delay = config["initial_delay"]
 max_validation_rounds = max(
@@ -8316,6 +8348,12 @@ else:
     print("  No Python label reconciliations were needed.")
 
 if not selected:
+    if classification_unavailable_this_run and pending_classification:
+        raise RuntimeError(
+            "Stock judgment service unavailable; "
+            f"{len(pending_classification)} stocks have validated research "
+            "pending classification. No new stock page was written."
+        )
     raise RuntimeError("No stocks passed the full research and classification rules.")
 pending_judgment_symbols = sorted(pending_classification)
 if pending_judgment_symbols and classification_unavailable_this_run:

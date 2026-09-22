@@ -86,6 +86,7 @@ jobs:
           echo "Stock research matched key: ${{ steps.stock-research-cache.outputs.cache-matched-key }}"
 
       - name: Run Stock Recommender
+        id: stock-run
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python stock_recommender.py
@@ -141,15 +142,23 @@ jobs:
           echo "=== Git status BEFORE staging ==="
           git status --short
 
-          # index.html is intentionally ignored for local development.
-          if [ -f index.html ]; then
-            git add -f index.html
-          fi
-
-          # Run reports are normal tracked diagnostic artifacts. Cache files
-          # are intentionally not staged and remain in GitHub Actions caches.
-          if [ -d run_reports ]; then
-            git add run_reports/
+          # Preserve the prior published page and report if the recommender
+          # failed, even if it had written a new index.html before failing.
+          if [ "${{ steps.stock-run.outcome }}" = "success" ]; then
+            if [ -f index.html ]; then
+              git add -f index.html
+            fi
+            if [ -d run_reports ]; then
+              git add run_reports/
+            fi
+          else
+            echo "Stock run did not succeed; keeping the previous published page and report."
+            if git ls-files --error-unmatch index.html >/dev/null 2>&1; then
+              git restore --worktree -- index.html
+            fi
+            if [ -f run_reports/stock_run.log ]; then
+              git add run_reports/stock_run.log
+            fi
           fi
 
           echo "=== Git status AFTER staging ==="

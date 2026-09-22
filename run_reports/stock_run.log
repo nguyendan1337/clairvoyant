@@ -8,7 +8,7 @@ Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
 Top QVM pickle loaded successfully.
-Using cached top 75 QVM stocks (0.6h old).
+Using cached top 75 QVM stocks (0.7h old).
 
 Top QVM Stocks:
    Symbol   QVMScore  3M Return   1Y Return
@@ -25,7 +25,7 @@ Top QVM Stocks:
 74    ASC  62.567759   9.811957   51.800132
 
 [75 rows x 4 columns]
-MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=0.6
+MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=0.72
 Using validated shared market context cache: caches/gemini_shared_market_context_cache.json
 Dynamic market risk-event catalog: 3 canonical event(s).
 RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=28 fresh=28 expired=0 contract=a4d152e3ea3f
@@ -137,11 +137,11 @@ Gemini 3.5 API budget: 1/8 total; 1/6 classification.
 Gemini classification request 1/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.5 classification in 38.2s...
+Retrying 3.5 classification in 37.9s...
 Gemini 3.5 API budget: 2/8 total; 2/6 classification.
 Gemini classification request 2/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3)
-Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.5 classification in 66.7s...
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3) failed: Server disconnected without sending a response.
+Retrying 3.5 classification in 68.7s...
 Gemini 3.5 API budget: 3/8 total; 3/6 classification.
 Gemini classification request 3/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3)
 Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}

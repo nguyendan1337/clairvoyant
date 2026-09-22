@@ -1,9 +1,9 @@
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
-Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.5_api_budget=8 (6 classification + 2 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
+Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.5_api_budget=8 (6 classification + 1 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
-Effective 52-week stock hurdle: 33.96% from VGT.
+Effective 52-week stock hurdle: 36.27% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
@@ -12,675 +12,213 @@ Top QVM benchmark hurdle changed. Rebuilding cache.
 Fetched 250 stock screener rows at offset 0.
 Fetched 250 stock screener rows at offset 250.
 Fetched 250 stock screener rows at offset 500.
-Fetched 151 stock screener rows at offset 750.
+Fetched 112 stock screener rows at offset 750.
 
 Stocks passing screener-level filters:
-    Symbol                            Name  52 WkChange %
-0     SNDK             Sandisk Corporation    1616.517600
-1     AXTI                       AXT, Inc.    1358.958400
-2      ANL         Adlai Nortye Group Ltd.     779.329600
-3     ERAS                    Erasca, Inc.     734.463300
-4     ANRO         Alto Neuroscience, Inc.     636.496340
-..     ...                             ...            ...
-896    NWG               NatWest Group plc      34.027280
-897  ALPMY            Astellas Pharma Inc.      34.008812
-898    WBI  WaterBridge Infrastructure LLC      33.999134
-899   RSKD                  Riskified Ltd.      33.966244
-900   SCHL          Scholastic Corporation      33.962990
+    Symbol                              Name  52 WkChange %
+0     AXTI                         AXT, Inc.    1565.208300
+1     SNDK               Sandisk Corporation    1560.376000
+2     NUAI    New Era Energy & Digital, Inc.     805.325440
+3      ANL           Adlai Nortye Group Ltd.     769.832400
+4     ERAS                      Erasca, Inc.     749.717500
+..     ...                               ...            ...
+857    SLF           Sun Life Financial Inc.      36.415410
+858    MGA          Magna International Inc.      36.355770
+859  RUSHB            Rush Enterprises, Inc.      36.319710
+860    BKD      Brookdale Senior Living Inc.      36.287426
+861     ST  Sensata Technologies Holding plc      36.286640
 
-[901 rows x 3 columns]
+[862 rows x 3 columns]
 Downloading price data...
 Computing momentum and extracting latest price...
-3M return gate >= 0.00%: 593 survivors; 308 removed before fundamentals.
-Fundamentals plan: eligible=593, cache_hits=536, live_fetches=57.
-Fetching Yahoo fundamentals for 57 uncached tickers...
-Yahoo fundamentals:   0%|          | 0/57 [00:00<?, ?it/s]Yahoo fundamentals:   2%|▏         | 1/57 [00:00<00:54,  1.02it/s]Yahoo fundamentals:   4%|▎         | 2/57 [00:01<00:49,  1.11it/s]Yahoo fundamentals:   5%|▌         | 3/57 [00:02<00:48,  1.12it/s]Yahoo fundamentals:   7%|▋         | 4/57 [00:03<00:45,  1.16it/s]Yahoo fundamentals:   9%|▉         | 5/57 [00:04<00:42,  1.22it/s]Yahoo fundamentals:  11%|█         | 6/57 [00:04<00:39,  1.31it/s]Yahoo fundamentals:  12%|█▏        | 7/57 [00:05<00:41,  1.21it/s]Yahoo fundamentals:  14%|█▍        | 8/57 [00:06<00:41,  1.19it/s]Yahoo fundamentals:  16%|█▌        | 9/57 [00:07<00:40,  1.18it/s]Yahoo fundamentals:  18%|█▊        | 10/57 [00:08<00:37,  1.25it/s]Yahoo fundamentals:  19%|█▉        | 11/57 [00:09<00:35,  1.29it/s]Yahoo fundamentals:  21%|██        | 12/57 [00:09<00:35,  1.27it/s]Yahoo fundamentals:  23%|██▎       | 13/57 [00:10<00:35,  1.24it/s]Yahoo fundamentals:  25%|██▍       | 14/57 [00:11<00:36,  1.18it/s]Yahoo fundamentals:  26%|██▋       | 15/57 [00:12<00:35,  1.19it/s]Yahoo fundamentals:  28%|██▊       | 16/57 [00:13<00:35,  1.17it/s]Yahoo fundamentals:  30%|██▉       | 17/57 [00:14<00:34,  1.17it/s]Yahoo fundamentals:  32%|███▏      | 18/57 [00:14<00:32,  1.21it/s]Yahoo fundamentals:  33%|███▎      | 19/57 [00:15<00:30,  1.23it/s]Yahoo fundamentals:  35%|███▌      | 20/57 [00:16<00:29,  1.27it/s]Yahoo fundamentals:  37%|███▋      | 21/57 [00:17<00:29,  1.21it/s]Yahoo fundamentals:  39%|███▊      | 22/57 [00:18<00:28,  1.22it/s]Yahoo fundamentals:  40%|████      | 23/57 [00:18<00:27,  1.26it/s]Yahoo fundamentals:  42%|████▏     | 24/57 [00:19<00:25,  1.29it/s]Yahoo fundamentals:  44%|████▍     | 25/57 [00:20<00:25,  1.24it/s]Yahoo fundamentals:  46%|████▌     | 26/57 [00:21<00:24,  1.27it/s]Yahoo fundamentals:  47%|████▋     | 27/57 [00:22<00:25,  1.20it/s]Yahoo fundamentals:  49%|████▉     | 28/57 [00:23<00:24,  1.20it/s]Yahoo fundamentals:  51%|█████     | 29/57 [00:23<00:22,  1.26it/s]Yahoo fundamentals:  53%|█████▎    | 30/57 [00:24<00:20,  1.33it/s]Yahoo fundamentals:  54%|█████▍    | 31/57 [00:25<00:20,  1.26it/s]Yahoo fundamentals:  56%|█████▌    | 32/57 [00:26<00:19,  1.29it/s]Yahoo fundamentals:  58%|█████▊    | 33/57 [00:26<00:19,  1.25it/s]Yahoo fundamentals:  60%|█████▉    | 34/57 [00:27<00:19,  1.20it/s]Yahoo fundamentals:  61%|██████▏   | 35/57 [00:28<00:18,  1.17it/s]Yahoo fundamentals:  63%|██████▎   | 36/57 [00:29<00:17,  1.21it/s]Yahoo fundamentals:  65%|██████▍   | 37/57 [00:30<00:16,  1.19it/s]Yahoo fundamentals:  67%|██████▋   | 38/57 [00:31<00:15,  1.26it/s]Yahoo fundamentals:  68%|██████▊   | 39/57 [00:31<00:13,  1.29it/s]Yahoo fundamentals:  70%|███████   | 40/57 [00:32<00:13,  1.29it/s]Yahoo fundamentals:  72%|███████▏  | 41/57 [00:33<00:12,  1.24it/s]Yahoo fundamentals:  74%|███████▎  | 42/57 [00:34<00:11,  1.27it/s]Yahoo fundamentals:  75%|███████▌  | 43/57 [00:34<00:11,  1.26it/s]Yahoo fundamentals:  77%|███████▋  | 44/57 [00:35<00:10,  1.29it/s]Yahoo fundamentals:  79%|███████▉  | 45/57 [00:36<00:09,  1.23it/s]Yahoo fundamentals:  81%|████████  | 46/57 [00:37<00:08,  1.25it/s]Yahoo fundamentals:  82%|████████▏ | 47/57 [00:38<00:08,  1.22it/s]Yahoo fundamentals:  84%|████████▍ | 48/57 [00:39<00:07,  1.19it/s]Yahoo fundamentals:  86%|████████▌ | 49/57 [00:39<00:06,  1.21it/s]Yahoo fundamentals:  88%|████████▊ | 50/57 [00:40<00:05,  1.20it/s]Yahoo fundamentals:  89%|████████▉ | 51/57 [00:41<00:04,  1.27it/s]Yahoo fundamentals:  91%|█████████ | 52/57 [00:42<00:03,  1.34it/s]Yahoo fundamentals:  93%|█████████▎| 53/57 [00:42<00:02,  1.39it/s]Yahoo fundamentals:  95%|█████████▍| 54/57 [00:43<00:02,  1.35it/s]Yahoo fundamentals:  96%|█████████▋| 55/57 [00:44<00:01,  1.31it/s]Yahoo fundamentals:  98%|█████████▊| 56/57 [00:45<00:00,  1.23it/s]Yahoo fundamentals: 100%|██████████| 57/57 [00:45<00:00,  1.31it/s]Yahoo fundamentals: 100%|██████████| 57/57 [00:45<00:00,  1.24it/s]
-Fundamentals summary: eligible=593, cache_hits=536, yahoo_fetches=57, fetch_successes=57, fetch_failures=0, apply_failures=0.
+3M return gate >= 0.00%: 587 survivors; 275 removed before fundamentals.
+Fundamentals plan: eligible=587, cache_hits=49, live_fetches=538.
+Fetching Yahoo fundamentals for 538 uncached tickers...
+Yahoo fundamentals:   0%|          | 0/538 [00:00<?, ?it/s]Yahoo fundamentals:   0%|          | 1/538 [00:00<06:48,  1.31it/s]Yahoo fundamentals:   0%|          | 2/538 [00:01<07:20,  1.22it/s]Yahoo fundamentals:   1%|          | 3/538 [00:02<07:23,  1.21it/s]Yahoo fundamentals:   1%|          | 4/538 [00:03<07:10,  1.24it/s]Yahoo fundamentals:   1%|          | 5/538 [00:03<06:37,  1.34it/s]Yahoo fundamentals:   1%|          | 6/538 [00:04<07:00,  1.27it/s]Yahoo fundamentals:   1%|▏         | 7/538 [00:05<06:54,  1.28it/s]Yahoo fundamentals:   1%|▏         | 8/538 [00:06<06:36,  1.34it/s]Yahoo fundamentals:   2%|▏         | 9/538 [00:06<06:21,  1.39it/s]Yahoo fundamentals:   2%|▏         | 10/538 [00:07<06:14,  1.41it/s]Yahoo fundamentals:   2%|▏         | 11/538 [00:08<06:13,  1.41it/s]Yahoo fundamentals:   2%|▏         | 12/538 [00:09<06:34,  1.33it/s]Yahoo fundamentals:   2%|▏         | 13/538 [00:09<06:39,  1.31it/s]Yahoo fundamentals:   3%|▎         | 14/538 [00:10<06:15,  1.40it/s]Yahoo fundamentals:   3%|▎         | 15/538 [00:11<06:15,  1.39it/s]Yahoo fundamentals:   3%|▎         | 16/538 [00:12<06:39,  1.31it/s]Yahoo fundamentals:   3%|▎         | 17/538 [00:12<06:34,  1.32it/s]Yahoo fundamentals:   3%|▎         | 18/538 [00:13<06:21,  1.36it/s]Yahoo fundamentals:   4%|▎         | 19/538 [00:14<06:42,  1.29it/s]Yahoo fundamentals:   4%|▎         | 20/538 [00:15<06:41,  1.29it/s]Yahoo fundamentals:   4%|▍         | 21/538 [00:15<06:32,  1.32it/s]Yahoo fundamentals:   4%|▍         | 22/538 [00:16<06:29,  1.32it/s]Yahoo fundamentals:   4%|▍         | 23/538 [00:17<06:24,  1.34it/s]Yahoo fundamentals:   4%|▍         | 24/538 [00:18<06:19,  1.35it/s]Yahoo fundamentals:   5%|▍         | 25/538 [00:18<06:41,  1.28it/s]Yahoo fundamentals:   5%|▍         | 26/538 [00:19<06:29,  1.31it/s]Yahoo fundamentals:   5%|▌         | 27/538 [00:20<06:21,  1.34it/s]Yahoo fundamentals:   5%|▌         | 28/538 [00:20<05:58,  1.42it/s]Yahoo fundamentals:   5%|▌         | 29/538 [00:21<05:42,  1.49it/s]Yahoo fundamentals:   6%|▌         | 30/538 [00:22<05:56,  1.42it/s]Yahoo fundamentals:   6%|▌         | 31/538 [00:22<05:47,  1.46it/s]Yahoo fundamentals:   6%|▌         | 32/538 [00:23<05:37,  1.50it/s]Yahoo fundamentals:   6%|▌         | 33/538 [00:24<05:34,  1.51it/s]Yahoo fundamentals:   6%|▋         | 34/538 [00:25<05:52,  1.43it/s]Yahoo fundamentals:   7%|▋         | 35/538 [00:25<06:15,  1.34it/s]Yahoo fundamentals:   7%|▋         | 36/538 [00:26<06:23,  1.31it/s]Yahoo fundamentals:   7%|▋         | 37/538 [00:27<06:08,  1.36it/s]Yahoo fundamentals:   7%|▋         | 38/538 [00:28<06:29,  1.28it/s]Yahoo fundamentals:   7%|▋         | 39/538 [00:29<06:44,  1.23it/s]Yahoo fundamentals:   7%|▋         | 40/538 [00:29<06:42,  1.24it/s]Yahoo fundamentals:   8%|▊         | 41/538 [00:30<06:41,  1.24it/s]Yahoo fundamentals:   8%|▊         | 42/538 [00:31<06:19,  1.31it/s]Yahoo fundamentals:   8%|▊         | 43/538 [00:32<06:12,  1.33it/s]Yahoo fundamentals:   8%|▊         | 44/538 [00:32<06:17,  1.31it/s]Yahoo fundamentals:   8%|▊         | 45/538 [00:33<06:33,  1.25it/s]Yahoo fundamentals:   9%|▊         | 46/538 [00:34<06:11,  1.32it/s]Yahoo fundamentals:   9%|▊         | 47/538 [00:35<06:16,  1.30it/s]Yahoo fundamentals:   9%|▉         | 48/538 [00:36<06:20,  1.29it/s]Yahoo fundamentals:   9%|▉         | 49/538 [00:36<06:22,  1.28it/s]Yahoo fundamentals:   9%|▉         | 50/538 [00:37<06:16,  1.30it/s]Yahoo fundamentals:   9%|▉         | 51/538 [00:38<06:05,  1.33it/s]Yahoo fundamentals:  10%|▉         | 52/538 [00:39<06:02,  1.34it/s]Yahoo fundamentals:  10%|▉         | 53/538 [00:39<06:09,  1.31it/s]Yahoo fundamentals:  10%|█         | 54/538 [00:40<06:08,  1.31it/s]Yahoo fundamentals:  10%|█         | 55/538 [00:41<06:22,  1.26it/s]Yahoo fundamentals:  10%|█         | 56/538 [00:42<06:03,  1.33it/s]Yahoo fundamentals:  11%|█         | 57/538 [00:42<05:46,  1.39it/s]Yahoo fundamentals:  11%|█         | 58/538 [00:43<05:50,  1.37it/s]Yahoo fundamentals:  11%|█         | 59/538 [00:44<05:54,  1.35it/s]Yahoo fundamentals:  11%|█         | 60/538 [00:44<05:43,  1.39it/s]Yahoo fundamentals:  11%|█▏        | 61/538 [00:45<05:38,  1.41it/s]Yahoo fundamentals:  12%|█▏        | 62/538 [00:46<05:55,  1.34it/s]Yahoo fundamentals:  12%|█▏        | 63/538 [00:47<06:09,  1.28it/s]Yahoo fundamentals:  12%|█▏        | 64/538 [00:48<05:58,  1.32it/s]Yahoo fundamentals:  12%|█▏        | 65/538 [00:48<05:38,  1.40it/s]Yahoo fundamentals:  12%|█▏        | 66/538 [00:49<05:55,  1.33it/s]Yahoo fundamentals:  12%|█▏        | 67/538 [00:50<06:04,  1.29it/s]Yahoo fundamentals:  13%|█▎        | 68/538 [00:51<06:12,  1.26it/s]Yahoo fundamentals:  13%|█▎        | 69/538 [00:51<05:49,  1.34it/s]Yahoo fundamentals:  13%|█▎        | 70/538 [00:52<06:03,  1.29it/s]Yahoo fundamentals:  13%|█▎        | 71/538 [00:53<06:05,  1.28it/s]Yahoo fundamentals:  13%|█▎        | 72/538 [00:54<05:55,  1.31it/s]Yahoo fundamentals:  14%|█▎        | 73/538 [00:54<06:00,  1.29it/s]Yahoo fundamentals:  14%|█▍        | 74/538 [00:55<05:58,  1.29it/s]Yahoo fundamentals:  14%|█▍        | 75/538 [00:56<05:55,  1.30it/s]Yahoo fundamentals:  14%|█▍        | 76/538 [00:57<06:10,  1.25it/s]Yahoo fundamentals:  14%|█▍        | 77/538 [00:58<06:02,  1.27it/s]Yahoo fundamentals:  14%|█▍        | 78/538 [00:58<06:11,  1.24it/s]Yahoo fundamentals:  15%|█▍        | 79/538 [00:59<06:12,  1.23it/s]Yahoo fundamentals:  15%|█▍        | 80/538 [01:00<06:20,  1.20it/s]Yahoo fundamentals:  15%|█▌        | 81/538 [01:01<05:55,  1.29it/s]Yahoo fundamentals:  15%|█▌        | 82/538 [01:02<06:06,  1.24it/s]Yahoo fundamentals:  15%|█▌        | 83/538 [01:03<06:13,  1.22it/s]Yahoo fundamentals:  16%|█▌        | 84/538 [01:03<05:55,  1.28it/s]Yahoo fundamentals:  16%|█▌        | 85/538 [01:04<06:07,  1.23it/s]Yahoo fundamentals:  16%|█▌        | 86/538 [01:05<05:44,  1.31it/s]Yahoo fundamentals:  16%|█▌        | 87/538 [01:05<05:28,  1.37it/s]Yahoo fundamentals:  16%|█▋        | 88/538 [01:06<05:34,  1.34it/s]Yahoo fundamentals:  17%|█▋        | 89/538 [01:07<05:38,  1.32it/s]Yahoo fundamentals:  17%|█▋        | 90/538 [01:08<05:32,  1.35it/s]Yahoo fundamentals:  17%|█▋        | 91/538 [01:08<05:31,  1.35it/s]Yahoo fundamentals:  17%|█▋        | 92/538 [01:09<05:30,  1.35it/s]Yahoo fundamentals:  17%|█▋        | 93/538 [01:10<05:42,  1.30it/s]Yahoo fundamentals:  17%|█▋        | 94/538 [01:11<05:28,  1.35it/s]Yahoo fundamentals:  18%|█▊        | 95/538 [01:11<05:38,  1.31it/s]Yahoo fundamentals:  18%|█▊        | 96/538 [01:12<05:54,  1.25it/s]Yahoo fundamentals:  18%|█▊        | 97/538 [01:13<05:33,  1.32it/s]Yahoo fundamentals:  18%|█▊        | 98/538 [01:14<05:47,  1.27it/s]Yahoo fundamentals:  18%|█▊        | 99/538 [01:15<05:26,  1.34it/s]Yahoo fundamentals:  19%|█▊        | 100/538 [01:15<05:32,  1.32it/s]Yahoo fundamentals:  19%|█▉        | 101/538 [01:16<05:47,  1.26it/s]Yahoo fundamentals:  19%|█▉        | 102/538 [01:17<05:21,  1.35it/s]Yahoo fundamentals:  19%|█▉        | 103/538 [01:18<05:25,  1.34it/s]Yahoo fundamentals:  19%|█▉        | 104/538 [01:18<05:13,  1.38it/s]Yahoo fundamentals:  20%|█▉        | 105/538 [01:19<05:01,  1.44it/s]Yahoo fundamentals:  20%|█▉        | 106/538 [01:20<05:11,  1.39it/s]Yahoo fundamentals:  20%|█▉        | 107/538 [01:20<05:03,  1.42it/s]Yahoo fundamentals:  20%|██        | 108/538 [01:21<05:17,  1.36it/s]Yahoo fundamentals:  20%|██        | 109/538 [01:22<05:05,  1.40it/s]Yahoo fundamentals:  20%|██        | 110/538 [01:23<05:16,  1.35it/s]Yahoo fundamentals:  21%|██        | 111/538 [01:23<05:14,  1.36it/s]Yahoo fundamentals:  21%|██        | 112/538 [01:24<05:39,  1.25it/s]Yahoo fundamentals:  21%|██        | 113/538 [01:25<05:26,  1.30it/s]Yahoo fundamentals:  21%|██        | 114/538 [01:26<05:38,  1.25it/s]Yahoo fundamentals:  21%|██▏       | 115/538 [01:27<05:36,  1.26it/s]Yahoo fundamentals:  22%|██▏       | 116/538 [01:27<05:15,  1.34it/s]Yahoo fundamentals:  22%|██▏       | 117/538 [01:28<04:59,  1.41it/s]Yahoo fundamentals:  22%|██▏       | 118/538 [01:29<05:21,  1.31it/s]Yahoo fundamentals:  22%|██▏       | 119/538 [01:30<05:34,  1.25it/s]Yahoo fundamentals:  22%|██▏       | 120/538 [01:30<05:11,  1.34it/s]Yahoo fundamentals:  22%|██▏       | 121/538 [01:31<05:22,  1.29it/s]Yahoo fundamentals:  23%|██▎       | 122/538 [01:32<05:06,  1.36it/s]Yahoo fundamentals:  23%|██▎       | 123/538 [01:33<05:07,  1.35it/s]Yahoo fundamentals:  23%|██▎       | 124/538 [01:33<04:51,  1.42it/s]Yahoo fundamentals:  23%|██▎       | 125/538 [01:34<05:01,  1.37it/s]Yahoo fundamentals:  23%|██▎       | 126/538 [01:35<05:00,  1.37it/s]Yahoo fundamentals:  24%|██▎       | 127/538 [01:35<04:48,  1.43it/s]Yahoo fundamentals:  24%|██▍       | 128/538 [01:36<04:39,  1.47it/s]Yahoo fundamentals:  24%|██▍       | 129/538 [01:37<04:30,  1.51it/s]Yahoo fundamentals:  24%|██▍       | 130/538 [01:37<04:45,  1.43it/s]Yahoo fundamentals:  24%|██▍       | 131/538 [01:38<05:07,  1.32it/s]Yahoo fundamentals:  25%|██▍       | 132/538 [01:39<04:49,  1.40it/s]Yahoo fundamentals:  25%|██▍       | 133/538 [01:39<04:41,  1.44it/s]Yahoo fundamentals:  25%|██▍       | 134/538 [01:40<04:54,  1.37it/s]Yahoo fundamentals:  25%|██▌       | 135/538 [01:41<04:43,  1.42it/s]Yahoo fundamentals:  25%|██▌       | 136/538 [01:42<04:51,  1.38it/s]Yahoo fundamentals:  25%|██▌       | 137/538 [01:42<04:44,  1.41it/s]Yahoo fundamentals:  26%|██▌       | 138/538 [01:43<04:56,  1.35it/s]Yahoo fundamentals:  26%|██▌       | 139/538 [01:44<04:52,  1.37it/s]Yahoo fundamentals:  26%|██▌       | 140/538 [01:45<04:54,  1.35it/s]Yahoo fundamentals:  26%|██▌       | 141/538 [01:45<04:57,  1.34it/s]Yahoo fundamentals:  26%|██▋       | 142/538 [01:46<04:43,  1.40it/s]Yahoo fundamentals:  27%|██▋       | 143/538 [01:47<04:32,  1.45it/s]Yahoo fundamentals:  27%|██▋       | 144/538 [01:47<04:36,  1.42it/s]Yahoo fundamentals:  27%|██▋       | 145/538 [01:48<04:32,  1.44it/s]Yahoo fundamentals:  27%|██▋       | 146/538 [01:49<04:46,  1.37it/s]Yahoo fundamentals:  27%|██▋       | 147/538 [01:50<04:47,  1.36it/s]Yahoo fundamentals:  28%|██▊       | 148/538 [01:50<04:47,  1.36it/s]Yahoo fundamentals:  28%|██▊       | 149/538 [01:51<05:02,  1.29it/s]Yahoo fundamentals:  28%|██▊       | 150/538 [01:52<05:06,  1.26it/s]Yahoo fundamentals:  28%|██▊       | 151/538 [01:53<04:59,  1.29it/s]Yahoo fundamentals:  28%|██▊       | 152/538 [01:54<05:03,  1.27it/s]Yahoo fundamentals:  28%|██▊       | 153/538 [01:54<05:02,  1.27it/s]Yahoo fundamentals:  29%|██▊       | 154/538 [01:55<04:58,  1.29it/s]Yahoo fundamentals:  29%|██▉       | 155/538 [01:56<04:46,  1.34it/s]Yahoo fundamentals:  29%|██▉       | 156/538 [01:57<04:31,  1.41it/s]Yahoo fundamentals:  29%|██▉       | 157/538 [01:57<04:22,  1.45it/s]Yahoo fundamentals:  29%|██▉       | 158/538 [01:58<04:42,  1.34it/s]Yahoo fundamentals:  30%|██▉       | 159/538 [01:59<04:26,  1.42it/s]Yahoo fundamentals:  30%|██▉       | 160/538 [01:59<04:21,  1.45it/s]Yahoo fundamentals:  30%|██▉       | 161/538 [02:00<04:19,  1.45it/s]Yahoo fundamentals:  30%|███       | 162/538 [02:01<04:11,  1.49it/s]Yahoo fundamentals:  30%|███       | 163/538 [02:01<04:05,  1.53it/s]Yahoo fundamentals:  30%|███       | 164/538 [02:02<04:26,  1.40it/s]Yahoo fundamentals:  31%|███       | 165/538 [02:03<04:21,  1.43it/s]Yahoo fundamentals:  31%|███       | 166/538 [02:03<04:26,  1.40it/s]Yahoo fundamentals:  31%|███       | 167/538 [02:04<04:42,  1.31it/s]Yahoo fundamentals:  31%|███       | 168/538 [02:05<04:56,  1.25it/s]Yahoo fundamentals:  31%|███▏      | 169/538 [02:06<04:40,  1.32it/s]Yahoo fundamentals:  32%|███▏      | 170/538 [02:07<04:32,  1.35it/s]Yahoo fundamentals:  32%|███▏      | 171/538 [02:07<04:34,  1.34it/s]Yahoo fundamentals:  32%|███▏      | 172/538 [02:08<04:21,  1.40it/s]Yahoo fundamentals:  32%|███▏      | 173/538 [02:09<04:24,  1.38it/s]Yahoo fundamentals:  32%|███▏      | 174/538 [02:09<04:20,  1.40it/s]Yahoo fundamentals:  33%|███▎      | 175/538 [02:10<04:21,  1.39it/s]Yahoo fundamentals:  33%|███▎      | 176/538 [02:11<04:38,  1.30it/s]Yahoo fundamentals:  33%|███▎      | 177/538 [02:12<04:28,  1.34it/s]Yahoo fundamentals:  33%|███▎      | 178/538 [02:12<04:15,  1.41it/s]Yahoo fundamentals:  33%|███▎      | 179/538 [02:13<04:21,  1.37it/s]Yahoo fundamentals:  33%|███▎      | 180/538 [02:14<04:19,  1.38it/s]Yahoo fundamentals:  34%|███▎      | 181/538 [02:15<04:10,  1.43it/s]Yahoo fundamentals:  34%|███▍      | 182/538 [02:15<04:16,  1.39it/s]Yahoo fundamentals:  34%|███▍      | 183/538 [02:16<04:17,  1.38it/s]Yahoo fundamentals:  34%|███▍      | 184/538 [02:17<04:08,  1.42it/s]Yahoo fundamentals:  34%|███▍      | 185/538 [02:17<04:16,  1.38it/s]Yahoo fundamentals:  35%|███▍      | 186/538 [02:18<04:08,  1.42it/s]Yahoo fundamentals:  35%|███▍      | 187/538 [02:19<04:12,  1.39it/s]Yahoo fundamentals:  35%|███▍      | 188/538 [02:20<04:21,  1.34it/s]Yahoo fundamentals:  35%|███▌      | 189/538 [02:20<04:27,  1.30it/s]Yahoo fundamentals:  35%|███▌      | 190/538 [02:21<04:21,  1.33it/s]Yahoo fundamentals:  36%|███▌      | 191/538 [02:22<04:06,  1.41it/s]Yahoo fundamentals:  36%|███▌      | 192/538 [02:23<04:25,  1.30it/s]Yahoo fundamentals:  36%|███▌      | 193/538 [02:23<04:24,  1.30it/s]Yahoo fundamentals:  36%|███▌      | 194/538 [02:24<04:23,  1.31it/s]Yahoo fundamentals:  36%|███▌      | 195/538 [02:25<04:28,  1.28it/s]Yahoo fundamentals:  36%|███▋      | 196/538 [02:26<04:24,  1.29it/s]Yahoo fundamentals:  37%|███▋      | 197/538 [02:27<04:34,  1.24it/s]Yahoo fundamentals:  37%|███▋      | 198/538 [02:27<04:28,  1.27it/s]Yahoo fundamentals:  37%|███▋      | 199/538 [02:28<04:16,  1.32it/s]Yahoo fundamentals:  37%|███▋      | 200/538 [02:29<04:22,  1.29it/s]Yahoo fundamentals:  37%|███▋      | 201/538 [02:30<04:24,  1.27it/s]Yahoo fundamentals:  38%|███▊      | 202/538 [02:31<04:29,  1.25it/s]Yahoo fundamentals:  38%|███▊      | 203/538 [02:31<04:21,  1.28it/s]Yahoo fundamentals:  38%|███▊      | 204/538 [02:32<04:26,  1.26it/s]Yahoo fundamentals:  38%|███▊      | 205/538 [02:33<04:24,  1.26it/s]Yahoo fundamentals:  38%|███▊      | 206/538 [02:34<04:09,  1.33it/s]Yahoo fundamentals:  38%|███▊      | 207/538 [02:34<04:13,  1.31it/s]Yahoo fundamentals:  39%|███▊      | 208/538 [02:35<04:16,  1.29it/s]Yahoo fundamentals:  39%|███▉      | 209/538 [02:36<04:15,  1.29it/s]Yahoo fundamentals:  39%|███▉      | 210/538 [02:37<04:04,  1.34it/s]Yahoo fundamentals:  39%|███▉      | 211/538 [02:38<04:14,  1.29it/s]Yahoo fundamentals:  39%|███▉      | 212/538 [02:38<04:20,  1.25it/s]Yahoo fundamentals:  40%|███▉      | 213/538 [02:39<04:22,  1.24it/s]Yahoo fundamentals:  40%|███▉      | 214/538 [02:40<04:09,  1.30it/s]Yahoo fundamentals:  40%|███▉      | 215/538 [02:41<04:21,  1.23it/s]Yahoo fundamentals:  40%|████      | 216/538 [02:41<04:02,  1.33it/s]Yahoo fundamentals:  40%|████      | 217/538 [02:42<03:57,  1.35it/s]Yahoo fundamentals:  41%|████      | 218/538 [02:43<03:45,  1.42it/s]Yahoo fundamentals:  41%|████      | 219/538 [02:43<03:46,  1.41it/s]Yahoo fundamentals:  41%|████      | 220/538 [02:44<03:37,  1.46it/s]Yahoo fundamentals:  41%|████      | 221/538 [02:45<03:45,  1.40it/s]Yahoo fundamentals:  41%|████▏     | 222/538 [02:46<03:39,  1.44it/s]Yahoo fundamentals:  41%|████▏     | 223/538 [02:46<03:30,  1.50it/s]Yahoo fundamentals:  42%|████▏     | 224/538 [02:47<03:37,  1.44it/s]Yahoo fundamentals:  42%|████▏     | 225/538 [02:48<03:41,  1.42it/s]Yahoo fundamentals:  42%|████▏     | 226/538 [02:48<03:39,  1.42it/s]Yahoo fundamentals:  42%|████▏     | 227/538 [02:49<03:49,  1.36it/s]Yahoo fundamentals:  42%|████▏     | 228/538 [02:50<03:54,  1.32it/s]Yahoo fundamentals:  43%|████▎     | 229/538 [02:51<03:54,  1.32it/s]Yahoo fundamentals:  43%|████▎     | 230/538 [02:51<03:43,  1.38it/s]Yahoo fundamentals:  43%|████▎     | 231/538 [02:52<03:48,  1.34it/s]Yahoo fundamentals:  43%|████▎     | 232/538 [02:53<04:01,  1.27it/s]Yahoo fundamentals:  43%|████▎     | 233/538 [02:54<03:57,  1.29it/s]Yahoo fundamentals:  43%|████▎     | 234/538 [02:54<03:41,  1.38it/s]Yahoo fundamentals:  44%|████▎     | 235/538 [02:55<03:43,  1.35it/s]Yahoo fundamentals:  44%|████▍     | 236/538 [02:56<03:46,  1.33it/s]Yahoo fundamentals:  44%|████▍     | 237/538 [02:57<03:38,  1.38it/s]Yahoo fundamentals:  44%|████▍     | 238/538 [02:57<03:38,  1.37it/s]Yahoo fundamentals:  44%|████▍     | 239/538 [02:58<03:52,  1.29it/s]Yahoo fundamentals:  45%|████▍     | 240/538 [02:59<03:35,  1.38it/s]Yahoo fundamentals:  45%|████▍     | 241/538 [03:00<03:43,  1.33it/s]Yahoo fundamentals:  45%|████▍     | 242/538 [03:00<03:46,  1.31it/s]Yahoo fundamentals:  45%|████▌     | 243/538 [03:01<03:55,  1.25it/s]Yahoo fundamentals:  45%|████▌     | 244/538 [03:02<03:49,  1.28it/s]Yahoo fundamentals:  46%|████▌     | 245/538 [03:03<03:57,  1.23it/s]Yahoo fundamentals:  46%|████▌     | 246/538 [03:04<03:39,  1.33it/s]Yahoo fundamentals:  46%|████▌     | 247/538 [03:04<03:46,  1.28it/s]Yahoo fundamentals:  46%|████▌     | 248/538 [03:05<03:37,  1.33it/s]Yahoo fundamentals:  46%|████▋     | 249/538 [03:06<03:33,  1.35it/s]Yahoo fundamentals:  46%|████▋     | 250/538 [03:07<03:41,  1.30it/s]Yahoo fundamentals:  47%|████▋     | 251/538 [03:07<03:35,  1.33it/s]Yahoo fundamentals:  47%|████▋     | 252/538 [03:08<03:31,  1.35it/s]Yahoo fundamentals:  47%|████▋     | 253/538 [03:09<03:26,  1.38it/s]Yahoo fundamentals:  47%|████▋     | 254/538 [03:09<03:29,  1.36it/s]Yahoo fundamentals:  47%|████▋     | 255/538 [03:10<03:30,  1.34it/s]Yahoo fundamentals:  48%|████▊     | 256/538 [03:11<03:31,  1.33it/s]Yahoo fundamentals:  48%|████▊     | 257/538 [03:12<03:37,  1.29it/s]Yahoo fundamentals:  48%|████▊     | 258/538 [03:12<03:25,  1.36it/s]Yahoo fundamentals:  48%|████▊     | 259/538 [03:13<03:15,  1.43it/s]Yahoo fundamentals:  48%|████▊     | 260/538 [03:14<03:09,  1.47it/s]Yahoo fundamentals:  49%|████▊     | 261/538 [03:14<03:02,  1.52it/s]Yahoo fundamentals:  49%|████▊     | 262/538 [03:15<02:59,  1.54it/s]Yahoo fundamentals:  49%|████▉     | 263/538 [03:16<02:58,  1.54it/s]Yahoo fundamentals:  49%|████▉     | 264/538 [03:16<03:14,  1.41it/s]Yahoo fundamentals:  49%|████▉     | 265/538 [03:17<03:17,  1.38it/s]Yahoo fundamentals:  49%|████▉     | 266/538 [03:18<03:27,  1.31it/s]Yahoo fundamentals:  50%|████▉     | 267/538 [03:19<03:32,  1.28it/s]Yahoo fundamentals:  50%|████▉     | 268/538 [03:20<03:27,  1.30it/s]Yahoo fundamentals:  50%|█████     | 269/538 [03:20<03:18,  1.35it/s]Yahoo fundamentals:  50%|█████     | 270/538 [03:21<03:23,  1.32it/s]Yahoo fundamentals:  50%|█████     | 271/538 [03:22<03:29,  1.28it/s]Yahoo fundamentals:  51%|█████     | 272/538 [03:23<03:25,  1.29it/s]Yahoo fundamentals:  51%|█████     | 273/538 [03:23<03:16,  1.35it/s]Yahoo fundamentals:  51%|█████     | 274/538 [03:24<03:18,  1.33it/s]Yahoo fundamentals:  51%|█████     | 275/538 [03:25<03:21,  1.31it/s]Yahoo fundamentals:  51%|█████▏    | 276/538 [03:26<03:18,  1.32it/s]Yahoo fundamentals:  51%|█████▏    | 277/538 [03:27<03:37,  1.20it/s]Yahoo fundamentals:  52%|█████▏    | 278/538 [03:28<03:34,  1.21it/s]Yahoo fundamentals:  52%|█████▏    | 279/538 [03:28<03:32,  1.22it/s]Yahoo fundamentals:  52%|█████▏    | 280/538 [03:29<03:29,  1.23it/s]Yahoo fundamentals:  52%|█████▏    | 281/538 [03:30<03:15,  1.32it/s]Yahoo fundamentals:  52%|█████▏    | 282/538 [03:31<03:24,  1.25it/s]Yahoo fundamentals:  53%|█████▎    | 283/538 [03:32<03:32,  1.20it/s]Yahoo fundamentals:  53%|█████▎    | 284/538 [03:32<03:18,  1.28it/s]Yahoo fundamentals:  53%|█████▎    | 285/538 [03:33<03:10,  1.33it/s]Yahoo fundamentals:  53%|█████▎    | 286/538 [03:34<03:09,  1.33it/s]Yahoo fundamentals:  53%|█████▎    | 287/538 [03:34<03:09,  1.32it/s]Yahoo fundamentals:  54%|█████▎    | 288/538 [03:35<02:57,  1.41it/s]Yahoo fundamentals:  54%|█████▎    | 289/538 [03:36<02:55,  1.41it/s]Yahoo fundamentals:  54%|█████▍    | 290/538 [03:36<02:57,  1.40it/s]Yahoo fundamentals:  54%|█████▍    | 291/538 [03:37<02:53,  1.43it/s]Yahoo fundamentals:  54%|█████▍    | 292/538 [03:38<02:46,  1.48it/s]Yahoo fundamentals:  54%|█████▍    | 293/538 [03:39<02:52,  1.42it/s]Yahoo fundamentals:  55%|█████▍    | 294/538 [03:39<02:44,  1.48it/s]Yahoo fundamentals:  55%|█████▍    | 295/538 [03:40<02:55,  1.39it/s]Yahoo fundamentals:  55%|█████▌    | 296/538 [03:41<02:52,  1.40it/s]Yahoo fundamentals:  55%|█████▌    | 297/538 [03:41<02:55,  1.37it/s]Yahoo fundamentals:  55%|█████▌    | 298/538 [03:42<02:55,  1.37it/s]Yahoo fundamentals:  56%|█████▌    | 299/538 [03:43<02:52,  1.39it/s]Yahoo fundamentals:  56%|█████▌    | 300/538 [03:44<03:03,  1.30it/s]Yahoo fundamentals:  56%|█████▌    | 301/538 [03:44<02:59,  1.32it/s]Yahoo fundamentals:  56%|█████▌    | 302/538 [03:45<02:51,  1.38it/s]Yahoo fundamentals:  56%|█████▋    | 303/538 [03:46<02:53,  1.35it/s]Yahoo fundamentals:  57%|█████▋    | 304/538 [03:47<02:55,  1.34it/s]Yahoo fundamentals:  57%|█████▋    | 305/538 [03:47<02:56,  1.32it/s]Yahoo fundamentals:  57%|█████▋    | 306/538 [03:48<02:57,  1.31it/s]Yahoo fundamentals:  57%|█████▋    | 307/538 [03:49<02:47,  1.38it/s]Yahoo fundamentals:  57%|█████▋    | 308/538 [03:49<02:41,  1.42it/s]Yahoo fundamentals:  57%|█████▋    | 309/538 [03:50<02:43,  1.40it/s]Yahoo fundamentals:  58%|█████▊    | 310/538 [03:51<02:44,  1.39it/s]Yahoo fundamentals:  58%|█████▊    | 311/538 [03:52<02:40,  1.41it/s]Yahoo fundamentals:  58%|█████▊    | 312/538 [03:52<02:32,  1.48it/s]Yahoo fundamentals:  58%|█████▊    | 313/538 [03:53<02:35,  1.45it/s]Yahoo fundamentals:  58%|█████▊    | 314/538 [03:54<02:44,  1.37it/s]Yahoo fundamentals:  59%|█████▊    | 315/538 [03:54<02:34,  1.44it/s]Yahoo fundamentals:  59%|█████▊    | 316/538 [03:55<02:36,  1.42it/s]Yahoo fundamentals:  59%|█████▉    | 317/538 [03:56<02:36,  1.41it/s]Yahoo fundamentals:  59%|█████▉    | 318/538 [03:56<02:31,  1.46it/s]Yahoo fundamentals:  59%|█████▉    | 319/538 [03:57<02:38,  1.38it/s]Yahoo fundamentals:  59%|█████▉    | 320/538 [03:58<02:36,  1.40it/s]Yahoo fundamentals:  60%|█████▉    | 321/538 [03:59<02:32,  1.43it/s]Yahoo fundamentals:  60%|█████▉    | 322/538 [03:59<02:34,  1.40it/s]Yahoo fundamentals:  60%|██████    | 323/538 [04:00<02:37,  1.36it/s]Yahoo fundamentals:  60%|██████    | 324/538 [04:01<02:39,  1.34it/s]Yahoo fundamentals:  60%|██████    | 325/538 [04:02<02:42,  1.31it/s]Yahoo fundamentals:  61%|██████    | 326/538 [04:03<02:43,  1.30it/s]Yahoo fundamentals:  61%|██████    | 327/538 [04:03<02:48,  1.25it/s]Yahoo fundamentals:  61%|██████    | 328/538 [04:04<02:48,  1.25it/s]Yahoo fundamentals:  61%|██████    | 329/538 [04:05<02:49,  1.23it/s]Yahoo fundamentals:  61%|██████▏   | 330/538 [04:06<02:44,  1.27it/s]Yahoo fundamentals:  62%|██████▏   | 331/538 [04:07<02:49,  1.22it/s]Yahoo fundamentals:  62%|██████▏   | 332/538 [04:07<02:39,  1.30it/s]Yahoo fundamentals:  62%|██████▏   | 333/538 [04:08<02:28,  1.38it/s]Yahoo fundamentals:  62%|██████▏   | 334/538 [04:09<02:25,  1.40it/s]Yahoo fundamentals:  62%|██████▏   | 335/538 [04:09<02:32,  1.33it/s]Yahoo fundamentals:  62%|██████▏   | 336/538 [04:10<02:25,  1.39it/s]Yahoo fundamentals:  63%|██████▎   | 337/538 [04:11<02:19,  1.44it/s]Yahoo fundamentals:  63%|██████▎   | 338/538 [04:11<02:15,  1.48it/s]Yahoo fundamentals:  63%|██████▎   | 339/538 [04:12<02:20,  1.42it/s]Yahoo fundamentals:  63%|██████▎   | 340/538 [04:13<02:22,  1.39it/s]Yahoo fundamentals:  63%|██████▎   | 341/538 [04:14<02:29,  1.32it/s]Yahoo fundamentals:  64%|██████▎   | 342/538 [04:15<02:29,  1.31it/s]Yahoo fundamentals:  64%|██████▍   | 343/538 [04:15<02:20,  1.39it/s]Yahoo fundamentals:  64%|██████▍   | 344/538 [04:16<02:28,  1.30it/s]Yahoo fundamentals:  64%|██████▍   | 345/538 [04:17<02:22,  1.35it/s]Yahoo fundamentals:  64%|██████▍   | 346/538 [04:18<02:28,  1.29it/s]Yahoo fundamentals:  64%|██████▍   | 347/538 [04:18<02:19,  1.37it/s]Yahoo fundamentals:  65%|██████▍   | 348/538 [04:19<02:21,  1.35it/s]Yahoo fundamentals:  65%|██████▍   | 349/538 [04:20<02:15,  1.39it/s]Yahoo fundamentals:  65%|██████▌   | 350/538 [04:20<02:09,  1.45it/s]Yahoo fundamentals:  65%|██████▌   | 351/538 [04:21<02:16,  1.37it/s]Yahoo fundamentals:  65%|██████▌   | 352/538 [04:22<02:08,  1.45it/s]Yahoo fundamentals:  66%|██████▌   | 353/538 [04:22<02:11,  1.41it/s]Yahoo fundamentals:  66%|██████▌   | 354/538 [04:23<02:17,  1.34it/s]Yahoo fundamentals:  66%|██████▌   | 355/538 [04:24<02:18,  1.32it/s]Yahoo fundamentals:  66%|██████▌   | 356/538 [04:25<02:11,  1.39it/s]Yahoo fundamentals:  66%|██████▋   | 357/538 [04:25<02:14,  1.35it/s]Yahoo fundamentals:  67%|██████▋   | 358/538 [04:26<02:11,  1.37it/s]Yahoo fundamentals:  67%|██████▋   | 359/538 [04:27<02:03,  1.45it/s]Yahoo fundamentals:  67%|██████▋   | 360/538 [04:28<02:11,  1.36it/s]Yahoo fundamentals:  67%|██████▋   | 361/538 [04:28<02:15,  1.31it/s]Yahoo fundamentals:  67%|██████▋   | 362/538 [04:29<02:08,  1.37it/s]Yahoo fundamentals:  67%|██████▋   | 363/538 [04:30<02:09,  1.35it/s]Yahoo fundamentals:  68%|██████▊   | 364/538 [04:31<02:07,  1.36it/s]Yahoo fundamentals:  68%|██████▊   | 365/538 [04:31<02:02,  1.41it/s]Yahoo fundamentals:  68%|██████▊   | 366/538 [04:32<01:58,  1.46it/s]Yahoo fundamentals:  68%|██████▊   | 367/538 [04:32<01:53,  1.51it/s]Yahoo fundamentals:  68%|██████▊   | 368/538 [04:33<01:57,  1.45it/s]Yahoo fundamentals:  69%|██████▊   | 369/538 [04:34<02:05,  1.34it/s]Yahoo fundamentals:  69%|██████▉   | 370/538 [04:35<02:08,  1.31it/s]Yahoo fundamentals:  69%|██████▉   | 371/538 [04:36<02:08,  1.30it/s]Yahoo fundamentals:  69%|██████▉   | 372/538 [04:36<02:03,  1.35it/s]Yahoo fundamentals:  69%|██████▉   | 373/538 [04:37<02:00,  1.37it/s]Yahoo fundamentals:  70%|██████▉   | 374/538 [04:38<01:54,  1.43it/s]Yahoo fundamentals:  70%|██████▉   | 375/538 [04:38<01:56,  1.40it/s]Yahoo fundamentals:  70%|██████▉   | 376/538 [04:39<01:59,  1.36it/s]Yahoo fundamentals:  70%|███████   | 377/538 [04:40<01:56,  1.38it/s]Yahoo fundamentals:  70%|███████   | 378/538 [04:41<01:58,  1.35it/s]Yahoo fundamentals:  70%|███████   | 379/538 [04:41<01:54,  1.39it/s]Yahoo fundamentals:  71%|███████   | 380/538 [04:42<01:55,  1.36it/s]Yahoo fundamentals:  71%|███████   | 381/538 [04:43<01:52,  1.40it/s]Yahoo fundamentals:  71%|███████   | 382/538 [04:44<01:58,  1.32it/s]Yahoo fundamentals:  71%|███████   | 383/538 [04:44<01:51,  1.40it/s]Yahoo fundamentals:  71%|███████▏  | 384/538 [04:45<01:46,  1.45it/s]Yahoo fundamentals:  72%|███████▏  | 385/538 [04:46<01:49,  1.40it/s]Yahoo fundamentals:  72%|███████▏  | 386/538 [04:46<01:51,  1.36it/s]Yahoo fundamentals:  72%|███████▏  | 387/538 [04:47<01:47,  1.40it/s]Yahoo fundamentals:  72%|███████▏  | 388/538 [04:48<01:46,  1.41it/s]Yahoo fundamentals:  72%|███████▏  | 389/538 [04:49<01:54,  1.30it/s]Yahoo fundamentals:  72%|███████▏  | 390/538 [04:50<01:55,  1.28it/s]Yahoo fundamentals:  73%|███████▎  | 391/538 [04:50<01:52,  1.31it/s]Yahoo fundamentals:  73%|███████▎  | 392/538 [04:51<01:46,  1.37it/s]Yahoo fundamentals:  73%|███████▎  | 393/538 [04:52<01:52,  1.29it/s]Yahoo fundamentals:  73%|███████▎  | 394/538 [04:52<01:43,  1.39it/s]Yahoo fundamentals:  73%|███████▎  | 395/538 [04:53<01:39,  1.44it/s]Yahoo fundamentals:  74%|███████▎  | 396/538 [04:54<01:39,  1.43it/s]Yahoo fundamentals:  74%|███████▍  | 397/538 [04:54<01:37,  1.44it/s]Yahoo fundamentals:  74%|███████▍  | 398/538 [04:55<01:39,  1.41it/s]Yahoo fundamentals:  74%|███████▍  | 399/538 [04:56<01:39,  1.39it/s]Yahoo fundamentals:  74%|███████▍  | 400/538 [04:57<01:35,  1.45it/s]Yahoo fundamentals:  75%|███████▍  | 401/538 [04:57<01:41,  1.35it/s]Yahoo fundamentals:  75%|███████▍  | 402/538 [04:58<01:48,  1.26it/s]Yahoo fundamentals:  75%|███████▍  | 403/538 [04:59<01:50,  1.22it/s]Yahoo fundamentals:  75%|███████▌  | 404/538 [05:00<01:42,  1.31it/s]Yahoo fundamentals:  75%|███████▌  | 405/538 [05:00<01:36,  1.37it/s]Yahoo fundamentals:  75%|███████▌  | 406/538 [05:01<01:41,  1.30it/s]Yahoo fundamentals:  76%|███████▌  | 407/538 [05:02<01:40,  1.31it/s]Yahoo fundamentals:  76%|███████▌  | 408/538 [05:03<01:34,  1.38it/s]Yahoo fundamentals:  76%|███████▌  | 409/538 [05:03<01:29,  1.44it/s]Yahoo fundamentals:  76%|███████▌  | 410/538 [05:04<01:35,  1.35it/s]Yahoo fundamentals:  76%|███████▋  | 411/538 [05:05<01:40,  1.27it/s]Yahoo fundamentals:  77%|███████▋  | 412/538 [05:06<01:35,  1.32it/s]Yahoo fundamentals:  77%|███████▋  | 413/538 [05:07<01:38,  1.27it/s]Yahoo fundamentals:  77%|███████▋  | 414/538 [05:07<01:31,  1.35it/s]Yahoo fundamentals:  77%|███████▋  | 415/538 [05:08<01:35,  1.28it/s]Yahoo fundamentals:  77%|███████▋  | 416/538 [05:09<01:39,  1.22it/s]Yahoo fundamentals:  78%|███████▊  | 417/538 [05:10<01:38,  1.23it/s]Yahoo fundamentals:  78%|███████▊  | 418/538 [05:11<01:35,  1.26it/s]Yahoo fundamentals:  78%|███████▊  | 419/538 [05:11<01:29,  1.33it/s]Yahoo fundamentals:  78%|███████▊  | 420/538 [05:12<01:34,  1.25it/s]Yahoo fundamentals:  78%|███████▊  | 421/538 [05:13<01:35,  1.23it/s]Yahoo fundamentals:  78%|███████▊  | 422/538 [05:14<01:33,  1.24it/s]Yahoo fundamentals:  79%|███████▊  | 423/538 [05:14<01:27,  1.31it/s]Yahoo fundamentals:  79%|███████▉  | 424/538 [05:15<01:23,  1.37it/s]Yahoo fundamentals:  79%|███████▉  | 425/538 [05:16<01:27,  1.29it/s]Yahoo fundamentals:  79%|███████▉  | 426/538 [05:17<01:23,  1.34it/s]Yahoo fundamentals:  79%|███████▉  | 427/538 [05:17<01:22,  1.35it/s]Yahoo fundamentals:  80%|███████▉  | 428/538 [05:18<01:20,  1.36it/s]Yahoo fundamentals:  80%|███████▉  | 429/538 [05:19<01:18,  1.39it/s]Yahoo fundamentals:  80%|███████▉  | 430/538 [05:19<01:15,  1.43it/s]Yahoo fundamentals:  80%|████████  | 431/538 [05:20<01:12,  1.48it/s]Yahoo fundamentals:  80%|████████  | 432/538 [05:21<01:09,  1.52it/s]Yahoo fundamentals:  80%|████████  | 433/538 [05:21<01:09,  1.51it/s]Yahoo fundamentals:  81%|████████  | 434/538 [05:22<01:14,  1.39it/s]Yahoo fundamentals:  81%|████████  | 435/538 [05:23<01:17,  1.33it/s]Yahoo fundamentals:  81%|████████  | 436/538 [05:24<01:15,  1.35it/s]Yahoo fundamentals:  81%|████████  | 437/538 [05:24<01:11,  1.42it/s]Yahoo fundamentals:  81%|████████▏ | 438/538 [05:25<01:11,  1.39it/s]Yahoo fundamentals:  82%|████████▏ | 439/538 [05:26<01:13,  1.35it/s]Yahoo fundamentals:  82%|████████▏ | 440/538 [05:27<01:12,  1.34it/s]Yahoo fundamentals:  82%|████████▏ | 441/538 [05:27<01:11,  1.35it/s]Yahoo fundamentals:  82%|████████▏ | 442/538 [05:28<01:13,  1.31it/s]Yahoo fundamentals:  82%|████████▏ | 443/538 [05:29<01:14,  1.28it/s]Yahoo fundamentals:  83%|████████▎ | 444/538 [05:30<01:11,  1.32it/s]Yahoo fundamentals:  83%|████████▎ | 445/538 [05:30<01:06,  1.41it/s]Yahoo fundamentals:  83%|████████▎ | 446/538 [05:31<01:03,  1.45it/s]Yahoo fundamentals:  83%|████████▎ | 447/538 [05:32<01:06,  1.36it/s]Yahoo fundamentals:  83%|████████▎ | 448/538 [05:33<01:10,  1.28it/s]Yahoo fundamentals:  83%|████████▎ | 449/538 [05:33<01:04,  1.38it/s]Yahoo fundamentals:  84%|████████▎ | 450/538 [05:34<01:09,  1.27it/s]Yahoo fundamentals:  84%|████████▍ | 451/538 [05:35<01:06,  1.31it/s]Yahoo fundamentals:  84%|████████▍ | 452/538 [05:36<01:04,  1.34it/s]Yahoo fundamentals:  84%|████████▍ | 453/538 [05:36<01:04,  1.32it/s]Yahoo fundamentals:  84%|████████▍ | 454/538 [05:37<01:05,  1.28it/s]Yahoo fundamentals:  85%|████████▍ | 455/538 [05:38<01:07,  1.23it/s]Yahoo fundamentals:  85%|████████▍ | 456/538 [05:39<01:08,  1.20it/s]Yahoo fundamentals:  85%|████████▍ | 457/538 [05:40<01:04,  1.26it/s]Yahoo fundamentals:  85%|████████▌ | 458/538 [05:41<01:04,  1.24it/s]Yahoo fundamentals:  85%|████████▌ | 459/538 [05:41<01:00,  1.30it/s]Yahoo fundamentals:  86%|████████▌ | 460/538 [05:42<00:57,  1.36it/s]Yahoo fundamentals:  86%|████████▌ | 461/538 [05:43<00:53,  1.43it/s]Yahoo fundamentals:  86%|████████▌ | 462/538 [05:43<00:55,  1.37it/s]Yahoo fundamentals:  86%|████████▌ | 463/538 [05:44<00:52,  1.43it/s]Yahoo fundamentals:  86%|████████▌ | 464/538 [05:45<00:49,  1.48it/s]Yahoo fundamentals:  86%|████████▋ | 465/538 [05:45<00:52,  1.38it/s]Yahoo fundamentals:  87%|████████▋ | 466/538 [05:46<00:56,  1.28it/s]Yahoo fundamentals:  87%|████████▋ | 467/538 [05:47<00:57,  1.23it/s]Yahoo fundamentals:  87%|████████▋ | 468/538 [05:48<00:58,  1.20it/s]Yahoo fundamentals:  87%|████████▋ | 469/538 [05:49<00:53,  1.30it/s]Yahoo fundamentals:  87%|████████▋ | 470/538 [05:49<00:49,  1.36it/s]Yahoo fundamentals:  88%|████████▊ | 471/538 [05:50<00:47,  1.41it/s]Yahoo fundamentals:  88%|████████▊ | 472/538 [05:51<00:47,  1.38it/s]Yahoo fundamentals:  88%|████████▊ | 473/538 [05:52<00:46,  1.39it/s]Yahoo fundamentals:  88%|████████▊ | 474/538 [05:52<00:44,  1.43it/s]Yahoo fundamentals:  88%|████████▊ | 475/538 [05:53<00:44,  1.42it/s]Yahoo fundamentals:  88%|████████▊ | 476/538 [05:54<00:42,  1.47it/s]Yahoo fundamentals:  89%|████████▊ | 477/538 [05:54<00:44,  1.37it/s]Yahoo fundamentals:  89%|████████▉ | 478/538 [05:55<00:42,  1.41it/s]Yahoo fundamentals:  89%|████████▉ | 479/538 [05:56<00:44,  1.33it/s]Yahoo fundamentals:  89%|████████▉ | 480/538 [05:57<00:42,  1.36it/s]Yahoo fundamentals:  89%|████████▉ | 481/538 [05:57<00:41,  1.39it/s]Yahoo fundamentals:  90%|████████▉ | 482/538 [05:58<00:39,  1.42it/s]Yahoo fundamentals:  90%|████████▉ | 483/538 [05:59<00:37,  1.46it/s]Yahoo fundamentals:  90%|████████▉ | 484/538 [05:59<00:39,  1.37it/s]Yahoo fundamentals:  90%|█████████ | 485/538 [06:00<00:38,  1.37it/s]Yahoo fundamentals:  90%|█████████ | 486/538 [06:01<00:39,  1.30it/s]Yahoo fundamentals:  91%|█████████ | 487/538 [06:02<00:37,  1.37it/s]Yahoo fundamentals:  91%|█████████ | 488/538 [06:02<00:37,  1.35it/s]Yahoo fundamentals:  91%|█████████ | 489/538 [06:03<00:35,  1.39it/s]Yahoo fundamentals:  91%|█████████ | 490/538 [06:04<00:34,  1.40it/s]Yahoo fundamentals:  91%|█████████▏| 491/538 [06:04<00:32,  1.45it/s]Yahoo fundamentals:  91%|█████████▏| 492/538 [06:05<00:32,  1.40it/s]Yahoo fundamentals:  92%|█████████▏| 493/538 [06:06<00:33,  1.36it/s]Yahoo fundamentals:  92%|█████████▏| 494/538 [06:07<00:30,  1.44it/s]Yahoo fundamentals:  92%|█████████▏| 495/538 [06:07<00:31,  1.37it/s]Yahoo fundamentals:  92%|█████████▏| 496/538 [06:08<00:31,  1.32it/s]Yahoo fundamentals:  92%|█████████▏| 497/538 [06:09<00:29,  1.39it/s]Yahoo fundamentals:  93%|█████████▎| 498/538 [06:10<00:28,  1.42it/s]Yahoo fundamentals:  93%|█████████▎| 499/538 [06:10<00:26,  1.48it/s]Yahoo fundamentals:  93%|█████████▎| 500/538 [06:11<00:25,  1.50it/s]Yahoo fundamentals:  93%|█████████▎| 501/538 [06:12<00:27,  1.37it/s]Yahoo fundamentals:  93%|█████████▎| 502/538 [06:12<00:25,  1.44it/s]Yahoo fundamentals:  93%|█████████▎| 503/538 [06:13<00:23,  1.50it/s]Yahoo fundamentals:  94%|█████████▎| 504/538 [06:14<00:23,  1.46it/s]Yahoo fundamentals:  94%|█████████▍| 505/538 [06:14<00:23,  1.40it/s]Yahoo fundamentals:  94%|█████████▍| 506/538 [06:15<00:23,  1.36it/s]Yahoo fundamentals:  94%|█████████▍| 507/538 [06:16<00:22,  1.39it/s]Yahoo fundamentals:  94%|█████████▍| 508/538 [06:17<00:21,  1.42it/s]Yahoo fundamentals:  95%|█████████▍| 509/538 [06:17<00:19,  1.48it/s]Yahoo fundamentals:  95%|█████████▍| 510/538 [06:18<00:19,  1.40it/s]Yahoo fundamentals:  95%|█████████▍| 511/538 [06:19<00:19,  1.39it/s]Yahoo fundamentals:  95%|█████████▌| 512/538 [06:19<00:19,  1.36it/s]Yahoo fundamentals:  95%|█████████▌| 513/538 [06:20<00:19,  1.31it/s]Yahoo fundamentals:  96%|█████████▌| 514/538 [06:21<00:17,  1.37it/s]Yahoo fundamentals:  96%|█████████▌| 515/538 [06:22<00:17,  1.34it/s]Yahoo fundamentals:  96%|█████████▌| 516/538 [06:23<00:17,  1.28it/s]Yahoo fundamentals:  96%|█████████▌| 517/538 [06:23<00:16,  1.27it/s]Yahoo fundamentals:  96%|█████████▋| 518/538 [06:24<00:15,  1.28it/s]Yahoo fundamentals:  96%|█████████▋| 519/538 [06:25<00:14,  1.35it/s]Yahoo fundamentals:  97%|█████████▋| 520/538 [06:25<00:12,  1.43it/s]Yahoo fundamentals:  97%|█████████▋| 521/538 [06:26<00:12,  1.34it/s]Yahoo fundamentals:  97%|█████████▋| 522/538 [06:27<00:11,  1.37it/s]Yahoo fundamentals:  97%|█████████▋| 523/538 [06:28<00:10,  1.37it/s]Yahoo fundamentals:  97%|█████████▋| 524/538 [06:29<00:10,  1.30it/s]Yahoo fundamentals:  98%|█████████▊| 525/538 [06:29<00:09,  1.33it/s]Yahoo fundamentals:  98%|█████████▊| 526/538 [06:30<00:09,  1.30it/s]Yahoo fundamentals:  98%|█████████▊| 527/538 [06:31<00:07,  1.39it/s]Yahoo fundamentals:  98%|█████████▊| 528/538 [06:31<00:07,  1.36it/s]Yahoo fundamentals:  98%|█████████▊| 529/538 [06:32<00:07,  1.28it/s]Yahoo fundamentals:  99%|█████████▊| 530/538 [06:33<00:06,  1.28it/s]Yahoo fundamentals:  99%|█████████▊| 531/538 [06:34<00:05,  1.37it/s]Yahoo fundamentals:  99%|█████████▉| 532/538 [06:34<00:04,  1.40it/s]Yahoo fundamentals:  99%|█████████▉| 533/538 [06:35<00:03,  1.26it/s]Yahoo fundamentals:  99%|█████████▉| 534/538 [06:36<00:02,  1.36it/s]Yahoo fundamentals:  99%|█████████▉| 535/538 [06:37<00:02,  1.30it/s]Yahoo fundamentals: 100%|█████████▉| 536/538 [06:38<00:01,  1.24it/s]Yahoo fundamentals: 100%|█████████▉| 537/538 [06:39<00:00,  1.22it/s]Yahoo fundamentals: 100%|██████████| 538/538 [06:39<00:00,  1.23it/s]Yahoo fundamentals: 100%|██████████| 538/538 [06:39<00:00,  1.35it/s]
+Fundamentals summary: eligible=587, cache_hits=49, yahoo_fetches=538, fetch_successes=538, fetch_failures=0, apply_failures=0.
 Done.
-/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4761: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
+/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4772: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
   .infer_objects(copy=False)
 Saved top QVM cache to caches/top_qvm_stocks_cache.pkl.
 
 Top QVM Stocks:
    Symbol   QVMScore  3M Return   1Y Return
-0    INSW  84.039846  27.398689  169.487240
-1     ECO  80.950165  59.176303  225.414752
-2     TNK  78.966357  25.086036   90.127666
-3     LPG  78.741866  42.655121   96.390154
-4     FRO  78.196615  23.986561  147.691405
+0    INSW  82.902190  24.512243  150.710969
+1     ECO  81.477031  55.407376  196.464295
+2     FRO  77.813899  25.609314  129.265198
+3     LPG  77.593388  37.144381   82.926687
+4     TNK  76.655851  25.635830   79.451530
 ..    ...        ...        ...         ...
-70   LGND  63.279354   3.804038   69.860046
-71  TNEYF  63.126544   5.829156  120.677115
-72   MATX  63.035863  20.124039  126.258175
-73   JAZZ  62.827389   4.868624   85.467395
-74   AAMI  62.688997  29.040332   93.731381
+70   NESR  62.944068  31.466031  218.786125
+71  TNEYF  62.897344   5.829156  120.677115
+72    SSL  62.770781  31.333333  124.959212
+73   TECK  62.670093  19.538468   79.159062
+74    ASC  62.567759   9.811957   51.800132
 
 [75 rows x 4 columns]
-MARKET CACHE MISS path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=20.75 reason=expired
+MARKET CACHE MISS path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=13.81 reason=expired
 
 ...calling Gemini for fresh shared stock/ETF market context...
 
 Gemini 2.5 API budget: 1/8 total; 1/2 market.
 Gemini logical request 1/8: market context (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Gemini usage [market context]: prompt_tokens=1061, tool_tokens=52231, cached_tokens=49261, thinking_tokens=15119, output_tokens=3207, total_tokens=71618
-Google searches performed [market context]: 45
-  Search: S&P 500 performance last 5 days
-  Search: Nasdaq performance last week
-  Search: Russell 2000 performance last week
-  Search: US market breadth current
-  Search: VIX index current
-  Search: investor sentiment survey latest
-  Search: US CPI latest release date
-  Search: US unemployment rate latest
-  Search: US GDP growth latest official
-  Search: US retail sales latest official data
-  Search: Federal Reserve next meeting date
-  Search: Fed rate hike expectations
-  Search: US Treasury yields current 10-year
-  Search: US credit market conditions
-  Search: US market liquidity current
-  Search: US corporate earnings growth latest quarter
-  Search: US company guidance outlook
-  Search: US corporate profit margins current
-  Search: analyst earnings estimate revisions US
-  Search: Basic Materials sector current conditions
-  Search: Communication Services sector current outlook
-  Search: Consumer Cyclical sector current trends
-  Search: Consumer Defensive sector current operating environment
-  Search: Energy sector current market conditions
-  Search: Financial Services sector current challenges
-  Search: Healthcare sector current demand
-  Search: Industrials sector current production
-  Search: Real Estate sector current market dynamics
-  Search: Technology sector current innovation trends
-  Search: Utilities sector current regulatory environment
-  Search: Value vs Growth performance last week
-  Search: momentum stocks performance US
-  Search: quality stocks market trends
-  Search: dividend stocks outlook US
-  Search: small cap vs large cap performance
-  Search: US equity market valuations current
-  Search: equity fund flows latest data
-  Search: market crowding indicators
-  Search: current geopolitical risks market impact
-  Search: oil prices latest news
-  Search: global commodity prices outlook
-  Search: global freight rates current
-  Search: supply chain conditions update
-  Search: US regulatory changes market impact
-  Search: temporary market events whose normalization could reverse winners
-Grounding citation chunks exposed [market context]: 9
-MARKET CACHE SAVED contract=835e51d1d7a2 entries=1 exposed_search_queries=45
+Gemini usage [market context]: prompt_tokens=1061, tool_tokens=1682, cached_tokens=None, thinking_tokens=2852, output_tokens=7035, total_tokens=12630
+Google searches performed [market context]: 8
+  Search: S&P 500 Nasdaq Russell performance breadth volatility sentiment last 10 days
+  Search: US inflation employment GDP official releases last 10 days
+  Search: Federal Reserve policy rate expectations Treasury yields credit liquidity current
+  Search: US earnings growth guidance margins analyst estimate revisions current
+  Search: Basic Materials Communication Services Consumer Cyclical Consumer Defensive Energy Financial Services Healthcare Industrials Real Estate Technology Utilities current operating conditions
+  Search: Value growth momentum quality dividends size valuation flows crowding current market
+  Search: Geopolitics energy commodities freight supply chain conditions current
+  Search: Material regulation temporary events market impact current
+Grounding citation chunks exposed [market context]: 24
+MARKET CACHE SAVED contract=835e51d1d7a2 entries=1 exposed_search_queries=8
 Dynamic market risk-event catalog: 3 canonical event(s).
-RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=28 fresh=15 expired=13 contract=a4d152e3ea3f
-Validated grounded research [INSW]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=INSW evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [ECO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=ECO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [TNK]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=TNK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=LPG reason=expired
-Validated grounded research [FRO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [NAT]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=NAT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [TEN]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=TEN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=TRMD reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DHT reason=symbol_not_cached
-Validated grounded research [ARREF]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=ARREF evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [SLDE]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SLDE evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [AYA]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=AYA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=DAC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SBLK reason=expired
-Validated grounded research [SHIP]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SHIP evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=HAFN reason=expired
-RESEARCH CACHE MISS symbol=DINO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TK reason=symbol_not_cached
-Validated grounded research [FTNT]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=FTNT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=PTGX evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=VCTR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=VLO reason=symbol_not_cached
-Validated grounded research [DSVSF]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=DSVSF evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [WDOFF]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=WDOFF evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=CDNA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=STNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PARR reason=expired
-RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
-Validated grounded research [MAKO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=MAKO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=DDI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NMM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AUGO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=HNGE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NUTX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RCRUY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PURR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MPC reason=expired
-RESEARCH CACHE MISS symbol=PAYS reason=expired
-RESEARCH CACHE MISS symbol=KRT reason=expired
-RESEARCH CACHE MISS symbol=SB reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=BWLP reason=expired
-RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ETON reason=expired
-RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SGYEF reason=expired
-RESEARCH CACHE MISS symbol=MGTX reason=expired
-RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CVE reason=expired
-RESEARCH CACHE MISS symbol=PSX reason=expired
-RESEARCH CACHE MISS symbol=APA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NVEC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TSM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=KNSA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=GSL reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=UGP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=LGND reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MATX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=JAZZ reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AAMI reason=symbol_not_cached
-Classifying cached PENDING_JUDGMENT research before new stock research: 15 candidate(s).
-Gemini 3.5 API budget: 1/8 total; 1/6 classification.
-Gemini classification request 1/6: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/3)
-Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 5 files:  20%|██        | 1/5 [00:00<00:00,  5.71it/s]Fetching 5 files: 100%|██████████| 5/5 [00:01<00:00,  4.32it/s]Fetching 5 files: 100%|██████████| 5/5 [00:01<00:00,  4.38it/s]
-FastEmbed risk-event matcher ready: model=BAAI/bge-small-en-v1.5, cache=caches/fastembed.
-Semantic risk-event reconciliation declined for INSW: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.798, transmission=0.791, combined=0.795, margin=0.022, structural=False.
-Classification invalid for INSW: INSW has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for INSW: {"error": "INSW has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"Geopolitical disruptions in Strait of Hormuz and Bab el-Mandeb driving high spot tanker rates\"]", "reversal_mechanism": "\"Normalization of geopolitical tensions could lead to a material reduction in spot tanker rates.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A significant decline in spot tanker rates would materially reduce revenue and profitability.\""}}
-Semantic risk-event reconciliation declined for ECO: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.808, transmission=0.794, combined=0.802, margin=0.027, structural=False.
-Classification invalid for ECO: ECO has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for ECO: {"error": "ECO has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"High spot tanker rates driven by market inefficiencies and geopolitical risks\"]", "reversal_mechanism": "\"A de-escalation of geopolitical tensions could lead to a material decline in spot tanker rates.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A significant decline in spot tanker rates would materially reduce revenue and profitability.\""}}
-Semantic risk-event reconciliation declined for TNK: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.786, transmission=0.793, combined=0.789, margin=0.026, structural=False.
-Classification invalid for TNK: TNK has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for TNK: {"error": "TNK has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"Geopolitical disruptions and sanctions creating strong demand for compliant tankers\"]", "reversal_mechanism": "\"Resolution of geopolitical conflicts or easing of sanctions could reduce tanker demand and rates.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A significant decline in spot tanker rates would materially reduce revenue and profitability.\""}}
-Semantic risk-event reconciliation declined for FRO: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.803, transmission=0.779, combined=0.792, margin=0.036, structural=False.
-Classification invalid for FRO: FRO has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for FRO: {"error": "FRO has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"Geopolitical risks and market inefficiencies driving unusually high tanker rates\"]", "reversal_mechanism": "\"A reduction in geopolitical tensions or improved market efficiency could lead to lower tanker rates.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A significant decline in tanker rates would materially reduce revenue and profitability.\""}}
-Semantic risk-event reconciliation declined for NAT: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.761, transmission=0.773, combined=0.767, margin=0.017, structural=False.
-Classification invalid for NAT: NAT has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for NAT: {"error": "NAT has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "HIGH", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "HIGH", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"Geopolitical factors, such as the Strait of Hormuz closure, driving strong tanker demand and high rates\"]", "reversal_mechanism": "\"De-escalation of geopolitical tensions or reopening of chokepoints could reduce demand and rates.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A significant decline in tanker rates would materially reduce revenue and profitability.\""}}
-Semantic risk-event reconciliation declined for TEN: returned='GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS', best='GLOBAL_SUPPLY_CHAIN_DISRUPTIONS', identity=0.800, transmission=0.792, combined=0.796, margin=0.044, structural=False.
-Classification invalid for TEN: TEN has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.; preserving grounded draft for a future judgment.
-  Invalid judgment fields for TEN: {"error": "TEN has unknown primary_risk_event_id 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null.", "judgment_model": "gemini-3.5-flash", "fields_before_validation": {"research_status": "COMPLETE", "crypto_dependence": "NONE", "business_reversal_risk": "MODERATE", "entry_reversal_risk": "MODERATE", "reversal_risk": "MODERATE", "business_concentration": "LOW", "binary_event_risk": "LOW", "benchmark_outperformance_outlook": "UNCERTAIN", "continuation_strength": "ADEQUATE", "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION", "catalyst_dependence": "MODERATE", "mechanism_status": "HYPOTHETICAL", "normalization_probability": "NOT_ESTABLISHED", "continuation_outlook": "CONTINUATION_MORE_LIKELY", "probability_indicator_type": "NONE", "probability_basis": "NONE", "risk_time_horizon": "6_12_MONTHS", "risk_materiality": "MODERATE", "primary_risk_event_id": "GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS", "risk_exposure_group": "CRUDE_TANKER_SPOT_RATES"}, "evidence_excerpt": {"temporary_drivers": "[\"Strong spot and time-charter markets benefiting from geopolitical factors\"]", "reversal_mechanism": "\"A significant decline in tanker rates due to easing geopolitical tensions or increased fleet supply.\"", "current_fact": "null", "probability_evidence": "null", "material_effect": "\"A material reduction in tanker rates would impact voyage revenues and profitability.\""}}
-Validated JSON sources [ARREF]: 4 distinct URLs
-Validated JSON sources [SLDE]: 4 distinct URLs
-Validated JSON sources [AYA]: 4 distinct URLs
-Reconciled semantic primary_risk_event_id for SHIP: 'GEOPOLITICAL_CHOKEPOINT_DISRUPTIONS' -> 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS' (identity=0.827, transmission=0.772, combined=0.802, margin=0.095).
-Applied cautious temporary-dependence floor to SHIP: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [SHIP]: 4 distinct URLs
-Validated JSON sources [FTNT]: 4 distinct URLs
-Validated JSON sources [PTGX]: 4 distinct URLs
-Validated JSON sources [DSVSF]: 4 distinct URLs
-Validated JSON sources [WDOFF]: 4 distinct URLs
-Validated JSON sources [MAKO]: 4 distinct URLs
-Deferred excess same-sector research candidates: TRMD, DHT
-Using validated stock research cache for ARREF.
-Using validated stock research cache for SLDE.
-Using validated stock research cache for AYA.
-Using validated stock research cache for SHIP.
-Filled ordinary research batch with future uncached QVM candidates: INSW, ECO, TNK, LPG, FRO, NAT, TEN, DAC, SBLK, HAFN, VCTR, CDNA, DDI, NMM, AUGO
-
-...calling Gemini for stock batch: INSW, ECO, TNK, LPG, FRO, NAT, TEN, DAC, SBLK, HAFN, VCTR, CDNA, DDI, NMM, AUGO...
-
-Gemini 2.5 API budget: 2/8 total; 1/6 stock.
-Gemini logical request 2/8: stock batch containing 15 stocks, spanning QVM ranks 1-32 (gemini-2.5-flash, attempt 1) (API attempt 2; stock API attempts 1)
-Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 1-32]: prompt_tokens=21541, tool_tokens=161797, cached_tokens=169746, thinking_tokens=12541, output_tokens=24175, total_tokens=220054
-Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 1-32]: 20
-  Search: International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Okeanis Eco Tankers Corp. ECO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Teekay Tankers Ltd. TNK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Dorian LPG Ltd. LPG investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Frontline plc FRO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Nordic American Tankers Limited NAT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Tsakos Energy Navigation Limited TEN investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Danaos Corporation DAC investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Star Bulk Carriers Corp. SBLK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hafnia Limited HAFN investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: CareDx, Inc. CDNA investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Navios Maritime Partners L.P. NMM investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Aura Minerals Inc. AUGO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: International Seaways, Inc. INSW latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Dorian LPG Ltd. LPG latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Tsakos Energy Navigation Limited TEN latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Danaos Corporation DAC business description investor relations
-  Search: Victory Capital Holdings, Inc. VCTR latest earnings release revenue guidance operating metrics investor relations SEC
-Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 1-32]: 5
-Recovered independently delimited stock results: INSW, ECO, TNK, LPG, FRO, NAT, TEN, DAC, SBLK, HAFN, CDNA, DDI, NMM, AUGO
-Stock response coverage: 14/15 returned; 1 missing; status=NORMAL.
-Research searches requested this call: 15 total; 15 first, 0 repeated.
-Cross-company similarity noted for INSW/ECO but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for INSW/TNK but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for INSW/FRO but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/TNK but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/FRO but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TNK/FRO but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/NAT but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
+RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=37 fresh=28 expired=9 contract=a4d152e3ea3f
 Validated grounded research [INSW]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=INSW evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [ECO]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [TNK]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [LPG]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=ECO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [FRO]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [LPG]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=LPG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [TNK]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TNK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [NAT]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NAT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TEN]: 5 distinct source URLs; awaiting judgment.
-Saving other valid results; DAC requires a targeted research retry: DAC research incomplete: Insufficient evidence to establish concrete recent operating facts for Q2 2026. The provided snippets mention the release of Q2 2026 results but do not contain the specific revenue, net income, or EBITDA figures.
-Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [HAFN]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [DDI]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [NMM]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [AUGO]: 4 distinct source URLs; awaiting judgment.
-Batch research summary:
-  candidates sent: 15
-  company searches exposed: 20
-  results returned: 14
-  results validated: 13
-  incomplete research: 1
-  structural repairs needed: 0
-  genuine repeated searches: 0
-  missing/unsearched attempts refunded: 0
-Classifying pending research before another 2.5 call: 6 selected, 13 pending, optimistic capacity 11/10.
-Gemini 3.5 API budget: 2/8 total; 2/6 classification.
-Gemini classification request 2/6: stock judgment for 13 stocks (gemini-3.5-flash, attempt 1/3)
-Warning: stock judgment for 13 stocks (gemini-3.5-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.5 classification in 37.6s...
-Gemini 3.5 API budget: 3/8 total; 3/6 classification.
-Gemini classification request 3/6: stock judgment for 13 stocks (gemini-3.5-flash, attempt 2/3)
-Warning: stock judgment for 13 stocks (gemini-3.5-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.5 classification in 71.3s...
-Gemini 3.5 API budget: 4/8 total; 4/6 classification.
-Gemini classification request 4/6: stock judgment for 13 stocks (gemini-3.5-flash, attempt 3/3)
-Applied cautious temporary-dependence floor to INSW: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [INSW]: 5 distinct URLs
-Applied cautious temporary-dependence floor to ECO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [ECO]: 5 distinct URLs
-Applied cautious temporary-dependence floor to TNK: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TNK]: 5 distinct URLs
-Applied cautious temporary-dependence floor to LPG: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [LPG]: 5 distinct URLs
-Applied cautious temporary-dependence floor to FRO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [FRO]: 5 distinct URLs
-Applied cautious temporary-dependence floor to NAT: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [NAT]: 5 distinct URLs
-Applied cautious temporary-dependence floor to TEN: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [TEN]: 5 distinct URLs
-Validated JSON sources [SBLK]: 4 distinct URLs
-Validated JSON sources [HAFN]: 5 distinct URLs
-Validated JSON sources [CDNA]: 5 distinct URLs
-Validated JSON sources [DDI]: 5 distinct URLs
-Applied cautious temporary-dependence floor to NMM: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [NMM]: 5 distinct URLs
-Cleared inapplicable temporary_drivers for AUGO.
-Validated JSON sources [AUGO]: 4 distinct URLs
-Carrying retryable stocks into the next batch and filling remaining capacity with: TRMD, DHT, DINO, TK, VLO, STNG, HNGE, NUTX, RCRUY, PURR, PAYS, KRT, SB
-
-...calling Gemini for stock batch: DAC, VCTR, TRMD, DHT, DINO, TK, VLO, STNG, HNGE, NUTX, RCRUY, PURR, PAYS, KRT, SB...
-
-Gemini 2.5 API budget: 3/8 total; 2/6 stock.
-Gemini logical request 3/8: stock batch containing 15 stocks, spanning QVM ranks 13-41 targeted retry 1 (gemini-2.5-flash, attempt 1) (API attempt 3; stock API attempts 2)
-Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 13-41 targeted retry 1]: prompt_tokens=22596, tool_tokens=178597, cached_tokens=None, thinking_tokens=18525, output_tokens=20736, total_tokens=240454
-Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 13-41 targeted retry 1]: 21
-  Search: Danaos Corporation DAC investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: TORM plc TRMD investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: HF Sinclair Corporation DINO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Teekay Corporation Ltd. TK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Valero Energy Corporation VLO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Scorpio Tankers Inc. STNG investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hinge Health, Inc. HNGE investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Nutex Health Inc. NUTX investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Recruit Holdings Co., Ltd. RCRUY investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hyperliquid Strategies Inc. PURR investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Paysign, Inc. PAYS investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Karat Packaging Inc. KRT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Safe Bulkers, Inc. SB investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Victory Capital Holdings, Inc. VCTR latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Teekay Corporation Ltd. TK latest earnings release revenue guidance operating metrics investor relations SEC current company spin-off
-  Search: Teekay Corporation Ltd. TK investor relations latest results guidance
-  Search: Valero Energy Corporation VLO latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Scorpio Tankers Inc. STNG latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Recruit Holdings Co., Ltd. RCRUY latest earnings release revenue guidance operating metrics investor relations SEC
-Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 13-41 targeted retry 1]: 5
-Recovered independently delimited stock results: DAC, VCTR, TRMD, DHT, DINO, TK, VLO, STNG, HNGE, NUTX, RCRUY, PURR, PAYS, KRT, SB
-Stock response coverage: 15/15 returned; 0 missing; status=NORMAL.
-Research searches requested this call: 15 total; 13 first, 2 repeated.
-Validated grounded research [DAC]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [VCTR]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TEN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=ARREF reason=expired
 Validated grounded research [TRMD]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TRMD evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [DHT]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DHT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=WDOFF reason=expired
+RESEARCH CACHE MISS symbol=AYA reason=expired
+RESEARCH CACHE MISS symbol=DSVSF reason=expired
+RESEARCH CACHE MISS symbol=FTNT reason=expired
 Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [TK]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DINO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [DAC]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DAC evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=MU reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MAKO reason=expired
+Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=SBLK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=CDNA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=SHIP reason=expired
 Validated grounded research [VLO]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [HNGE]: 3 distinct source URLs; awaiting judgment.
-Validated grounded research [NUTX]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VLO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [AUGO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=AUGO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=PTGX reason=expired
+RESEARCH CACHE MISS symbol=SLDE reason=expired
+Validated grounded research [HAFN]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=HAFN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=NVEC reason=symbol_not_cached
+Validated grounded research [DDI]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DDI evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [RCRUY]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=RCRUY evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [VCTR]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VCTR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [PURR]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PURR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [HNGE]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=HNGE evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [KRT]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=KRT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
+Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PAYS evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
+Validated grounded research [NUTX]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NUTX evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [TK]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
+Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=STNG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=KRYS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
+Validated grounded research [NMM]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NMM evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
 Validated grounded research [SB]: 3 distinct source URLs; awaiting judgment.
-Batch research summary:
-  candidates sent: 15
-  company searches exposed: 21
-  results returned: 15
-  results validated: 15
-  incomplete research: 0
-  structural repairs needed: 0
-  genuine repeated searches: 2
-  missing/unsearched attempts refunded: 0
-Classifying pending research before another 2.5 call: 8 selected, 15 pending, optimistic capacity 14/10.
-Gemini 3.5 API budget: 5/8 total; 5/6 classification.
-Gemini classification request 5/6: stock judgment for 15 stocks (gemini-3.5-flash, attempt 1/2)
-Applied cautious temporary-dependence floor to DAC: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DAC]: 4 distinct URLs
-Validated JSON sources [VCTR]: 3 distinct URLs
-Reconciled TRMD ELEVATED to MODERATE because the at-least-as-likely threshold was not established.
-Validated JSON sources [TRMD]: 3 distinct URLs
-Applied cautious temporary-dependence floor to DHT: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DHT]: 3 distinct URLs
-Applied cautious temporary-dependence floor to DINO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [DINO]: 4 distinct URLs
-Reconciled TK ELEVATED to MODERATE because the at-least-as-likely threshold was not established.
-Validated JSON sources [TK]: 5 distinct URLs
-Applied cautious temporary-dependence floor to VLO: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [VLO]: 4 distinct URLs
-Reconciled STNG ELEVATED to MODERATE because the at-least-as-likely threshold was not established.
-Validated JSON sources [STNG]: 4 distinct URLs
-Validated JSON sources [HNGE]: 3 distinct URLs
-Validated JSON sources [NUTX]: 4 distinct URLs
-Validated JSON sources [RCRUY]: 4 distinct URLs
-Validated JSON sources [PURR]: 4 distinct URLs
-Validated JSON sources [PAYS]: 4 distinct URLs
-Cleared inapplicable temporary_drivers for KRT.
-Validated JSON sources [KRT]: 3 distinct URLs
-Applied cautious temporary-dependence floor to SB: MODERATE->MODERATE without another Gemini call.
-Validated JSON sources [SB]: 3 distinct URLs
-Portfolio meeting final quality bar: 10/10; stopping stock research.
-Portfolio meeting final quality bar: 10/10; freezing research.
+RESEARCH CACHE HIT symbol=SB evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=LGND reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ERO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TSM reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=KNSA reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ARIS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=FSM reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=UGP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NESR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TECK reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
+Classifying cached PENDING_JUDGMENT research before new stock research: 28 candidate(s).
+Gemini 3.5 API budget: 1/8 total; 1/6 classification.
+Gemini classification request 1/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3)
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Retrying 3.5 classification in 30.8s...
+Gemini 3.5 API budget: 2/8 total; 2/6 classification.
+Gemini classification request 2/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3)
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Retrying 3.5 classification in 71.5s...
+Gemini 3.5 API budget: 3/8 total; 3/6 classification.
+Gemini classification request 3/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3)
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Warning: Gemini 3.5 judgment is unavailable after this batch's retry allowance; preserving validated research as PENDING_JUDGMENT and opening the classification circuit breaker: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Judgment unavailable; leaving validated research queued for a later run.
+Stopping stock research because no classification model is available.
 FINAL VALIDATED CANDIDATE COMPARISON
-  ARREF: final_score=85.62, qvm=73.62, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=COPPER_PRICES
-  SBLK: final_score=85.30, qvm=72.30, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=DRY_BULK_SHIPPING_RATES
-  SLDE: final_score=85.20, qvm=73.20, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=None
-  HAFN: final_score=85.08, qvm=72.08, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=PRODUCT_TANKER_SPOT_RATES
-  AYA: final_score=84.97, qvm=72.97, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=SILVER_PRICES
-  PTGX: final_score=84.00, qvm=71.00, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=None
-  VCTR: final_score=83.89, qvm=70.89, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=ASSET_MANAGEMENT_FLOWS
-  FTNT: final_score=83.29, qvm=71.29, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CYBERSECURITY_SPENDING
-  DSVSF: final_score=82.58, qvm=70.58, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_AND_SILVER_PRICES
-  WDOFF: final_score=82.50, qvm=70.50, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICES
-  AUGO: final_score=82.42, qvm=69.42, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=GOLD_AND_COPPER_PRICES
-  CDNA: final_score=82.39, qvm=70.39, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=DIAGNOSTICS_DEMAND
-  HNGE: final_score=82.34, qvm=69.34, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=DIGITAL_HEALTH_ADOPTION
-  NUTX: final_score=82.23, qvm=69.23, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=HEALTHCARE_SERVICE_DEMAND
-  RCRUY: final_score=82.11, qvm=69.11, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=NONE, risk_event=None, return_driver=HR_TECHNOLOGY_DEMAND
-  MAKO: final_score=82.00, qvm=70.00, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=GOLD_PRICES
-  DHT: final_score=79.74, qvm=76.74, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  PAYS: final_score=78.05, qvm=68.05, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=LOW, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=CUSTOMER_CONCENTRATION_RISK
-  DAC: final_score=76.63, qvm=72.63, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS, return_driver=DRYBULK_SHIPPING_RATES
-  SHIP: final_score=76.25, qvm=72.25, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS, return_driver=DRY_BULK_FREIGHT_RATES
-  DINO: final_score=75.46, qvm=71.46, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS, return_driver=REFINING_CRACK_SPREADS
-  INSW: final_score=75.04, qvm=84.04, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  VLO: final_score=74.78, qvm=70.78, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS, return_driver=REFINING_CRACK_SPREADS
-  NMM: final_score=73.51, qvm=69.51, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=DIVERSIFIED_SHIPPING_RATES
-  SB: final_score=71.97, qvm=67.97, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -1.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS, return_driver=DRYBULK_SHIPPING_RATES
-  ECO: final_score=71.95, qvm=80.95, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  PURR: final_score=70.83, qvm=68.83, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': 5.0, 'continuation_strength': 4.0, 'catalyst_dependence': -2.0, 'business_concentration': -2.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=STRONG, benchmark=LIKELY, mechanism=HYPOTHETICAL, risk_event=None, return_driver=DIGITAL_ASSET_PRICE_VOLATILITY
-  TNK: final_score=69.97, qvm=78.97, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  LPG: final_score=69.74, qvm=78.74, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=LPG_TANKER_FREIGHT_RATES
-  DDI: final_score=69.60, qvm=69.60, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=NONE, risk_event=None, return_driver=MOBILE_GAMING_ENGAGEMENT
-  FRO: final_score=69.20, qvm=78.20, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  NAT: final_score=68.91, qvm=77.91, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  TEN: final_score=68.62, qvm=77.62, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': 0.0, 'catalyst_dependence': -2.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=ADEQUATE, benchmark=UNCERTAIN, mechanism=HYPOTHETICAL, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  KRT: final_score=63.98, qvm=67.98, adjustments={'reversal_risk': 3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': 0.0, 'business_concentration': 0.0, 'binary_event_risk': 0.0, 'mechanism_status': 1.0}, risk=LOW, continuation=WEAK, benchmark=UNCERTAIN, mechanism=NONE, risk_event=None, return_driver=NONRECURRING_TARIFF_REFUNDS
-  TRMD: final_score=63.01, qvm=77.01, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=WEAK, benchmark=UNCERTAIN, mechanism=UNUSUALLY_PROBABLE, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=PRODUCT_TANKER_FREIGHT_RATES
-  TK: final_score=57.35, qvm=71.35, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=WEAK, benchmark=UNCERTAIN, mechanism=UNUSUALLY_PROBABLE, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=CRUDE_TANKER_SPOT_RATES
-  STNG: final_score=56.29, qvm=70.29, adjustments={'reversal_risk': -3.0, 'benchmark_outlook': -4.0, 'continuation_strength': -4.0, 'catalyst_dependence': -2.0, 'business_concentration': -1.0, 'binary_event_risk': 0.0, 'mechanism_status': 0.0}, risk=MODERATE, continuation=WEAK, benchmark=UNCERTAIN, mechanism=UNUSUALLY_PROBABLE, risk_event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS, return_driver=PRODUCT_TANKER_FREIGHT_RATES
-Research efficiency: 28 unique stocks, 30 requested searches, 2 repeated searches.
+Research efficiency: 0 unique stocks, 0 requested searches, 0 repeated searches.
 
 CONTEXT REVIEW
 
-|   QVM Rank | Symbol   | Sector Group           | Reversal Risk / Status                      |   Final Score | Continuation   | Benchmark Outlook   |   Sector Selected After |   Total Selected After | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-|-----------:|:---------|:-----------------------|:--------------------------------------------|--------------:|:---------------|:--------------------|------------------------:|-----------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|         10 | ARREF    | Basic Materials        | SELECTED — LOW                              |       85.6223 | STRONG         | LIKELY              |                       1 |                      1 | Amerigo Resources reported strong Q2 2026 net income and EBITDA, driven by its copper and molybdenum production. The company maintains a disciplined capital return strategy and has a positive long-term outlook for copper prices, indicating a low probability of material business reversal.                                                                                                                                                        |
-|         14 | SBLK     | Industrials            | SELECTED — LOW                              |       85.2986 | STRONG         | LIKELY              |                       1 |                      2 | Star Bulk Carriers reported strong Q2 2026 results, supported by favorable dry bulk market fundamentals. With a diversified fleet and strong balance sheet, the company is well-positioned for continuation, with no probable reversal mechanisms identified.                                                                                                                                                                                           |
-|         11 | SLDE     | Financial Services     | SELECTED — LOW                              |       85.1974 | STRONG         | LIKELY              |                       1 |                      3 | Slide Insurance reported strong Q2 2026 revenue and net income growth, driven by policy expansion and disciplined underwriting. The company is expanding geographically and initiated a dividend, indicating stable operations and a low probability of material business reversal.                                                                                                                                                                     |
-|         16 | HAFN     | Industrials            | SELECTED — LOW                              |       85.0806 | STRONG         | LIKELY              |                       2 |                      4 | Hafnia reported strong Q2 2026 net profit and TCE earnings, supported by robust industry fundamentals. With a large, diversified fleet and strong capital structure, the company is well-positioned for continuation, with no probable reversal mechanisms identified.                                                                                                                                                                                  |
-|         12 | AYA      | Basic Materials        | SELECTED — LOW                              |       84.969  | STRONG         | LIKELY              |                       2 |                      5 | Aya Gold & Silver reported record Q2 2026 operational and financial performance, driven by Zgounder's ramp-up and robust silver prices. The company is advancing key projects and expanding its portfolio, indicating a low probability of material business reversal.                                                                                                                                                                                  |
-|         20 | PTGX     | Healthcare             | SELECTED — LOW                              |       83.9958 | STRONG         | LIKELY              |                       1 |                      6 | Protagonist Therapeutics reported strong Q2 2026 results, driven by sales and milestone payments from its recently approved first-in-class drugs. The company has a robust pipeline and strong financial position, indicating a low probability of material business reversal.                                                                                                                                                                          |
-|         21 | VCTR     | Financial Services     | SELECTED — LOW                              |       83.8901 | STRONG         | LIKELY              |                       2 |                      7 | Victory Capital reported record Q2 2026 revenue of $435.4 million and $4.2 billion in long-term net inflows, driven by strong investment performance and a diversified platform. The company's ability to attract and retain client assets through its specialized strategies is a key durable driver.                                                                                                                                                  |
-|         19 | FTNT     | Technology             | SELECTED — LOW                              |       83.2892 | STRONG         | LIKELY              |                       1 |                      8 | Fortinet reported strong Q2 2026 results, exceeding guidance with significant revenue and billings growth. The company is benefiting from strong demand in cybersecurity, driven by AI, and is innovating through strategic collaborations, indicating a low probability of material business reversal.                                                                                                                                                 |
-|         23 | DSVSF    | Basic Materials        | SKIPPED — SECTOR CAPACITY                   |       82.5769 | STRONG         | LIKELY              |                       2 |                      8 | Discovery Mining reported record Q2 2026 revenue and strong gold production, on track for full-year guidance. The company is expanding its operations through strategic acquisitions and investments, indicating a low probability of material business reversal.                                                                                                                                                                                       |
-|         24 | WDOFF    | Basic Materials        | SKIPPED — SECTOR CAPACITY                   |       82.5047 | STRONG         | LIKELY              |                       2 |                      8 | Wesdome Gold Mines reported strong Q2 2026 revenue and gold production, reaffirming full-year guidance. The company benefits from high-grade assets and a robust exploration pipeline, indicating a low probability of material business reversal.                                                                                                                                                                                                      |
-|         32 | AUGO     | Basic Materials        | SKIPPED — SECTOR CAPACITY                   |       82.4244 | STRONG         | LIKELY              |                       2 |                      8 | Aura Minerals reported strong Q2 2026 revenue and production, reaffirming full-year guidance. With a diversified portfolio and growth projects, the company is well-positioned for continuation, with no probable reversal mechanisms identified.                                                                                                                                                                                                       |
-|         25 | CDNA     | Healthcare             | SELECTED — LOW                              |       82.3918 | STRONG         | LIKELY              |                       2 |                      9 | CareDx reported strong Q2 2026 revenue growth, driven by its Testing Services segment. With a focused business and pipeline, the company is well-positioned for continuation, with no probable reversal mechanisms identified.                                                                                                                                                                                                                          |
-|         33 | HNGE     | Healthcare             | SKIPPED — SECTOR CAPACITY                   |       82.3395 | STRONG         | LIKELY              |                       2 |                      9 | Hinge Health reported strong Q2 2026 revenue of $212.8 million, up 53% year-over-year, and raised its full-year guidance, demonstrating robust growth in digital musculoskeletal care. The company is expanding into gastrointestinal care with the acquisition of Cylinder Health. While competition is a factor, no current indicators suggest a material reversal is probable.                                                                       |
-|         34 | NUTX     | Healthcare             | SKIPPED — SECTOR CAPACITY                   |       82.2303 | STRONG         | LIKELY              |                       2 |                      9 | Nutex Health reported strong Q2 2026 net income of $65.8 million, with its Hospital Division seeing a 6.2% increase in visits in the first half of 2026. The company operates an integrated healthcare delivery system focused on community-based acute care. No current indicators suggest a material business reversal is probable.                                                                                                                   |
-|         35 | RCRUY    | Communication Services | SELECTED — LOW                              |       82.107  | STRONG         | LIKELY              |                       1 |                     10 | Recruit Holdings reported strong Q1 FY2027 results with sales revenue up 18.9% and operating profit increasing 66.1%, driven by its HR Technology segment. The company also raised its full-year operating profit forecast. While the job market can be cyclical, no current indicators suggest a material business reversal is probable.                                                                                                               |
-|         29 | MAKO     | Basic Materials        | SKIPPED — SECTOR CAPACITY                   |       82.0032 | STRONG         | LIKELY              |                       2 |                     10 | Mako Mining reported record Q1 2026 revenue and net income, driven by strong gold production and strategic acquisitions. The company is funding future growth from internal cash flow, indicating a low probability of material business reversal.                                                                                                                                                                                                      |
-|          9 | DHT      | Energy                 | NOT SELECTED — LOWER FINAL SCORE            |       79.7437 | STRONG         | LIKELY              |                       0 |                     10 | DHT achieved a record Q2 2026 net profit of $198.3 million, driven by exceptionally strong crude oil tanker market conditions and high TCE rates. While Q3 coverage is largely booked, the company's reliance on the volatile spot market for a portion of its fleet, coupled with high asset values, suggests a hypothetical reversal risk if these strong conditions normalize.                                                                       |
-|         39 | PAYS     | Technology             | NOT SELECTED — LOWER FINAL SCORE            |       78.0474 | STRONG         | LIKELY              |                       1 |                     10 | Paysign reported strong Q2 2026 revenue of $28.3 million, up 48.1% year-over-year, driven by growth in both plasma payments and patient affordability programs. The company raised its full-year guidance. However, a significant concentration of receivables with one pharma customer presents a hypothetical reversal risk if that relationship deteriorates.                                                                                        |
-|         13 | DAC      | Industrials            | SKIPPED — SECTOR CAPACITY                   |       76.6285 | STRONG         | LIKELY              |                       2 |                     10 | Danaos reported strong Q2 2026 operating revenues of $274.4 million, driven by improved drybulk vessel Time Charter Equivalent rates. The company benefits from a modern fleet and long-term containership charters. However, the elevated drybulk rates, a temporary driver, could normalize, potentially impacting future profitability.                                                                                                              |
-|         15 | SHIP     | Industrials            | SKIPPED — SECTOR CAPACITY                   |       76.2466 | STRONG         | LIKELY              |                       2 |                     10 | Seanergy Maritime reported record Q2 2026 results, driven by a strong Capesize freight market. While the company is expanding its fleet, its profitability is materially supported by elevated freight rates. A potential downturn in the market presents a moderate reversal risk.                                                                                                                                                                     |
-|         17 | DINO     | Energy                 | NOT SELECTED — LOWER FINAL SCORE            |       75.4558 | STRONG         | LIKELY              |                       0 |                     10 | HF Sinclair reported strong Q2 2026 results with $10.39 billion in revenue and $1.5 billion adjusted EBITDA, benefiting from tight refinery markets and strong margins. The company is also planning to separate its Lubricants & Specialties segment by 2027. While current refining conditions are favorable, a hypothetical reversal could occur if refining margins compress due to changes in global supply.                                       |
-|          1 | INSW     | Energy                 | NOT SELECTED — UNCERTAIN MODERATE-RISK CASE |       75.0398 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | International Seaways reported record Q2 2026 revenues, driven by strong tanker rates. While a robust balance sheet supports operations, current high rates are materially dependent on geopolitical tensions, posing a hypothetical reversal risk if conditions normalize.                                                                                                                                                                             |
-|         22 | VLO      | Energy                 | NOT SELECTED — LOWER FINAL SCORE            |       74.7834 | STRONG         | LIKELY              |                       0 |                     10 | Valero reported a very strong Q2 2026 with $3.7 billion net income, driven by robust refining operating income. The company benefits from diversified operations and investments in renewable fuels. While management anticipates continued strong refining margins due to tight global supply, a hypothetical reversal could occur if these market conditions normalize, potentially impacting profitability.                                          |
-|         31 | NMM      | Industrials            | SKIPPED — SECTOR CAPACITY                   |       73.5081 | STRONG         | LIKELY              |                       2 |                     10 | Navios Maritime Partners reported strong Q2 2026 revenue and TCE rates, driven by geopolitical disruptions. While a diversified fleet and backlog provide stability, current performance is materially dependent on these temporary conditions, posing a hypothetical reversal risk.                                                                                                                                                                    |
-|         41 | SB       | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       71.973  | STRONG         | LIKELY              |                       2 |                     10 | Safe Bulkers reported Q2 2026 EPS of $0.28 and adjusted EBITDA of $50.3 million, benefiting from healthy drybulk spot rates. The company is modernizing its fleet and has a contracted revenue backlog. However, management flagged risks from China demand uncertainty, declining coal shipments, and trade tensions, which pose a hypothetical reversal risk to spot rates.                                                                           |
-|          2 | ECO      | Industrials            | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       71.9502 | ADEQUATE       | UNCERTAIN           |                       2 |                     10 | Okeanis Eco Tankers achieved record Q2 2026 results, driven by strong TCE rates. While fleet expansion supports growth, current high rates are materially dependent on geopolitical factors, posing a hypothetical reversal risk if conditions normalize.                                                                                                                                                                                               |
-|         36 | PURR     | Financial Services     | EXCLUDED — CRYPTO DEPENDENCE                |       70.8294 | STRONG         | LIKELY              |                       2 |                     10 | Hyperliquid Strategies reported $553 million in FY2026 treasury-related income, primarily from unrealized gains on its HYPE token holdings, and increased its treasury to 29.3 million tokens. The company's business model is primarily dependent on the volatile digital asset market. While no active deterioration is reported, the inherent significant risk of loss from digital asset price volatility poses a high, hypothetical reversal risk. |
-|          3 | TNK      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       69.9664 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Teekay Tankers reported record Q2 2026 net income, driven by all-time high spot tanker rates. While fleet renewal is ongoing, current strong performance is materially dependent on geopolitical disruptions, posing a hypothetical reversal risk.                                                                                                                                                                                                      |
-|          4 | LPG      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       69.7419 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Dorian LPG reported record Q1 FY2027 revenue and TCE rates, driven by geopolitical disruptions. While fleet modernization is ongoing, current strong performance is materially dependent on these temporary conditions, posing a hypothetical reversal risk.                                                                                                                                                                                            |
-|         30 | DDI      | Communication Services | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       69.6019 | ADEQUATE       | UNCERTAIN           |                       1 |                     10 | DoubleDown Interactive reported Q2 2026 revenue growth, driven by its social casino and iGaming segments. With diversified revenue and strategic acquisitions, the company is well-positioned for continuation, with no probable reversal mechanisms identified.                                                                                                                                                                                        |
-|          5 | FRO      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       69.1966 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Frontline reported record Q2 2026 profits, driven by high tanker rates. While strategic fleet management provides visibility, current strong performance is materially dependent on geopolitical volatility, posing a hypothetical reversal risk.                                                                                                                                                                                                       |
-|          6 | NAT      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       68.9123 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Nordic American Tankers reported strong Q1 2026 results and Q2 bookings, driven by high tanker rates. While a Suezmax-only fleet is a durable driver, current performance is materially dependent on geopolitical factors, posing a hypothetical reversal risk.                                                                                                                                                                                         |
-|          7 | TEN      | Energy                 | NOT SELECTED — BELOW BENCHMARK FALLBACK BAR |       68.6192 | ADEQUATE       | UNCERTAIN           |                       0 |                     10 | Tsakos Energy Navigation reported record Q2 2026 results, driven by strong profit-sharing and market fundamentals. While long-term contracts provide stability, current performance is materially dependent on global disruptions, posing a hypothetical reversal risk.                                                                                                                                                                                 |
-|         40 | KRT      | Consumer Cyclical      | NOT SELECTED — WEAK CONTINUATION            |       63.9835 | WEAK           | UNCERTAIN           |                       0 |                     10 | Karat Packaging reported record Q2 2026 net sales of $136.3 million, but its net income of $29.6 million was significantly boosted by $25.8 million in one-time tariff refunds. The Q3 2026 guidance for adjusted EBITDA margin (9-11%) is substantially lower than Q2's reported 30.5%, indicating a reasonably probable normalization of profitability due to the absence of these non-recurring gains.                                               |
-|          8 | TRMD     | Energy                 | NOT SELECTED — WEAK CONTINUATION            |       63.014  | WEAK           | UNCERTAIN           |                       0 |                     10 | TORM achieved record Q2 2026 net profit of $338 million, driven by unprecedented freight rates due to geopolitical conflicts. While the company has fixed 70% of its 2026 earning days, the market remains volatile. Normalization of these temporary high rates, linked to Middle East tensions and supply chain disruptions, is reasonably probable and poses a high reversal risk.                                                                   |
-|         18 | TK       | Energy                 | NOT SELECTED — WEAK CONTINUATION            |       57.3543 | WEAK           | UNCERTAIN           |                       0 |                     10 | Teekay Corporation, through Teekay Tankers, reported record Q2 2026 net income of $225.9 million, driven by unprecedented spot tanker rates fueled by geopolitical disruptions. While the company is renewing its fleet, the current record rates are highly dependent on these temporary factors. Normalization of these rates is reasonably probable, posing a high reversal risk.                                                                    |
-|         26 | STNG     | Energy                 | NOT SELECTED — WEAK CONTINUATION            |       56.2867 | WEAK           | UNCERTAIN           |                       0 |                     10 | Scorpio Tankers reported strong Q2 2026 net income of $387.5 million, driven by a significantly stronger product tanker market influenced by Middle East conflicts. While new time charters provide some stability, the current high TCE rates are highly dependent on these temporary geopolitical factors. Normalization of these rates is reasonably probable, posing a high reversal risk.                                                          |
+| QVM Rank   | Symbol   | Sector Group   | Reversal Risk / Status   | Final Score   | Continuation   | Benchmark Outlook   | Sector Selected After   | Total Selected After   | Explanation   |
+|------------|----------|----------------|--------------------------|---------------|----------------|---------------------|-------------------------|------------------------|---------------|
 
 CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN
-  ARREF: qvm_rank, qvm_score
-  AUGO: qvm_rank, qvm_score
-  AYA: qvm_rank, qvm_score
-  CDNA: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: "PRECISION_MEDICINE_DIAGNOSTICS" -> "DIAGNOSTICS_DEMAND"
-  DDI: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: "SOCIAL_CASINO_MARKET_DEMAND" -> "MOBILE_GAMING_ENGAGEMENT"
-  DHT: primary_risk_event_id, qvm_rank, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  DINO: catalyst_dependence, primary_risk_event_id, qvm_rank, qvm_score, risk_materiality
-    catalyst_dependence: "HIGH" -> "MODERATE"
-    risk_materiality: "HIGH" -> "MODERATE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS"
-  DSVSF: benchmark_outperformance_outlook, business_reversal_risk, catalyst_dependence, continuation_strength, normalization_probability, qvm_rank, qvm_score, reversal_risk, risk_basis, risk_materiality, risk_time_horizon
-    business_reversal_risk: "MODERATE" -> "LOW"
-    reversal_risk: "MODERATE" -> "LOW"
-    benchmark_outperformance_outlook: "UNCERTAIN" -> "LIKELY"
-    continuation_strength: "ADEQUATE" -> "STRONG"
-    risk_basis: "TEMPORARY_DRIVER_NORMALIZATION" -> "NONE"
-    catalyst_dependence: "MODERATE" -> "LOW"
-    normalization_probability: "NOT_ESTABLISHED" -> "NOT_APPLICABLE"
-    risk_time_horizon: "6_12_MONTHS" -> null
-    risk_materiality: "MODERATE" -> "LOW"
-  ECO: primary_risk_event_id, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  FRO: primary_risk_event_id, qvm_rank, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  FTNT: qvm_rank, qvm_score
-  HAFN: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: "PRODUCT_TANKER_FREIGHT_RATES" -> "PRODUCT_TANKER_SPOT_RATES"
-  HNGE: qvm_rank, qvm_score
-  INSW: primary_risk_event_id, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  KRT: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: null -> "NONRECURRING_TARIFF_REFUNDS"
-  LPG: primary_risk_event_id, qvm_score, risk_exposure_group
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-    risk_exposure_group: "LPG_FREIGHT_RATES" -> "LPG_TANKER_FREIGHT_RATES"
-  MAKO: qvm_rank, qvm_score
-  NAT: primary_risk_event_id, qvm_rank, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  NMM: primary_risk_event_id, qvm_rank, qvm_score, risk_exposure_group, risk_materiality
-    risk_materiality: "MODERATE" -> "HIGH"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-    risk_exposure_group: "SHIPPING_FREIGHT_RATES" -> "DIVERSIFIED_SHIPPING_RATES"
-  NUTX: benchmark_outperformance_outlook, business_reversal_risk, continuation_strength, mechanism_status, normalization_probability, probability_basis, probability_indicator_type, qvm_rank, qvm_score, reversal_risk, risk_basis, risk_exposure_group, risk_materiality, risk_time_horizon
-    business_reversal_risk: "MODERATE" -> "LOW"
-    reversal_risk: "MODERATE" -> "LOW"
-    benchmark_outperformance_outlook: "UNCERTAIN" -> "LIKELY"
-    continuation_strength: "ADEQUATE" -> "STRONG"
-    risk_basis: "NORMALIZED_OPERATING_DETERIORATION" -> "NONE"
-    mechanism_status: "ACTIVE" -> "NONE"
-    normalization_probability: "REASONABLY_PROBABLE" -> "NOT_APPLICABLE"
-    probability_indicator_type: "OTHER_CURRENT_INDICATOR" -> "NONE"
-    probability_basis: "COMPANY_REPORTED_CHANGE" -> "NONE"
-    risk_time_horizon: "6_12_MONTHS" -> null
-    risk_materiality: "MODERATE" -> "LOW"
-    risk_exposure_group: "HEALTHCARE_DELIVERY_REVENUE" -> "HEALTHCARE_SERVICE_DEMAND"
-  PAYS: catalyst_dependence, qvm_rank, qvm_score, risk_exposure_group
-    catalyst_dependence: "LOW" -> "MODERATE"
-    risk_exposure_group: null -> "CUSTOMER_CONCENTRATION_RISK"
-  PTGX: benchmark_outperformance_outlook, binary_event_risk, business_reversal_risk, catalyst_dependence, continuation_strength, entry_reversal_risk, mechanism_status, normalization_probability, qvm_rank, qvm_score, reversal_risk, risk_basis, risk_exposure_group, risk_materiality, risk_time_horizon
-    business_reversal_risk: "MODERATE" -> "LOW"
-    entry_reversal_risk: "MODERATE" -> "LOW"
-    reversal_risk: "MODERATE" -> "LOW"
-    binary_event_risk: "HIGH" -> "LOW"
-    benchmark_outperformance_outlook: "UNCERTAIN" -> "LIKELY"
-    continuation_strength: "ADEQUATE" -> "STRONG"
-    risk_basis: "TEMPORARY_DRIVER_NORMALIZATION" -> "NONE"
-    catalyst_dependence: "MODERATE" -> "LOW"
-    mechanism_status: "HYPOTHETICAL" -> "NONE"
-    normalization_probability: "NOT_ESTABLISHED" -> "NOT_APPLICABLE"
-    risk_time_horizon: "6_12_MONTHS" -> null
-    risk_materiality: "MODERATE" -> "LOW"
-    risk_exposure_group: "BIOPHARMACEUTICAL_COLLABORATION_PAYMENTS" -> null
-  PURR: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: "CRYPTO_ASSET_PRICES" -> "DIGITAL_ASSET_PRICE_VOLATILITY"
-  RCRUY: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: null -> "HR_TECHNOLOGY_DEMAND"
-  SB: catalyst_dependence, primary_risk_event_id, qvm_rank, qvm_score, risk_exposure_group, risk_materiality
-    catalyst_dependence: "HIGH" -> "MODERATE"
-    risk_materiality: "HIGH" -> "MODERATE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS"
-    risk_exposure_group: "DRY_BULK_FREIGHT_RATES" -> "DRYBULK_SHIPPING_RATES"
-  SBLK: qvm_rank, qvm_score, risk_exposure_group
-    risk_exposure_group: "DRY_BULK_FREIGHT_RATES" -> "DRY_BULK_SHIPPING_RATES"
-  SHIP: catalyst_dependence, primary_risk_event_id, qvm_rank, qvm_score, risk_materiality
-    catalyst_dependence: "HIGH" -> "MODERATE"
-    risk_materiality: "HIGH" -> "MODERATE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS"
-  SLDE: qvm_rank, qvm_score
-  STNG: mechanism_status, normalization_probability, primary_risk_event_id, probability_basis, probability_indicator_type, qvm_rank, qvm_score, risk_exposure_group
-    mechanism_status: "HYPOTHETICAL" -> "UNUSUALLY_PROBABLE"
-    normalization_probability: "NOT_ESTABLISHED" -> "REASONABLY_PROBABLE"
-    probability_indicator_type: "NONE" -> "PRICE_OR_MARGIN_COMPRESSION"
-    probability_basis: "NONE" -> "OBSERVABLE_MARKET_CHANGE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-    risk_exposure_group: "PRODUCT_TANKER_SPOT_RATES" -> "PRODUCT_TANKER_FREIGHT_RATES"
-  TEN: primary_risk_event_id, qvm_rank, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  TK: benchmark_outperformance_outlook, continuation_strength, mechanism_status, normalization_probability, primary_risk_event_id, probability_basis, probability_indicator_type, qvm_rank, qvm_score, risk_exposure_group
-    benchmark_outperformance_outlook: "LIKELY" -> "UNCERTAIN"
-    continuation_strength: "STRONG" -> "WEAK"
-    mechanism_status: "HYPOTHETICAL" -> "UNUSUALLY_PROBABLE"
-    normalization_probability: "NOT_ESTABLISHED" -> "REASONABLY_PROBABLE"
-    probability_indicator_type: "NONE" -> "PRICE_OR_MARGIN_COMPRESSION"
-    probability_basis: "NONE" -> "OBSERVABLE_MARKET_CHANGE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-    risk_exposure_group: "CRUDE_AND_PRODUCT_TANKER_SPOT_RATES" -> "CRUDE_TANKER_SPOT_RATES"
-  TNK: primary_risk_event_id, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-  TRMD: benchmark_outperformance_outlook, continuation_strength, mechanism_status, normalization_probability, primary_risk_event_id, probability_basis, probability_indicator_type, qvm_rank, qvm_score, risk_exposure_group
-    benchmark_outperformance_outlook: "LIKELY" -> "UNCERTAIN"
-    continuation_strength: "STRONG" -> "WEAK"
-    mechanism_status: "HYPOTHETICAL" -> "UNUSUALLY_PROBABLE"
-    normalization_probability: "NOT_ESTABLISHED" -> "REASONABLY_PROBABLE"
-    probability_indicator_type: "NONE" -> "PRICE_OR_MARGIN_COMPRESSION"
-    probability_basis: "NONE" -> "OBSERVABLE_MARKET_CHANGE"
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "MIDDLE_EAST_GEOPOLITICAL_TENSIONS"
-    risk_exposure_group: "PRODUCT_TANKER_SPOT_RATES" -> "PRODUCT_TANKER_FREIGHT_RATES"
-  VCTR: qvm_rank, qvm_score
-  VLO: primary_risk_event_id, qvm_rank, qvm_score
-    primary_risk_event_id: "GEOPOLITICAL_ENERGY_DISRUPTION" -> "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS"
-  WDOFF: qvm_rank, qvm_score
+  No comparable classification fields changed.
 PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN
-  Added ARREF: SKIPPED — SECTOR CAPACITY -> SELECTED — LOW; changed fields: qvm_rank, qvm_score
-  Added PTGX: NOT SELECTED — BELOW BENCHMARK FALLBACK BAR -> SELECTED — LOW; changed fields: benchmark_outperformance_outlook, binary_event_risk, business_reversal_risk, catalyst_dependence, continuation_strength, entry_reversal_risk, mechanism_status, normalization_probability, qvm_rank, qvm_score, reversal_risk, risk_basis, risk_exposure_group, risk_materiality, risk_time_horizon
-  Removed WDOFF: SELECTED — LOW -> SKIPPED — SECTOR CAPACITY; changed fields: qvm_rank, qvm_score
-  Removed HNGE: SELECTED — LOW -> SKIPPED — SECTOR CAPACITY; changed fields: qvm_rank, qvm_score
+  Removed ARREF: SELECTED — LOW -> not present
+  Removed SBLK: SELECTED — LOW -> not present
+  Removed SLDE: SELECTED — LOW -> not present
+  Removed HAFN: SELECTED — LOW -> not present
+  Removed AYA: SELECTED — LOW -> not present
+  Removed PTGX: SELECTED — LOW -> not present
+  Removed VCTR: SELECTED — LOW -> not present
+  Removed FTNT: SELECTED — LOW -> not present
+  Removed CDNA: SELECTED — LOW -> not present
+  Removed RCRUY: SELECTED — LOW -> not present
 NO-CALL NORMALIZATION SUMMARY
-  cautious_temporary_dependence_floor: 14
-  component_risk_alignment: 3
-  dynamic_risk_event_id_semantic_decline: 6
-  dynamic_risk_event_id_semantic_reconciliation: 1
-Gemini 3.5 API budget: 6/8 total; 1/2 summary.
-Gemini logical request 4/8: final HTML summary (gemini-3.5-flash, attempt 1) (API attempt 4; stock API attempts 2)
-Error on attempt 1/2 during final HTML summary with gemini-3.5-flash: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retryable Gemini error; retrying the same model and unchanged request in 38.2s...
-Gemini 3.5 API budget: 7/8 total; 2/2 summary.
-Gemini logical request 4/8: final HTML summary (gemini-3.5-flash, attempt 2) (API attempt 5; stock API attempts 2)
-Error on attempt 2/2 during final HTML summary with gemini-3.5-flash: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Switching to fallback model after final HTML summary failure.
-Gemini 2.5 API budget: 4/8 total; 1/1 summary.
-Gemini logical request 4/8: final HTML summary (gemini-2.5-flash, attempt 1) (API attempt 6; stock API attempts 2)
-Error on attempt 1/1 during final HTML summary with gemini-2.5-flash: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Warning: final Gemini summary was unavailable; using the deterministic Python summary instead: Gemini final HTML summary failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-SELECTED EVIDENCE AUDIT (missing event/date fields are unknown)
-  {"symbol": "ARREF", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 1.2456599642979027, "3m": 38.93654414925703, "6m": 49.31575412486687, "9m": 79.88834434512042, "1y": 238.92716010617565}, "benchmark_outperformance_basis": "Amerigo Resources has delivered substantial benchmark outperformance, including 238.93% excess return over the past year, supported by its unique operating model of reprocessing tailings and a disciplined capital return strategy with performance dividends.", "material_company_event_review": "REPORTED", "material_company_event": "Declared Cdn$0.21 per share performance dividend in September 2026.", "research_age_hours": 21.05, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "SBLK", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -1.9966011213184798, "3m": 12.930573473614619, "6m": 5.50434072030118, "9m": 51.20368537109876, "1y": 43.86333625513127}, "benchmark_outperformance_basis": "SBLK has strong trailing excess returns of 43.86% over the 1-year period, supported by robust dry bulk market fundamentals, a diversified fleet of 145 bulk carriers, and a strong balance sheet.", "material_company_event_review": "REPORTED", "material_company_event": "The Board declared a $0.90 per share dividend payable September 3rd, and authorized a new $100 million share repurchase program.", "research_age_hours": 0.23, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "SLDE", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 0.4789668677951342, "3m": 30.704190623434464, "6m": 2.5812847463122353, "9m": -5.009336512468778, "1y": 29.55994697099861}, "benchmark_outperformance_basis": "Slide Insurance has demonstrated strong momentum with a 29.56% 1-year excess return, driven by technology-driven underwriting, geographic expansion, and a 92.4% year-over-year increase in net income to $134.9 million.", "material_company_event_review": "REPORTED", "material_company_event": "Initiated a first quarterly cash dividend of $0.07 per share in July 2026.", "research_age_hours": 21.05, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "HAFN", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 19.788828879463022, "3m": 26.429593569924585, "6m": 6.728979279642473, "9m": 69.34888982887406, "1y": 53.17406121732729}, "benchmark_outperformance_basis": "HAFN has strong trailing excess returns of 53.17% over the 1-year period, supported by its position as one of the world's largest operators of product and chemical tankers with a commercially managed fleet of over 250 vessels.", "material_company_event_review": "REPORTED", "material_company_event": "On September 16, 2026, Hafnia announced the acquisition of an additional 4.5 million TORM shares.", "research_age_hours": 0.23, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "AYA", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 1.5878769678575555, "3m": 49.19102397152484, "6m": 76.5871635737892, "9m": 69.66189582734081, "1y": 100.35562913048625}, "benchmark_outperformance_basis": "Aya Gold & Silver has achieved a 100.36% 1-year excess return, supported by a 151% year-over-year revenue increase in Q2 2026 driven by the Zgounder mine ramp-up and robust silver prices.", "material_company_event_review": "REPORTED", "material_company_event": "Boumadine feasibility and updated PEA to be published in September 2026, with construction to start by year-end.", "research_age_hours": 21.05, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "PTGX", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -12.08175246823952, "3m": 13.568028793221568, "6m": 6.60697468244301, "9m": 33.064541446836586, "1y": 90.78223303360032}, "benchmark_outperformance_basis": "Protagonist Therapeutics has achieved a 90.78% 1-year excess return, supported by the FDA approval of its first-in-class peptide drugs ICOTYDE and MIMRYLO, and strong Q2 2026 net income of $162.85 million.", "material_company_event_review": "REPORTED", "material_company_event": "Achieved FDA approval for two first-in-class peptide drugs: ICOTYDE and MIMRYLO.", "research_age_hours": 21.05, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "VCTR", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": -12.417138185665104, "3m": 17.20979234631113, "6m": 20.7449206283694, "9m": 38.76462127906055, "1y": 33.25771679587736}, "benchmark_outperformance_basis": "Strong trailing outperformance over VGT (+33.3% over 1 year) and record Q2 2026 revenue of $435.4 million with $4.2 billion in net inflows.", "material_company_event_review": "NONE_FOUND_IN_RESEARCH", "material_company_event": null, "research_age_hours": 0.11, "sources_with_publication_date": 3, "source_count": 3}
-  {"symbol": "FTNT", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 8.11953017590152, "3m": 10.093778755375943, "6m": 71.18605425844967, "9m": 83.79462555295527, "1y": 72.17057730206545}, "benchmark_outperformance_basis": "Fortinet has achieved a 72.17% 1-year excess return, driven by strong demand for secure networking and SASE, resulting in a 26% year-over-year revenue increase and 33% billings growth in Q2 2026.", "material_company_event_review": "REPORTED", "material_company_event": "Announced strategic collaboration with Intel to develop Fortinet Security Processor 6 (SP6).", "research_age_hours": 21.05, "sources_with_publication_date": 4, "source_count": 4}
-  {"symbol": "CDNA", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 5.737741963508643, "3m": 107.97698019075928, "6m": 168.87528575605828, "9m": 147.18670099930637, "1y": 228.48354226659447}, "benchmark_outperformance_basis": "CDNA has exceptional trailing excess returns of 228.48% over the 1-year period, driven by a 61% year-over-year increase in Testing Services revenue to $100 million and expanding clinical evidence for its diagnostic solutions.", "material_company_event_review": "REPORTED", "material_company_event": "On June 30, 2026, CareDx closed the sale of its Lab Products business, recognizing a $113 million gain on sale, and acquired Naveris, strengthening its focus on transplant, specialty oncology, and cell therapy.", "research_age_hours": 0.23, "sources_with_publication_date": 5, "source_count": 5}
-  {"symbol": "RCRUY", "benchmark_outlook": "LIKELY", "benchmark_excess_returns": {"1m": 5.530153753897199, "3m": 54.53149219096843, "6m": 132.86109050237633, "9m": 60.30186624018292, "1y": 74.90382616777848}, "benchmark_outperformance_basis": "Exceptional trailing outperformance over VGT (+74.9% over 1 year) and strong Q1 FY2027 operating profit growth of 66.1% year-over-year.", "material_company_event_review": "NONE_FOUND_IN_RESEARCH", "material_company_event": null, "research_age_hours": 0.11, "sources_with_publication_date": 4, "source_count": 4}
-CACHE EFFECTIVENESS SUMMARY
-  market: {"path": "caches/gemini_shared_market_context_cache.json", "file_existed": true, "entries_loaded": 1, "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "prompt_hash": "77401ca43504e4d243d356511fe2417af9b471721b7439fef260be2bf2f0844e", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "ttl_hours": 12.0, "hit": false, "miss_reason": "expired", "age_hours": 20.75, "created": true, "exposed_search_queries": 45, "entries_after_save": 1, "file_size_bytes": 26701}
-  stock research: {"path": "caches/gemini_stock_research_cache_hardened.json", "file_existed": true, "research_contract_hash": "a4d152e3ea3f0d09d82ff59dbf1c9128050b3bfd1857e8a2087907e39ba2ca22", "research_schema_hash": "8988d4b4fda2ad21e3be72297033d7c3dcba977156cbec7347800805e6125b7a", "judgment_contract_hash": "394c87193eecafdb75db38b00fa85b813bf5d462cf03d64eeda1a740d47683f5", "ttl_hours": 24.0, "entries_loaded": 28, "entries_fresh": 15, "entries_expired": 13, "evidence_hits": 15, "judgment_hits": 0, "judgment_refreshes": 15, "misses": 60, "validation_failures": 0, "miss_reasons": {"expired": 13, "symbol_not_cached": 47}, "entries_after_run": 37, "deferred_entries_after_run": 0, "newly_researched_symbols": ["AUGO", "CDNA", "DAC", "DDI", "DHT", "DINO", "ECO", "FRO", "HAFN", "HNGE", "INSW", "KRT", "LPG", "NAT", "NMM", "NUTX", "PAYS", "PURR", "RCRUY", "SB", "SBLK", "STNG", "TEN", "TK", "TNK", "TRMD", "VCTR", "VLO"], "file_size_bytes": 496605}
-GEMINI EFFICIENCY SUMMARY
-  requests used: 4/8
-  stock research calls: 2/6
-  actual API attempts by model family: Gemini 3.5=7/8, Gemini 2.5=4/8
-  newly validated stocks: 28
-  newly validated stocks per completed stock response: 14.00
-  newly validated stocks per attempted stock request: 14.00
-  exposed searches per newly validated stock: 1.46
-  duplicate extra result blocks: 0
-  tokens: prompt=45198, tool=392625, thinking=46185, output=48118, total=532126
-Saved comprehensive run report: run_reports/stock_run_report.json
-Generated research with model(s): gemini-2.5-flash, gemini-3.5-flash
-Selected symbols: ARREF, SBLK, SLDE, HAFN, AYA, PTGX, VCTR, FTNT, CDNA, RCRUY
-Elapsed time: 1412 seconds
-
-
+  No Python label reconciliations were needed.
+Traceback (most recent call last):
+  File "/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py", line 8319, in <module>
+    raise RuntimeError("No stocks passed the full research and classification rules.")
+RuntimeError: No stocks passed the full research and classification rules.

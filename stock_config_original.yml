@@ -26,12 +26,6 @@ max_classification_calls_per_run: 6
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
-# Recover omitted or invalid 3.5 judgments with the existing grounded 2.5
-# evidence. These caps apply per stock and use the existing six-call ceiling.
-classification_omission_retry_batch_max: 6
-classification_invalid_retry_batch_max: 6
-max_judgment_omission_rounds_per_stock: 3
-max_judgment_invalid_patch_rounds_per_stock: 2
 gemini_batch_size: 15
 max_research_candidates_per_open_sector_slot: 3
 # Evaluate the first 50 candidates normally, then backfill from ranks 51-75
@@ -74,13 +68,13 @@ max_gemini_calls_per_run: 8
 max_stock_research_calls_per_run: 6
 reserved_summary_calls: 0
 # Hard API-attempt ceilings are enforced independently of logical requests and
-# retries. Gemini 3.5 receives 6 classification + 1 summary attempt. The 2.5
+# retries. Gemini 3.5 receives 6 classification + 2 summary attempts. The 2.5
 # family allows up to 2 market + 6 research + 1 summary-fallback attempts, but
 # its shared total remains 8, so the summary fallback disappears automatically
 # when market and research consume all eight.
 max_3_5_api_calls_per_run: 8
 max_3_5_classification_calls_per_run: 6
-max_3_5_summary_calls_per_run: 1
+max_3_5_summary_calls_per_run: 2
 max_2_5_api_calls_per_run: 8
 max_2_5_market_calls_per_run: 2
 max_2_5_research_calls_per_run: 6

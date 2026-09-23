@@ -4487,13 +4487,14 @@ def has_retryable_judgment_recovery(research_by_symbol):
 
 def safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
-    recovery_only=False,
+    recovery_only=False, release_recovery_reserve=False,
 ):
     """Contain any unexpected judge failure so one classification bug cannot abort the run."""
     try:
         return judge_etf_research_pool(
             client, candidate_records, research_by_symbol, market_context,
             force=force, recovery_only=recovery_only,
+            release_recovery_reserve=release_recovery_reserve,
         )
     except BaseException as exc:
         if isinstance(exc, (KeyboardInterrupt, SystemExit, TotalRuntimeTimeout)):
@@ -4513,7 +4514,7 @@ def safe_judge_etf_research_pool(
 
 def judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
-    recovery_only=False,
+    recovery_only=False, release_recovery_reserve=False,
 ):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
@@ -4581,6 +4582,7 @@ def judge_etf_research_pool(
     classification_scheduling_diagnostics.append({
         'pending': pending_count, 'force': force,
         'recovery_only': recovery_only,
+        'release_recovery_reserve': release_recovery_reserve,
         'untouched': len(untouched_symbols),
         'omitted': len(omission_symbols),
         'invalid': len(invalid_symbols),
@@ -4665,6 +4667,7 @@ def judge_etf_research_pool(
             break
         if (
             batch_kind == 'initial'
+            and not release_recovery_reserve
             and classification_api_attempts_used
             >= max_classification_api_attempts_per_run
             - classification_reserved_recovery_calls
@@ -4745,6 +4748,7 @@ def judge_etf_research_pool(
                     break
                 if (
                     batch_kind == 'initial'
+                    and not release_recovery_reserve
                     and classification_api_attempts_used
                     >= max_classification_api_attempts_per_run
                     - classification_reserved_recovery_calls
@@ -5719,6 +5723,9 @@ classification_min_intermediate_batch = max(1, int(config.get('classification_mi
 classification_reserved_recovery_calls = max(
     0, int(config.get('classification_reserved_recovery_calls', 1))
 )
+classification_release_recovery_reserve_at_final_tail = bool(
+    config.get('classification_release_recovery_reserve_at_final_tail', True)
+)
 if classification_reserved_recovery_calls >= max_classification_api_attempts_per_run:
     raise ValueError(
         'classification_reserved_recovery_calls must be smaller than the '
@@ -6502,7 +6509,7 @@ while (
         set_run_stage('classification_recovery_before_research')
         research_by_symbol = safe_judge_etf_research_pool(
             client, candidate_records, research_by_symbol, market_context,
-            force=True,
+            force=True, recovery_only=True,
         )
         selected = preview_portfolio(
             candidate_records, research_by_symbol, target_selected_etfs,
@@ -7184,13 +7191,43 @@ while (
         and len(selected) < target_selected_etfs
     )
 
-# Final forced catch-up handles a deliberately accumulated tail. Because the
-# judge skips judged symbols, this cannot introduce repeated classification drift.
+# Final forced catch-up handles a deliberately accumulated tail. First spend the
+# reserved recovery attempt on a real omission/invalid patch if one exists. Once
+# research is closed, an otherwise-unused recovery reserve may then classify
+# untouched validated ETFs instead of expiring with portfolio slots still open.
+# The judge skips already judged symbols, so neither pass can introduce repeated
+# classification drift or exceed the existing six-attempt classification ceiling.
 set_run_stage('classification_final_tail')
 pre_final_selected_count = len(selected)
 research_by_symbol = safe_judge_etf_research_pool(
-    client, candidate_records, research_by_symbol, market_context, force=True,
+    client, candidate_records, research_by_symbol, market_context,
+    force=True, recovery_only=True,
 )
+selected_after_recovery = preview_portfolio(
+    candidate_records,
+    research_by_symbol,
+    target_selected_etfs,
+    max_etfs_per_sector_group,
+    max_moderate_per_risk_event,
+    require_judgment=True,
+)
+if (
+    classification_release_recovery_reserve_at_final_tail
+    and len(selected_after_recovery) < target_selected_etfs
+    and not classification_quota_exhausted
+    and not has_retryable_judgment_recovery(research_by_symbol)
+    and classification_logical_calls_used < max_classification_logical_calls_per_run
+    and classification_api_attempts_used < max_classification_api_attempts_per_run
+    and api_attempt_budget.remaining(classification_model, 'classification') > 0
+):
+    print(
+        'ETF final tail: no judgment recovery is pending; releasing the unused '
+        'recovery reserve for untouched validated ETFs.'
+    )
+    research_by_symbol = safe_judge_etf_research_pool(
+        client, candidate_records, research_by_symbol, market_context,
+        force=True, release_recovery_reserve=True,
+    )
 for call in classification_call_diagnostics:
     if call.get('success') and call.get('model') and call['model'] not in models_used:
         models_used.append(call['model'])

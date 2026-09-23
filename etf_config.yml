@@ -143,8 +143,11 @@ max_3_5_summary_calls_per_run: 1
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
-# Keep one of the six judgment attempts available for a compact recovery call.
+# Keep one of the six judgment attempts available for a compact omission/invalid
+# recovery call during normal batching. After research is fully closed, release
+# that reserve for untouched validated ETFs if no actual recovery remains pending.
 classification_reserved_recovery_calls: 1
+classification_release_recovery_reserve_at_final_tail: true
 # Omitted and malformed patches are retried in isolated small batches after all
 # untouched researched ETFs have received a first-pass judgment opportunity.
 classification_omission_retry_batch_max: 6

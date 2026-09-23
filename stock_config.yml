@@ -93,9 +93,9 @@ max_research_attempts_per_stock: 2
 max_deferred_research_attempts_per_run: 1
 max_structural_repairs_per_stock: 2
 max_transient_api_attempts: 3
-initial_transient_backoff_seconds: 30
-max_transient_backoff_seconds: 120
-transient_backoff_jitter_seconds: 15
+initial_transient_backoff_seconds: 60
+max_transient_backoff_seconds: 240
+transient_backoff_jitter_seconds: 30
 max_stock_sources: 5
 # New content-addressed cache files intentionally start clean. Future prompt
 # changes create new contract entries without deleting still-valid old entries.

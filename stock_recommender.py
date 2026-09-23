@@ -1316,6 +1316,92 @@ def is_transient_gemini_error(exc):
     )
 
 
+STOCK_JUDGMENT_RESEARCH_FIELDS = (
+    # Identity/context needed to interpret the grounded evidence.
+    "industry_group", "business_description", "industry_context",
+    "crypto_dependence",
+    # Grounded company evidence and durable/temporary drivers from 2.5.
+    "current_operating_evidence", "material_company_event",
+    "durable_drivers", "temporary_drivers",
+    # Research-stage atomic risk evidence. These are evidence inputs, not the
+    # authoritative 3.5 judgment, and are intentionally retained so the judge
+    # sees the same substantive facts as before.
+    "reversal_risk", "risk_basis", "catalyst_dependence",
+    "mechanism_status", "normalization_probability",
+    "continuation_outlook", "reversal_mechanism", "current_fact",
+    "probability_evidence", "probability_indicator_type",
+    "probability_basis", "material_effect", "risk_time_horizon",
+    "risk_materiality", "company_difference", "primary_risk_event_id",
+    "risk_exposure_group", "explanation",
+)
+
+
+def build_stock_judgment_research_projection(research):
+    """Keep grounded decision evidence while excluding sources/cache metadata.
+
+    Gemini 3.5 is a no-Search judgment stage. Source URLs, cache/provenance
+    bookkeeping, eligibility flags, QVM rank copies, and prior judgment metadata
+    do not add classification evidence and materially increase a batched request.
+    The substantive grounded evidence fields are preserved unchanged.
+    """
+    return {
+        field: research.get(field)
+        for field in STOCK_JUDGMENT_RESEARCH_FIELDS
+        if field in research
+    }
+
+
+def build_stock_judgment_market_context(market_context):
+    """Mirror the ETF judge: keep decision context, omit sources/duplicate prose."""
+    return {
+        field: market_context.get(field)
+        for field in (
+            "market_status", "market_summary", "sector_context",
+            "factor_and_theme_context", "active_risk_events",
+        )
+        if field in market_context
+    }
+
+
+def build_stock_previous_classification_projection(previous):
+    """Retain only fields used by the judgment hysteresis rules."""
+    if not isinstance(previous, dict):
+        return None
+    fields = (
+        "business_reversal_risk", "entry_reversal_risk", "reversal_risk",
+        "business_concentration", "binary_event_risk",
+        "benchmark_outperformance_outlook", "continuation_strength",
+        "risk_basis", "catalyst_dependence", "mechanism_status",
+        "normalization_probability", "continuation_outlook",
+        "probability_indicator_type", "probability_basis",
+        "risk_time_horizon", "risk_materiality", "primary_risk_event_id",
+        "risk_exposure_group",
+    )
+    projected = {field: previous.get(field) for field in fields if field in previous}
+    return projected or None
+
+
+def build_stock_peer_classification_projection(peer_classifications):
+    """Compact peer context to the fields used for cross-candidate consistency."""
+    if not isinstance(peer_classifications, list):
+        return []
+    fields = (
+        "symbol", "industry_group", "reversal_risk",
+        "business_reversal_risk", "entry_reversal_risk",
+        "business_concentration", "binary_event_risk",
+        "benchmark_outperformance_outlook", "continuation_strength",
+        "risk_basis", "catalyst_dependence", "mechanism_status",
+        "normalization_probability", "probability_indicator_type",
+        "continuation_outlook", "primary_risk_event_id",
+        "risk_exposure_group", "company_difference",
+    )
+    return [
+        {field: item.get(field) for field in fields if field in item}
+        for item in peer_classifications
+        if isinstance(item, dict)
+    ]
+
+
 def judge_stock_research_batch(
         client,
         research_results,
@@ -1398,20 +1484,28 @@ def judge_stock_research_batch(
                 "9m": candidate.get("BenchmarkExcess9M"),
                 "1y": candidate.get("BenchmarkExcess1Y"),
             },
-            "research": by_symbol[symbol],
-            "previous_classification": previous_classifications.get(symbol),
+            "research": build_stock_judgment_research_projection(
+                by_symbol[symbol]
+            ),
+            "previous_classification": build_stock_previous_classification_projection(
+                previous_classifications.get(symbol)
+            ),
         })
 
+    compact_market_context = build_stock_judgment_market_context(market_context)
+    compact_peer_classifications = build_stock_peer_classification_projection(
+        peer_classifications
+    )
     prompt = (
         config["prompt_stock_judgment"]
         + "\n\nCURRENT_DATE_UTC: "
         + datetime.now(UTC).date().isoformat()
         + "\n\nMARKET_CONTEXT:\n"
-        + json.dumps(market_context, ensure_ascii=False)
+        + json.dumps(compact_market_context, ensure_ascii=False)
         + "\n\nBENCHMARK_CONTEXT:\n"
         + json.dumps(benchmark_context, ensure_ascii=False)
         + "\n\nPEER_CLASSIFICATIONS_FROM_EARLIER_BATCHES:\n"
-        + json.dumps(peer_classifications, ensure_ascii=False)
+        + json.dumps(compact_peer_classifications, ensure_ascii=False)
         + "\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n"
         + json.dumps(compact_candidates, ensure_ascii=False)
     )
@@ -1425,6 +1519,13 @@ def judge_stock_research_batch(
             "from MARKET_CONTEXT.active_risk_events; never invent an ID. "
             "Grounded research is already provided; no new research is needed."
         )
+
+    print(
+        f"Prepared compact 3.5 stock judgment payload: "
+        f"stocks={len(compact_candidates)}, prompt_chars={len(prompt)}, "
+        f"market_events={len(compact_market_context.get('active_risk_events') or [])}, "
+        f"peer_classifications={len(compact_peer_classifications)}."
+    )
 
     attempts = min(
         max_classification_attempts_per_batch,

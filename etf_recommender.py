@@ -7301,13 +7301,58 @@ if research_budget_exhausted:
         f'research_API_remaining={api_attempt_budget.remaining(model_primary, "research")}.'
     )
 partial_portfolio = len(selected) < target_selected_etfs
-if partial_portfolio:
-    print(
-        'ETF portfolio shortfall: '
-        f'{len(selected)} of {target_selected_etfs} requested ETFs passed '
-        'validated research and portfolio rules. Publishing the validated '
-        'selections without adding unresearched or ineligible ETFs.'
+
+# Publication is allowed to be partial only when the authoritative comparison is
+# complete. A validated, otherwise-eligible ETF without a 3.5 judgment can still
+# fill an open slot or displace an incumbent, so publishing while such candidates
+# remain would replace the last good page with a portfolio we know is incomplete.
+pending_authoritative_symbols = []
+for candidate in candidate_records:
+    symbol = str(candidate['Symbol']).upper()
+    research = research_by_symbol.get(symbol)
+    if not research or research.get('judgment_model'):
+        continue
+    if research.get('eligible') is not True:
+        continue
+    if etf_optimistic_final_score(candidate) < minimum_final_selection_score:
+        continue
+    could_change_portfolio = (
+        len(selected) < target_selected_etfs
+        or pending_candidate_can_improve_full_portfolio(
+            candidate, selected, rank_by_symbol, max_etfs_per_sector_group
+        )
     )
+    if could_change_portfolio:
+        pending_authoritative_symbols.append(symbol)
+
+publication_blocked_by_judgment = bool(pending_authoritative_symbols)
+publication_block_reason = None
+if publication_blocked_by_judgment:
+    publication_block_reason = (
+        'Authoritative ETF judgment is incomplete; validated candidates that '
+        'could change the final portfolio remain unjudged: '
+        + ', '.join(pending_authoritative_symbols[:30])
+    )
+    print(
+        'ETF PUBLICATION BLOCKED — preserving the previous successful HTML page. '
+        + publication_block_reason
+    )
+
+if partial_portfolio:
+    if publication_blocked_by_judgment:
+        print(
+            'ETF portfolio shortfall is operational, not a validated final result: '
+            f'{len(selected)} of {target_selected_etfs} authoritative selections '
+            'are available, but the final comparison is incomplete.'
+        )
+    else:
+        print(
+            'ETF portfolio shortfall: '
+            f'{len(selected)} of {target_selected_etfs} requested ETFs passed '
+            'the completed authoritative comparison and portfolio rules. '
+            'Publishing the validated selections without adding unresearched or '
+            'ineligible ETFs.'
+        )
 consistency_warnings = audit_etf_consistency(candidate_records, research_by_symbol)
 research_disposition = {}
 for candidate in candidate_records:
@@ -7365,8 +7410,14 @@ print('\n' + context_review + '\n')
 
 recommendations_table = build_recommendations_table(selected)
 summary_html = build_fallback_summary(market_context, selected)
-set_run_stage('summary')
-if config.get('final_summary_enabled', True):
+if publication_blocked_by_judgment:
+    set_run_stage('summary_skipped_incomplete_judgment')
+    print(
+        'Skipping ETF summary generation because this run is not publishable; '
+        'preserving Gemini quota for a later retry.'
+    )
+elif config.get('final_summary_enabled', True):
+    set_run_stage('summary')
     selected_summary_input = build_summary_input(selected)
     summary_prompt = (
         config['prompt_html_summary'].rstrip()
@@ -7507,14 +7558,21 @@ df_html_table = df_html.to_html(
     classes='recommendations-table',
     border=0,
 )
-set_run_stage('publish_html')
-update_html_page(
-    final_recommendations,
-    df_html_table,
-    'etf_page_template.html',
-    'etf_index.html',
-    model_used,
-)
+if publication_blocked_by_judgment:
+    set_run_stage('publish_html_skipped_incomplete_judgment')
+    print(
+        'ETF HTML publication skipped. etf_index.html is intentionally left '
+        'unchanged from the previous successful run.'
+    )
+else:
+    set_run_stage('publish_html')
+    update_html_page(
+        final_recommendations,
+        df_html_table,
+        'etf_page_template.html',
+        'etf_index.html',
+        model_used,
+    )
 # previous_diagnostics was loaded before the run so classification drift
 # compares against the prior execution rather than the report being written now.
 current_classifications = {
@@ -7690,7 +7748,13 @@ diagnostics = {
         actionable_unresearched, max_fresh_research_attempts_per_etf,
     ),
     'generated_at': datetime.now(UTC).isoformat(),
-    'status': 'SUCCESS_PARTIAL' if partial_portfolio else 'SUCCESS',
+    'status': (
+        'FAILED_INCOMPLETE_JUDGMENT'
+        if publication_blocked_by_judgment
+        else 'SUCCESS_PARTIAL' if partial_portfolio
+        else 'SUCCESS'
+    ),
+    'failure_reason': publication_block_reason,
     'selection_target': target_selected_etfs,
     'selection_count': len(selected),
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
@@ -7702,6 +7766,8 @@ diagnostics = {
             'no_actionable_work_within_attempt_limits'
         ),
         'classification_quota_exhausted': classification_quota_exhausted,
+        'publication_blocked_by_incomplete_judgment': publication_blocked_by_judgment,
+        'pending_authoritative_symbols': pending_authoritative_symbols,
         'classification_api_attempts_remaining': api_attempt_budget.remaining(
             classification_model, 'classification'
         ),
@@ -7876,6 +7942,14 @@ print(
 )
 end_time = time.perf_counter()
 print(f'Elapsed time: {round(end_time - start_time)} seconds\n')
-set_run_stage('complete')
+set_run_stage(
+    'failed_incomplete_judgment'
+    if publication_blocked_by_judgment else 'complete'
+)
 write_run_checkpoint(diagnostics['status'])
 signal.alarm(0)
+if publication_blocked_by_judgment:
+    raise RuntimeError(
+        'ETF authoritative judgment incomplete; previous successful HTML page '
+        'was preserved. ' + publication_block_reason
+    )

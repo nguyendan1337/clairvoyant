@@ -59,6 +59,7 @@ jobs:
             clairvoyant-etf-${{ runner.os }}-${{ github.ref_name }}-
 
       - name: Run ETF Recommender
+        id: recommender
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python etf_recommender.py
@@ -91,8 +92,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Commit and push ETF page and run reports
-        if: always()
+      # A successful recommender run is the only path allowed to publish a new
+      # HTML page. This condition keys off the recommender step specifically so
+      # an unrelated cache/artifact warning cannot accidentally change semantics.
+      - name: Commit and push successful ETF page and run reports
+        if: always() && steps.recommender.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -111,4 +115,27 @@ jobs:
             git push origin main
           else
             echo "No ETF page or run report changes to commit"
+          fi
+
+      # Failed runs may publish diagnostics, but never the page. Restore the
+      # checkout copy defensively in case a future failure occurs after touching
+      # etf_index.html, then commit only run_reports.
+      - name: Commit failed ETF run reports without page
+        if: always() && steps.recommender.outcome == 'failure'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git restore --source=HEAD --staged --worktree etf_index.html || true
+
+          if [ -d run_reports ]; then
+            git add run_reports/
+          fi
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Record failed ETF recommender run"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "No failed-run reports to commit"
           fi

@@ -3,29 +3,61 @@ Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
 Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.5_api_budget=8 (6 classification + 1 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
-Effective 52-week stock hurdle: 36.27% from VGT.
+Effective 52-week stock hurdle: 35.35% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
 Top QVM pickle loaded successfully.
-Using cached top 75 QVM stocks (0.7h old).
+Top QVM benchmark hurdle changed. Rebuilding cache.
+Fetched 250 stock screener rows at offset 0.
+Fetched 250 stock screener rows at offset 250.
+Fetched 250 stock screener rows at offset 500.
+Fetched 139 stock screener rows at offset 750.
+
+Stocks passing screener-level filters:
+    Symbol                                 Name  52 WkChange %
+0     SNDK                  Sandisk Corporation    1560.376000
+1     AXTI                            AXT, Inc.    1554.865500
+2      ANL              Adlai Nortye Group Ltd.     815.882400
+3     NUAI       New Era Energy & Digital, Inc.     805.325440
+4     ANRO              Alto Neuroscience, Inc.     689.433000
+..     ...                                  ...            ...
+883   VRTX  Vertex Pharmaceuticals Incorporated      35.606182
+884   ABNB                         Airbnb, Inc.      35.554110
+885   MNST         Monster Beverage Corporation      35.530567
+886    MAC                 The Macerich Company      35.452915
+887   ARGX                            argenx SE      35.414387
+
+[888 rows x 3 columns]
+YFINANCE FUNDAMENTALS CACHE {"file_existed": true, "entries_loaded": 595, "fresh": 595, "expired": 0, "invalid": 0, "ttl_hours": 36.0}
+Downloading price data...
+Computing momentum and extracting latest price...
+3M return gate >= 0.00%: 587 survivors; 301 removed before fundamentals.
+Fundamentals plan: eligible=587, cache_hits=560, live_fetches=27, incomplete_cached_entries=0.
+Fetching Yahoo fundamentals for 27 uncached tickers...
+Yahoo fundamentals:   0%|          | 0/27 [00:00<?, ?it/s]Yahoo fundamentals:   4%|▎         | 1/27 [00:01<00:26,  1.00s/it]Yahoo fundamentals:   7%|▋         | 2/27 [00:01<00:23,  1.08it/s]Yahoo fundamentals:  11%|█         | 3/27 [00:02<00:22,  1.09it/s]Yahoo fundamentals:  15%|█▍        | 4/27 [00:03<00:21,  1.07it/s]Yahoo fundamentals:  19%|█▊        | 5/27 [00:04<00:19,  1.13it/s]Yahoo fundamentals:  22%|██▏       | 6/27 [00:05<00:18,  1.15it/s]Yahoo fundamentals:  26%|██▌       | 7/27 [00:06<00:17,  1.17it/s]Yahoo fundamentals:  30%|██▉       | 8/27 [00:07<00:16,  1.18it/s]Yahoo fundamentals:  33%|███▎      | 9/27 [00:08<00:16,  1.07it/s]Yahoo fundamentals:  37%|███▋      | 10/27 [00:08<00:14,  1.14it/s]Yahoo fundamentals:  41%|████      | 11/27 [00:09<00:13,  1.16it/s]Yahoo fundamentals:  44%|████▍     | 12/27 [00:10<00:12,  1.17it/s]Yahoo fundamentals:  48%|████▊     | 13/27 [00:11<00:11,  1.20it/s]Yahoo fundamentals:  52%|█████▏    | 14/27 [00:12<00:10,  1.23it/s]Yahoo fundamentals:  56%|█████▌    | 15/27 [00:12<00:09,  1.21it/s]Yahoo fundamentals:  59%|█████▉    | 16/27 [00:13<00:09,  1.16it/s]Yahoo fundamentals:  63%|██████▎   | 17/27 [00:14<00:09,  1.09it/s]Yahoo fundamentals:  67%|██████▋   | 18/27 [00:15<00:07,  1.14it/s]Yahoo fundamentals:  70%|███████   | 19/27 [00:16<00:07,  1.11it/s]Yahoo fundamentals:  74%|███████▍  | 20/27 [00:17<00:06,  1.14it/s]Yahoo fundamentals:  78%|███████▊  | 21/27 [00:18<00:05,  1.10it/s]Yahoo fundamentals:  81%|████████▏ | 22/27 [00:19<00:04,  1.06it/s]Yahoo fundamentals:  85%|████████▌ | 23/27 [00:20<00:03,  1.04it/s]Yahoo fundamentals:  89%|████████▉ | 24/27 [00:21<00:02,  1.06it/s]Yahoo fundamentals:  93%|█████████▎| 25/27 [00:22<00:01,  1.10it/s]Yahoo fundamentals:  96%|█████████▋| 26/27 [00:23<00:00,  1.08it/s]Yahoo fundamentals: 100%|██████████| 27/27 [00:23<00:00,  1.14it/s]Yahoo fundamentals: 100%|██████████| 27/27 [00:23<00:00,  1.13it/s]
+Fundamentals summary: eligible=587, cache_hits=560, yahoo_fetches=27, fetch_successes=27, fetch_failures=0, apply_failures=0.
+Done.
+/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4803: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
+  .infer_objects(copy=False)
+Saved top QVM cache to caches/top_qvm_stocks_cache.pkl.
 
 Top QVM Stocks:
    Symbol   QVMScore  3M Return   1Y Return
-0    INSW  82.902190  24.512243  150.710969
-1     ECO  81.477031  55.407376  196.464295
-2     FRO  77.813899  25.609314  129.265198
-3     LPG  77.593388  37.144381   82.926687
-4     TNK  76.655851  25.635830   79.451530
+0    INSW  84.097741  27.398689  163.131959
+1     ECO  81.281265  59.176303  215.925246
+2     LPG  78.880577  42.655121   93.518240
+3     TNK  78.485814  25.086036   85.383185
+4     FRO  78.217238  23.986561  138.307580
 ..    ...        ...        ...         ...
-70   NESR  62.944068  31.466031  218.786125
-71  TNEYF  62.897344   5.829156  120.677115
-72    SSL  62.770781  31.333333  124.959212
-73   TECK  62.670093  19.538468   79.159062
-74    ASC  62.567759   9.811957   51.800132
+70   JAZZ  62.942843   4.868624   86.599705
+71    UGP  62.934177  58.409285   94.662152
+72    GSL  62.745630  18.484744   50.461473
+73   AAMI  62.653121  29.040332   95.171188
+74   NESR  62.610474  29.238141  212.138740
 
 [75 rows x 4 columns]
-MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=0.72
+MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=4.74
 Using validated shared market context cache: caches/gemini_shared_market_context_cache.json
 Dynamic market risk-event catalog: 3 canonical event(s).
 RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=28 fresh=28 expired=0 contract=a4d152e3ea3f
@@ -33,119 +65,120 @@ Validated grounded research [INSW]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=INSW evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [ECO]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=ECO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [FRO]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [LPG]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=LPG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TNK]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=TNK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [FRO]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [NAT]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=NAT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TEN]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=TEN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=ARREF reason=symbol_not_cached
 Validated grounded research [TRMD]: 3 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=TRMD evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [DHT]: 3 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=DHT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=ARREF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=WDOFF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AYA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DSVSF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=FTNT reason=symbol_not_cached
-Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=DINO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
 Validated grounded research [DAC]: 4 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=DAC evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=MU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MAKO reason=symbol_not_cached
-Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=SBLK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=CDNA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=SHIP reason=symbol_not_cached
-Validated grounded research [VLO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=VLO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [AUGO]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=AUGO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=PTGX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
 Validated grounded research [HAFN]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=HAFN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=NVEC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SHIP reason=symbol_not_cached
+Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=SBLK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=DSVSF reason=symbol_not_cached
+Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DINO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=FTNT reason=symbol_not_cached
+Validated grounded research [TK]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [VLO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VLO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=PTGX reason=symbol_not_cached
+Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=CDNA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [VCTR]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VCTR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=MAKO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
+Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=STNG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [DDI]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=DDI evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [RCRUY]: 4 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=RCRUY evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [VCTR]: 3 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=VCTR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [PURR]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=PURR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [HNGE]: 3 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=HNGE evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [KRT]: 3 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=KRT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
-Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=PAYS evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
-Validated grounded research [NUTX]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=NUTX evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-Validated grounded research [TK]: 5 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=TK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
-Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
-RESEARCH CACHE HIT symbol=STNG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=KRYS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
+Validated grounded research [AUGO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=AUGO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [NMM]: 5 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=NMM evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
-RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
+Validated grounded research [HNGE]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=HNGE evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [PURR]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PURR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [NUTX]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NUTX evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
+Validated grounded research [PAYS]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PAYS evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [KRT]: 3 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=KRT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [SB]: 3 distinct source URLs; awaiting judgment.
 RESEARCH CACHE HIT symbol=SB evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MGTX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=APA reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NVEC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=LGND reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ERO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TSM reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=KNSA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ARIS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=FSM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=UGP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NESR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TSM reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=LGND reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TECK reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MATX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=JAZZ reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=UGP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=GSL reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AAMI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NESR reason=symbol_not_cached
 Classifying cached PENDING_JUDGMENT research before new stock research: 28 candidate(s).
 Gemini 3.5 API budget: 1/8 total; 1/6 classification.
 Gemini classification request 1/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.5 classification in 37.9s...
+Retrying 3.5 classification in 41.2s...
 Gemini 3.5 API budget: 2/8 total; 2/6 classification.
 Gemini classification request 2/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3)
-Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3) failed: Server disconnected without sending a response.
-Retrying 3.5 classification in 68.7s...
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Retrying 3.5 classification in 62.5s...
 Gemini 3.5 API budget: 3/8 total; 3/6 classification.
 Gemini classification request 3/6: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3)
-Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Warning: Gemini 3.5 judgment is unavailable after this batch's retry allowance; preserving validated research as PENDING_JUDGMENT and opening the classification circuit breaker: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Warning: stock judgment for 28 stocks (gemini-3.5-flash, attempt 3/3) failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.5-flash\nPlease retry in 49.500965446s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '49s'}]}}
+Classification failure is not transient; opening the circuit breaker without spending more calls on this batch.
+Warning: Gemini 3.5 judgment is unavailable after this batch's retry allowance; preserving validated research as PENDING_JUDGMENT and opening the classification circuit breaker: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.5-flash\nPlease retry in 49.500965446s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '49s'}]}}
 Judgment unavailable; leaving validated research queued for a later run.
 Stopping stock research because no classification model is available.
 FINAL VALIDATED CANDIDATE COMPARISON

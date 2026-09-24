@@ -21,10 +21,13 @@ model_fallback: gemini-2.5-flash-lite
 classification_model: gemini-3.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
-# Six 3.5 calls are reserved for classification. A single batch may consume at
-# most three before the circuit breaker preserves it for the next run.
+# Six 3.5 API attempts are available for classification. Keep one for genuine
+# omissions/invalid patches, releasing it to untouched stocks at the final tail.
+# A provider outage still opens the circuit after at most three batch attempts.
 max_classification_attempts_per_batch: 3
 max_classification_calls_per_run: 6
+classification_reserved_recovery_calls: 1
+classification_release_recovery_reserve_at_final_tail: true
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15

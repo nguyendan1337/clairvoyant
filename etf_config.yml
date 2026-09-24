@@ -130,7 +130,11 @@ summary_model: gemini-3.5-flash
 summary_fallback_model: gemini-2.5-flash
 classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
-classification_attempts: 2
+# Match the stock judge's bounded 3.5 transport retry and circuit policy.
+max_classification_attempts_per_batch: 3
+initial_transient_backoff_seconds: 60
+max_transient_backoff_seconds: 240
+transient_backoff_jitter_seconds: 30
 # Six calls are available to judgment, including retries. One additional 3.5
 # call is reserved exclusively for the HTML summary.
 max_classification_logical_calls_per_run: 6
@@ -239,7 +243,7 @@ max_2_5_summary_fallback_calls_per_run: 1
 reserved_summary_calls: 1
 summary_reservation_releasable_on_shortfall: true
 max_transient_api_attempts: 3
-max_transient_delay: 60
+max_transient_delay: 240
 transport_retry_batch_fraction: 0.67
 max_fresh_research_attempts_per_etf: 2
 max_structural_repairs_per_etf: 1
@@ -248,7 +252,8 @@ min_structural_repair_batch_size: 3
 max_grounding_urls_for_repair: 60
 gemini_max_output_tokens: 49152
 max_retries: 4
-initial_delay: 15
+# Search-enabled 2.5 calls also begin transient backoff at one minute.
+initial_delay: 60
 min_etf_sources: 2
 max_etf_sources: 5
 final_summary_enabled: true

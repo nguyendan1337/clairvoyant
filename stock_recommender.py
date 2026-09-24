@@ -1410,6 +1410,8 @@ def judge_stock_research_batch(
         previous_classifications,
         peer_classifications,
         recovery_errors=None,
+        attempt_ceiling=None,
+        batch_kind="initial",
 ):
     """Use only 3.5 Flash as the no-Search judge.
 
@@ -1417,8 +1419,8 @@ def judge_stock_research_batch(
     The judge returns only decision-field patches, which are merged into the
     grounded drafts. This keeps classification quality independent from search
     behavior and prevents a judgment failure from discarding valid research.
-    A per-batch retry cap prevents one outage from consuming the run-wide
-    classification budget needed by later batches.
+    A per-batch retry cap and an optional attempt ceiling protect the recovery
+    reserve without turning transport failures into invalid patches.
     """
     global classification_calls_used, classification_schema_unavailable
     if not research_results:
@@ -1529,8 +1531,11 @@ def judge_stock_research_batch(
 
     attempts = min(
         max_classification_attempts_per_batch,
-        max_classification_calls_per_run - classification_calls_used,
+        (max_classification_calls_per_run if attempt_ceiling is None
+         else attempt_ceiling) - classification_calls_used,
     )
+    if attempts <= 0:
+        return research_results, None
     last_error = None
     for attempt in range(1, attempts + 1):
         stage = (
@@ -1553,6 +1558,7 @@ def judge_stock_research_batch(
             print(f"Classification budget stopped {stage}: {exc}")
             break
         classification_calls_used += 1
+        attempt_started = time.perf_counter()
         print(
             f"Gemini classification request {classification_calls_used}/"
             f"{max_classification_calls_per_run}: {stage}"
@@ -1572,24 +1578,36 @@ def judge_stock_research_batch(
             patches = data.get("results") if isinstance(data, dict) else None
             if not isinstance(patches, list):
                 raise ValueError("Classification response lacks results array.")
-            patch_by_symbol = {
-                str(item.get("symbol") or "").upper(): item
-                for item in patches if isinstance(item, dict)
-            }
+            patch_by_symbol = {}
+            response_symbols = []
+            for item in patches:
+                if isinstance(item, dict):
+                    symbol = str(item.get("symbol") or "").strip().upper()
+                    response_symbols.append(symbol)
+                    if symbol in expected:
+                        patch_by_symbol[symbol] = item
+            duplicates = sorted({
+                symbol for symbol in expected if response_symbols.count(symbol) > 1
+            })
+            for symbol in duplicates:
+                patch_by_symbol.pop(symbol, None)
             missing = [
                 symbol for symbol in expected
                 if symbol in by_symbol and symbol not in patch_by_symbol
+                and symbol not in duplicates
             ]
-            if not patch_by_symbol or len(patch_by_symbol) != len(patches):
+            if not patch_by_symbol and not duplicates:
                 raise ValueError(
-                    "Classification returned no distinct, symbol-keyed patches."
+                    "Classification returned no usable symbol-keyed patches."
                 )
-            unexpected = sorted(set(patch_by_symbol).difference(expected))
+            unexpected = sorted(set(response_symbols).difference(expected) - {""})
             if unexpected:
-                raise ValueError(
-                    "Classification returned unexpected symbols: "
+                print(
+                    "Ignoring unexpected stock judgment symbols: "
                     + ", ".join(unexpected)
                 )
+            if duplicates:
+                print("Isolating duplicate stock judgment patches: " + ", ".join(duplicates))
             if missing:
                 print(
                     "Classification response omitted "
@@ -1603,9 +1621,17 @@ def judge_stock_research_batch(
             invalid_patch_symbols = []
             for symbol in expected:
                 draft = by_symbol.get(symbol)
-                if draft is None or symbol not in patch_by_symbol:
+                if draft is None or (symbol not in patch_by_symbol
+                                     and symbol not in duplicates):
                     continue
                 result = dict(draft)
+                if symbol in duplicates:
+                    result["_judgment_patch_error"] = (
+                        "Gemini returned duplicate judgment patches."
+                    )
+                    merged.append(result)
+                    invalid_patch_symbols.append(symbol)
+                    continue
                 patch = patch_by_symbol[symbol]
                 try:
                     validate_stock_judgment_patch(patch)
@@ -1618,18 +1644,30 @@ def judge_stock_research_batch(
                 if "risk_exposure_group" not in patch:
                     result["_missing_return_driver_group"] = True
                 merged.append(result)
+            metadata = extract_gemini_metadata(response)
+            print_gemini_metadata(stage, metadata)
             classification_call_diagnostics.append({
                 "stage": "stock_judgment",
                 "model": classification_model,
                 "attempt": attempt,
+                "api_attempt": classification_calls_used,
+                "batch_kind": batch_kind,
                 "symbols": [item["symbol"] for item in compact_candidates],
                 "returned_symbols": [item["symbol"] for item in merged],
                 "missing_symbols": missing,
+                "duplicate_symbols": duplicates,
+                "unexpected_symbols": unexpected,
                 "invalid_patch_symbols": invalid_patch_symbols,
+                "requested_count": len(expected),
+                "returned_count": len(merged),
+                "prompt_chars": len(prompt),
+                "elapsed_seconds": round(time.perf_counter() - attempt_started, 3),
+                "metadata": {k: v for k, v in metadata.items()
+                             if k not in ("grounding_chunks", "search_queries")},
                 "structured_output": structured_output,
                 "fallback": False,
                 "success": True,
-                "status": "PARTIAL" if missing or invalid_patch_symbols else "SUCCESS",
+                "status": "PARTIAL" if missing or invalid_patch_symbols or unexpected else "SUCCESS",
             })
             gemini_attempt_diagnostics.append({
                 "stage": "stock_judgment",
@@ -1639,7 +1677,7 @@ def judge_stock_research_batch(
                 "search_enabled": False,
                 "structured_output": structured_output,
                 "symbols": [item["symbol"] for item in compact_candidates],
-                "status": "PARTIAL" if missing or invalid_patch_symbols else "SUCCESS",
+                "status": "PARTIAL" if missing or invalid_patch_symbols or unexpected else "SUCCESS",
             })
             return merged, classification_model
         except Exception as exc:
@@ -1649,13 +1687,23 @@ def judge_stock_research_batch(
                 "stage": "stock_judgment",
                 "model": classification_model,
                 "attempt": attempt,
+                "api_attempt": classification_calls_used,
+                "batch_kind": batch_kind,
                 "symbols": [item["symbol"] for item in compact_candidates],
                 "fallback": False,
                 "success": False,
                 "structured_output": structured_output,
                 "status": "ERROR",
+                "prompt_chars": len(prompt),
+                "elapsed_seconds": round(time.perf_counter() - attempt_started, 3),
                 "error": str(exc),
                 "transient": transient_error,
+                "failure_type": (
+                    "QUOTA_FAILURE" if is_daily_gemini_quota_error(exc)
+                    else "TRANSIENT_PROVIDER_FAILURE" if transient_error
+                    else "STRUCTURAL_RESPONSE_FAILURE" if isinstance(exc, ValueError)
+                    else "UNEXPECTED_FAILURE"
+                ),
             })
             gemini_attempt_diagnostics.append({
                 "stage": "stock_judgment",
@@ -6131,6 +6179,17 @@ max_classification_attempts_per_batch = max(
         )),
     ),
 )
+classification_reserved_recovery_calls = max(
+    0, int(config.get("classification_reserved_recovery_calls", 1))
+)
+classification_release_recovery_reserve_at_final_tail = bool(
+    config.get("classification_release_recovery_reserve_at_final_tail", True)
+)
+if classification_reserved_recovery_calls >= max_classification_calls_per_run:
+    raise ValueError(
+        "classification_reserved_recovery_calls must be smaller than the "
+        "classification API-attempt ceiling."
+    )
 classification_batch_target = max(1, int(config.get("classification_batch_target", 25)))
 classification_batch_soft_max = max(
     classification_batch_target, int(config.get("classification_batch_soft_max", 30))
@@ -7243,7 +7302,24 @@ def optimistic_portfolio_capacity(
     return capacity
 
 
-def classify_pending(force=False):
+def write_stock_classification_checkpoint(status="RUNNING"):
+    """Record completed 3.5 work after the research cache is safely saved."""
+    try:
+        save_json_object_atomic(RUN_REPORTS_DIR / "stock_classification_checkpoint.json", {
+            "updated_at": datetime.now(UTC).isoformat(),
+            "status": status,
+            "classification_api_attempts_used": classification_calls_used,
+            "classification_api_attempts_maximum": max_classification_calls_per_run,
+            "validated_symbols": sorted(validated_cached_research),
+            "pending_judgment_symbols": sorted(pending_classification),
+            "recovery_kind_by_symbol": dict(classification_retry_kind),
+            "classification_calls": classification_call_diagnostics,
+        })
+    except OSError as exc:
+        print(f"Warning: stock classification checkpoint unavailable: {exc}")
+
+
+def classify_pending(force=False, release_recovery_reserve=False):
     """Judge grounded drafts, retrying only bad/omitted 3.5 patches."""
     global classification_unavailable_this_run
     if classification_unavailable_this_run:
@@ -7268,13 +7344,13 @@ def classify_pending(force=False):
             symbol for symbol in pending_classification
             if symbol not in classification_initial_attempted
         ]
-        if omission_symbols:
-            batch_kind = "omission_recovery"
-            symbols = omission_symbols[:classification_omission_retry_batch_max]
-        elif invalid_symbols:
-            batch_kind = "invalid_patch_recovery"
-            symbols = invalid_symbols[:classification_invalid_retry_batch_max]
-        elif untouched and (force or len(untouched) >= classification_batch_target):
+        # Give untouched drafts a first judgment opportunity before retrying
+        # incomplete responses, while reserving an actual API attempt for repair.
+        initial_ceiling = max_classification_calls_per_run - (
+            0 if release_recovery_reserve else classification_reserved_recovery_calls
+        )
+        if (untouched and (force or len(untouched) >= classification_batch_target)
+                and classification_calls_used < initial_ceiling):
             batch_kind = "initial"
             symbols = untouched[:classification_batch_soft_max]
             tail = len(untouched) - len(symbols)
@@ -7283,7 +7359,15 @@ def classify_pending(force=False):
                     classification_min_intermediate_batch,
                     len(symbols) - (classification_min_intermediate_batch - tail),
                 )]
+        elif omission_symbols:
+            batch_kind = "omission_recovery"
+            symbols = omission_symbols[:classification_omission_retry_batch_max]
+        elif invalid_symbols:
+            batch_kind = "invalid_patch_recovery"
+            symbols = invalid_symbols[:classification_invalid_retry_batch_max]
         else:
+            if untouched and classification_calls_used >= initial_ceiling:
+                print("Stock judgment recovery reserve reached; untouched drafts stay pending.")
             break
         if classification_calls_used >= max_classification_calls_per_run:
             print("Classification attempt budget exhausted; grounded drafts remain pending.")
@@ -7301,10 +7385,14 @@ def classify_pending(force=False):
             previous_run_diagnostics.get("classifications", {}),
             prior_research_decisions,
             recovery_errors=recovery_errors,
+            attempt_ceiling=(initial_ceiling if batch_kind == "initial"
+                             else max_classification_calls_per_run),
+            batch_kind=batch_kind,
         )
         if not judge_model:
             print("Judgment unavailable; leaving validated research queued for a later run.")
             classification_unavailable_this_run = True
+            write_stock_classification_checkpoint("UNAVAILABLE")
             break
         models_used.append(judge_model)
         valid_count = 0
@@ -7412,6 +7500,15 @@ def classify_pending(force=False):
             )
             print(f"Classification omitted {symbol}; retaining grounded draft for no-Search recovery.")
         save_json_object_atomic(stock_research_cache_file, stock_research_cache)
+        # This checkpoint is diagnostic; the atomic research cache remains the
+        # source of truth for already accepted judgments on the next run.
+        if classification_call_diagnostics:
+            latest_call = classification_call_diagnostics[-1]
+            if latest_call.get("success"):
+                latest_call["valid_count"] = valid_count
+                latest_call["invalid_count"] = len(returned_symbols) - valid_count
+                latest_call["omitted_count"] = len(symbols) - len(returned_symbols)
+        write_stock_classification_checkpoint()
         print(
             f"Stock judgment {batch_kind}: {valid_count}/{len(symbols)} valid; "
             f"{len(pending_classification)} grounded draft(s) pending."
@@ -8319,6 +8416,27 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
         known_peer_symbols.add(symbol)
 
 classify_pending(force=True)
+# Any protected call not needed for genuine response recovery can classify a
+# still-untouched tail after the research pool has closed. Never release it
+# during a transport outage or while a retryable invalid patch remains.
+if (
+    classification_release_recovery_reserve_at_final_tail
+    and not classification_unavailable_this_run
+    and any(symbol not in classification_initial_attempted
+            for symbol in pending_classification)
+    and not any(
+        (classification_retry_kind.get(symbol) == "omission"
+         and classification_omission_rounds.get(symbol, 0)
+         < max_judgment_omission_rounds_per_stock)
+        or (classification_retry_kind.get(symbol) == "invalid"
+            and classification_invalid_patch_rounds.get(symbol, 0)
+            < max_judgment_invalid_patch_rounds_per_stock)
+        for symbol in pending_classification
+    )
+    and classification_calls_used < max_classification_calls_per_run
+):
+    print("Stock final tail: releasing unused recovery reserve for untouched drafts.")
+    classify_pending(force=True, release_recovery_reserve=True)
 
 # Rebuild the portfolio from the entire frozen validated pool. Earlier batch
 # selections were provisional only and must not prevent a later, stronger LOW/
@@ -8448,13 +8566,13 @@ if reconciliation_counts:
 else:
     print("  No Python label reconciliations were needed.")
 
+if pending_classification:
+    raise RuntimeError(
+        "Stock authoritative judgment incomplete; "
+        f"{len(pending_classification)} stocks have validated research "
+        "pending classification. Previous successful page was preserved."
+    )
 if not selected:
-    if classification_unavailable_this_run and pending_classification:
-        raise RuntimeError(
-            "Stock judgment service unavailable; "
-            f"{len(pending_classification)} stocks have validated research "
-            "pending classification. No new stock page was written."
-        )
     raise RuntimeError("No stocks passed the full research and classification rules.")
 pending_judgment_symbols = sorted(pending_classification)
 if pending_judgment_symbols and classification_unavailable_this_run:
@@ -8714,6 +8832,7 @@ run_report = {
         "stock_api_attempts": request_budget.stock_api_attempts,
         "classification_api_attempts_used": classification_calls_used,
         "classification_api_attempts_maximum": max_classification_calls_per_run,
+        "classification_reserved_recovery_calls": classification_reserved_recovery_calls,
         "per_model_api_attempts": api_attempt_budget.snapshot(),
     },
     "gemini_call_ledger": gemini_attempt_diagnostics,

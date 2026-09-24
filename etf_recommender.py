@@ -78,6 +78,8 @@ classification_call_diagnostics = []
 classification_logical_calls_used = 0
 classification_api_attempts_used = 0
 classification_quota_exhausted = False
+classification_circuit_open = False
+classification_circuit_reason = None
 summary_35_api_attempts_used = 0
 classification_omission_rounds = {}
 classification_invalid_patch_rounds = {}
@@ -431,6 +433,30 @@ def is_daily_quota_error(exc):
     ))
 
 
+def is_transient_classification_error(exc):
+    """Detect provider/transport failures without retrying malformed 3.5 JSON."""
+    if is_daily_quota_error(exc) or isinstance(exc, ValueError):
+        return False
+    message = str(exc).upper()
+    error_type = type(exc).__name__.upper()
+    error_code = getattr(exc, 'code', None)
+    return (
+        isinstance(exc, (TimeoutError, ConnectionError))
+        or error_code in {408, 429, 500, 502, 503, 504}
+        or any(token in message for token in (
+            'RESOURCE_EXHAUSTED', 'TOO MANY REQUESTS', 'UNAVAILABLE',
+            'HIGH DEMAND', 'TIMEOUT', 'TIMED OUT', 'DEADLINE EXCEEDED',
+            'SERVER DISCONNECTED', 'WITHOUT SENDING A RESPONSE',
+            'REMOTE PROTOCOL ERROR', 'CONNECTION RESET', 'CONNECTION ABORTED',
+            'CONNECTION ERROR', 'CONNECTION CLOSED', 'BROKEN PIPE',
+            'TRY AGAIN LATER',
+        ))
+        or any(token in error_type for token in (
+            'TIMEOUT', 'CONNECTION', 'REMOTEPROTOCOL', 'NETWORK',
+        ))
+    )
+
+
 def call_gemini_json(
     client,
     model,
@@ -606,6 +632,8 @@ def write_run_checkpoint(status='RUNNING', error=None):
                 if state.get('api_attempt_budget') else {}
             ),
             'classification_api_attempts': classification_api_attempts_used,
+            'classification_circuit_open': classification_circuit_open,
+            'classification_circuit_reason': classification_circuit_reason,
             'classification_validation': classification_validation_diagnostics,
             'classification_calls': classification_call_diagnostics,
             'api_attempts': api_attempt_diagnostics,
@@ -4504,7 +4532,10 @@ def safe_judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
     recovery_only=False, release_recovery_reserve=False,
 ):
-    """Contain any unexpected judge failure so one classification bug cannot abort the run."""
+    """Contain unexpected judge failures while keeping grounded evidence pending."""
+    global classification_circuit_open, classification_circuit_reason
+    if classification_circuit_open or classification_quota_exhausted:
+        return research_by_symbol
     try:
         return judge_etf_research_pool(
             client, candidate_records, research_by_symbol, market_context,
@@ -4516,14 +4547,17 @@ def safe_judge_etf_research_pool(
             raise
         print(
             'WARNING — ETF judgment stage encountered an unexpected error; '
-            'preserving grounded research and continuing with affected ETFs '
-            f'unjudged/ineligible rather than aborting the run: {exc}'
+            'preserving grounded research and opening the classification '
+            f'circuit so no further 3.5 requests are spent this run: {exc}'
         )
+        classification_circuit_open = True
+        classification_circuit_reason = f'UNEXPECTED_INTERNAL_FAILURE: {exc}'
         classification_call_diagnostics.append({
             'stage': 'etf_judgment_safety_wrapper',
-            'success': False,
+            'success': False, 'status': 'UNEXPECTED_INTERNAL_FAILURE',
             'error': str(exc),
         })
+        write_run_checkpoint('JUDGMENT_UNAVAILABLE', classification_circuit_reason)
         return research_by_symbol
 
 
@@ -4533,8 +4567,9 @@ def judge_etf_research_pool(
 ):
     """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
-    global classification_quota_exhausted
-    if classification_quota_exhausted:
+    global classification_quota_exhausted, classification_circuit_open
+    global classification_circuit_reason
+    if classification_quota_exhausted or classification_circuit_open:
         return research_by_symbol
     candidate_by_symbol = {
         str(candidate['Symbol']).upper(): candidate for candidate in candidate_records
@@ -4750,14 +4785,29 @@ def judge_etf_research_pool(
             + '\nEXPECTED_SYMBOLS: ' + json.dumps(batch_symbols)
             + '\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n' + json.dumps(compact, ensure_ascii=False)
         )
+        print(
+            f'Prepared compact 3.5 ETF judgment payload: '
+            f'kind={batch_kind}, etfs={len(batch_symbols)}, prompt_chars={len(prompt)}, '
+            f'market_events={len(compact_market_context.get("active_risk_events") or [])}, '
+            f'peer_classifications={len(prior_peer_patches)}.'
+        )
         models = [classification_model]
         patches = None
         used_model = None
         last_error = None
+        received_any_response = False
         response_missing_symbols = set()
         response_duplicate_symbols = set()
         for model_index, model_name in enumerate(models):
-            attempts = classification_attempts if model_index == 0 else 1
+            initial_ceiling = max_classification_api_attempts_per_run - (
+                classification_reserved_recovery_calls
+                if batch_kind == 'initial' and not release_recovery_reserve else 0
+            )
+            attempts = min(
+                max_classification_attempts_per_batch if model_index == 0 else 1,
+                initial_ceiling - classification_api_attempts_used,
+                api_attempt_budget.remaining(model_name, 'classification'),
+            )
             for attempt in range(1, attempts + 1):
                 if classification_api_attempts_used >= max_classification_api_attempts_per_run:
                     break
@@ -4815,6 +4865,7 @@ def judge_etf_research_pool(
                         ),
                         contents=prompt,
                     )
+                    received_any_response = True
                     metadata = extract_gemini_metadata(response)
                     metadata['response_text_chars'] = len(getattr(response, 'text', '') or '')
                     print_gemini_metadata(stage, metadata)
@@ -4863,12 +4914,14 @@ def judge_etf_research_pool(
                         'prompt_chars': len(prompt),
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'metadata': metadata,
+                        'status': 'PARTIAL' if missing or duplicates or unexpected else 'SUCCESS',
                     })
                     patches = patch_by_symbol
                     break
                 except Exception as exc:
                     patches = None
                     last_error = exc
+                    transient_error = is_transient_classification_error(exc)
                     classification_call_diagnostics.append({
                         'stage': 'etf_judgment', 'model': model_name,
                         'attempt': attempt, 'logical_call': classification_logical_calls_used,
@@ -4879,27 +4932,55 @@ def judge_etf_research_pool(
                         'prompt_chars': len(prompt),
                         'elapsed_seconds': round(time.perf_counter() - attempt_started, 3),
                         'error': str(exc),
+                        'status': (
+                            'QUOTA_FAILURE' if is_daily_quota_error(exc)
+                            else 'TRANSIENT_PROVIDER_FAILURE' if transient_error
+                            else 'STRUCTURAL_RESPONSE_FAILURE' if received_any_response
+                            else 'UNEXPECTED_FAILURE'
+                        ),
                     })
                     print(f'Warning: {stage} failed: {exc}')
-                    # A valid JSON response with the wrong schema is structural, not
-                    # transient. Repeating the same model/prompt usually reproduces it,
-                    # so move directly to the fallback model instead of burning budget.
+                    # A returned malformed response can enter the bounded response
+                    # repair path. A transport failure never becomes an invalid patch.
                     if is_daily_quota_error(exc):
                         classification_quota_exhausted = True
                         break
-                    if isinstance(exc, ValueError) or not is_transient_gemini_error(exc):
+                    if not transient_error:
                         break
                     if attempt < attempts:
-                        time.sleep(min(max_transient_delay, initial_delay * (2 ** (attempt - 1))) + random.uniform(0, 3))
+                        delay = min(
+                            max_transient_backoff_seconds,
+                            initial_transient_backoff_seconds * (2 ** (attempt - 1)),
+                        ) + random.uniform(0, transient_backoff_jitter_seconds)
+                        print(f'Retrying 3.5 ETF classification in {delay:.1f}s...')
+                        time.sleep(delay)
             if patches is not None or classification_quota_exhausted:
                 break
         if patches is None:
             print(f'Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: {last_error}')
-            if classification_quota_exhausted:
+            if classification_quota_exhausted or not received_any_response:
+                classification_circuit_open = True
+                classification_circuit_reason = (
+                    'QUOTA_FAILURE' if classification_quota_exhausted
+                    else 'TRANSIENT_PROVIDER_FAILURE' if (
+                        last_error is not None
+                        and is_transient_classification_error(last_error)
+                    ) else 'API_BUDGET_EXHAUSTED' if isinstance(
+                        last_error, GeminiApiAttemptBudgetExhausted
+                    ) else 'UNEXPECTED_FAILURE'
+                )
+                print(
+                    'ETF 3.5 classification circuit OPEN: '
+                    f'{classification_circuit_reason}; leaving '
+                    f'{len(batch_symbols)} validated ETF(s) pending judgment '
+                    'without entering invalid-patch recovery.'
+                )
+                write_run_checkpoint(
+                    'JUDGMENT_UNAVAILABLE', classification_circuit_reason
+                )
                 break
-            # A wholly malformed response must not starve untouched peers.
-            # Treat the batch as missing patches and apply the same bounded
-            # validation rounds used for partial responses.
+            # Gemini responded but no usable patches survived parsing. This is
+            # response repair, unlike an API failure with no response at all.
             patches = {}
         valid_patch_count = 0
         invalid_patch_symbols = []
@@ -5854,7 +5935,19 @@ if any('2.5' not in model for model in (model_primary, model_fallback, summary_f
     raise ValueError('Research/context and summary fallback models must use the separately budgeted Gemini 2.5 family.')
 classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
 classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
-classification_attempts = max(1, int(config.get('classification_attempts', 2)))
+max_classification_attempts_per_batch = max(1, int(config.get(
+    'max_classification_attempts_per_batch',
+    config.get('classification_attempts', 2),
+)))
+initial_transient_backoff_seconds = max(0.0, float(config.get(
+    'initial_transient_backoff_seconds', config['initial_delay'],
+)))
+max_transient_backoff_seconds = max(0.0, float(config.get(
+    'max_transient_backoff_seconds', config.get('max_transient_delay', 60),
+)))
+transient_backoff_jitter_seconds = max(0.0, float(config.get(
+    'transient_backoff_jitter_seconds', 3,
+)))
 max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
 max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
 max_3_5_api_calls_per_run = int(config.get(
@@ -6670,6 +6763,7 @@ while (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
+    and not classification_circuit_open
 ):
     if has_retryable_judgment_recovery(research_by_symbol):
         set_run_stage('classification_recovery_before_research')
@@ -7381,6 +7475,7 @@ if (
     classification_release_recovery_reserve_at_final_tail
     and len(selected_after_recovery) < target_selected_etfs
     and not classification_quota_exhausted
+    and not classification_circuit_open
     and not has_retryable_judgment_recovery(research_by_symbol)
     and classification_logical_calls_used < max_classification_logical_calls_per_run
     and classification_api_attempts_used < max_classification_api_attempts_per_run
@@ -7446,6 +7541,7 @@ if (
     and request_budget.can_reserve('research')
     and api_attempt_budget.remaining(model_primary, 'research') > 0
     and not research_quota_exhausted
+    and not classification_circuit_open
 ):
     print(
         'WARNING — ETF backfill invariant: portfolio is short while actionable '
@@ -7934,12 +8030,15 @@ diagnostics = {
     'selection_shortfall': max(0, target_selected_etfs - len(selected)),
     'operational_health': {
         'research_stop_reason': (
+            'classification_service_unavailable' if classification_circuit_open else
             'daily_quota_exhausted' if research_quota_exhausted else
             'portfolio_target_met' if not partial_portfolio else
             'api_or_logical_budget_exhausted' if research_budget_exhausted else
             'no_actionable_work_within_attempt_limits'
         ),
         'classification_quota_exhausted': classification_quota_exhausted,
+        'classification_circuit_open': classification_circuit_open,
+        'classification_circuit_reason': classification_circuit_reason,
         'publication_blocked_by_incomplete_judgment': publication_blocked_by_judgment,
         'pending_authoritative_symbols': pending_authoritative_symbols,
         'classification_api_attempts_remaining': api_attempt_budget.remaining(

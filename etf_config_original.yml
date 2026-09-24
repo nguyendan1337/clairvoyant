@@ -174,8 +174,7 @@ challenger_relative_bonus_start: 80.0
 challenger_relative_bonus_per_point: 0.15
 challenger_relative_bonus_cap: 3.0
 challenger_score_epsilon: 0.25
-# The post-judgment one-for-one swap pass requires this much improvement in
-# total portfolio merit. It never lowers eligibility floors or changes calls.
+# Replacement audit is diagnostic only: it never lowers eligibility floors.
 replacement_merit_epsilon: 0.25
 replacement_diagnostics_top_n: 12
 
@@ -222,8 +221,6 @@ concentration_low_adjustment: 0.0
 concentration_moderate_adjustment: 0.0
 concentration_high_adjustment: -1.0
 max_concentration_penalty: -2.0
-# Applied once per additional ETF sharing a return driver in the final
-# portfolio objective, after individual selection eligibility is established.
 repeated_return_driver_penalty: -3.0
 thinking_budget: 12288
 summary_thinking_budget: 4096

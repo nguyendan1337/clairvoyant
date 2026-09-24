@@ -3880,26 +3880,17 @@ def replacement_comparison_record(candidate, research, incumbent_item, dimension
 
 
 def build_replacement_diagnostics(candidate_records, research_by_symbol, selected):
-    """Explain capped-exposure head-to-head tests after final selection."""
+    """Explain full-sector/family replacement tests after authoritative selection."""
     selected_symbols = {
         str(item['candidate']['Symbol']).upper() for item in selected
     }
     selected_by_sector = {}
     selected_by_family = {}
-    selected_by_driver = {}
-    selected_by_event = {}
     for item in selected:
         sector = candidate_sector_group(item['candidate']).casefold()
         family = etf_factor_family(item['candidate'], item.get('research'))
-        driver = normalized_return_driver_key(item['research'])
-        event = (normalized_risk_event_key(item['research'])
-                 if combined_etf_reversal_risk(item['research']) == 'MODERATE' else None)
         selected_by_sector.setdefault(sector, []).append(item)
         selected_by_family.setdefault(family, []).append(item)
-        if driver:
-            selected_by_driver.setdefault(driver, []).append(item)
-        if event:
-            selected_by_event.setdefault(event, []).append(item)
 
     records = []
     for candidate in candidate_records:
@@ -3927,12 +3918,6 @@ def build_replacement_diagnostics(candidate_records, research_by_symbol, selecte
             pools.append(('SECTOR', selected_by_sector[sector_key]))
         if len(selected_by_family.get(family, [])) >= max_etfs_per_factor_family:
             pools.append(('FACTOR_FAMILY', selected_by_family[family]))
-        driver = normalized_return_driver_key(research)
-        if driver and len(selected_by_driver.get(driver, [])) >= max_etfs_per_return_driver:
-            pools.append(('RETURN_DRIVER', selected_by_driver[driver]))
-        event = normalized_risk_event_key(research) if risk == 'MODERATE' else None
-        if event and len(selected_by_event.get(event, [])) >= max_moderate_per_risk_event:
-            pools.append(('RISK_EVENT', selected_by_event[event]))
         for dimension, pool in pools:
             incumbent = min(
                 pool,
@@ -3947,7 +3932,7 @@ def build_replacement_diagnostics(candidate_records, research_by_symbol, selecte
             )
             record['selection_merit_gap'] = gap
             record['result'] = (
-                'HEAD_TO_HEAD_ADVANTAGE'
+                'CHALLENGER_WOULD_WIN'
                 if gap > replacement_merit_epsilon
                 else 'INCUMBENT_RETAINED'
             )
@@ -3963,7 +3948,7 @@ def print_replacement_diagnostics(records):
     if not records:
         print('ETF replacement audit: no qualified blocked candidates required a head-to-head test.')
         return
-    print('ETF replacement audit (individual comparisons; swaps require every cap to pass):')
+    print('ETF replacement audit:')
     for row in records:
         print(
             f'  {row["challenger_symbol"]} vs {row["incumbent_symbol"]} '
@@ -5177,103 +5162,6 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
     return selected
 
 
-def optimize_authoritative_portfolio(candidates, research_by_symbol, selected,
-                                     max_per_sector, max_moderate_event):
-    """Improve a completed portfolio by valid one-for-one swaps only.
-
-    The penalty prices repeated return drivers in the portfolio objective; it
-    never changes an ETF's individual floor or its authoritative judgment.
-    """
-    def qualified(candidate, research):
-        return (
-            research and research.get('judgment_model')
-            and research.get('eligible', True)
-            and combined_etf_reversal_risk(research) in SELECTABLE_RISKS
-            and etf_optimistic_final_score(candidate) >= minimum_final_selection_score
-            and etf_passes_benchmark_override(candidate, research)
-            and etf_final_score(candidate, research) + score_comparison_epsilon
-                >= etf_required_final_score(research, candidate)
-        )
-
-    def within_caps(portfolio):
-        sectors, families, events, drivers = {}, {}, {}, {}
-        for item in portfolio:
-            candidate, research = item['candidate'], item['research']
-            sector = candidate_sector_group(candidate).casefold()
-            family = etf_factor_family(candidate, research)
-            driver = normalized_return_driver_key(research)
-            event = (normalized_risk_event_key(research)
-                     if combined_etf_reversal_risk(research) == 'MODERATE' else None)
-            for counts, key, cap in (
-                (sectors, sector, max_per_sector),
-                (families, family, max_etfs_per_factor_family),
-                (events, event, max_moderate_event),
-                (drivers, driver, max_etfs_per_return_driver),
-            ):
-                if key:
-                    counts[key] = counts.get(key, 0) + 1
-                    if counts[key] > cap:
-                        return False
-        return True
-
-    def portfolio_merit(portfolio):
-        drivers = {}
-        merit = 0.0
-        for item in portfolio:
-            merit += etf_selection_merit(item['candidate'], item['research'])
-            driver = normalized_return_driver_key(item['research'])
-            if driver:
-                merit += repeated_return_driver_penalty * drivers.get(driver, 0)
-                drivers[driver] = drivers.get(driver, 0) + 1
-        return merit
-
-    # If the starting portfolio is invalid, do not hide the existing failure.
-    if not within_caps(selected):
-        raise ValueError('Initial ETF portfolio violates a diversification cap.')
-    pool = []
-    for candidate in candidates:
-        symbol = str(candidate['Symbol']).upper()
-        research = research_by_symbol.get(symbol)
-        if qualified(candidate, research):
-            pool.append({'candidate': candidate, 'research': research})
-    portfolio = list(selected)
-    changes = []
-    # Strict improvement makes cycles impossible; this bound prevents surprises
-    # if a future merit function changes without updating this optimizer.
-    for _ in range(len(pool) * max(1, len(portfolio))):
-        current_symbols = {str(item['candidate']['Symbol']).upper() for item in portfolio}
-        baseline = portfolio_merit(portfolio)
-        best = None
-        for challenger in pool:
-            symbol = str(challenger['candidate']['Symbol']).upper()
-            if symbol in current_symbols:
-                continue
-            for index, incumbent in enumerate(portfolio):
-                trial = portfolio[:index] + [challenger] + portfolio[index + 1:]
-                if not within_caps(trial):
-                    continue
-                gain = portfolio_merit(trial) - baseline
-                if gain <= replacement_merit_epsilon:
-                    continue
-                incumbent_symbol = str(incumbent['candidate']['Symbol']).upper()
-                key = (gain, symbol, incumbent_symbol)
-                if best is None or key > best[0]:
-                    best = (key, trial, incumbent_symbol, symbol)
-        if best is None:
-            break
-        key, portfolio, removed, added = best
-        changes.append((removed, added, key[0]))
-    portfolio.sort(
-        key=lambda item: etf_selection_merit(item['candidate'], item['research']),
-        reverse=True,
-    )
-    for removed, added, gain in changes:
-        print(f'ETF portfolio swap: {removed} -> {added}; portfolio merit +{gain:.2f}.')
-    print(f'ETF portfolio optimization: {len(changes)} valid one-for-one swaps; '
-          f'driver repetition penalty {repeated_return_driver_penalty:+.2f}.')
-    return portfolio
-
-
 def print_validated_research_inspection(candidates, research_by_symbol):
     rows = []
     for candidate in candidates:
@@ -5398,6 +5286,8 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
         for rank, candidate in enumerate(candidates, start=1)
     }
     for candidate in ranked_candidates:
+        if len(selected) >= target:
+            break
         symbol = str(candidate['Symbol']).upper()
         research = research_by_symbol.get(symbol)
         status, reason = None, None
@@ -5482,9 +5372,6 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
                     f'calibrated ETF floor {required_score:.2f}; '
                     f'continuation={continuation}, benchmark={benchmark_outlook}, confidence={str(research.get("benchmark_outperformance_confidence") or "MEDIUM").upper()}, risk={risk}.'
                 )
-            elif len(selected) >= target:
-                status = 'SKIPPED — PORTFOLIO FULL'
-                reason = f'The portfolio already contains {target} selected ETFs.'
             elif sector_counts.get(sector_key, 0) >= max_per_sector:
                 status = 'SKIPPED — SECTOR CAPACITY'
                 reason = f'{max_per_sector} selected ETFs already use the {sector} sector/category.'
@@ -5533,59 +5420,6 @@ def build_decision_ledger(candidates, research_by_symbol, target, max_per_sector
             'explanation': reason,
         })
     return selected, ledger
-
-
-def reconcile_optimized_ledger(ledger, candidates, research_by_symbol, selected,
-                               max_per_sector, max_moderate_event):
-    """Make the published decision ledger describe the final, swapped portfolio."""
-    selected_symbols = {str(item['candidate']['Symbol']).upper() for item in selected}
-    by_symbol = {str(item['Symbol']).upper(): item for item in candidates}
-    sectors, families, events, drivers = {}, {}, {}, {}
-    for item in selected:
-        candidate, research = item['candidate'], item['research']
-        sector = candidate_sector_group(candidate).casefold()
-        family = etf_factor_family(candidate, research)
-        event = (normalized_risk_event_key(research)
-                 if combined_etf_reversal_risk(research) == 'MODERATE' else None)
-        driver = normalized_return_driver_key(research)
-        for counts, key in ((sectors, sector), (families, family),
-                            (events, event), (drivers, driver)):
-            if key:
-                counts[key] = counts.get(key, 0) + 1
-    running_sectors, running_total = {}, 0
-    for row in ledger:
-        symbol = row['symbol']
-        candidate = by_symbol[symbol]
-        research = research_by_symbol.get(symbol)
-        sector = candidate_sector_group(candidate).casefold()
-        if symbol in selected_symbols:
-            row['status'] = f'SELECTED — {combined_etf_reversal_risk(research)}'
-            row['explanation'] = research.get('explanation')
-            running_sectors[sector] = running_sectors.get(sector, 0) + 1
-            running_total += 1
-        elif row['status'].startswith(('SELECTED', 'SKIPPED')) and research:
-            family = etf_factor_family(candidate, research)
-            event = (normalized_risk_event_key(research)
-                     if combined_etf_reversal_risk(research) == 'MODERATE' else None)
-            driver = normalized_return_driver_key(research)
-            if sectors.get(sector, 0) >= max_per_sector:
-                row['status'] = 'SKIPPED — SECTOR CAPACITY'
-                row['explanation'] = f'{max_per_sector} selected ETFs already use the {candidate_sector_group(candidate)} sector/category.'
-            elif families.get(family, 0) >= max_etfs_per_factor_family:
-                row['status'] = 'SKIPPED — FACTOR-FAMILY CAPACITY'
-                row['explanation'] = f'{max_etfs_per_factor_family} selected ETFs already use the {family} factor family.'
-            elif event and events.get(event, 0) >= max_moderate_event:
-                row['status'] = 'SKIPPED — RISK-EVENT CAPACITY'
-                row['explanation'] = f'The {event[0]} / {event[1]} group is already full.'
-            elif driver and drivers.get(driver, 0) >= max_etfs_per_return_driver:
-                row['status'] = 'SKIPPED — RETURN-DRIVER CAPACITY'
-                row['explanation'] = f'{max_etfs_per_return_driver} selected ETFs already depend on {driver}.'
-            else:
-                row['status'] = 'SKIPPED — PORTFOLIO MERIT'
-                row['explanation'] = 'A higher-merit combination occupies the available portfolio slots.'
-        row['sector_selected_after'] = running_sectors.get(sector, 0)
-        row['total_selected_after'] = running_total
-    return ledger
 
 
 def build_recommendations_table(selected):
@@ -7549,14 +7383,6 @@ selected, decision_ledger = build_decision_ledger(
     max_etfs_per_sector_group,
     max_moderate_per_risk_event,
     research_disposition,
-)
-selected = optimize_authoritative_portfolio(
-    candidate_records, research_by_symbol, selected,
-    max_etfs_per_sector_group, max_moderate_per_risk_event,
-)
-decision_ledger = reconcile_optimized_ledger(
-    decision_ledger, candidate_records, research_by_symbol, selected,
-    max_etfs_per_sector_group, max_moderate_per_risk_event,
 )
 replacement_diagnostics = build_replacement_diagnostics(
     candidate_records, research_by_symbol, selected

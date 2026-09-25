@@ -1,13 +1,9 @@
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
-Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.5_api_budget=8 (6 classification + 1 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
+Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.8_api_budget=8 (6 classification + 1 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
-
-1 Failed download:
-['SPMO']: OperationalError('database is locked')
-Could not calculate benchmark returns for SPMO: only 0 daily closes
-Effective 52-week stock hurdle: 37.47% from VGT.
+Effective 52-week stock hurdle: 37.84% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
@@ -16,151 +12,318 @@ Top QVM benchmark hurdle changed. Rebuilding cache.
 Fetched 250 stock screener rows at offset 0.
 Fetched 250 stock screener rows at offset 250.
 Fetched 250 stock screener rows at offset 500.
-Fetched 56 stock screener rows at offset 750.
+Fetched 44 stock screener rows at offset 750.
 
 Stocks passing screener-level filters:
-    Symbol                              Name  52 WkChange %
-0     SNDK               Sandisk Corporation    1705.622000
-1     AXTI                         AXT, Inc.    1528.755400
-2      ANL           Adlai Nortye Group Ltd.     820.348800
-3     MRNA                     Moderna, Inc.     695.508360
-4      SLS  SELLAS Life Sciences Group, Inc.     634.969360
-..     ...                               ...            ...
-801    HLF                    Herbalife Ltd.      37.655020
-802  SMPNY              Sompo Holdings, Inc.      37.654960
-803   ELPC   Companhia Paranaense de Energia      37.585426
-804    SAN             Banco Santander, S.A.      37.572254
-805   TITN              Titan Machinery Inc.      37.551260
+    Symbol                                Name  52 WkChange %
+0     SNDK                 Sandisk Corporation    1705.622000
+1     AXTI                           AXT, Inc.    1528.755400
+2      ANL             Adlai Nortye Group Ltd.     820.348800
+3     MRNA                       Moderna, Inc.     695.508360
+4      SLS    SELLAS Life Sciences Group, Inc.     634.969360
+..     ...                                 ...            ...
+789   SUPV              Grupo Supervielle S.A.      38.148150
+790    IFS   Intercorp Financial Services Inc.      38.072704
+791    CSX                     CSX Corporation      38.047634
+792     CM  Canadian Imperial Bank of Commerce      37.964344
+793   VEON                           VEON Ltd.      37.908745
 
-[806 rows x 3 columns]
-YFINANCE FUNDAMENTALS CACHE {"file_existed": true, "entries_loaded": 543, "fresh": 541, "expired": 2, "invalid": 0, "ttl_hours": 36.0}
+[794 rows x 3 columns]
+YFINANCE FUNDAMENTALS CACHE {"file_existed": true, "entries_loaded": 558, "fresh": 558, "expired": 0, "invalid": 0, "ttl_hours": 36.0}
 Downloading price data...
 Computing momentum and extracting latest price...
-3M return gate >= 0.00%: 481 survivors; 325 removed before fundamentals.
-Fundamentals plan: eligible=481, cache_hits=464, live_fetches=17, incomplete_cached_entries=0.
-Fetching Yahoo fundamentals for 17 uncached tickers...
-Yahoo fundamentals:   0%|          | 0/17 [00:00<?, ?it/s]Yahoo fundamentals:   6%|▌         | 1/17 [00:00<00:15,  1.06it/s]Yahoo fundamentals:  12%|█▏        | 2/17 [00:01<00:13,  1.12it/s]Yahoo fundamentals:  18%|█▊        | 3/17 [00:02<00:11,  1.24it/s]Yahoo fundamentals:  24%|██▎       | 4/17 [00:03<00:10,  1.30it/s]Yahoo fundamentals:  29%|██▉       | 5/17 [00:03<00:08,  1.37it/s]Yahoo fundamentals:  35%|███▌      | 6/17 [00:04<00:08,  1.25it/s]Yahoo fundamentals:  41%|████      | 7/17 [00:05<00:08,  1.21it/s]Yahoo fundamentals:  47%|████▋     | 8/17 [00:06<00:07,  1.17it/s]Yahoo fundamentals:  53%|█████▎    | 9/17 [00:07<00:06,  1.23it/s]Yahoo fundamentals:  59%|█████▉    | 10/17 [00:08<00:05,  1.28it/s]Yahoo fundamentals:  65%|██████▍   | 11/17 [00:08<00:04,  1.20it/s]Yahoo fundamentals:  71%|███████   | 12/17 [00:09<00:04,  1.16it/s]Yahoo fundamentals:  76%|███████▋  | 13/17 [00:10<00:03,  1.18it/s]Yahoo fundamentals:  82%|████████▏ | 14/17 [00:11<00:02,  1.19it/s]Yahoo fundamentals:  88%|████████▊ | 15/17 [00:12<00:01,  1.15it/s]Yahoo fundamentals:  94%|█████████▍| 16/17 [00:13<00:00,  1.12it/s]Yahoo fundamentals: 100%|██████████| 17/17 [00:14<00:00,  1.15it/s]Yahoo fundamentals: 100%|██████████| 17/17 [00:14<00:00,  1.19it/s]
-Fundamentals summary: eligible=481, cache_hits=464, yahoo_fetches=17, fetch_successes=17, fetch_failures=0, apply_failures=0.
+3M return gate >= 0.00%: 481 survivors; 313 removed before fundamentals.
+Fundamentals plan: eligible=481, cache_hits=476, live_fetches=5, incomplete_cached_entries=0.
+Fetching Yahoo fundamentals for 5 uncached tickers...
+Yahoo fundamentals:   0%|          | 0/5 [00:00<?, ?it/s]Yahoo fundamentals:  20%|██        | 1/5 [00:01<00:04,  1.04s/it]Yahoo fundamentals:  40%|████      | 2/5 [00:01<00:02,  1.11it/s]Yahoo fundamentals:  60%|██████    | 3/5 [00:02<00:01,  1.18it/s]Yahoo fundamentals:  80%|████████  | 4/5 [00:03<00:00,  1.25it/s]Yahoo fundamentals: 100%|██████████| 5/5 [00:04<00:00,  1.19it/s]Yahoo fundamentals: 100%|██████████| 5/5 [00:04<00:00,  1.17it/s]
+Fundamentals summary: eligible=481, cache_hits=476, yahoo_fetches=5, fetch_successes=5, fetch_failures=0, apply_failures=0.
 Done.
-/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4952: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
+/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4960: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
   .infer_objects(copy=False)
 Saved top QVM cache to caches/top_qvm_stocks_cache.pkl.
 
 Top QVM Stocks:
    Symbol   QVMScore  3M Return   1Y Return
-0    INSW  84.835966  41.619408  157.958033
-1     ECO  82.287509  70.990098  207.883995
-2     FRO  79.564804  43.523512  137.075290
-3     LPG  78.826060  54.893373   86.262910
-4     NAT  77.742937  35.661146  162.745625
+0    INSW  84.960193  41.862474  158.400799
+1     ECO  82.271943  70.099167  206.279788
+2     FRO  79.546976  42.395610  135.212174
+3     LPG  78.824126  54.893373   86.262898
+4     NAT  78.012809  37.637660  166.573717
 ..    ...        ...        ...         ...
-70   KEYS  62.053387   6.794457  110.781632
-71   HRMY  62.010902  16.482741   52.237424
-72    APA  61.825498  31.608550   83.144338
-73    AMD  61.727634  17.896530  294.394470
-74   AAMI  61.640837  33.712775   98.741439
+70    SSL  62.128282  43.969077  123.440002
+71   KEYS  62.015860   7.026723  111.240060
+72    AMG  61.552730  10.009994   58.537389
+73    AMD  61.531892  16.796417  290.714308
+74  TNEYF  61.415608   7.490717  116.926348
 
 [75 rows x 4 columns]
-MARKET CACHE HIT path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=9.03
-Using validated shared market context cache: caches/gemini_shared_market_context_cache.json
-Dynamic market risk-event catalog: 3 canonical event(s).
-RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=0 fresh=0 expired=0 contract=a4d152e3ea3f
+MARKET CACHE MISS path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=12.14 reason=expired
+
+...calling Gemini for fresh shared stock/ETF market context...
+
+Gemini 2.5 API budget: 1/8 total; 1/2 market.
+Gemini logical request 1/8: market context (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Gemini usage [market context]: prompt_tokens=1061, tool_tokens=1831, cached_tokens=None, thinking_tokens=6455, output_tokens=6971, total_tokens=16318
+Google searches performed [market context]: 8
+  Search: S&P 500 Nasdaq Russell 2000 performance breadth volatility sentiment last 10 days
+  Search: US inflation employment GDP official releases last 10 days
+  Search: Federal Reserve policy rate expectations Treasury yields credit liquidity current
+  Search: US earnings growth guidance margins analyst estimate revisions recent
+  Search: current operating conditions Basic Materials Communication Services Consumer Cyclical Consumer Defensive Energy Financial Services Healthcare Industrials Real Estate Technology Utilities
+  Search: Value growth momentum quality dividends size valuation flows crowding market trends recent
+  Search: geopolitics energy commodities freight supply chain conditions current
+  Search: material regulation temporary events market impact recent
+Grounding citation chunks exposed [market context]: 19
+MARKET CACHE SAVED contract=835e51d1d7a2 entries=1 exposed_search_queries=8
+Dynamic market risk-event catalog: 4 canonical event(s).
+RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=0 fresh=0 expired=0 contract=db58e7866090
 RESEARCH CACHE MISS symbol=INSW reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ECO reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=FRO reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=LPG reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=NAT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TNK reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=DHT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TNK reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=TEN reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=TRMD reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ARREF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PURR reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AYA reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=WDOFF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CDNA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TK reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=VCTR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TK reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=FTNT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CDNA reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=DINO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DAC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=VLO reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=MAKO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=VLO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=HNGE reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=NVEC reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=HNGE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DDI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=KRT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=HAFN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DSVSF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SHIP reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=NMM reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PAYS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=KRT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=DSVSF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=DDI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PTGX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=HAFN reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=SBLK reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PTGX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SHIP reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=NUTX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PAYS reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=STNG reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=RCRUY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AUGO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RDVT reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=HPE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SB reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NTAP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=BVS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ERO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SB reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=RDVT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NTAP reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=ANET reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=SU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=KEYS reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=HRMY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=APA reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=KEYS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AMG reason=symbol_not_cached
 RESEARCH CACHE MISS symbol=AMD reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AAMI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
 Deferred excess same-sector research candidates: TEN, TRMD, TK
-Filled ordinary research batch with future uncached QVM candidates: INSW, ECO, FRO, LPG, NAT, TNK, DHT, ARREF, PURR, AYA, WDOFF, CDNA, VCTR, FTNT, DAC
+Filled ordinary research batch with future uncached QVM candidates: INSW, ECO, FRO, LPG, NAT, DHT, TNK, ARREF, PURR, AYA, WDOFF, VCTR, FTNT, CDNA, MAKO
 
-...calling Gemini for stock batch: INSW, ECO, FRO, LPG, NAT, TNK, DHT, ARREF, PURR, AYA, WDOFF, CDNA, VCTR, FTNT, DAC...
+...calling Gemini for stock batch: INSW, ECO, FRO, LPG, NAT, DHT, TNK, ARREF, PURR, AYA, WDOFF, VCTR, FTNT, CDNA, MAKO...
 
-Gemini 2.5 API budget: 1/8 total; 1/6 stock.
-Gemini logical request 1/8: stock batch containing 15 stocks, spanning QVM ranks 1-19 (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 1)
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Error on attempt 1/3 during stock batch containing 15 stocks, spanning QVM ranks 1-19 with gemini-2.5-flash: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retryable Gemini error; retrying the same model and unchanged request in 61.3s...
-Gemini 2.5 API budget: 2/8 total; 2/6 stock.
-Gemini logical request 1/8: stock batch containing 15 stocks, spanning QVM ranks 1-19 (gemini-2.5-flash, attempt 2) (API attempt 2; stock API attempts 2)
-Error on attempt 2/3 during stock batch containing 15 stocks, spanning QVM ranks 1-19 with gemini-2.5-flash: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retryable Gemini error; retrying the same model and unchanged request in 191.9s...
-Gemini 2.5 API budget: 3/8 total; 3/6 stock.
-Gemini logical request 1/8: stock batch containing 15 stocks, spanning QVM ranks 1-19 (gemini-2.5-flash, attempt 3) (API attempt 3; stock API attempts 3)
-Error on attempt 3/3 during stock batch containing 15 stocks, spanning QVM ranks 1-19 with gemini-2.5-flash: Empty response from Gemini.
+Gemini 2.5 API budget: 2/8 total; 1/6 stock.
+Gemini logical request 2/8: stock batch containing 15 stocks, spanning QVM ranks 1-19 (gemini-2.5-flash, attempt 1) (API attempt 2; stock API attempts 1)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 1-19]: prompt_tokens=25415, tool_tokens=60158, cached_tokens=58252, thinking_tokens=8911, output_tokens=23561, total_tokens=118045
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 1-19]: 20
+  Search: International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Okeanis Eco Tankers Corp. ECO investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Frontline plc FRO investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Dorian LPG Ltd. LPG investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Nordic American Tankers Limited NAT investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Teekay Tankers Ltd. TNK investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Amerigo Resources Ltd. ARREF investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Hyperliquid Strategies Inc. PURR investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Aya Gold & Silver Inc. AYA investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Wesdome Gold Mines Ltd. WDOFF investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Fortinet, Inc. FTNT investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: CareDx, Inc. CDNA investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Mako Mining Corp. MAKO investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Okeanis Eco Tankers Corp. ECO latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Amerigo Resources Ltd. ARREF latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Hyperliquid Strategies Inc. PURR latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Wesdome Gold Mines Ltd. WDOFF latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Victory Capital Holdings, Inc. VCTR latest earnings release revenue guidance operating metrics investor relations SEC
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 1-19]: 19
+Recovered independently delimited stock results: INSW, ECO, FRO, LPG, NAT, DHT, TNK, ARREF, PURR, AYA, WDOFF, VCTR, FTNT, CDNA, MAKO
+Stock response coverage: 15/15 returned; 0 missing; status=NORMAL.
+Research searches requested this call: 15 total; 15 first, 0 repeated.
+Cross-company similarity noted for INSW/ECO but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
+Cross-company similarity noted for INSW/FRO but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
+Cross-company similarity noted for INSW/NAT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for INSW/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for INSW/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for ECO/FRO but below retry threshold: score=1.0, low_specificity_fields=['material_effect', 'reversal_mechanism'], shared_specific_financial_figures=none.
+Cross-company similarity noted for ECO/NAT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for ECO/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for ECO/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for FRO/NAT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for FRO/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for FRO/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for NAT/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for NAT/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Cross-company similarity noted for DHT/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Validated grounded research [INSW]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [ECO]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [FRO]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [LPG]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [NAT]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [DHT]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [TNK]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [ARREF]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [PURR]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [AYA]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [WDOFF]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [VCTR]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [FTNT]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [CDNA]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [MAKO]: 5 distinct source URLs; awaiting judgment.
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 20
+  results returned: 15
+  results validated: 15
+  incomplete research: 0
+  structural repairs needed: 0
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 0
+Deferred excess same-sector research candidates: PTGX, HAFN, PBT
+Filled ordinary research batch with future uncached QVM candidates: TEN, TRMD, TK, DINO, VLO, HNGE, NVEC, CMBT, NMM, KRT, DSVSF, DDI, SBLK, SHIP, NUTX
+
+...calling Gemini for stock batch: TEN, TRMD, TK, DINO, VLO, HNGE, NVEC, CMBT, NMM, KRT, DSVSF, DDI, SBLK, SHIP, NUTX...
+
+Gemini 2.5 API budget: 3/8 total; 2/6 stock.
+Gemini logical request 3/8: stock batch containing 15 stocks, spanning QVM ranks 8-34 (gemini-2.5-flash, attempt 1) (API attempt 3; stock API attempts 2)
+Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 8-34]: prompt_tokens=25414, tool_tokens=61283, cached_tokens=None, thinking_tokens=12691, output_tokens=24337, total_tokens=123725
+Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 8-34]: 20
+  Search: Tsakos Energy Navigation Limited TEN investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: TORM plc TRMD investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Teekay Corporation Ltd. TK investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: HF Sinclair Corporation DINO investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Valero Energy Corporation VLO investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Hinge Health, Inc. HNGE investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: NVE Corporation NVEC investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Cmb.Tech NV CMBT investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Navios Maritime Partners L.P. NMM investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Karat Packaging Inc. KRT investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Discovery Mining Ltd. DSVSF investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Star Bulk Carriers Corp. SBLK investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Seanergy Maritime Holdings Corp SHIP investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Nutex Health Inc. NUTX investor relations latest results guidance operating metrics acquisition financing material announcement
+  Search: Tsakos Energy Navigation Limited TEN latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Teekay Corporation Ltd. TK latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Star Bulk Carriers Corp. SBLK latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Seanergy Maritime Holdings Corp SHIP latest earnings release revenue guidance operating metrics investor relations SEC
+  Search: Karat Packaging Inc. KRT latest earnings release revenue guidance operating metrics investor relations SEC
+Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 8-34]: 21
+Recovered independently delimited stock results: TEN, TRMD, TK, DINO, VLO, HNGE, NVEC, CMBT, NMM, KRT, DSVSF, DDI, SBLK, SHIP, NUTX
+Stock response coverage: 15/15 returned; 0 missing; status=NORMAL.
+Research searches requested this call: 15 total; 15 first, 0 repeated.
+Cross-company similarity noted for DINO/VLO but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Validated grounded research [TEN]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [TRMD]: 3 distinct source URLs; awaiting judgment.
+Validated grounded research [TK]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [VLO]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [HNGE]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [NVEC]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [CMBT]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [NMM]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [KRT]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [DSVSF]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [DDI]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+Validated grounded research [SHIP]: 5 distinct source URLs; awaiting judgment.
+Validated grounded research [NUTX]: 5 distinct source URLs; awaiting judgment.
+Batch research summary:
+  candidates sent: 15
+  company searches exposed: 20
+  results returned: 15
+  results validated: 15
+  incomplete research: 0
+  structural repairs needed: 0
+  genuine repeated searches: 0
+  missing/unsearched attempts refunded: 0
+Prepared compact 3.8 stock judgment payload: stocks=30, prompt_chars=127685, market_events=4, peer_classifications=0.
+Gemini 3.8 API budget: 1/8 total; 1/6 classification.
+Gemini classification request 1/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 1/3)
+Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Retrying 3.8 classification in 72.7s...
+Gemini 3.8 API budget: 2/8 total; 2/6 classification.
+Gemini classification request 2/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 2/3)
+Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Retrying 3.8 classification in 131.7s...
+Gemini 3.8 API budget: 3/8 total; 3/6 classification.
+Gemini classification request 3/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 3/3)
+Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Warning: Gemini 3.8 judgment is unavailable after this batch's retry allowance; preserving validated research as PENDING_JUDGMENT and opening the classification circuit breaker: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+Judgment unavailable; leaving validated research queued for a later run.
+Classifying pending research before another 2.5 call: 0 selected, 30 pending, optimistic capacity 13/10.
+Stopping retries because no classification model is available.
+Stopping stock research because no classification model is available.
+FINAL VALIDATED CANDIDATE COMPARISON
+Research efficiency: 30 unique stocks, 30 requested searches, 0 repeated searches.
+
+CONTEXT REVIEW
+
+| QVM Rank   | Symbol   | Sector Group   | Reversal Risk / Status   | Final Score   | Continuation   | Benchmark Outlook   | Sector Selected After   | Total Selected After   | Explanation   |
+|------------|----------|----------------|--------------------------|---------------|----------------|---------------------|-------------------------|------------------------|---------------|
+
+CLASSIFICATION DRIFT VERSUS PREVIOUS SUCCESSFUL RUN
+  No comparable classification fields changed.
+PORTFOLIO CHANGES VERSUS PREVIOUS SUCCESSFUL RUN
+  Removed ARREF: SELECTED — LOW -> not present
+  Removed AYA: SELECTED — LOW -> not present
+  Removed FTNT: SELECTED — LOW -> not present
+  Removed VCTR: SELECTED — LOW -> not present
+  Removed DAC: SELECTED — LOW -> not present
+  Removed CDNA: SELECTED — LOW -> not present
+  Removed NVEC: SELECTED — LOW -> not present
+  Removed RCRUY: SELECTED — LOW -> not present
+  Removed HNGE: SELECTED — LOW -> not present
+  Removed SLDE: SELECTED — LOW -> not present
+NO-CALL NORMALIZATION SUMMARY
+  No Python label reconciliations were needed.
 Traceback (most recent call last):
-  File "/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py", line 7909, in <module>
-    batch_data, batch_model, batch_metadata = call_gemini_json(
-                                              ^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py", line 4266, in call_gemini_json
-    raise RuntimeError(f"Gemini {stage} failed: {last_error}")
-RuntimeError: Gemini stock batch containing 15 stocks, spanning QVM ranks 1-19 failed: Empty response from Gemini.
+  File "/home/runner/work/clairvoyant/clairvoyant/stock_recommender.py", line 8585, in <module>
+    raise RuntimeError(
+RuntimeError: Stock authoritative judgment incomplete; 30 stocks have validated research pending classification. Previous successful page was preserved.

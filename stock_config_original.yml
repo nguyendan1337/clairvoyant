@@ -16,12 +16,12 @@ initial_delay: 10
 model_primary: gemini-2.5-flash
 # Search-enabled evidence collection stays on Gemini 2.5 Flash.
 model_fallback: gemini-2.5-flash-lite
-# Gemini 3.8 Flash is the only no-Search risk judge. Validated 2.5 research is
-# kept pending when 3.8 is unavailable; 2.5 is never used for classification.
-classification_model: gemini-3.8-flash
-classification_thinking_level: medium
+# Gemini 3.5 Flash is the only no-Search risk judge. Validated 2.5 research is
+# kept pending when 3.5 is unavailable; 2.5 is never used for classification.
+classification_model: gemini-3.5-flash
+classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
-# Six 3.8 API attempts are available for classification. Keep one for genuine
+# Six 3.5 API attempts are available for classification. Keep one for genuine
 # omissions/invalid patches, releasing it to untouched stocks at the final tail.
 # A provider outage still opens the circuit after at most three batch attempts.
 max_classification_attempts_per_batch: 3
@@ -31,7 +31,7 @@ classification_release_recovery_reserve_at_final_tail: true
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
-# Recover omitted or invalid 3.8 judgments with the existing grounded 2.5
+# Recover omitted or invalid 3.5 judgments with the existing grounded 2.5
 # evidence. These caps apply per stock and use the existing six-call ceiling.
 classification_omission_retry_batch_max: 6
 classification_invalid_retry_batch_max: 6
@@ -79,13 +79,13 @@ max_gemini_calls_per_run: 8
 max_stock_research_calls_per_run: 6
 reserved_summary_calls: 0
 # Hard API-attempt ceilings are enforced independently of logical requests and
-# retries. Gemini 3.8 receives 6 classification + 1 summary attempt. The 2.5
+# retries. Gemini 3.5 receives 6 classification + 1 summary attempt. The 2.5
 # family allows up to 2 market + 6 research + 1 summary-fallback attempts, but
 # its shared total remains 8, so the summary fallback disappears automatically
 # when market and research consume all eight.
-max_3_8_api_calls_per_run: 8
-max_3_8_classification_calls_per_run: 6
-max_3_8_summary_calls_per_run: 1
+max_3_5_api_calls_per_run: 8
+max_3_5_classification_calls_per_run: 6
+max_3_5_summary_calls_per_run: 1
 max_2_5_api_calls_per_run: 8
 max_2_5_market_calls_per_run: 2
 max_2_5_research_calls_per_run: 6
@@ -109,7 +109,6 @@ market_context_cache_hours: 12
 gemini_research_cache_hours: 24
 final_summary_enabled: true
 summary_thinking_budget: 4096
-summary_thinking_level: medium
 
 prompt_market_context: |
   You are the shared market-research stage for U.S. stock and ETF recommenders.
@@ -511,7 +510,7 @@ prompt_stock_batch: |
   valuation/expectation expansion, catalyst exhaustion, binary-event exposure and
   whether recent price appreciation has outrun supplied fundamental improvement.
   Do not use short-term technical indicators as primary reversal evidence. Gemini
-  3.8 Flash owns the final reversal-risk judgment.
+  3.5 Flash owns the final reversal-risk judgment.
 
   MARKET_CONTEXT supplies hypotheses and shared background only. It does not
   establish company-level reversal probability. Confirm a current probability

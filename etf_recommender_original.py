@@ -80,7 +80,7 @@ classification_api_attempts_used = 0
 classification_quota_exhausted = False
 classification_circuit_open = False
 classification_circuit_reason = None
-summary_38_api_attempts_used = 0
+summary_35_api_attempts_used = 0
 classification_omission_rounds = {}
 classification_invalid_patch_rounds = {}
 classification_retry_kind = {}
@@ -132,26 +132,21 @@ def initialize_gemini_client():
 
 
 def build_gemini_config(
-    thinking_budget=None,
+    thinking_budget,
     enable_search=True,
     response_mime_type='application/json',
     max_output_tokens=None,
-    model_name=None,
-    thinking_level='medium',
 ):
     tools = None
     if enable_search:
         tools = [types.Tool(google_search=types.GoogleSearch())]
-    kwargs = {'tools': tools}
-    if str(model_name or '').lower().startswith('gemini-3.'):
-        kwargs['thinking_config'] = types.ThinkingConfig(
-            thinking_level=thinking_level,
-        )
-    else:
-        kwargs['temperature'] = 0
-        kwargs['thinking_config'] = types.ThinkingConfig(
+    kwargs = {
+        'tools': tools,
+        'temperature': 0,
+        'thinking_config': types.ThinkingConfig(
             thinking_budget=int(thinking_budget),
-        )
+        ),
+    }
     if response_mime_type:
         kwargs['response_mime_type'] = response_mime_type
     if max_output_tokens:
@@ -243,8 +238,8 @@ class GeminiApiAttemptBudget:
     @staticmethod
     def model_family(model_name):
         normalized = str(model_name or '').lower()
-        if 'gemini-3.8' in normalized:
-            return '3.8'
+        if 'gemini-3.5' in normalized:
+            return '3.5'
         if 'gemini-2.5' in normalized:
             return '2.5'
         return normalized or 'unknown'
@@ -439,7 +434,7 @@ def is_daily_quota_error(exc):
 
 
 def is_transient_classification_error(exc):
-    """Detect provider/transport failures without retrying malformed 3.8 JSON."""
+    """Detect provider/transport failures without retrying malformed 3.5 JSON."""
     if is_daily_quota_error(exc) or isinstance(exc, ValueError):
         return False
     message = str(exc).upper()
@@ -4378,7 +4373,7 @@ def normalize_etf_judgment_patch(symbol, patch, research):
     ).strip() or None
 
     # A HIGH-confidence negative is intentionally a cross-stage conclusion, not
-    # something the 3.8 judge may self-certify. Grounded 2.5 research must have
+    # something the 3.5 judge may self-certify. Grounded 2.5 research must have
     # independently failed the benchmark thesis, and either the judge must find
     # continuation WEAK or the grounded research must already contain an
     # observed adverse mechanism. Otherwise keep UNLIKELY but cap confidence at
@@ -4553,7 +4548,7 @@ def safe_judge_etf_research_pool(
         print(
             'WARNING — ETF judgment stage encountered an unexpected error; '
             'preserving grounded research and opening the classification '
-            f'circuit so no further 3.8 requests are spent this run: {exc}'
+            f'circuit so no further 3.5 requests are spent this run: {exc}'
         )
         classification_circuit_open = True
         classification_circuit_reason = f'UNEXPECTED_INTERNAL_FAILURE: {exc}'
@@ -4570,7 +4565,7 @@ def judge_etf_research_pool(
     client, candidate_records, research_by_symbol, market_context, force=False,
     recovery_only=False, release_recovery_reserve=False,
 ):
-    """Use 3.8 Flash as a no-Search judge over validated 2.5 evidence packets."""
+    """Use 3.5 Flash as a no-Search judge over validated 2.5 evidence packets."""
     global classification_logical_calls_used, classification_api_attempts_used
     global classification_quota_exhausted, classification_circuit_open
     global classification_circuit_reason
@@ -4656,7 +4651,7 @@ def judge_etf_research_pool(
     ):
         print(
             f'Accumulating ETF judgment candidates: {len(untouched_symbols)}/'
-            f'{classification_batch_target}; no 3.8 call yet.'
+            f'{classification_batch_target}; no 3.5 call yet.'
         )
         return research_by_symbol
     prior_peer_patches = {
@@ -4791,7 +4786,7 @@ def judge_etf_research_pool(
             + '\n\nCANDIDATES_WITH_GROUNDED_RESEARCH:\n' + json.dumps(compact, ensure_ascii=False)
         )
         print(
-            f'Prepared compact 3.8 ETF judgment payload: '
+            f'Prepared compact 3.5 ETF judgment payload: '
             f'kind={batch_kind}, etfs={len(batch_symbols)}, prompt_chars={len(prompt)}, '
             f'market_events={len(compact_market_context.get("active_risk_events") or [])}, '
             f'peer_classifications={len(prior_peer_patches)}.'
@@ -4863,11 +4858,10 @@ def judge_etf_research_pool(
                     response = client.models.generate_content(
                         model=model_name,
                         config=build_gemini_config(
+                            classification_thinking_budget,
                             enable_search=False,
                             response_mime_type='application/json',
                             max_output_tokens=classification_max_output_tokens,
-                            model_name=model_name,
-                            thinking_level=classification_thinking_level,
                         ),
                         contents=prompt,
                     )
@@ -4958,7 +4952,7 @@ def judge_etf_research_pool(
                             max_transient_backoff_seconds,
                             initial_transient_backoff_seconds * (2 ** (attempt - 1)),
                         ) + random.uniform(0, transient_backoff_jitter_seconds)
-                        print(f'Retrying 3.8 ETF classification in {delay:.1f}s...')
+                        print(f'Retrying 3.5 ETF classification in {delay:.1f}s...')
                         time.sleep(delay)
             if patches is not None or classification_quota_exhausted:
                 break
@@ -4976,7 +4970,7 @@ def judge_etf_research_pool(
                     ) else 'UNEXPECTED_FAILURE'
                 )
                 print(
-                    'ETF 3.8 classification circuit OPEN: '
+                    'ETF 3.5 classification circuit OPEN: '
                     f'{classification_circuit_reason}; leaving '
                     f'{len(batch_symbols)} validated ETF(s) pending judgment '
                     'without entering invalid-patch recovery.'
@@ -5235,7 +5229,7 @@ def preview_portfolio(candidates, research_by_symbol, target, max_per_sector, ma
             continue
         # Apply the calibrated continuation score only after authoritative
         # judgment exists. Provisional 2.5 research can guide backfill order,
-        # but it cannot be treated as though missing 3.8 fields were UNCERTAIN.
+        # but it cannot be treated as though missing 3.5 fields were UNCERTAIN.
         if (
             research.get('judgment_model')
             and etf_final_score(candidate, research) + score_comparison_epsilon < etf_required_final_score(research, candidate)
@@ -5932,16 +5926,14 @@ max_retries = config['max_retries']
 initial_delay = config['initial_delay']
 model_primary = config['model_primary']
 model_fallback = config['model_fallback']
-classification_model = str(config.get('classification_model', 'gemini-3.8-flash'))
+classification_model = str(config.get('classification_model', 'gemini-3.5-flash'))
 summary_model = str(config.get('summary_model', classification_model))
 summary_fallback_model = str(config.get('summary_fallback_model', model_primary))
-if any(model != 'gemini-3.8-flash' for model in (classification_model, summary_model)):
-    raise ValueError('Classification and primary summary models must use the separately budgeted Gemini 3.8 family.')
+if any('3.5' not in model for model in (classification_model, summary_model)):
+    raise ValueError('Classification and primary summary models must use the separately budgeted Gemini 3.5 family.')
 if any('2.5' not in model for model in (model_primary, model_fallback, summary_fallback_model)):
     raise ValueError('Research/context and summary fallback models must use the separately budgeted Gemini 2.5 family.')
-classification_thinking_level = str(config.get('classification_thinking_level', 'medium'))
-if classification_thinking_level not in {'low', 'medium', 'high'}:
-    raise ValueError('Invalid Gemini 3.8 classification thinking_level.')
+classification_thinking_budget = int(config.get('classification_thinking_budget', 8192))
 classification_max_output_tokens = int(config.get('classification_max_output_tokens', 65536))
 max_classification_attempts_per_batch = max(1, int(config.get(
     'max_classification_attempts_per_batch',
@@ -5958,31 +5950,31 @@ transient_backoff_jitter_seconds = max(0.0, float(config.get(
 )))
 max_classification_logical_calls_per_run = max(1, int(config.get('max_classification_logical_calls_per_run', config.get('max_classification_calls_per_run', 8))))
 max_classification_api_attempts_per_run = max(max_classification_logical_calls_per_run, int(config.get('max_classification_api_attempts_per_run', max_classification_logical_calls_per_run * 2 + 2)))
-max_3_8_api_calls_per_run = int(config.get(
-    'max_3_8_api_calls_per_run', config.get('max_gemini_38_calls_per_run', 7)
+max_3_5_api_calls_per_run = int(config.get(
+    'max_3_5_api_calls_per_run', config.get('max_gemini_35_calls_per_run', 7)
 ))
-max_3_8_classification_calls_per_run = int(config.get(
-    'max_3_8_classification_calls_per_run',
+max_3_5_classification_calls_per_run = int(config.get(
+    'max_3_5_classification_calls_per_run',
     max_classification_api_attempts_per_run,
 ))
-max_3_8_summary_calls_per_run = int(config.get(
-    'max_3_8_summary_calls_per_run', 1
+max_3_5_summary_calls_per_run = int(config.get(
+    'max_3_5_summary_calls_per_run', 1
 ))
-max_gemini_38_calls_per_run = max_3_8_api_calls_per_run
+max_gemini_35_calls_per_run = max_3_5_api_calls_per_run
 if (
-    max_3_8_classification_calls_per_run
+    max_3_5_classification_calls_per_run
     != max_classification_api_attempts_per_run
 ):
     raise ValueError(
-        'max_3_8_classification_calls_per_run must equal '
+        'max_3_5_classification_calls_per_run must equal '
         'max_classification_api_attempts_per_run.'
     )
 if (
-    max_3_8_classification_calls_per_run + max_3_8_summary_calls_per_run
-    > max_3_8_api_calls_per_run
+    max_3_5_classification_calls_per_run + max_3_5_summary_calls_per_run
+    > max_3_5_api_calls_per_run
 ):
     raise ValueError(
-        'Gemini 3.8 category limits exceed its total API-call limit.'
+        'Gemini 3.5 category limits exceed its total API-call limit.'
     )
 classification_batch_target = max(1, int(config.get('classification_batch_target', 25)))
 classification_batch_soft_max = max(classification_batch_target, int(config.get('classification_batch_soft_max', 30)))
@@ -6012,9 +6004,6 @@ max_judgment_invalid_patch_rounds_per_etf = max(
 )
 thinking_budget = config.get('thinking_budget', 12288)
 summary_thinking_budget = config.get('summary_thinking_budget', 4096)
-summary_thinking_level = str(config.get('summary_thinking_level', 'medium'))
-if summary_thinking_level not in {'low', 'medium', 'high'}:
-    raise ValueError('Invalid Gemini 3.8 summary thinking_level.')
 gemini_max_output_tokens = config.get('gemini_max_output_tokens', 49152)
 gemini_batch_size = config.get('gemini_batch_size', 15)
 target_selected_etfs = config.get('target_selected_etfs', 10)
@@ -6454,12 +6443,12 @@ request_budget = GeminiRequestBudget(
 )
 api_attempt_budget = GeminiApiAttemptBudget(
     family_limits={
-        '3.8': max_3_8_api_calls_per_run,
+        '3.5': max_3_5_api_calls_per_run,
         '2.5': max_2_5_api_calls_per_run,
     },
     category_limits={
-        ('3.8', 'classification'): max_3_8_classification_calls_per_run,
-        ('3.8', 'summary'): max_3_8_summary_calls_per_run,
+        ('3.5', 'classification'): max_3_5_classification_calls_per_run,
+        ('3.5', 'summary'): max_3_5_summary_calls_per_run,
         ('2.5', 'market'): max_2_5_market_calls_per_run,
         ('2.5', 'research'): max_2_5_research_calls_per_run,
         ('2.5', 'summary'): max_2_5_summary_fallback_calls_per_run,
@@ -6737,7 +6726,7 @@ if research_by_symbol:
         f'Cached evidence preview: provisional={initial_provisional_count}, '
         f'authoritative={len(selected)}; unjudged evidence is not a reopened slot.'
     )
-# Finish already-paid-for 3.8 work before considering any new 2.5 research.
+# Finish already-paid-for 3.5 work before considering any new 2.5 research.
 # force=True drains the untouched tail first, then uses isolated small recovery
 # batches for omissions or malformed patches.
 if (
@@ -7576,7 +7565,7 @@ if research_budget_exhausted:
 partial_portfolio = len(selected) < target_selected_etfs
 
 # Publication is allowed to be partial only when the authoritative comparison is
-# complete. A validated, otherwise-eligible ETF without a 3.8 judgment can still
+# complete. A validated, otherwise-eligible ETF without a 3.5 judgment can still
 # fill an open slot or displace an incumbent, so publishing while such candidates
 # remain would replace the last good page with a portfolio we know is incomplete.
 pending_authoritative_symbols = []
@@ -7709,31 +7698,30 @@ elif config.get('final_summary_enabled', True):
     )
     summary_data = None
     if (
-        classification_api_attempts_used + summary_38_api_attempts_used
-        < max_gemini_38_calls_per_run
+        classification_api_attempts_used + summary_35_api_attempts_used
+        < max_gemini_35_calls_per_run
         and api_attempt_budget.remaining(summary_model, 'summary') > 0
     ):
         api_attempt_budget.reserve(
             summary_model, 'summary', 'ETF HTML summary'
         )
-        summary_38_api_attempts_used += 1
+        summary_35_api_attempts_used += 1
         stage = 'ETF HTML summary'
-        total_38_attempt = (
-            classification_api_attempts_used + summary_38_api_attempts_used
+        total_35_attempt = (
+            classification_api_attempts_used + summary_35_api_attempts_used
         )
         print(
-            f'Gemini 3.8 summary call {total_38_attempt}/'
-            f'{max_gemini_38_calls_per_run}: {stage} ({summary_model})'
+            f'Gemini 3.5 summary call {total_35_attempt}/'
+            f'{max_gemini_35_calls_per_run}: {stage} ({summary_model})'
         )
         try:
             response = client.models.generate_content(
                 model=summary_model,
                 config=build_gemini_config(
+                    summary_thinking_budget,
                     enable_search=False,
                     response_mime_type='application/json',
                     max_output_tokens=gemini_max_output_tokens,
-                    model_name=summary_model,
-                    thinking_level=summary_thinking_level,
                 ),
                 contents=summary_prompt,
             )
@@ -7746,21 +7734,21 @@ elif config.get('final_summary_enabled', True):
             models_used.append(summary_model)
             call_diagnostics.append({
                 'stage': 'HTML summary', 'model': summary_model,
-                'model_family': '3.8', 'api_attempt': total_38_attempt,
+                'model_family': '3.5', 'api_attempt': total_35_attempt,
                 'success': True, **metadata,
             })
-            print('Using Gemini 3.8-written ETF HTML summary.')
+            print('Using Gemini 3.5-written ETF HTML summary.')
         except Exception as exc:
             print(f'ETF summary unavailable from {summary_model}: {exc}')
             call_diagnostics.append({
                 'stage': 'HTML summary', 'model': summary_model,
-                'model_family': '3.8', 'api_attempt': total_38_attempt,
+                'model_family': '3.5', 'api_attempt': total_35_attempt,
                 'success': False, 'error': str(exc),
             })
             summary_data = None
     else:
         print(
-            'ETF 3.8 summary reservation was unavailable; trying the 2.5 fallback.'
+            'ETF 3.5 summary reservation was unavailable; trying the 2.5 fallback.'
         )
 
     if (summary_data is None and request_budget.can_reserve('summary')
@@ -8071,7 +8059,7 @@ diagnostics = {
         'minimum_final_selection_score': minimum_final_selection_score,
         'max_classification_logical_calls_per_run': max_classification_logical_calls_per_run,
         'max_classification_api_attempts_per_run': max_classification_api_attempts_per_run,
-        'max_gemini_38_calls_per_run': max_gemini_38_calls_per_run,
+        'max_gemini_35_calls_per_run': max_gemini_35_calls_per_run,
         'benchmark_qvm_floor': benchmark_qvm_floor,
         'benchmark_qvm_override_margin': benchmark_qvm_override_margin,
         'minimum_uncertain_selection_score': minimum_uncertain_selection_score,
@@ -8088,9 +8076,9 @@ diagnostics = {
         'api_attempt_limit': request_budget.max_api_attempts,
         'research_api_attempts': request_budget.research_api_attempts,
         'summary_api_attempts': request_budget.summary_api_attempts,
-        'summary_38_api_attempts': summary_38_api_attempts_used,
-        'total_38_api_attempts': (
-            classification_api_attempts_used + summary_38_api_attempts_used
+        'summary_35_api_attempts': summary_35_api_attempts_used,
+        'total_35_api_attempts': (
+            classification_api_attempts_used + summary_35_api_attempts_used
         ),
         'context_api_attempts': request_budget.context_api_attempts,
         'per_model_api_attempts': api_attempt_budget.snapshot(),
@@ -8216,10 +8204,10 @@ print(
     f'  summary logical calls: {request_budget.summary_used}\n'
     f'  ETF judgment logical calls: {classification_logical_calls_used}/{max_classification_logical_calls_per_run}\n'
     f'  ETF judgment API attempts: {classification_api_attempts_used}/{max_classification_api_attempts_per_run}\n'
-    f'  ETF 3.8 summary API attempts: {summary_38_api_attempts_used}/1\n'
-    f'  total Gemini 3.8 API attempts: '
-    f'{classification_api_attempts_used + summary_38_api_attempts_used}/'
-    f'{max_gemini_38_calls_per_run}\n'
+    f'  ETF 3.5 summary API attempts: {summary_35_api_attempts_used}/1\n'
+    f'  total Gemini 3.5 API attempts: '
+    f'{classification_api_attempts_used + summary_35_api_attempts_used}/'
+    f'{max_gemini_35_calls_per_run}\n'
     f'  actual API attempts: {request_budget.api_attempts}/{request_budget.max_api_attempts} '
     f'(research={request_budget.research_api_attempts}, '
     f'context={request_budget.context_api_attempts}, '

@@ -122,28 +122,28 @@ benchmark_etfs:
 # Search-enabled evidence collection stays on Gemini 2.5 Flash.
 model_primary: gemini-2.5-flash
 model_fallback: gemini-2.5-flash-lite
-# Gemini 3.8 Flash is the authoritative no-Search ETF continuation/risk judge.
-classification_model: gemini-3.8-flash
-# The HTML summary normally uses the seventh 3.8 call. If that call fails,
+# Gemini 3.5 Flash is the authoritative no-Search ETF continuation/risk judge.
+classification_model: gemini-3.5-flash
+# The HTML summary normally uses the seventh 3.5 call. If that call fails,
 # retry once on 2.5 Flash using the reserved eighth 2.5-stage call.
-summary_model: gemini-3.8-flash
+summary_model: gemini-3.5-flash
 summary_fallback_model: gemini-2.5-flash
-classification_thinking_level: medium
+classification_thinking_budget: 8192
 classification_max_output_tokens: 65536
-# Match the stock judge's bounded 3.8 transport retry and circuit policy.
+# Match the stock judge's bounded 3.5 transport retry and circuit policy.
 max_classification_attempts_per_batch: 3
 initial_transient_backoff_seconds: 60
 max_transient_backoff_seconds: 240
 transient_backoff_jitter_seconds: 30
-# Six calls are available to judgment, including retries. One additional 3.8
+# Six calls are available to judgment, including retries. One additional 3.5
 # call is reserved exclusively for the HTML summary.
 max_classification_logical_calls_per_run: 6
 max_classification_api_attempts_per_run: 6
 # Hard model-family and workload ceilings count actual HTTP attempts, including
-# transient retries. Classification and summary share the seven-call 3.8 cap.
-max_3_8_api_calls_per_run: 7
-max_3_8_classification_calls_per_run: 6
-max_3_8_summary_calls_per_run: 1
+# transient retries. Classification and summary share the seven-call 3.5 cap.
+max_3_5_api_calls_per_run: 7
+max_3_5_classification_calls_per_run: 6
+max_3_5_summary_calls_per_run: 1
 classification_batch_target: 25
 classification_batch_soft_max: 30
 classification_min_intermediate_batch: 15
@@ -231,7 +231,6 @@ max_concentration_penalty: -2.0
 repeated_return_driver_penalty: -3.0
 thinking_budget: 12288
 summary_thinking_budget: 4096
-summary_thinking_level: medium
 max_gemini_calls_per_run: 8
 max_etf_research_calls_per_run: 6
 # Hard 2.5-model ceilings across context, research, summary, and retries. The

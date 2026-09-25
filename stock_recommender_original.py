@@ -615,22 +615,19 @@ def initialize_gemini_client():
 
 
 def build_gemini_config(
-        thinking_budget=None, enable_search=True, max_output_tokens=None,
-        response_schema=None, model_name=None, thinking_level="medium"):
-    """Create a Gemini configuration compatible with the target model."""
+        thinking_budget, enable_search=True, max_output_tokens=None,
+        response_schema=None):
+    """Create a low-variance Gemini configuration."""
     tools = None
     if enable_search:
         tools = [types.Tool(google_search=types.GoogleSearch())]
-    options = {"tools": tools}
-    if str(model_name or "").lower().startswith("gemini-3."):
-        options["thinking_config"] = types.ThinkingConfig(
-            thinking_level=thinking_level
-        )
-    else:
-        options["temperature"] = 0
-        options["thinking_config"] = types.ThinkingConfig(
+    options = {
+        "tools": tools,
+        "temperature": 0,
+        "thinking_config": types.ThinkingConfig(
             thinking_budget=thinking_budget
-        )
+        ),
+    }
     if max_output_tokens is not None:
         options["max_output_tokens"] = int(max_output_tokens)
     if response_schema is not None:
@@ -718,8 +715,8 @@ class GeminiApiAttemptBudget:
     @staticmethod
     def model_family(model_name):
         normalized = str(model_name or "").lower()
-        if "gemini-3.8" in normalized:
-            return "3.8"
+        if "gemini-3.5" in normalized:
+            return "3.5"
         if "gemini-2.5" in normalized:
             return "2.5"
         return normalized or "unknown"
@@ -1327,7 +1324,7 @@ STOCK_JUDGMENT_RESEARCH_FIELDS = (
     "current_operating_evidence", "material_company_event",
     "durable_drivers", "temporary_drivers",
     # Research-stage atomic risk evidence. These are evidence inputs, not the
-    # authoritative 3.8 judgment, and are intentionally retained so the judge
+    # authoritative 3.5 judgment, and are intentionally retained so the judge
     # sees the same substantive facts as before.
     "reversal_risk", "risk_basis", "catalyst_dependence",
     "mechanism_status", "normalization_probability",
@@ -1342,7 +1339,7 @@ STOCK_JUDGMENT_RESEARCH_FIELDS = (
 def build_stock_judgment_research_projection(research):
     """Keep grounded decision evidence while excluding sources/cache metadata.
 
-    Gemini 3.8 is a no-Search judgment stage. Source URLs, cache/provenance
+    Gemini 3.5 is a no-Search judgment stage. Source URLs, cache/provenance
     bookkeeping, eligibility flags, QVM rank copies, and prior judgment metadata
     do not add classification evidence and materially increase a batched request.
     The substantive grounded evidence fields are preserved unchanged.
@@ -1416,7 +1413,7 @@ def judge_stock_research_batch(
         attempt_ceiling=None,
         batch_kind="initial",
 ):
-    """Use only 3.8 Flash as the no-Search judge.
+    """Use only 3.5 Flash as the no-Search judge.
 
     Research facts and sources remain owned by the grounded 2.5 research stage.
     The judge returns only decision-field patches, which are merged into the
@@ -1526,7 +1523,7 @@ def judge_stock_research_batch(
         )
 
     print(
-        f"Prepared compact 3.8 stock judgment payload: "
+        f"Prepared compact 3.5 stock judgment payload: "
         f"stocks={len(compact_candidates)}, prompt_chars={len(prompt)}, "
         f"market_events={len(compact_market_context.get('active_risk_events') or [])}, "
         f"peer_classifications={len(compact_peer_classifications)}."
@@ -1740,11 +1737,11 @@ def judge_stock_research_batch(
                     max_transient_backoff_seconds,
                     initial_transient_backoff_seconds * (2 ** (attempt - 1)),
                 ) + random.uniform(0, transient_backoff_jitter_seconds)
-                print(f"Retrying 3.8 classification in {delay:.1f}s...")
+                print(f"Retrying 3.5 classification in {delay:.1f}s...")
                 time.sleep(delay)
 
     print(
-        "Warning: Gemini 3.8 judgment is unavailable after this batch's retry "
+        "Warning: Gemini 3.5 judgment is unavailable after this batch's retry "
         "allowance; preserving validated research as PENDING_JUDGMENT and "
         f"opening the classification circuit breaker: {last_error}"
     )
@@ -2080,7 +2077,7 @@ def validate_sources(sources, label, minimum=1, maximum=None):
 
 def validate_stock_research_evidence(
         data, expected_candidates, minimum_sources=1):
-    """Validate the 2.5 evidence packet without requiring 3.8 judgment fields."""
+    """Validate the 2.5 evidence packet without requiring 3.5 judgment fields."""
     results = data.get("results")
     if not isinstance(results, list) or len(results) != len(expected_candidates):
         raise ValueError("Research results do not match the supplied candidates.")
@@ -2308,9 +2305,8 @@ def build_stock_judgment_config():
     if not classification_schema_unavailable:
         try:
             return build_gemini_config(
-                response_schema=stock_judgment_response_schema(),
-                model_name=classification_model,
-                thinking_level=classification_thinking_level, **options,
+                classification_thinking_budget,
+                response_schema=stock_judgment_response_schema(), **options,
             )
         except (TypeError, ValueError) as exc:
             if not is_judgment_schema_compatibility_error(exc):
@@ -2318,10 +2314,7 @@ def build_stock_judgment_config():
             classification_schema_unavailable = True
             print("Classification SDK cannot use the response schema; using "
                   "the JSON prompt with strict local enum validation.")
-    return build_gemini_config(
-        model_name=classification_model,
-        thinking_level=classification_thinking_level, **options,
-    )
+    return build_gemini_config(classification_thinking_budget, **options)
 
 
 def has_material_entry_or_concentration_risk(result):
@@ -4007,7 +4000,7 @@ def call_gemini_json(
         fallback_max_attempts=None,
         retry_output_errors=False,
         minimum_exposed_search_queries=0,
-        budget_category="general", fallback_gemini_config=None):
+        budget_category="general"):
     """Call Gemini, require grounded research, parse JSON, and validate it."""
     models = [model_primary]
     if model_fallback and model_fallback != model_primary:
@@ -4053,8 +4046,7 @@ def call_gemini_json(
                 )
                 response = client.models.generate_content(
                     model=model_name,
-                    config=(gemini_config if model_index == 0
-                            else fallback_gemini_config or gemini_config),
+                    config=gemini_config,
                     contents=attempt_prompt
                 )
                 response_text = getattr(response, "text", None)
@@ -6166,15 +6158,11 @@ transient_backoff_jitter_seconds = float(
 )
 model_primary = config["model_primary"]
 model_fallback = config["model_fallback"]
-classification_model = str(config.get("classification_model", "gemini-3.8-flash"))
+classification_model = str(config.get("classification_model", "gemini-3.5-flash"))
 classification_fallback_model = None
-if classification_model != "gemini-3.8-flash":
-    raise ValueError("Stock classification requires gemini-3.8-flash.")
-classification_thinking_level = str(
-    config.get("classification_thinking_level", "medium")
+classification_thinking_budget = int(
+    config.get("classification_thinking_budget", 8192)
 )
-if classification_thinking_level not in {"low", "medium", "high"}:
-    raise ValueError("Invalid Gemini 3.8 classification thinking_level.")
 classification_max_output_tokens = int(
     config.get("classification_max_output_tokens", 32768)
 )
@@ -6330,13 +6318,13 @@ max_stock_research_calls_per_run = int(
     config.get("max_stock_research_calls_per_run", max_gemini_calls_per_run)
 )
 reserved_summary_calls = int(config.get("reserved_summary_calls", 1))
-max_3_8_api_calls_per_run = int(config.get("max_3_8_api_calls_per_run", 8))
-max_3_8_classification_calls_per_run = int(config.get(
-    "max_3_8_classification_calls_per_run",
+max_3_5_api_calls_per_run = int(config.get("max_3_5_api_calls_per_run", 8))
+max_3_5_classification_calls_per_run = int(config.get(
+    "max_3_5_classification_calls_per_run",
     max_classification_calls_per_run,
 ))
-max_3_8_summary_calls_per_run = int(config.get(
-    "max_3_8_summary_calls_per_run", 2
+max_3_5_summary_calls_per_run = int(config.get(
+    "max_3_5_summary_calls_per_run", 2
 ))
 max_2_5_api_calls_per_run = int(config.get("max_2_5_api_calls_per_run", 8))
 max_2_5_market_calls_per_run = int(config.get(
@@ -6348,16 +6336,16 @@ max_2_5_research_calls_per_run = int(config.get(
 max_2_5_summary_fallback_calls_per_run = int(config.get(
     "max_2_5_summary_fallback_calls_per_run", 1
 ))
-if max_3_8_classification_calls_per_run != max_classification_calls_per_run:
+if max_3_5_classification_calls_per_run != max_classification_calls_per_run:
     raise ValueError(
-        "max_3_8_classification_calls_per_run must equal "
+        "max_3_5_classification_calls_per_run must equal "
         "max_classification_calls_per_run."
     )
 if (
-    max_3_8_classification_calls_per_run + max_3_8_summary_calls_per_run
-    > max_3_8_api_calls_per_run
+    max_3_5_classification_calls_per_run + max_3_5_summary_calls_per_run
+    > max_3_5_api_calls_per_run
 ):
-    raise ValueError("Gemini 3.8 category limits exceed its total API-call limit.")
+    raise ValueError("Gemini 3.5 category limits exceed its total API-call limit.")
 for category_name, category_limit in (
     ("market", max_2_5_market_calls_per_run),
     ("research", max_2_5_research_calls_per_run),
@@ -6392,9 +6380,6 @@ market_context_cache_hours = float(
 )
 final_summary_enabled = bool(config.get("final_summary_enabled", True))
 summary_thinking_budget = int(config.get("summary_thinking_budget", 4096))
-summary_thinking_level = str(config.get("summary_thinking_level", "medium"))
-if summary_thinking_level not in {"low", "medium", "high"}:
-    raise ValueError("Invalid Gemini 3.8 summary thinking_level.")
 
 print(f"Stock config loaded from: {Path('stock_config.yml').resolve()}")
 print(
@@ -6404,9 +6389,9 @@ print(
     f"{max_research_candidates_per_open_sector_slot}, "
     f"max_calls={max_gemini_calls_per_run}, "
     f"max_stock_calls={max_stock_research_calls_per_run}, "
-    f"3.8_api_budget={max_3_8_api_calls_per_run} "
-    f"({max_3_8_classification_calls_per_run} classification + "
-    f"{max_3_8_summary_calls_per_run} summary), "
+    f"3.5_api_budget={max_3_5_api_calls_per_run} "
+    f"({max_3_5_classification_calls_per_run} classification + "
+    f"{max_3_5_summary_calls_per_run} summary), "
     f"2.5_api_budget={max_2_5_api_calls_per_run} "
     f"({max_2_5_market_calls_per_run} market + "
     f"{max_2_5_research_calls_per_run} research + "
@@ -6653,12 +6638,12 @@ request_budget = GeminiRequestBudget(
 )
 api_attempt_budget = GeminiApiAttemptBudget(
     family_limits={
-        "3.8": max_3_8_api_calls_per_run,
+        "3.5": max_3_5_api_calls_per_run,
         "2.5": max_2_5_api_calls_per_run,
     },
     category_limits={
-        ("3.8", "classification"): max_3_8_classification_calls_per_run,
-        ("3.8", "summary"): max_3_8_summary_calls_per_run,
+        ("3.5", "classification"): max_3_5_classification_calls_per_run,
+        ("3.5", "summary"): max_3_5_summary_calls_per_run,
         ("2.5", "market"): max_2_5_market_calls_per_run,
         ("2.5", "stock"): max_2_5_research_calls_per_run,
         ("2.5", "summary"): max_2_5_summary_fallback_calls_per_run,
@@ -6786,7 +6771,7 @@ print(
     f"{len(allowed_risk_event_ids)} canonical event(s)."
 )
 
-# Grounded 2.5 evidence and market-sensitive 3.8 judgment have separate
+# Grounded 2.5 evidence and market-sensitive 3.5 judgment have separate
 # contracts. Market/QVM changes can therefore refresh judgment without paying
 # for the same Google-grounded company research again.
 stock_prompt_cache_text = config["prompt_stock_batch"].strip()
@@ -6963,7 +6948,7 @@ save_json_object_atomic(stock_research_cache_file, stock_research_cache)
 # Individual cache entries can each be structurally valid while disagreeing
 # about a shared market mechanism. Audit them together before deciding the
 # cache can fill the portfolio. A judgment inconsistency refreshes only the
-# no-Search 3.8 layer; its still-valid grounded evidence remains reusable.
+# no-Search 3.5 layer; its still-valid grounded evidence remains reusable.
 cache_consistency_changed = False
 for symbol, cached_result in list(validated_cached_research.items()):
     comparison_results = [
@@ -7295,7 +7280,7 @@ candidate_by_symbol = {str(row["Symbol"]).upper(): row for row in candidate_reco
 def optimistic_portfolio_capacity(
         provisional, pending, candidates_by_symbol, sector_limit,
         excluded_crypto_levels):
-    """Upper bound on slots pending evidence could fill, before 3.8 judges it.
+    """Upper bound on slots pending evidence could fill, before 3.5 judges it.
 
     Only deterministic eligibility and sector limits reduce this bound. Risk,
     benchmark outlook, and shared-event limits are decided after classification.
@@ -7318,7 +7303,7 @@ def optimistic_portfolio_capacity(
 
 
 def write_stock_classification_checkpoint(status="RUNNING"):
-    """Record completed 3.8 work after the research cache is safely saved."""
+    """Record completed 3.5 work after the research cache is safely saved."""
     try:
         save_json_object_atomic(RUN_REPORTS_DIR / "stock_classification_checkpoint.json", {
             "updated_at": datetime.now(UTC).isoformat(),
@@ -7335,7 +7320,7 @@ def write_stock_classification_checkpoint(status="RUNNING"):
 
 
 def classify_pending(force=False, release_recovery_reserve=False):
-    """Judge grounded drafts, retrying only bad/omitted 3.8 patches."""
+    """Judge grounded drafts, retrying only bad/omitted 3.5 patches."""
     global classification_unavailable_this_run
     if classification_unavailable_this_run:
         return
@@ -7548,7 +7533,7 @@ def classify_pending(force=False, release_recovery_reserve=False):
 
 # Recovery order is deliberate: classify every fresh, validated cache entry
 # before spending another search-enabled 2.5 call. This makes a rerun after a
-# 3.8 outage cheap and prevents pending evidence from being researched again.
+# 3.5 outage cheap and prevents pending evidence from being researched again.
 if pending_classification:
     print(
         "Classifying cached PENDING_JUDGMENT research before new stock "
@@ -8239,7 +8224,7 @@ PRIOR_INVALID_RESULTS_TO_REPAIR:
                 )
 
             # Check the pending evidence before spending a 2.5 call on retries
-            # or fresh candidates. A smaller 3.8 batch is worthwhile if it
+            # or fresh candidates. A smaller 3.5 batch is worthwhile if it
             # might already complete the actual portfolio.
             provisional, _, _, _ = build_stock_portfolio(
                 candidate_records, validated_cached_research
@@ -8668,17 +8653,11 @@ if final_summary_enabled:
     try:
         summary_data, summary_model, _ = call_gemini_json(
             client=client,
-            # Try one 3.8 summary, then at most one 2.5 no-Search fallback.
+            # Try one 3.5 summary, then at most one 2.5 no-Search fallback.
             model_primary=classification_model,
             model_fallback=model_primary,
             gemini_config=build_gemini_config(
-                summary_thinking_budget, enable_search=False,
-                model_name=classification_model,
-                thinking_level=summary_thinking_level,
-            ),
-            fallback_gemini_config=build_gemini_config(
-                summary_thinking_budget, enable_search=False,
-                model_name=model_primary,
+                summary_thinking_budget, enable_search=False
             ),
             prompt=summary_prompt,
             stage="final HTML summary",
@@ -8701,7 +8680,7 @@ if final_summary_enabled:
 
 if portfolio_status == "PORTFOLIO_INCOMPLETE_JUDGMENT_SERVICE_UNAVAILABLE":
     recommendations_summary = (
-        '<p><strong>Portfolio incomplete:</strong> Gemini 3.8 classification '
+        '<p><strong>Portfolio incomplete:</strong> Gemini 3.5 classification '
         'was unavailable. The displayed selections are confirmed, but '
         f'{len(pending_judgment_symbols)} validated candidate(s) remain '
         'pending judgment and may fill or change the portfolio on the next '

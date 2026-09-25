@@ -1,26 +1,26 @@
 {
   "schema_version": 2,
-  "run_id": "36158838053-1",
-  "updated_at": "2026-09-25T16:13:58.160634+00:00",
+  "run_id": "36167912589-1",
+  "updated_at": "2026-09-25T17:37:42.068314+00:00",
   "status": "FAILED",
   "active_stage": "failed_incomplete_judgment",
-  "elapsed_seconds": 294.837,
-  "active_stage_seconds": 0.003,
+  "elapsed_seconds": 204.193,
+  "active_stage_seconds": 0.005,
   "provenance": {
-    "run_id": "36158838053-1",
-    "github_sha": "0f59446a93ab9ed92a5baae929be7af44455dd70",
+    "run_id": "36167912589-1",
+    "github_sha": "88f7015112a0481596542a9a34f2f8c5ec9301ff",
     "github_run_attempt": "1",
-    "source_sha256": "d2fc12636685971b59e90448cc679f7abfae3335fb081bee0365be0104eaa7dc",
-    "config_sha256": "c8750781c5ec4bcf8942905355df14739be49d6697f5f33ca132796df0a0a36c"
+    "source_sha256": "6eb36efcd9bb8afce7f4ad400980e7ce5018d5f08c69b2fc0b7dc962f8deab52",
+    "config_sha256": "7e4e4efd844ba44752e4dc5f564e57e1e17f46c8d8530871614b60b7ea46a036"
   },
   "stages": [
     {
       "stage": "startup",
-      "elapsed_seconds": 0.031
+      "elapsed_seconds": 0.032
     },
     {
       "stage": "universe_and_quantitative_data",
-      "elapsed_seconds": 74.469
+      "elapsed_seconds": 0.688
     },
     {
       "stage": "market_context",
@@ -28,7 +28,7 @@
     },
     {
       "stage": "research_cache",
-      "elapsed_seconds": 220.29
+      "elapsed_seconds": 203.43
     },
     {
       "stage": "classification_before_new_research",
@@ -36,41 +36,32 @@
     },
     {
       "stage": "classification_final_tail",
-      "elapsed_seconds": 0.016
+      "elapsed_seconds": 0.014
     },
     {
       "stage": "summary_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.01
+      "elapsed_seconds": 0.009
     },
     {
       "stage": "publish_html_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.015
+      "elapsed_seconds": 0.012
     }
   ],
   "cache": {
     "yfinance_metadata": {
-      "status": "completed",
-      "eligible": 807,
-      "hits": 806,
-      "live_requests": 1,
-      "failed_symbols": [],
-      "incomplete_symbols": [
-        "SEURF"
-      ],
-      "ttl_hours": 168,
-      "save_succeeded": true
+      "status": "not_run"
     },
     "fund_data": {
       "status": "completed",
-      "hits": 86,
-      "live_requests": 16,
+      "hits": 101,
+      "live_requests": 1,
       "incomplete_symbols": [
         "GARP"
       ],
       "save_succeeded": true
     },
     "top_qvm": {
-      "hit": false,
+      "hit": true,
       "path": "caches/top_qvm_etfs_cache.pkl",
       "ttl_hours": 6
     },
@@ -80,7 +71,7 @@
       "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9",
       "entries": 1,
       "hit": true,
-      "age_hours": 11.114320986388888,
+      "age_hours": 0.3541748275,
       "ttl_hours": 12,
       "reason": "validated_shared_contract"
     },
@@ -88,29 +79,28 @@
       "path": "caches/gemini_etf_research_cache.json",
       "ttl_hours": 30,
       "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4",
-      "hits": 30,
-      "misses": 67,
+      "hits": 27,
+      "misses": 70,
       "symbols": {
         "VLUE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904887958055555,
-          "market_context_changed": false,
+          "age_hours": 11.305102791666666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253000+00:00"
         },
         "XLK": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888319444446,
-          "market_context_changed": false,
+          "age_hours": 11.305103162777778,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.252939+00:00"
         },
         "VFLO": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.904888528611112,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:16:00.252807+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.30510338138889,
+          "error": "VFLO has unknown primary_risk_event_id 'MIDDLE_EAST_CONFLICT'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FTEC": {
           "hit": false,
@@ -120,15 +110,15 @@
         "DIVB": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888719999999,
-          "market_context_changed": false,
+          "age_hours": 11.305551821944444,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253058+00:00"
         },
         "CRAK": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888838055555,
-          "market_context_changed": false,
+          "age_hours": 11.305552034722222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253117+00:00"
         },
         "IYW": {
@@ -144,15 +134,15 @@
         "VOO": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889140277778,
-          "market_context_changed": false,
+          "age_hours": 11.305571540555555,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253253+00:00"
         },
         "XLE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889379166667,
-          "market_context_changed": false,
+          "age_hours": 11.305571889166666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.252884+00:00"
         },
         "CIBR": {
@@ -163,8 +153,8 @@
         "VONV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889396944444,
-          "market_context_changed": false,
+          "age_hours": 11.30559330222222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253682+00:00"
         },
         "VOOG": {
@@ -175,8 +165,8 @@
         "QQQM": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889728055556,
-          "market_context_changed": false,
+          "age_hours": 11.305593835833333,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253322+00:00"
         },
         "RSPT": {
@@ -187,15 +177,15 @@
         "IVV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889950555555,
-          "market_context_changed": false,
+          "age_hours": 11.305594239444444,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253379+00:00"
         },
         "AVLV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.9048900425,
-          "market_context_changed": false,
+          "age_hours": 11.305594436388889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253511+00:00"
         },
         "IUSG": {
@@ -206,8 +196,8 @@
         "IWD": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904890202499999,
-          "market_context_changed": false,
+          "age_hours": 11.305594760277778,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253737+00:00"
         },
         "QQQ": {
@@ -223,8 +213,8 @@
         "DYNF": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904890605,
-          "market_context_changed": false,
+          "age_hours": 11.305595396666668,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253435+00:00"
         },
         "SPYM": {
@@ -280,8 +270,8 @@
         "JQUA": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875773319444443,
-          "market_context_changed": false,
+          "age_hours": 11.2764789,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079598+00:00"
         },
         "DFLV": {
@@ -302,22 +292,21 @@
         "GARP": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875773658611111,
-          "market_context_changed": false,
+          "age_hours": 11.276479525,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079882+00:00"
         },
         "COPX": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.875773811388889,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:17:45.079835+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.276479765833333,
+          "error": "COPX has unknown primary_risk_event_id 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FENY": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.90489245861111,
-          "market_context_changed": false,
+          "age_hours": 11.305627135555556,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253181+00:00"
         },
         "SMH": {
@@ -358,8 +347,8 @@
         "VDE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.90489316138889,
-          "market_context_changed": false,
+          "age_hours": 11.305648824444443,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253594+00:00"
         },
         "OEF": {
@@ -370,8 +359,8 @@
         "JMOM": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.8597464625,
-          "market_context_changed": false,
+          "age_hours": 11.260522773055555,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782543+00:00"
         },
         "PRF": {
@@ -402,8 +391,8 @@
         "IBB": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859747153611112,
-          "market_context_changed": false,
+          "age_hours": 11.260523978333334,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782298+00:00"
         },
         "BBUS": {
@@ -454,8 +443,8 @@
         "XLV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859748156944445,
-          "market_context_changed": false,
+          "age_hours": 11.260525707222223,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782429+00:00"
         },
         "FNDB": {
@@ -476,8 +465,8 @@
         "XBI": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875777141944445,
-          "market_context_changed": false,
+          "age_hours": 11.276554977222222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079778+00:00"
         },
         "DFAC": {
@@ -486,11 +475,10 @@
           "age_hours": null
         },
         "GDX": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.859748885277778,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:18:42.782374+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.26052688,
+          "error": "GDX has unknown primary_risk_event_id 'MIDDLE_EAST_CONFLICT'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FBCG": {
           "hit": false,
@@ -500,8 +488,8 @@
         "IYE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875777650833333,
-          "market_context_changed": false,
+          "age_hours": 11.276585293888889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079671+00:00"
         },
         "ESGU": {
@@ -552,8 +540,8 @@
         "XOP": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875778698055555,
-          "market_context_changed": false,
+          "age_hours": 11.276622043888889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079725+00:00"
         },
         "HDV": {
@@ -574,8 +562,8 @@
         "IHE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859750668333334,
-          "market_context_changed": false,
+          "age_hours": 11.260626436388888,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782484+00:00"
         },
         "QTUM": {
@@ -596,22 +584,22 @@
         "QUAL": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.838857703611112,
-          "market_context_changed": false,
+          "age_hours": 11.239733753888888,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998913+00:00"
         },
         "VHT": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.83885790361111,
-          "market_context_changed": false,
+          "age_hours": 11.239734031666666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998741+00:00"
         },
         "SIL": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.838857981111111,
-          "market_context_changed": false,
+          "age_hours": 11.239734206944446,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998969+00:00"
         },
         "DSI": {
@@ -627,8 +615,8 @@
         "IGE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859751917777778,
-          "market_context_changed": false,
+          "age_hours": 11.260628437777777,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782606+00:00"
         },
         "DCOR": {
@@ -656,23 +644,23 @@
   },
   "per_model_api_attempts": {
     "family_used": {
-      "3.5": 3,
+      "3.8": 3,
       "2.5": 0
     },
     "family_limits": {
-      "3.5": 7,
+      "3.8": 7,
       "2.5": 8
     },
     "category_used": {
-      "3.5:classification": 3,
-      "3.5:summary": 0,
+      "3.8:classification": 3,
+      "3.8:summary": 0,
       "2.5:market": 0,
       "2.5:research": 0,
       "2.5:summary": 0
     },
     "category_limits": {
-      "3.5:classification": 6,
-      "3.5:summary": 1,
+      "3.8:classification": 6,
+      "3.8:summary": 1,
       "2.5:market": 2,
       "2.5:research": 6,
       "2.5:summary": 1
@@ -685,14 +673,13 @@
   "classification_calls": [
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 1,
       "logical_call": 1,
       "api_attempt": 1,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -705,14 +692,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -724,22 +709,21 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 1.308,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 4.388,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 2,
       "logical_call": 1,
       "api_attempt": 2,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -752,14 +736,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -771,22 +753,21 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 3.795,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 4.539,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 3,
       "logical_call": 1,
       "api_attempt": 3,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -799,14 +780,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -818,9 +797,9 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 1.483,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 0.89,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     }
@@ -829,13 +808,11 @@
   "batches": [],
   "validated_symbols": [
     "AVLV",
-    "COPX",
     "CRAK",
     "DIVB",
     "DYNF",
     "FENY",
     "GARP",
-    "GDX",
     "IBB",
     "IGE",
     "IHE",
@@ -848,7 +825,6 @@
     "QUAL",
     "SIL",
     "VDE",
-    "VFLO",
     "VHT",
     "VLUE",
     "VONV",
@@ -860,5 +836,5 @@
     "XOP"
   ],
   "selected_symbols": [],
-  "error": "RuntimeError: ETF authoritative judgment incomplete; previous successful HTML page was preserved. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: VLUE, XLK, VFLO, DIVB, VOO, XLE, VONV, QQQM, IVV, AVLV, IWD, DYNF, JQUA, GARP, FENY, VDE, JMOM, IBB, XLV, XBI, IYE, XOP, IHE, QUAL"
+  "error": "RuntimeError: ETF authoritative judgment incomplete; previous successful HTML page was preserved. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: VLUE, XLK, DIVB, VOO, XLE, VONV, QQQM, IVV, AVLV, IWD, DYNF, JQUA, GARP, FENY, VDE, JMOM, IBB, XLV, XBI, IYE, XOP, IHE, QUAL"
 }

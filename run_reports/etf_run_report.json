@@ -1,44 +1,35 @@
 {
   "schema_version": 2,
-  "run_id": "36158838053-1",
-  "classification_contract_hash": "8f8f1e507a46b17e8e7d53aa32c2880e9aa82552931e0d86502601044cc90598",
-  "classification_prior_compatible": true,
+  "run_id": "36167912589-1",
+  "classification_contract_hash": "ddb64b4c758b82e8058d404428ef1e35efc89a7ba8b8040304cf1b62a0902b93",
+  "classification_prior_compatible": false,
   "benchmark_high_negative": {
     "raw": 0,
     "corroborated": 0,
     "downgraded": 0
   },
   "provenance": {
-    "run_id": "36158838053-1",
-    "github_sha": "0f59446a93ab9ed92a5baae929be7af44455dd70",
+    "run_id": "36167912589-1",
+    "github_sha": "88f7015112a0481596542a9a34f2f8c5ec9301ff",
     "github_run_attempt": "1",
-    "source_sha256": "d2fc12636685971b59e90448cc679f7abfae3335fb081bee0365be0104eaa7dc",
-    "config_sha256": "c8750781c5ec4bcf8942905355df14739be49d6697f5f33ca132796df0a0a36c"
+    "source_sha256": "6eb36efcd9bb8afce7f4ad400980e7ce5018d5f08c69b2fc0b7dc962f8deab52",
+    "config_sha256": "7e4e4efd844ba44752e4dc5f564e57e1e17f46c8d8530871614b60b7ea46a036"
   },
   "cache": {
     "yfinance_metadata": {
-      "status": "completed",
-      "eligible": 807,
-      "hits": 806,
-      "live_requests": 1,
-      "failed_symbols": [],
-      "incomplete_symbols": [
-        "SEURF"
-      ],
-      "ttl_hours": 168,
-      "save_succeeded": true
+      "status": "not_run"
     },
     "fund_data": {
       "status": "completed",
-      "hits": 86,
-      "live_requests": 16,
+      "hits": 101,
+      "live_requests": 1,
       "incomplete_symbols": [
         "GARP"
       ],
       "save_succeeded": true
     },
     "top_qvm": {
-      "hit": false,
+      "hit": true,
       "path": "caches/top_qvm_etfs_cache.pkl",
       "ttl_hours": 6
     },
@@ -48,7 +39,7 @@
       "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9",
       "entries": 1,
       "hit": true,
-      "age_hours": 11.114320986388888,
+      "age_hours": 0.3541748275,
       "ttl_hours": 12,
       "reason": "validated_shared_contract"
     },
@@ -56,29 +47,28 @@
       "path": "caches/gemini_etf_research_cache.json",
       "ttl_hours": 30,
       "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4",
-      "hits": 30,
-      "misses": 67,
+      "hits": 27,
+      "misses": 70,
       "symbols": {
         "VLUE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904887958055555,
-          "market_context_changed": false,
+          "age_hours": 11.305102791666666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253000+00:00"
         },
         "XLK": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888319444446,
-          "market_context_changed": false,
+          "age_hours": 11.305103162777778,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.252939+00:00"
         },
         "VFLO": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.904888528611112,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:16:00.252807+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.30510338138889,
+          "error": "VFLO has unknown primary_risk_event_id 'MIDDLE_EAST_CONFLICT'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FTEC": {
           "hit": false,
@@ -88,15 +78,15 @@
         "DIVB": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888719999999,
-          "market_context_changed": false,
+          "age_hours": 11.305551821944444,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253058+00:00"
         },
         "CRAK": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904888838055555,
-          "market_context_changed": false,
+          "age_hours": 11.305552034722222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253117+00:00"
         },
         "IYW": {
@@ -112,15 +102,15 @@
         "VOO": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889140277778,
-          "market_context_changed": false,
+          "age_hours": 11.305571540555555,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253253+00:00"
         },
         "XLE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889379166667,
-          "market_context_changed": false,
+          "age_hours": 11.305571889166666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.252884+00:00"
         },
         "CIBR": {
@@ -131,8 +121,8 @@
         "VONV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889396944444,
-          "market_context_changed": false,
+          "age_hours": 11.30559330222222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253682+00:00"
         },
         "VOOG": {
@@ -143,8 +133,8 @@
         "QQQM": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889728055556,
-          "market_context_changed": false,
+          "age_hours": 11.305593835833333,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253322+00:00"
         },
         "RSPT": {
@@ -155,15 +145,15 @@
         "IVV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904889950555555,
-          "market_context_changed": false,
+          "age_hours": 11.305594239444444,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253379+00:00"
         },
         "AVLV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.9048900425,
-          "market_context_changed": false,
+          "age_hours": 11.305594436388889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253511+00:00"
         },
         "IUSG": {
@@ -174,8 +164,8 @@
         "IWD": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904890202499999,
-          "market_context_changed": false,
+          "age_hours": 11.305594760277778,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253737+00:00"
         },
         "QQQ": {
@@ -191,8 +181,8 @@
         "DYNF": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.904890605,
-          "market_context_changed": false,
+          "age_hours": 11.305595396666668,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253435+00:00"
         },
         "SPYM": {
@@ -248,8 +238,8 @@
         "JQUA": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875773319444443,
-          "market_context_changed": false,
+          "age_hours": 11.2764789,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079598+00:00"
         },
         "DFLV": {
@@ -270,22 +260,21 @@
         "GARP": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875773658611111,
-          "market_context_changed": false,
+          "age_hours": 11.276479525,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079882+00:00"
         },
         "COPX": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.875773811388889,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:17:45.079835+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.276479765833333,
+          "error": "COPX has unknown primary_risk_event_id 'GLOBAL_SUPPLY_CHAIN_DISRUPTIONS'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FENY": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.90489245861111,
-          "market_context_changed": false,
+          "age_hours": 11.305627135555556,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253181+00:00"
         },
         "SMH": {
@@ -326,8 +315,8 @@
         "VDE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.90489316138889,
-          "market_context_changed": false,
+          "age_hours": 11.305648824444443,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:16:00.253594+00:00"
         },
         "OEF": {
@@ -338,8 +327,8 @@
         "JMOM": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.8597464625,
-          "market_context_changed": false,
+          "age_hours": 11.260522773055555,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782543+00:00"
         },
         "PRF": {
@@ -370,8 +359,8 @@
         "IBB": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859747153611112,
-          "market_context_changed": false,
+          "age_hours": 11.260523978333334,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782298+00:00"
         },
         "BBUS": {
@@ -422,8 +411,8 @@
         "XLV": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859748156944445,
-          "market_context_changed": false,
+          "age_hours": 11.260525707222223,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782429+00:00"
         },
         "FNDB": {
@@ -444,8 +433,8 @@
         "XBI": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875777141944445,
-          "market_context_changed": false,
+          "age_hours": 11.276554977222222,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079778+00:00"
         },
         "DFAC": {
@@ -454,11 +443,10 @@
           "age_hours": null
         },
         "GDX": {
-          "hit": true,
-          "reason": "compatible",
-          "age_hours": 9.859748885277778,
-          "market_context_changed": false,
-          "evidence_timestamp": "2026-09-25T06:18:42.782374+00:00"
+          "hit": false,
+          "reason": "validation_failed",
+          "age_hours": 11.26052688,
+          "error": "GDX has unknown primary_risk_event_id 'MIDDLE_EAST_CONFLICT'; use an exact event_id from MARKET_CONTEXT.active_risk_events or null."
         },
         "FBCG": {
           "hit": false,
@@ -468,8 +456,8 @@
         "IYE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875777650833333,
-          "market_context_changed": false,
+          "age_hours": 11.276585293888889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079671+00:00"
         },
         "ESGU": {
@@ -520,8 +508,8 @@
         "XOP": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.875778698055555,
-          "market_context_changed": false,
+          "age_hours": 11.276622043888889,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:17:45.079725+00:00"
         },
         "HDV": {
@@ -542,8 +530,8 @@
         "IHE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859750668333334,
-          "market_context_changed": false,
+          "age_hours": 11.260626436388888,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782484+00:00"
         },
         "QTUM": {
@@ -564,22 +552,22 @@
         "QUAL": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.838857703611112,
-          "market_context_changed": false,
+          "age_hours": 11.239733753888888,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998913+00:00"
         },
         "VHT": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.83885790361111,
-          "market_context_changed": false,
+          "age_hours": 11.239734031666666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998741+00:00"
         },
         "SIL": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.838857981111111,
-          "market_context_changed": false,
+          "age_hours": 11.239734206944446,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:19:57.998969+00:00"
         },
         "DSI": {
@@ -595,8 +583,8 @@
         "IGE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.859751917777778,
-          "market_context_changed": false,
+          "age_hours": 11.260628437777777,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-09-25T06:18:42.782606+00:00"
         },
         "DCOR": {
@@ -611,11 +599,11 @@
   "stages": [
     {
       "stage": "startup",
-      "elapsed_seconds": 0.031
+      "elapsed_seconds": 0.032
     },
     {
       "stage": "universe_and_quantitative_data",
-      "elapsed_seconds": 74.469
+      "elapsed_seconds": 0.688
     },
     {
       "stage": "market_context",
@@ -623,7 +611,7 @@
     },
     {
       "stage": "research_cache",
-      "elapsed_seconds": 220.29
+      "elapsed_seconds": 203.43
     },
     {
       "stage": "classification_before_new_research",
@@ -631,23 +619,23 @@
     },
     {
       "stage": "classification_final_tail",
-      "elapsed_seconds": 0.016
+      "elapsed_seconds": 0.014
     },
     {
       "stage": "summary_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.01
+      "elapsed_seconds": 0.009
     }
   ],
   "api_attempts": [],
   "semantic_matcher": {
     "model": "BAAI/bge-small-en-v1.5",
-    "loaded": false,
+    "loaded": true,
     "unavailable_reason": null
   },
   "coverage": {
     "counts": {
-      "VALIDATED_UNJUDGED": 30,
-      "NEVER_REQUESTED": 67
+      "VALIDATED_UNJUDGED": 27,
+      "NEVER_REQUESTED": 70
     },
     "candidates": {
       "VLUE": {
@@ -669,10 +657,10 @@
         "judgment_error": null
       },
       "VFLO": {
-        "state": "VALIDATED_UNJUDGED",
+        "state": "NEVER_REQUESTED",
         "requests": 0,
         "charged_research_attempts": 0,
-        "actionable_for_research": false,
+        "actionable_for_research": true,
         "judgment_omission_rounds": 0,
         "judgment_invalid_patch_rounds": 0,
         "judgment_error": null
@@ -984,10 +972,10 @@
         "judgment_error": null
       },
       "COPX": {
-        "state": "VALIDATED_UNJUDGED",
+        "state": "NEVER_REQUESTED",
         "requests": 0,
         "charged_research_attempts": 0,
-        "actionable_for_research": false,
+        "actionable_for_research": true,
         "judgment_omission_rounds": 0,
         "judgment_invalid_patch_rounds": 0,
         "judgment_error": null
@@ -1281,10 +1269,10 @@
         "judgment_error": null
       },
       "GDX": {
-        "state": "VALIDATED_UNJUDGED",
+        "state": "NEVER_REQUESTED",
         "requests": 0,
         "charged_research_attempts": 0,
-        "actionable_for_research": false,
+        "actionable_for_research": true,
         "judgment_omission_rounds": 0,
         "judgment_invalid_patch_rounds": 0,
         "judgment_error": null
@@ -1525,6 +1513,7 @@
       }
     },
     "actionable_never_requested": [
+      "VFLO",
       "FTEC",
       "IYW",
       "SPYG",
@@ -1547,6 +1536,7 @@
       "DFLV",
       "HACK",
       "VV",
+      "COPX",
       "SMH",
       "ONEQ",
       "SCHB",
@@ -1573,6 +1563,7 @@
       "CGDV",
       "SPHB",
       "DFAC",
+      "GDX",
       "FBCG",
       "ESGU",
       "KLMN",
@@ -1597,7 +1588,6 @@
     "validated_unjudged": [
       "VLUE",
       "XLK",
-      "VFLO",
       "DIVB",
       "CRAK",
       "VOO",
@@ -1610,14 +1600,12 @@
       "DYNF",
       "JQUA",
       "GARP",
-      "COPX",
       "FENY",
       "VDE",
       "JMOM",
       "IBB",
       "XLV",
       "XBI",
-      "GDX",
       "IYE",
       "XOP",
       "IHE",
@@ -1627,9 +1615,9 @@
       "IGE"
     ]
   },
-  "generated_at": "2026-09-25T16:13:58.144524+00:00",
+  "generated_at": "2026-09-25T17:37:42.053508+00:00",
   "status": "FAILED_INCOMPLETE_JUDGMENT",
-  "failure_reason": "Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: VLUE, XLK, VFLO, DIVB, VOO, XLE, VONV, QQQM, IVV, AVLV, IWD, DYNF, JQUA, GARP, FENY, VDE, JMOM, IBB, XLV, XBI, IYE, XOP, IHE, QUAL",
+  "failure_reason": "Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: VLUE, XLK, DIVB, VOO, XLE, VONV, QQQM, IVV, AVLV, IWD, DYNF, JQUA, GARP, FENY, VDE, JMOM, IBB, XLV, XBI, IYE, XOP, IHE, QUAL",
   "selection_target": 10,
   "selection_count": 0,
   "selection_shortfall": 10,
@@ -1642,7 +1630,6 @@
     "pending_authoritative_symbols": [
       "VLUE",
       "XLK",
-      "VFLO",
       "DIVB",
       "VOO",
       "XLE",
@@ -1672,9 +1659,10 @@
     "provisional_portfolio_peak": 10,
     "judgment_reopened_slots": 0,
     "authoritative_backfill_batches": 0,
-    "remaining_unresearched_candidates": 67,
-    "remaining_unvalidated_candidates": 67,
+    "remaining_unresearched_candidates": 70,
+    "remaining_unvalidated_candidates": 70,
     "actionable_retryable_or_unrequested": [
+      "VFLO",
       "FTEC",
       "IYW",
       "SPYG",
@@ -1697,6 +1685,7 @@
       "DFLV",
       "HACK",
       "VV",
+      "COPX",
       "SMH",
       "ONEQ",
       "SCHB",
@@ -1723,6 +1712,7 @@
       "CGDV",
       "SPHB",
       "DFAC",
+      "GDX",
       "FBCG",
       "ESGU",
       "KLMN",
@@ -1747,7 +1737,7 @@
     "minimum_final_selection_score": 60.0,
     "max_classification_logical_calls_per_run": 6,
     "max_classification_api_attempts_per_run": 6,
-    "max_gemini_35_calls_per_run": 7,
+    "max_gemini_38_calls_per_run": 7,
     "benchmark_qvm_floor": 60.30009891337208,
     "benchmark_qvm_override_margin": 3.0,
     "minimum_uncertain_selection_score": 66.0,
@@ -1764,28 +1754,28 @@
     "api_attempt_limit": 8,
     "research_api_attempts": 0,
     "summary_api_attempts": 0,
-    "summary_35_api_attempts": 0,
-    "total_35_api_attempts": 3,
+    "summary_38_api_attempts": 0,
+    "total_38_api_attempts": 3,
     "context_api_attempts": 0,
     "per_model_api_attempts": {
       "family_used": {
-        "3.5": 3,
+        "3.8": 3,
         "2.5": 0
       },
       "family_limits": {
-        "3.5": 7,
+        "3.8": 7,
         "2.5": 8
       },
       "category_used": {
-        "3.5:classification": 3,
-        "3.5:summary": 0,
+        "3.8:classification": 3,
+        "3.8:summary": 0,
         "2.5:market": 0,
         "2.5:research": 0,
         "2.5:summary": 0
       },
       "category_limits": {
-        "3.5:classification": 6,
-        "3.5:summary": 1,
+        "3.8:classification": 6,
+        "3.8:summary": 1,
         "2.5:market": 2,
         "2.5:research": 6,
         "2.5:summary": 1
@@ -1809,13 +1799,11 @@
     "factor_family_capacity_skipped_symbols": [],
     "validated_symbols": [
       "AVLV",
-      "COPX",
       "CRAK",
       "DIVB",
       "DYNF",
       "FENY",
       "GARP",
-      "GDX",
       "IBB",
       "IGE",
       "IHE",
@@ -1828,7 +1816,6 @@
       "QUAL",
       "SIL",
       "VDE",
-      "VFLO",
       "VHT",
       "VLUE",
       "VONV",
@@ -1921,44 +1908,6 @@
       "risk_exposure_group": "AI_INFRASTRUCTURE_SLOWDOWN",
       "evidence_warnings": []
     },
-    "VFLO": {
-      "portfolio_group": "Free Cash Flow",
-      "canonical_sector": null,
-      "style_category": "Free Cash Flow",
-      "research_admission": "BACKFILL",
-      "python_eligible": true,
-      "eligibility_reason": "Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.",
-      "reversal_risk": "LOW",
-      "exposure_reversal_risk": null,
-      "entry_reversal_risk": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null,
-      "benchmark_outperformance_confidence": null,
-      "benchmark_outperformance_basis": null,
-      "benchmark_negative_evidence_scope": null,
-      "benchmark_negative_evidence": null,
-      "holdings_concentration": null,
-      "construction_concentration": null,
-      "primary_reversal_channel": null,
-      "judgment_model": null,
-      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "POSSIBLE",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "US_EQUITY",
-      "us_equity_weight_estimate": 99.0,
-      "mandate_basis": "HOLDINGS_WEIGHT",
-      "evidence_scope": "EXPOSURE_SPECIFIC",
-      "adverse_change_observed": false,
-      "adverse_change_date": null,
-      "adverse_change_indicator": null,
-      "mechanism_evidence_source": null,
-      "mechanism_evidence_source_index": null,
-      "exposure_group": "FREE_CASH_FLOW_MULTI_SECTOR",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
-      "risk_exposure_group": "ELEVATED_ENERGY_PRICES",
-      "evidence_warnings": []
-    },
     "DIVB": {
       "portfolio_group": "Dividend",
       "canonical_sector": null,
@@ -2031,7 +1980,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "GLOBAL_OIL_REFINING",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ELEVATED_ENERGY_PRICES",
       "evidence_warnings": []
     },
@@ -2107,7 +2056,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "US_LARGE_CAP_ENERGY",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ELEVATED_ENERGY_PRICES",
       "evidence_warnings": []
     },
@@ -2415,44 +2364,6 @@
       "risk_exposure_group": "GROWTH_LEADERSHIP_ROTATION",
       "evidence_warnings": []
     },
-    "COPX": {
-      "portfolio_group": "Basic Materials",
-      "canonical_sector": "Basic Materials",
-      "style_category": "Natural Resources",
-      "research_admission": "BACKFILL",
-      "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks a global index of copper mining companies, with top holdings including companies listed on Canadian, Australian, Polish, and UK exchanges (e.g., HBM.TO, BHP.AX, TECK-B.TO, ANTO.L, KGH.WA, GLEN.L).",
-      "reversal_risk": "MODERATE",
-      "exposure_reversal_risk": null,
-      "entry_reversal_risk": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null,
-      "benchmark_outperformance_confidence": null,
-      "benchmark_outperformance_basis": null,
-      "benchmark_negative_evidence_scope": null,
-      "benchmark_negative_evidence": null,
-      "holdings_concentration": null,
-      "construction_concentration": null,
-      "primary_reversal_channel": null,
-      "judgment_model": null,
-      "risk_basis": "NORMALIZED_EXPOSURE_DETERIORATION",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "POSSIBLE",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "NOT_US_EQUITY",
-      "us_equity_weight_estimate": 50.0,
-      "mandate_basis": "HOLDINGS_WEIGHT",
-      "evidence_scope": "EXPOSURE_SPECIFIC",
-      "adverse_change_observed": false,
-      "adverse_change_date": null,
-      "adverse_change_indicator": null,
-      "mechanism_evidence_source": null,
-      "mechanism_evidence_source_index": null,
-      "exposure_group": "GLOBAL_COPPER_MINERS",
-      "primary_risk_event_id": "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS",
-      "risk_exposure_group": "COMMODITY_PRICE_NORMALIZATION",
-      "evidence_warnings": []
-    },
     "FENY": {
       "portfolio_group": "Energy",
       "canonical_sector": "Energy",
@@ -2487,7 +2398,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "US_BROAD_ENERGY",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ELEVATED_ENERGY_PRICES",
       "evidence_warnings": []
     },
@@ -2525,7 +2436,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "US_BROAD_ENERGY",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ELEVATED_ENERGY_PRICES",
       "evidence_warnings": []
     },
@@ -2681,44 +2592,6 @@
       "risk_exposure_group": "BIOTECH_INNOVATION_SLOWDOWN",
       "evidence_warnings": []
     },
-    "GDX": {
-      "portfolio_group": "Basic Materials",
-      "canonical_sector": "Basic Materials",
-      "style_category": "Equity Precious Metals",
-      "research_admission": "BACKFILL",
-      "python_eligible": false,
-      "eligibility_reason": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a global index and has significant holdings in non-U.S. companies, with Canada representing 42.7% of country weightings.",
-      "reversal_risk": "MODERATE",
-      "exposure_reversal_risk": null,
-      "entry_reversal_risk": null,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null,
-      "benchmark_outperformance_confidence": null,
-      "benchmark_outperformance_basis": null,
-      "benchmark_negative_evidence_scope": null,
-      "benchmark_negative_evidence": null,
-      "holdings_concentration": null,
-      "construction_concentration": null,
-      "primary_reversal_channel": null,
-      "judgment_model": null,
-      "risk_basis": "TEMPORARY_DRIVER_NORMALIZATION",
-      "mechanism_status": "HYPOTHETICAL",
-      "normalization_probability": "POSSIBLE",
-      "benchmark_assessment": "PASS",
-      "mandate_assessment": "NOT_US_EQUITY",
-      "us_equity_weight_estimate": 24.0,
-      "mandate_basis": "HOLDINGS_WEIGHT",
-      "evidence_scope": "EXPOSURE_SPECIFIC",
-      "adverse_change_observed": false,
-      "adverse_change_date": null,
-      "adverse_change_indicator": null,
-      "mechanism_evidence_source": null,
-      "mechanism_evidence_source_index": null,
-      "exposure_group": "GOLD_SILVER_MINING",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
-      "risk_exposure_group": "GOLD_PRICE_SENSITIVITY",
-      "evidence_warnings": []
-    },
     "IYE": {
       "portfolio_group": "Energy",
       "canonical_sector": "Energy",
@@ -2753,7 +2626,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "US_ENERGY_LARGE_CAP",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
       "evidence_warnings": []
     },
@@ -2791,7 +2664,7 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "US_OIL_GAS_EXPLORATION_PRODUCTION",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "ENERGY_PRICE_NORMALIZATION",
       "evidence_warnings": []
     },
@@ -2981,809 +2854,342 @@
       "mechanism_evidence_source": null,
       "mechanism_evidence_source_index": null,
       "exposure_group": "NORTH_AMERICAN_NATURAL_RESOURCES",
-      "primary_risk_event_id": "MIDDLE_EAST_CONFLICT",
+      "primary_risk_event_id": "STRAIT_OF_HORMUZ_DISRUPTION",
       "risk_exposure_group": "COMMODITY_PRICE_SENSITIVITY",
       "evidence_warnings": []
     }
   },
   "classification_changes": [
     {
-      "symbol": "AVLV",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_LARGE_VALUE",
-          "current": null
-        }
-      }
-    },
-    {
       "symbol": "CRAK",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "WEAK",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNLIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "ETF_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Fails U.S. equity mandate with 63.2% foreign holdings.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "GLOBAL_OIL_REFINING",
-          "current": "ELEVATED_ENERGY_PRICES"
-        }
-      }
-    },
-    {
-      "symbol": "DIVB",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "WEAK",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNLIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "EXPOSURE_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Dividend growth focus tends to lag high-momentum growth benchmarks in expansionary phases.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_DIVIDEND_GROWTH",
-          "current": null
-        }
-      }
-    },
-    {
-      "symbol": "DYNF",
-      "changes": {
-        "reversal_risk": {
-          "previous": "LOW",
-          "current": "MINIMAL"
-        },
-        "exposure_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "FACTOR_ROTATION_MISALIGNMENT",
-          "current": null
+        "primary_risk_event_id": {
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
       "symbol": "FENY",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "EXPOSURE_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Highly dependent on volatile geopolitical tensions and oil prices.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_ENERGY_PRODUCERS",
-          "current": "ELEVATED_ENERGY_PRICES"
-        }
-      }
-    },
-    {
-      "symbol": "IVV",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "WEAK",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNLIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "GENERIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Broad market index lacks the concentrated factor exposure of VGT or SPMO.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
         "primary_risk_event_id": {
-          "previous": null,
-          "current": "AI_INFRASTRUCTURE_BUILD_OUT"
-        },
-        "risk_exposure_group": {
-          "previous": "MACRO_ECONOMIC_HEADWINDS",
-          "current": "AI_INFRASTRUCTURE_SLOWDOWN"
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
-      "symbol": "IWD",
+      "symbol": "IGE",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_LARGE_VALUE",
-          "current": null
+        "primary_risk_event_id": {
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
-      "symbol": "QQQM",
+      "symbol": "IYE",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "WEAK",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNLIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "EXPOSURE_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Underperforming VGT and SPMO benchmarks over the past year due to lower tech concentration than VGT.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "EXPOSURE_DETERIORATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "AI_GROWTH_DE_RATING",
-          "current": "AI_INFRASTRUCTURE_SLOWDOWN"
+        "primary_risk_event_id": {
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
       "symbol": "VDE",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "EXPOSURE_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Highly dependent on volatile geopolitical tensions and oil prices.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_ENERGY_PRODUCERS",
-          "current": "ELEVATED_ENERGY_PRICES"
-        }
-      }
-    },
-    {
-      "symbol": "VFLO",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "LIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "FREE_CASH_FLOW_EQUITY",
-          "current": "ELEVATED_ENERGY_PRICES"
-        }
-      }
-    },
-    {
-      "symbol": "VLUE",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "LIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_LARGE_VALUE",
-          "current": null
-        }
-      }
-    },
-    {
-      "symbol": "VONV",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MINIMAL",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_LARGE_VALUE",
-          "current": null
-        }
-      }
-    },
-    {
-      "symbol": "VOO",
-      "changes": {
-        "exposure_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "WEAK",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNLIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "GENERIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Broad market index lacks the concentrated factor exposure of VGT or SPMO.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "LOW",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "NONE",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
         "primary_risk_event_id": {
-          "previous": null,
-          "current": "AI_INFRASTRUCTURE_BUILD_OUT"
-        },
-        "risk_exposure_group": {
-          "previous": "MACRO_ECONOMIC_HEADWINDS",
-          "current": "AI_INFRASTRUCTURE_SLOWDOWN"
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
       "symbol": "XLE",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "LOW",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "ADEQUATE",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "UNCERTAIN",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "MEDIUM",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "EXPOSURE_SPECIFIC",
-          "current": null
-        },
-        "benchmark_negative_evidence": {
-          "previous": "Highly dependent on volatile geopolitical tensions and oil prices.",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "TEMPORARY_DRIVER_NORMALIZATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "US_ENERGY_PRODUCERS",
-          "current": "ELEVATED_ENERGY_PRICES"
+        "primary_risk_event_id": {
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     },
     {
-      "symbol": "XLK",
+      "symbol": "XOP",
       "changes": {
-        "exposure_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "entry_reversal_risk": {
-          "previous": "MODERATE",
-          "current": null
-        },
-        "continuation_strength": {
-          "previous": "STRONG",
-          "current": null
-        },
-        "benchmark_outperformance_outlook": {
-          "previous": "LIKELY",
-          "current": null
-        },
-        "benchmark_outperformance_confidence": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "benchmark_negative_evidence_scope": {
-          "previous": "NONE",
-          "current": null
-        },
-        "holdings_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "construction_concentration": {
-          "previous": "HIGH",
-          "current": null
-        },
-        "primary_reversal_channel": {
-          "previous": "EXPOSURE_DETERIORATION",
-          "current": null
-        },
-        "judgment_model": {
-          "previous": "gemini-3.5-flash",
-          "current": null
-        },
-        "risk_exposure_group": {
-          "previous": "AI_GROWTH_DE_RATING",
-          "current": "AI_INFRASTRUCTURE_SLOWDOWN"
+        "primary_risk_event_id": {
+          "previous": "MIDDLE_EAST_CONFLICT",
+          "current": "STRAIT_OF_HORMUZ_DISRUPTION"
         }
       }
     }
   ],
-  "runtime_reconciliations": [],
-  "reconciliation_counts": {},
+  "runtime_reconciliations": [
+    {
+      "symbol": "VFLO",
+      "type": "dynamic_risk_event_id_semantic_decline",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "candidate": "AI_INFRASTRUCTURE_BUILD_OUT",
+      "identity_similarity": 0.7867189963385968,
+      "transmission_similarity": 0.7420634026371112,
+      "combined_similarity": 0.7666239791729283,
+      "runner_up_similarity": 0.7033262239789113,
+      "margin": 0.06329775519401704,
+      "structural": {
+        "compatible": false,
+        "event_label_overlap": [],
+        "exposure_overlap": [],
+        "portfolio_overlap": []
+      }
+    },
+    {
+      "symbol": "CRAK",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7529786527372835,
+      "transmission_similarity": 0.7025835080617638,
+      "combined_similarity": 0.7303008376332997,
+      "runner_up_similarity": 0.651435306710863,
+      "margin": 0.07886553092243664,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "XLE",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7798824401648031,
+      "transmission_similarity": 0.7580026335927526,
+      "combined_similarity": 0.7700365272073804,
+      "runner_up_similarity": 0.6370762658118367,
+      "margin": 0.13296026139554362,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "COPX",
+      "type": "dynamic_risk_event_id_semantic_decline",
+      "field": "primary_risk_event_id",
+      "from": "GLOBAL_SUPPLY_CHAIN_DISRUPTIONS",
+      "candidate": "EU_CARBON_REGULATIONS",
+      "identity_similarity": 0.6480336562884939,
+      "transmission_similarity": 0.6579339600561022,
+      "combined_similarity": 0.6524887929839176,
+      "runner_up_similarity": 0.6459763959665805,
+      "margin": 0.006512397017337079,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "GLOBAL"
+        ],
+        "exposure_overlap": [],
+        "portfolio_overlap": [
+          "BASIC",
+          "MATERIALS"
+        ]
+      }
+    },
+    {
+      "symbol": "FENY",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7789419797955377,
+      "transmission_similarity": 0.751346562872025,
+      "combined_similarity": 0.7665240421799571,
+      "runner_up_similarity": 0.622534733729775,
+      "margin": 0.1439893084501821,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "VDE",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7786845622287297,
+      "transmission_similarity": 0.7542052381804681,
+      "combined_similarity": 0.7676688664070122,
+      "runner_up_similarity": 0.6254763019213523,
+      "margin": 0.14219256448565987,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "GDX",
+      "type": "dynamic_risk_event_id_semantic_decline",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "candidate": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7571200240752568,
+      "transmission_similarity": 0.6866147790156407,
+      "combined_similarity": 0.7253926637984296,
+      "runner_up_similarity": 0.677978137523276,
+      "margin": 0.047414526275153634,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [],
+        "portfolio_overlap": [
+          "BASIC",
+          "MATERIALS"
+        ]
+      }
+    },
+    {
+      "symbol": "IYE",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7901559479263234,
+      "transmission_similarity": 0.7654783101744277,
+      "combined_similarity": 0.7790510109379704,
+      "runner_up_similarity": 0.6281013227403189,
+      "margin": 0.15094968819765142,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "XOP",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7752868194077238,
+      "transmission_similarity": 0.7357558481328843,
+      "combined_similarity": 0.7574978823340461,
+      "runner_up_similarity": 0.6299345564445455,
+      "margin": 0.1275633258895006,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "ENERGY"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    },
+    {
+      "symbol": "IGE",
+      "type": "dynamic_risk_event_id_semantic_reconciliation",
+      "field": "primary_risk_event_id",
+      "from": "MIDDLE_EAST_CONFLICT",
+      "to": "STRAIT_OF_HORMUZ_DISRUPTION",
+      "identity_similarity": 0.7907988610670941,
+      "transmission_similarity": 0.8017013079734894,
+      "combined_similarity": 0.795704962174972,
+      "runner_up_similarity": 0.6703264888738074,
+      "margin": 0.12537847330116458,
+      "structural": {
+        "compatible": true,
+        "event_label_overlap": [
+          "EAST",
+          "MIDDLE"
+        ],
+        "exposure_overlap": [
+          "AMERICAN",
+          "NORTH"
+        ],
+        "portfolio_overlap": [
+          "ENERGY"
+        ]
+      },
+      "model": "BAAI/bge-small-en-v1.5"
+    }
+  ],
+  "reconciliation_counts": {
+    "dynamic_risk_event_id_semantic_decline": 3,
+    "dynamic_risk_event_id_semantic_reconciliation": 7
+  },
   "consistency_warnings": [
-    "VFLO: normalized Mid-Cap Value to Free Cash Flow.",
     "DIVB: normalized Large Value to Dividend.",
     "CRAK: normalized Equity Energy to Energy.",
     "XLE: normalized Equity Energy to Energy.",
     "QQQM: normalized Large Growth to Technology.",
     "JQUA: normalized Large Blend to Quality.",
-    "COPX: normalized Natural Resources to Basic Materials.",
     "FENY: normalized Equity Energy to Energy.",
     "VDE: normalized Equity Energy to Energy.",
     "JMOM: normalized Large Blend to Momentum.",
     "IBB: normalized Health to Healthcare.",
     "XLV: normalized Health to Healthcare.",
     "XBI: normalized Health to Healthcare.",
-    "GDX: normalized Equity Precious Metals to Basic Materials.",
     "IYE: normalized Equity Energy to Energy.",
     "XOP: normalized Equity Energy to Energy.",
     "IHE: normalized Health to Healthcare.",
@@ -3793,6 +3199,7 @@
     "IGE: normalized Natural Resources to Energy."
   ],
   "research_disposition": {
+    "VFLO": "NOT_NEEDED",
     "FTEC": "NOT_NEEDED",
     "IYW": "NOT_NEEDED",
     "SPYG": "NOT_NEEDED",
@@ -3815,6 +3222,7 @@
     "DFLV": "NOT_NEEDED",
     "HACK": "NOT_NEEDED",
     "VV": "NOT_NEEDED",
+    "COPX": "NOT_NEEDED",
     "SMH": "NOT_NEEDED",
     "ONEQ": "NOT_NEEDED",
     "SCHB": "NOT_NEEDED",
@@ -3841,6 +3249,7 @@
     "CGDV": "NOT_NEEDED",
     "SPHB": "NOT_NEEDED",
     "DFAC": "NOT_NEEDED",
+    "GDX": "NOT_NEEDED",
     "FBCG": "NOT_NEEDED",
     "ESGU": "NOT_NEEDED",
     "KLMN": "NOT_NEEDED",
@@ -3882,17 +3291,17 @@
       "qvm_rank": 3,
       "symbol": "VFLO",
       "sector_group": "Free Cash Flow",
-      "status": "NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED",
-      "final_selection_score": 73.62109120798519,
+      "status": "NOT RESEARCHED — NOT NEEDED",
+      "final_selection_score": null,
       "continuation_strength": null,
       "benchmark_outperformance_outlook": null,
-      "return_driver_group": "ELEVATED_ENERGY_PRICES",
+      "return_driver_group": null,
       "factor_family": "QUALITY_CASHFLOW",
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
-      "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
+      "risk_derivation": null,
+      "explanation": "The portfolio filled before research was needed."
     },
     {
       "qvm_rank": 5,
@@ -4275,7 +3684,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests in global oil refiners, with 63.2% of its portfolio in foreign issues."
     },
     {
@@ -4387,7 +3796,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
     },
     {
@@ -4437,6 +3846,22 @@
       "total_selected_after": 0,
       "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
+    },
+    {
+      "qvm_rank": 38,
+      "symbol": "COPX",
+      "sector_group": "Basic Materials",
+      "status": "NOT RESEARCHED — NOT NEEDED",
+      "final_selection_score": null,
+      "continuation_strength": null,
+      "benchmark_outperformance_outlook": null,
+      "return_driver_group": null,
+      "factor_family": "MATERIALS",
+      "selection_merit_score": null,
+      "sector_selected_after": 0,
+      "total_selected_after": 0,
+      "risk_derivation": null,
+      "explanation": "The portfolio filled before research was needed."
     },
     {
       "qvm_rank": 40,
@@ -4871,22 +4296,6 @@
       "explanation": "The portfolio filled before research was needed."
     },
     {
-      "qvm_rank": 38,
-      "symbol": "COPX",
-      "sector_group": "Basic Materials",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "final_selection_score": 55.27517573772416,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null,
-      "return_driver_group": "COMMODITY_PRICE_NORMALIZATION",
-      "factor_family": "MATERIALS",
-      "selection_merit_score": null,
-      "sector_selected_after": 0,
-      "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS",
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks a global index of copper mining companies, with top holdings including companies listed on Canadian, Australian, Polish, and UK exchanges (e.g., HBM.TO, BHP.AX, TECK-B.TO, ANTO.L, KGH.WA, GLEN.L)."
-    },
-    {
       "qvm_rank": 68,
       "symbol": "SPHB",
       "sector_group": "Large Blend",
@@ -4928,6 +4337,22 @@
       "benchmark_outperformance_outlook": null,
       "return_driver_group": null,
       "factor_family": "LARGE_BLEND",
+      "selection_merit_score": null,
+      "sector_selected_after": 0,
+      "total_selected_after": 0,
+      "risk_derivation": null,
+      "explanation": "The portfolio filled before research was needed."
+    },
+    {
+      "qvm_rank": 71,
+      "symbol": "GDX",
+      "sector_group": "Basic Materials",
+      "status": "NOT RESEARCHED — NOT NEEDED",
+      "final_selection_score": null,
+      "continuation_strength": null,
+      "benchmark_outperformance_outlook": null,
+      "return_driver_group": null,
+      "factor_family": "MATERIALS",
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
@@ -5075,7 +4500,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
     },
     {
@@ -5203,7 +4628,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
     },
     {
@@ -5335,22 +4760,6 @@
       "explanation": "The portfolio filled before research was needed."
     },
     {
-      "qvm_rank": 71,
-      "symbol": "GDX",
-      "sector_group": "Basic Materials",
-      "status": "NOT SELECTED — INELIGIBLE",
-      "final_selection_score": 48.95627501480712,
-      "continuation_strength": null,
-      "benchmark_outperformance_outlook": null,
-      "return_driver_group": "GOLD_PRICE_SENSITIVITY",
-      "factor_family": "MATERIALS",
-      "selection_merit_score": null,
-      "sector_selected_after": 0,
-      "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
-      "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a global index and has significant holdings in non-U.S. companies, with Canada representing 42.7% of country weightings."
-    },
-    {
       "qvm_rank": 73,
       "symbol": "IYE",
       "sector_group": "Energy",
@@ -5363,7 +4772,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
     },
     {
@@ -5379,7 +4788,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended."
     },
     {
@@ -5395,7 +4804,7 @@
       "selection_merit_score": null,
       "sector_selected_after": 0,
       "total_selected_after": 0,
-      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT",
+      "risk_derivation": "mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION",
       "explanation": "Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a North American index and includes Canadian companies in its top holdings, despite focusing on US-listed companies."
     },
     {
@@ -5416,18 +4825,17 @@
     }
   ],
   "selected_fund_audit": [],
-  "context_review": "CONTEXT REVIEW\n\nResearch summary: 30 ETFs have validated research (0 researched and validated this run, 30 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.\nSelected ETFs: None\n|   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                         |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                     | Explanation                                                                                                                                                                                                                                                                                |\n|-----------:|:---------|:----------------|:-----------------------------------------------|------------------------:|-----------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|          1 | VLUE     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|          3 | VFLO     | Free Cash Flow  | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT           | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|          5 | DIVB     | Dividend        | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|          4 | FTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|          2 | XLK      | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         12 | VONV     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|          7 | IYW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|          8 | SPYG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         17 | AVLV     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         11 | CIBR     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         13 | VOOG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         19 | IWD      | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         15 | RSPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|          9 | VOO      | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         22 | DYNF     | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         18 | IUSG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         20 | QQQ      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         16 | IVV      | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         21 | IWX      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         23 | SPYM     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         24 | SCHD     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         25 | FNDX     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         26 | SPY      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         27 | IVW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         28 | MGK      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|          6 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests in global oil refiners, with 63.2% of its portfolio in foreign issues.                                                                                                                          |\n|         29 | SEIV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         30 | SCHX     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         31 | IGM      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         33 | JQUA     | Quality         | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         32 | PVAL     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         34 | DFLV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         10 | XLE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         35 | HACK     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         36 | VV       | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         37 | GARP     | Quality GARP    | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         40 | SMH      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         41 | ONEQ     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         14 | QQQM     | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         42 | SCHB     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         43 | DFUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         44 | VTI      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         45 | DFUV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         46 | PBUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         48 | OEF      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         50 | PRF      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         51 | SCHK     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         52 | VTV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         53 | SPUS     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         54 | BUG      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         55 | IBB      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         56 | BBUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         57 | SPTM     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         58 | AVUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         59 | ITOT     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         60 | AIQ      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         61 | QGRW     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         62 | MGV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         63 | ESGV     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         64 | BKLC     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         66 | FNDB     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         65 | XLV      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=LOW, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         67 | CGDV     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         38 | COPX     | Basic Materials | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=GLOBAL_SUPPLY_CHAIN_DISRUPTIONS | Excluded because current holdings do not satisfy the U.S.-equity mandate. COPX tracks a global index of copper mining companies, with top holdings including companies listed on Canadian, Australian, Polish, and UK exchanges (e.g., HBM.TO, BHP.AX, TECK-B.TO, ANTO.L, KGH.WA, GLEN.L). |\n|         68 | SPHB     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         69 | XBI      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         70 | DFAC     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         72 | FBCG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         74 | ESGU     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         75 | KLMN     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         76 | MTUM     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         77 | DFAU     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         78 | QTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         79 | TSPA     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         80 | THRO     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         39 | FENY     | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         81 | SNPE     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         82 | IWB      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         84 | HDV      | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         85 | SKYY     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         86 | IGPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         88 | QTUM     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         89 | RWL      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         47 | VDE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         49 | JMOM     | Momentum        | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=AI_INFRASTRUCTURE_BUILD_OUT            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         90 | TOPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         87 | IHE      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         91 | QUAL     | Quality         | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         92 | VHT      | Healthcare      | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                                                                                                                                                                                        |\n|         94 | DSI      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         95 | QLTY     | Quality         | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         97 | DCOR     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                                                                                           |\n|         71 | GDX      | Basic Materials | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a global index and has significant holdings in non-U.S. companies, with Canada representing 42.7% of country weightings.                                                                          |\n|         73 | IYE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         83 | XOP      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                                                                                                 |\n|         96 | IGE      | Energy          | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_CONFLICT                   | Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a North American index and includes Canadian companies in its top holdings, despite focusing on US-listed companies.                                                                              |\n|         93 | SIL      | Basic Materials | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=OBSERVED, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund's mandate is global silver miners, with top holdings including companies listed on non-U.S. exchanges (e.g., WPM.TO, PAAS.TO).                                                                          |",
+  "context_review": "CONTEXT REVIEW\n\nResearch summary: 27 ETFs have validated research (0 researched and validated this run, 27 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.\nSelected ETFs: None\n|   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                         |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                     | Explanation                                                                                                                                                                                                       |\n|-----------:|:---------|:----------------|:-----------------------------------------------|------------------------:|-----------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|          1 | VLUE     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|          3 | VFLO     | Free Cash Flow  | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|          5 | DIVB     | Dividend        | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|          4 | FTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|          2 | XLK      | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         12 | VONV     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|          7 | IYW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|          8 | SPYG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         17 | AVLV     | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         11 | CIBR     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         13 | VOOG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         19 | IWD      | Large Value     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         15 | RSPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|          9 | VOO      | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         22 | DYNF     | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         18 | IUSG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         20 | QQQ      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         16 | IVV      | Large Blend     | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         21 | IWX      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         23 | SPYM     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         24 | SCHD     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         25 | FNDX     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         26 | SPY      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         27 | IVW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         28 | MGK      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|          6 | CRAK     | Energy          | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund invests in global oil refiners, with 63.2% of its portfolio in foreign issues.                                                 |\n|         29 | SEIV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         30 | SCHX     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         31 | IGM      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         33 | JQUA     | Quality         | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=NONE, probability=UNLIKELY, materiality=LOW, dependence=LOW, basis=NONE                                                                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         32 | PVAL     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         34 | DFLV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         10 | XLE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         35 | HACK     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         36 | VV       | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         37 | GARP     | Quality GARP    | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         38 | COPX     | Basic Materials | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         40 | SMH      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         41 | ONEQ     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         14 | QQQM     | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION, event=AI_INFRASTRUCTURE_BUILD_OUT         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         42 | SCHB     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         43 | DFUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         44 | VTI      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         45 | DFUV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         46 | PBUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         48 | OEF      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         50 | PRF      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         51 | SCHK     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         52 | VTV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         53 | SPUS     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         54 | BUG      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         55 | IBB      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         56 | BBUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         57 | SPTM     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         58 | AVUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         59 | ITOT     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         60 | AIQ      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         61 | QGRW     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         62 | MGV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         63 | ESGV     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         64 | BKLC     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         66 | FNDB     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         65 | XLV      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=LOW, basis=NORMALIZED_EXPOSURE_DETERIORATION                                         | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         67 | CGDV     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         68 | SPHB     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         69 | XBI      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         70 | DFAC     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         71 | GDX      | Basic Materials | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         72 | FBCG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         74 | ESGU     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         75 | KLMN     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         76 | MTUM     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         77 | DFAU     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         78 | QTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         79 | TSPA     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         80 | THRO     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         39 | FENY     | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         81 | SNPE     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         82 | IWB      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         84 | HDV      | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         85 | SKYY     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         86 | IGPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         88 | QTUM     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         89 | RWL      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         47 | VDE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         49 | JMOM     | Momentum        | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=AI_INFRASTRUCTURE_BUILD_OUT            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         90 | TOPT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         87 | IHE      | Healthcare      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         91 | QUAL     | Quality         | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         92 | VHT      | Healthcare      | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION                                    | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                                                                                                               |\n|         94 | DSI      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         95 | QLTY     | Quality         | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         97 | DCOR     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                                 | The portfolio filled before research was needed.                                                                                                                                                                  |\n|         73 | IYE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         83 | XOP      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.                                                                                        |\n|         96 | IGE      | Energy          | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=STRAIT_OF_HORMUZ_DISRUPTION            | Excluded because current holdings do not satisfy the U.S.-equity mandate. The ETF tracks a North American index and includes Canadian companies in its top holdings, despite focusing on US-listed companies.     |\n|         93 | SIL      | Basic Materials | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=OBSERVED, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                                | Excluded because current holdings do not satisfy the U.S.-equity mandate. The fund's mandate is global silver miners, with top holdings including companies listed on non-U.S. exchanges (e.g., WPM.TO, PAAS.TO). |",
   "classification_calls": [
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 1,
       "logical_call": 1,
       "api_attempt": 1,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -5440,14 +4848,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -5459,22 +4865,21 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 1.308,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 4.388,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 2,
       "logical_call": 1,
       "api_attempt": 2,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -5487,14 +4892,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -5506,22 +4909,21 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 3.795,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 4.539,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
     {
       "stage": "etf_judgment",
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.8-flash",
       "attempt": 3,
       "logical_call": 1,
       "api_attempt": 3,
       "symbols": [
         "VLUE",
         "XLK",
-        "VFLO",
         "DIVB",
         "CRAK",
         "VOO",
@@ -5534,14 +4936,12 @@
         "DYNF",
         "JQUA",
         "GARP",
-        "COPX",
         "FENY",
         "VDE",
         "JMOM",
         "IBB",
         "XLV",
         "XBI",
-        "GDX",
         "IYE",
         "XOP",
         "IHE",
@@ -5553,9 +4953,9 @@
       "batch_kind": "initial",
       "success": false,
       "fallback": false,
-      "requested_count": 30,
-      "prompt_chars": 167965,
-      "elapsed_seconds": 1.483,
+      "requested_count": 27,
+      "prompt_chars": 144224,
+      "elapsed_seconds": 0.89,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     }
@@ -5563,11 +4963,11 @@
   "classification_validation": [],
   "classification_scheduling": [
     {
-      "pending": 30,
+      "pending": 27,
       "force": false,
       "recovery_only": false,
       "release_recovery_reserve": false,
-      "untouched": 30,
+      "untouched": 27,
       "omitted": 0,
       "invalid": 0,
       "target": 25,
@@ -5674,8 +5074,8 @@
           "1Y": 11.975693665247956
         }
       },
-      "final_selection_score": 73.62109120798519,
-      "required_selection_score": 60.0
+      "final_selection_score": null,
+      "required_selection_score": null
     },
     "FTEC": {
       "qvm_score": 72.29064921315577,
@@ -6864,8 +6264,8 @@
           "1Y": 30.794824119761085
         }
       },
-      "final_selection_score": 55.27517573772416,
-      "required_selection_score": 60.0
+      "final_selection_score": null,
+      "required_selection_score": null
     },
     "FENY": {
       "qvm_score": 62.05666985610225,
@@ -7986,8 +7386,8 @@
           "1Y": 0.033088524826595744
         }
       },
-      "final_selection_score": 48.95627501480712,
-      "required_selection_score": 60.0
+      "final_selection_score": null,
+      "required_selection_score": null
     },
     "FBCG": {
       "qvm_score": 55.8350859682721,

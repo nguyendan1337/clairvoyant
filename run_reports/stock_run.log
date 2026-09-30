@@ -3,11 +3,7 @@ Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/stock_run.log
 Stock config loaded from: /home/runner/work/clairvoyant/clairvoyant/stock_config.yml
 Effective Gemini settings: batch_size=15, research_candidates_per_open_sector_slot=3, max_calls=8, max_stock_calls=6, 3.8_api_budget=8 (6 classification + 1 summary), 2.5_api_budget=8 (2 market + 6 research + 1 summary fallback), research_attempts_per_stock=2, deferred_research_attempts_per_run=1, structural_repairs_per_stock=2, thinking_budget=12288, cautious_floor=True, normal_candidates=50, max_candidates=75, stocks_per_risk_event=2, max_moderate=3, qvm_weights={'Quality': 0.45, 'Value': 0.1, 'Momentum': 0.45}, benchmarks=['SPMO', 'VGT'], excluded_crypto=['MATERIAL', 'PRIMARY']
 Downloading benchmark price history: SPMO, VGT
-
-1 Failed download:
-['SPMO']: OperationalError('database is locked')
-Could not calculate benchmark returns for SPMO: only 0 daily closes
-Effective 52-week stock hurdle: 35.26% from VGT.
+Effective 52-week stock hurdle: 34.37% from VGT.
 Checking top QVM cache: caches/top_qvm_stocks_cache.pkl
 Top QVM cache exists.
 About to read top QVM pickle...
@@ -16,31 +12,31 @@ Top QVM benchmark hurdle changed. Rebuilding cache.
 Fetched 250 stock screener rows at offset 0.
 Fetched 250 stock screener rows at offset 250.
 Fetched 250 stock screener rows at offset 500.
-Fetched 70 stock screener rows at offset 750.
+Fetched 80 stock screener rows at offset 750.
 
 Stocks passing screener-level filters:
-    Symbol                        Name  52 WkChange %
-0     AXTI                   AXT, Inc.    1540.757200
-1     SNDK         Sandisk Corporation    1409.154200
-2      ANL     Adlai Nortye Group Ltd.     756.031100
-3     MRNA               Moderna, Inc.     678.839300
-4      TXG          10x Genomics, Inc.     657.057300
-..     ...                         ...            ...
-814   SNDA  Sonida Senior Living, Inc.      35.678207
-815  EBCOY           Ebara Corporation      35.653805
-816  SSLZY              Santos Limited      35.634743
-817    CNO   CNO Financial Group, Inc.      35.625793
-818    DAN           Dana Incorporated      35.329340
+    Symbol                               Name  52 WkChange %
+0     AXTI                          AXT, Inc.    1492.260600
+1     SNDK                Sandisk Corporation    1441.675500
+2      ANL            Adlai Nortye Group Ltd.     769.444460
+3      TXG                 10x Genomics, Inc.     670.230960
+4     MRNA                      Moderna, Inc.     637.173900
+..     ...                                ...            ...
+824   CAMT                        Camtek Ltd.      34.738148
+825   MGTX              MeiraGTx Holdings plc      34.582830
+826   DBRG          DigitalBridge Group, Inc.      34.566868
+827   THFF        First Financial Corporation      34.553360
+828    IHG  InterContinental Hotels Group PLC      34.382460
 
-[819 rows x 3 columns]
-YFINANCE FUNDAMENTALS CACHE {"file_existed": true, "entries_loaded": 501, "fresh": 38, "expired": 463, "invalid": 0, "ttl_hours": 36.0}
+[829 rows x 3 columns]
+YFINANCE FUNDAMENTALS CACHE {"file_existed": true, "entries_loaded": 489, "fresh": 451, "expired": 38, "invalid": 0, "ttl_hours": 36.0}
 Downloading price data...
 Computing momentum and extracting latest price...
-3M return gate >= 0.00%: 480 survivors; 339 removed before fundamentals.
-Fundamentals plan: eligible=480, cache_hits=29, live_fetches=451, incomplete_cached_entries=0.
-Fetching Yahoo fundamentals for 451 uncached tickers...
-Yahoo fundamentals:   0%|          | 0/451 [00:00<?, ?it/s]Yahoo fundamentals:   0%|          | 1/451 [00:00<05:47,  1.30it/s]Yahoo fundamentals:   0%|          | 2/451 [00:01<06:17,  1.19it/s]Yahoo fundamentals:   1%|          | 3/451 [00:02<06:04,  1.23it/s]Yahoo fundamentals:   1%|          | 4/451 [00:03<05:58,  1.25it/s]Yahoo fundamentals:   1%|          | 5/451 [00:03<05:39,  1.31it/s]Yahoo fundamentals:   1%|▏         | 6/451 [00:04<05:27,  1.36it/s]Yahoo fundamentals:   2%|▏         | 7/451 [00:05<05:19,  1.39it/s]Yahoo fundamentals:   2%|▏         | 8/451 [00:06<05:25,  1.36it/s]Yahoo fundamentals:   2%|▏         | 9/451 [00:06<05:15,  1.40it/s]Yahoo fundamentals:   2%|▏         | 10/451 [00:07<05:25,  1.35it/s]Yahoo fundamentals:   2%|▏         | 11/451 [00:08<05:30,  1.33it/s]Yahoo fundamentals:   3%|▎         | 12/451 [00:08<05:20,  1.37it/s]Yahoo fundamentals:   3%|▎         | 13/451 [00:09<05:14,  1.39it/s]Yahoo fundamentals:   3%|▎         | 14/451 [00:10<05:21,  1.36it/s]Yahoo fundamentals:   3%|▎         | 15/451 [00:11<05:10,  1.40it/s]Yahoo fundamentals:   4%|▎         | 16/451 [00:11<05:05,  1.42it/s]Yahoo fundamentals:   4%|▍         | 17/451 [00:12<05:27,  1.33it/s]Yahoo fundamentals:   4%|▍         | 18/451 [00:13<05:16,  1.37it/s]Yahoo fundamentals:   4%|▍         | 19/451 [00:14<05:23,  1.34it/s]Yahoo fundamentals:   4%|▍         | 20/451 [00:14<05:34,  1.29it/s]Yahoo fundamentals:   5%|▍         | 21/451 [00:15<05:50,  1.23it/s]Yahoo fundamentals:   5%|▍         | 22/451 [00:16<05:46,  1.24it/s]Yahoo fundamentals:   5%|▌         | 23/451 [00:17<05:46,  1.24it/s]Yahoo fundamentals:   5%|▌         | 24/451 [00:18<05:56,  1.20it/s]Yahoo fundamentals:   6%|▌         | 25/451 [00:19<06:03,  1.17it/s]Yahoo fundamentals:   6%|▌         | 26/451 [00:20<05:52,  1.21it/s]Yahoo fundamentals:   6%|▌         | 27/451 [00:20<05:29,  1.29it/s]Yahoo fundamentals:   6%|▌         | 28/451 [00:21<05:33,  1.27it/s]Yahoo fundamentals:   6%|▋         | 29/451 [00:22<05:40,  1.24it/s]Yahoo fundamentals:   7%|▋         | 30/451 [00:23<05:40,  1.24it/s]Yahoo fundamentals:   7%|▋         | 31/451 [00:24<05:55,  1.18it/s]Yahoo fundamentals:   7%|▋         | 32/451 [00:24<05:52,  1.19it/s]Yahoo fundamentals:   7%|▋         | 33/451 [00:25<05:55,  1.17it/s]Yahoo fundamentals:   8%|▊         | 34/451 [00:26<06:00,  1.16it/s]Yahoo fundamentals:   8%|▊         | 35/451 [00:27<06:05,  1.14it/s]Yahoo fundamentals:   8%|▊         | 36/451 [00:28<06:13,  1.11it/s]Yahoo fundamentals:   8%|▊         | 37/451 [00:29<05:48,  1.19it/s]Yahoo fundamentals:   8%|▊         | 38/451 [00:30<05:45,  1.19it/s]Yahoo fundamentals:   9%|▊         | 39/451 [00:30<05:22,  1.28it/s]Yahoo fundamentals:   9%|▉         | 40/451 [00:31<05:31,  1.24it/s]Yahoo fundamentals:   9%|▉         | 41/451 [00:32<05:37,  1.21it/s]Yahoo fundamentals:   9%|▉         | 42/451 [00:33<05:29,  1.24it/s]Yahoo fundamentals:  10%|▉         | 43/451 [00:33<05:21,  1.27it/s]Yahoo fundamentals:  10%|▉         | 44/451 [00:34<05:16,  1.29it/s]Yahoo fundamentals:  10%|▉         | 45/451 [00:35<05:07,  1.32it/s]Yahoo fundamentals:  10%|█         | 46/451 [00:36<05:16,  1.28it/s]Yahoo fundamentals:  10%|█         | 47/451 [00:37<05:18,  1.27it/s]Yahoo fundamentals:  11%|█         | 48/451 [00:37<05:07,  1.31it/s]Yahoo fundamentals:  11%|█         | 49/451 [00:38<04:56,  1.35it/s]Yahoo fundamentals:  11%|█         | 50/451 [00:39<04:57,  1.35it/s]Yahoo fundamentals:  11%|█▏        | 51/451 [00:40<05:19,  1.25it/s]Yahoo fundamentals:  12%|█▏        | 52/451 [00:40<05:20,  1.24it/s]Yahoo fundamentals:  12%|█▏        | 53/451 [00:41<05:12,  1.27it/s]Yahoo fundamentals:  12%|█▏        | 54/451 [00:42<05:01,  1.31it/s]Yahoo fundamentals:  12%|█▏        | 55/451 [00:43<05:19,  1.24it/s]Yahoo fundamentals:  12%|█▏        | 56/451 [00:44<05:10,  1.27it/s]Yahoo fundamentals:  13%|█▎        | 57/451 [00:44<05:06,  1.29it/s]Yahoo fundamentals:  13%|█▎        | 58/451 [00:45<04:56,  1.32it/s]Yahoo fundamentals:  13%|█▎        | 59/451 [00:46<04:49,  1.36it/s]Yahoo fundamentals:  13%|█▎        | 60/451 [00:47<04:57,  1.31it/s]Yahoo fundamentals:  14%|█▎        | 61/451 [00:47<05:07,  1.27it/s]Yahoo fundamentals:  14%|█▎        | 62/451 [00:48<05:04,  1.28it/s]Yahoo fundamentals:  14%|█▍        | 63/451 [00:49<05:00,  1.29it/s]Yahoo fundamentals:  14%|█▍        | 64/451 [00:50<04:50,  1.33it/s]Yahoo fundamentals:  14%|█▍        | 65/451 [00:50<04:41,  1.37it/s]Yahoo fundamentals:  15%|█▍        | 66/451 [00:51<05:03,  1.27it/s]Yahoo fundamentals:  15%|█▍        | 67/451 [00:52<05:07,  1.25it/s]Yahoo fundamentals:  15%|█▌        | 68/451 [00:53<05:20,  1.20it/s]Yahoo fundamentals:  15%|█▌        | 69/451 [00:54<05:32,  1.15it/s]Yahoo fundamentals:  16%|█▌        | 70/451 [00:55<05:29,  1.16it/s]Yahoo fundamentals:  16%|█▌        | 71/451 [00:56<05:16,  1.20it/s]Yahoo fundamentals:  16%|█▌        | 72/451 [00:56<05:24,  1.17it/s]Yahoo fundamentals:  16%|█▌        | 73/451 [00:57<05:16,  1.19it/s]Yahoo fundamentals:  16%|█▋        | 74/451 [00:58<04:55,  1.28it/s]Yahoo fundamentals:  17%|█▋        | 75/451 [00:59<04:55,  1.27it/s]Yahoo fundamentals:  17%|█▋        | 76/451 [01:00<05:01,  1.24it/s]Yahoo fundamentals:  17%|█▋        | 77/451 [01:00<05:09,  1.21it/s]Yahoo fundamentals:  17%|█▋        | 78/451 [01:01<04:56,  1.26it/s]Yahoo fundamentals:  18%|█▊        | 79/451 [01:02<04:51,  1.28it/s]Yahoo fundamentals:  18%|█▊        | 80/451 [01:03<04:49,  1.28it/s]Yahoo fundamentals:  18%|█▊        | 81/451 [01:03<04:41,  1.31it/s]Yahoo fundamentals:  18%|█▊        | 82/451 [01:04<04:59,  1.23it/s]Yahoo fundamentals:  18%|█▊        | 83/451 [01:05<05:11,  1.18it/s]Yahoo fundamentals:  19%|█▊        | 84/451 [01:06<04:48,  1.27it/s]Yahoo fundamentals:  19%|█▉        | 85/451 [01:07<04:39,  1.31it/s]Yahoo fundamentals:  19%|█▉        | 86/451 [01:07<04:40,  1.30it/s]Yahoo fundamentals:  19%|█▉        | 87/451 [01:08<04:26,  1.36it/s]Yahoo fundamentals:  20%|█▉        | 88/451 [01:09<04:35,  1.32it/s]Yahoo fundamentals:  20%|█▉        | 89/451 [01:10<04:48,  1.25it/s]Yahoo fundamentals:  20%|█▉        | 90/451 [01:11<05:01,  1.20it/s]Yahoo fundamentals:  20%|██        | 91/451 [01:11<04:40,  1.28it/s]Yahoo fundamentals:  20%|██        | 92/451 [01:12<04:26,  1.35it/s]Yahoo fundamentals:  21%|██        | 93/451 [01:13<04:18,  1.39it/s]Yahoo fundamentals:  21%|██        | 94/451 [01:13<04:16,  1.39it/s]Yahoo fundamentals:  21%|██        | 95/451 [01:14<04:13,  1.40it/s]Yahoo fundamentals:  21%|██▏       | 96/451 [01:15<04:34,  1.30it/s]Yahoo fundamentals:  22%|██▏       | 97/451 [01:16<04:50,  1.22it/s]Yahoo fundamentals:  22%|██▏       | 98/451 [01:17<04:44,  1.24it/s]Yahoo fundamentals:  22%|██▏       | 99/451 [01:18<04:47,  1.22it/s]Yahoo fundamentals:  22%|██▏       | 100/451 [01:18<04:28,  1.31it/s]Yahoo fundamentals:  22%|██▏       | 101/451 [01:19<04:18,  1.36it/s]Yahoo fundamentals:  23%|██▎       | 102/451 [01:19<04:08,  1.41it/s]Yahoo fundamentals:  23%|██▎       | 103/451 [01:20<04:13,  1.37it/s]Yahoo fundamentals:  23%|██▎       | 104/451 [01:21<04:21,  1.33it/s]Yahoo fundamentals:  23%|██▎       | 105/451 [01:22<04:38,  1.24it/s]Yahoo fundamentals:  24%|██▎       | 106/451 [01:23<04:49,  1.19it/s]Yahoo fundamentals:  24%|██▎       | 107/451 [01:24<04:59,  1.15it/s]Yahoo fundamentals:  24%|██▍       | 108/451 [01:25<05:01,  1.14it/s]Yahoo fundamentals:  24%|██▍       | 109/451 [01:26<04:55,  1.16it/s]Yahoo fundamentals:  24%|██▍       | 110/451 [01:26<04:43,  1.20it/s]Yahoo fundamentals:  25%|██▍       | 111/451 [01:27<04:49,  1.17it/s]Yahoo fundamentals:  25%|██▍       | 112/451 [01:28<04:32,  1.24it/s]Yahoo fundamentals:  25%|██▌       | 113/451 [01:29<04:30,  1.25it/s]Yahoo fundamentals:  25%|██▌       | 114/451 [01:30<04:36,  1.22it/s]Yahoo fundamentals:  25%|██▌       | 115/451 [01:30<04:42,  1.19it/s]Yahoo fundamentals:  26%|██▌       | 116/451 [01:31<04:48,  1.16it/s]Yahoo fundamentals:  26%|██▌       | 117/451 [01:32<04:43,  1.18it/s]Yahoo fundamentals:  26%|██▌       | 118/451 [01:33<04:48,  1.15it/s]Yahoo fundamentals:  26%|██▋       | 119/451 [01:34<04:32,  1.22it/s]Yahoo fundamentals:  27%|██▋       | 120/451 [01:35<04:22,  1.26it/s]Yahoo fundamentals:  27%|██▋       | 121/451 [01:35<04:10,  1.32it/s]Yahoo fundamentals:  27%|██▋       | 122/451 [01:36<04:25,  1.24it/s]Yahoo fundamentals:  27%|██▋       | 123/451 [01:37<04:12,  1.30it/s]Yahoo fundamentals:  27%|██▋       | 124/451 [01:38<04:29,  1.21it/s]Yahoo fundamentals:  28%|██▊       | 125/451 [01:39<04:20,  1.25it/s]Yahoo fundamentals:  28%|██▊       | 126/451 [01:39<04:07,  1.31it/s]Yahoo fundamentals:  28%|██▊       | 127/451 [01:40<04:14,  1.27it/s]Yahoo fundamentals:  28%|██▊       | 128/451 [01:41<04:17,  1.26it/s]Yahoo fundamentals:  29%|██▊       | 129/451 [01:42<04:28,  1.20it/s]Yahoo fundamentals:  29%|██▉       | 130/451 [01:43<04:22,  1.22it/s]Yahoo fundamentals:  29%|██▉       | 131/451 [01:43<04:20,  1.23it/s]Yahoo fundamentals:  29%|██▉       | 132/451 [01:44<04:05,  1.30it/s]Yahoo fundamentals:  29%|██▉       | 133/451 [01:45<04:14,  1.25it/s]Yahoo fundamentals:  30%|██▉       | 134/451 [01:46<04:06,  1.28it/s]Yahoo fundamentals:  30%|██▉       | 135/451 [01:46<04:13,  1.25it/s]Yahoo fundamentals:  30%|███       | 136/451 [01:47<04:13,  1.24it/s]Yahoo fundamentals:  30%|███       | 137/451 [01:48<04:21,  1.20it/s]Yahoo fundamentals:  31%|███       | 138/451 [01:49<04:17,  1.22it/s]Yahoo fundamentals:  31%|███       | 139/451 [01:50<04:04,  1.27it/s]Yahoo fundamentals:  31%|███       | 140/451 [01:51<04:12,  1.23it/s]Yahoo fundamentals:  31%|███▏      | 141/451 [01:51<04:02,  1.28it/s]Yahoo fundamentals:  31%|███▏      | 142/451 [01:52<04:06,  1.26it/s]Yahoo fundamentals:  32%|███▏      | 143/451 [01:53<04:16,  1.20it/s]Yahoo fundamentals:  32%|███▏      | 144/451 [01:54<04:25,  1.16it/s]Yahoo fundamentals:  32%|███▏      | 145/451 [01:55<04:04,  1.25it/s]Yahoo fundamentals:  32%|███▏      | 146/451 [01:55<03:53,  1.31it/s]Yahoo fundamentals:  33%|███▎      | 147/451 [01:56<03:56,  1.29it/s]Yahoo fundamentals:  33%|███▎      | 148/451 [01:57<03:57,  1.28it/s]Yahoo fundamentals:  33%|███▎      | 149/451 [01:58<04:07,  1.22it/s]Yahoo fundamentals:  33%|███▎      | 150/451 [01:58<03:49,  1.31it/s]Yahoo fundamentals:  33%|███▎      | 151/451 [01:59<03:59,  1.26it/s]Yahoo fundamentals:  34%|███▎      | 152/451 [02:00<04:03,  1.23it/s]Yahoo fundamentals:  34%|███▍      | 153/451 [02:01<03:59,  1.25it/s]Yahoo fundamentals:  34%|███▍      | 154/451 [02:02<03:57,  1.25it/s]Yahoo fundamentals:  34%|███▍      | 155/451 [02:03<03:57,  1.24it/s]Yahoo fundamentals:  35%|███▍      | 156/451 [02:03<03:48,  1.29it/s]Yahoo fundamentals:  35%|███▍      | 157/451 [02:04<03:42,  1.32it/s]Yahoo fundamentals:  35%|███▌      | 158/451 [02:05<03:39,  1.34it/s]Yahoo fundamentals:  35%|███▌      | 159/451 [02:05<03:36,  1.35it/s]Yahoo fundamentals:  35%|███▌      | 160/451 [02:06<03:53,  1.25it/s]Yahoo fundamentals:  36%|███▌      | 161/451 [02:07<03:42,  1.30it/s]Yahoo fundamentals:  36%|███▌      | 162/451 [02:08<03:40,  1.31it/s]Yahoo fundamentals:  36%|███▌      | 163/451 [02:08<03:30,  1.37it/s]Yahoo fundamentals:  36%|███▋      | 164/451 [02:09<03:42,  1.29it/s]Yahoo fundamentals:  37%|███▋      | 165/451 [02:10<03:45,  1.27it/s]Yahoo fundamentals:  37%|███▋      | 166/451 [02:11<03:36,  1.32it/s]Yahoo fundamentals:  37%|███▋      | 167/451 [02:12<03:35,  1.32it/s]Yahoo fundamentals:  37%|███▋      | 168/451 [02:12<03:29,  1.35it/s]Yahoo fundamentals:  37%|███▋      | 169/451 [02:13<03:34,  1.31it/s]Yahoo fundamentals:  38%|███▊      | 170/451 [02:14<03:37,  1.29it/s]Yahoo fundamentals:  38%|███▊      | 171/451 [02:15<03:39,  1.28it/s]Yahoo fundamentals:  38%|███▊      | 172/451 [02:16<03:44,  1.24it/s]Yahoo fundamentals:  38%|███▊      | 173/451 [02:16<03:32,  1.31it/s]Yahoo fundamentals:  39%|███▊      | 174/451 [02:17<03:40,  1.26it/s]Yahoo fundamentals:  39%|███▉      | 175/451 [02:18<03:49,  1.20it/s]Yahoo fundamentals:  39%|███▉      | 176/451 [02:19<03:53,  1.18it/s]Yahoo fundamentals:  39%|███▉      | 177/451 [02:20<03:52,  1.18it/s]Yahoo fundamentals:  39%|███▉      | 178/451 [02:21<03:53,  1.17it/s]Yahoo fundamentals:  40%|███▉      | 179/451 [02:21<03:37,  1.25it/s]Yahoo fundamentals:  40%|███▉      | 180/451 [02:22<03:32,  1.28it/s]Yahoo fundamentals:  40%|████      | 181/451 [02:23<03:21,  1.34it/s]Yahoo fundamentals:  40%|████      | 182/451 [02:24<03:27,  1.29it/s]Yahoo fundamentals:  41%|████      | 183/451 [02:24<03:24,  1.31it/s]Yahoo fundamentals:  41%|████      | 184/451 [02:25<03:26,  1.29it/s]Yahoo fundamentals:  41%|████      | 185/451 [02:26<03:29,  1.27it/s]Yahoo fundamentals:  41%|████      | 186/451 [02:27<03:17,  1.34it/s]Yahoo fundamentals:  41%|████▏     | 187/451 [02:27<03:27,  1.27it/s]Yahoo fundamentals:  42%|████▏     | 188/451 [02:28<03:22,  1.30it/s]Yahoo fundamentals:  42%|████▏     | 189/451 [02:29<03:34,  1.22it/s]Yahoo fundamentals:  42%|████▏     | 190/451 [02:30<03:28,  1.25it/s]Yahoo fundamentals:  42%|████▏     | 191/451 [02:31<03:33,  1.22it/s]Yahoo fundamentals:  43%|████▎     | 192/451 [02:32<03:30,  1.23it/s]Yahoo fundamentals:  43%|████▎     | 193/451 [02:32<03:21,  1.28it/s]Yahoo fundamentals:  43%|████▎     | 194/451 [02:33<03:24,  1.26it/s]Yahoo fundamentals:  43%|████▎     | 195/451 [02:34<03:14,  1.32it/s]Yahoo fundamentals:  43%|████▎     | 196/451 [02:35<03:26,  1.24it/s]Yahoo fundamentals:  44%|████▎     | 197/451 [02:36<03:35,  1.18it/s]Yahoo fundamentals:  44%|████▍     | 198/451 [02:37<03:39,  1.15it/s]Yahoo fundamentals:  44%|████▍     | 199/451 [02:37<03:31,  1.19it/s]Yahoo fundamentals:  44%|████▍     | 200/451 [02:38<03:16,  1.27it/s]Yahoo fundamentals:  45%|████▍     | 201/451 [02:39<03:18,  1.26it/s]Yahoo fundamentals:  45%|████▍     | 202/451 [02:40<03:20,  1.24it/s]Yahoo fundamentals:  45%|████▌     | 203/451 [02:40<03:21,  1.23it/s]Yahoo fundamentals:  45%|████▌     | 204/451 [02:41<03:30,  1.17it/s]Yahoo fundamentals:  45%|████▌     | 205/451 [02:42<03:16,  1.25it/s]Yahoo fundamentals:  46%|████▌     | 206/451 [02:43<03:19,  1.23it/s]Yahoo fundamentals:  46%|████▌     | 207/451 [02:44<03:22,  1.20it/s]Yahoo fundamentals:  46%|████▌     | 208/451 [02:45<03:21,  1.21it/s]Yahoo fundamentals:  46%|████▋     | 209/451 [02:45<03:14,  1.25it/s]Yahoo fundamentals:  47%|████▋     | 210/451 [02:46<03:14,  1.24it/s]Yahoo fundamentals:  47%|████▋     | 211/451 [02:47<03:10,  1.26it/s]Yahoo fundamentals:  47%|████▋     | 212/451 [02:48<03:18,  1.21it/s]Yahoo fundamentals:  47%|████▋     | 213/451 [02:49<03:12,  1.24it/s]Yahoo fundamentals:  47%|████▋     | 214/451 [02:49<03:11,  1.24it/s]Yahoo fundamentals:  48%|████▊     | 215/451 [02:50<03:06,  1.27it/s]Yahoo fundamentals:  48%|████▊     | 216/451 [02:51<03:01,  1.30it/s]Yahoo fundamentals:  48%|████▊     | 217/451 [02:52<02:56,  1.33it/s]Yahoo fundamentals:  48%|████▊     | 218/451 [02:52<03:05,  1.26it/s]Yahoo fundamentals:  49%|████▊     | 219/451 [02:53<03:10,  1.22it/s]Yahoo fundamentals:  49%|████▉     | 220/451 [02:54<03:06,  1.24it/s]Yahoo fundamentals:  49%|████▉     | 221/451 [02:55<02:55,  1.31it/s]Yahoo fundamentals:  49%|████▉     | 222/451 [02:56<03:06,  1.23it/s]Yahoo fundamentals:  49%|████▉     | 223/451 [02:56<03:00,  1.26it/s]Yahoo fundamentals:  50%|████▉     | 224/451 [02:57<03:05,  1.22it/s]Yahoo fundamentals:  50%|████▉     | 225/451 [02:58<03:04,  1.23it/s]Yahoo fundamentals:  50%|█████     | 226/451 [02:59<03:03,  1.23it/s]Yahoo fundamentals:  50%|█████     | 227/451 [03:00<02:52,  1.30it/s]Yahoo fundamentals:  51%|█████     | 228/451 [03:00<02:48,  1.32it/s]Yahoo fundamentals:  51%|█████     | 229/451 [03:01<02:49,  1.31it/s]Yahoo fundamentals:  51%|█████     | 230/451 [03:02<02:47,  1.32it/s]Yahoo fundamentals:  51%|█████     | 231/451 [03:03<02:54,  1.26it/s]Yahoo fundamentals:  51%|█████▏    | 232/451 [03:04<02:51,  1.27it/s]Yahoo fundamentals:  52%|█████▏    | 233/451 [03:04<02:43,  1.33it/s]Yahoo fundamentals:  52%|█████▏    | 234/451 [03:05<02:52,  1.26it/s]Yahoo fundamentals:  52%|█████▏    | 235/451 [03:06<02:55,  1.23it/s]Yahoo fundamentals:  52%|█████▏    | 236/451 [03:07<02:58,  1.21it/s]Yahoo fundamentals:  53%|█████▎    | 237/451 [03:08<03:00,  1.19it/s]Yahoo fundamentals:  53%|█████▎    | 238/451 [03:09<03:01,  1.18it/s]Yahoo fundamentals:  53%|█████▎    | 239/451 [03:09<02:54,  1.21it/s]Yahoo fundamentals:  53%|█████▎    | 240/451 [03:10<02:55,  1.21it/s]Yahoo fundamentals:  53%|█████▎    | 241/451 [03:11<02:59,  1.17it/s]Yahoo fundamentals:  54%|█████▎    | 242/451 [03:12<02:49,  1.23it/s]Yahoo fundamentals:  54%|█████▍    | 243/451 [03:12<02:38,  1.32it/s]Yahoo fundamentals:  54%|█████▍    | 244/451 [03:13<02:45,  1.25it/s]Yahoo fundamentals:  54%|█████▍    | 245/451 [03:14<02:41,  1.28it/s]Yahoo fundamentals:  55%|█████▍    | 246/451 [03:15<02:47,  1.22it/s]Yahoo fundamentals:  55%|█████▍    | 247/451 [03:16<02:41,  1.27it/s]Yahoo fundamentals:  55%|█████▍    | 248/451 [03:17<02:47,  1.21it/s]Yahoo fundamentals:  55%|█████▌    | 249/451 [03:17<02:47,  1.20it/s]Yahoo fundamentals:  55%|█████▌    | 250/451 [03:18<02:46,  1.21it/s]Yahoo fundamentals:  56%|█████▌    | 251/451 [03:19<02:39,  1.25it/s]Yahoo fundamentals:  56%|█████▌    | 252/451 [03:20<02:37,  1.27it/s]Yahoo fundamentals:  56%|█████▌    | 253/451 [03:20<02:32,  1.30it/s]Yahoo fundamentals:  56%|█████▋    | 254/451 [03:21<02:32,  1.29it/s]Yahoo fundamentals:  57%|█████▋    | 255/451 [03:22<02:29,  1.31it/s]Yahoo fundamentals:  57%|█████▋    | 256/451 [03:23<02:27,  1.33it/s]Yahoo fundamentals:  57%|█████▋    | 257/451 [03:23<02:22,  1.36it/s]Yahoo fundamentals:  57%|█████▋    | 258/451 [03:24<02:30,  1.28it/s]Yahoo fundamentals:  57%|█████▋    | 259/451 [03:25<02:37,  1.22it/s]Yahoo fundamentals:  58%|█████▊    | 260/451 [03:26<02:36,  1.22it/s]Yahoo fundamentals:  58%|█████▊    | 261/451 [03:27<02:40,  1.18it/s]Yahoo fundamentals:  58%|█████▊    | 262/451 [03:28<02:40,  1.18it/s]Yahoo fundamentals:  58%|█████▊    | 263/451 [03:29<02:31,  1.24it/s]Yahoo fundamentals:  59%|█████▊    | 264/451 [03:29<02:31,  1.23it/s]Yahoo fundamentals:  59%|█████▉    | 265/451 [03:30<02:32,  1.22it/s]Yahoo fundamentals:  59%|█████▉    | 266/451 [03:31<02:33,  1.21it/s]Yahoo fundamentals:  59%|█████▉    | 267/451 [03:32<02:31,  1.21it/s]Yahoo fundamentals:  59%|█████▉    | 268/451 [03:33<02:23,  1.27it/s]Yahoo fundamentals:  60%|█████▉    | 269/451 [03:33<02:24,  1.26it/s]Yahoo fundamentals:  60%|█████▉    | 270/451 [03:34<02:27,  1.23it/s]Yahoo fundamentals:  60%|██████    | 271/451 [03:35<02:22,  1.26it/s]Yahoo fundamentals:  60%|██████    | 272/451 [03:36<02:17,  1.30it/s]Yahoo fundamentals:  61%|██████    | 273/451 [03:37<02:21,  1.25it/s]Yahoo fundamentals:  61%|██████    | 274/451 [03:37<02:16,  1.29it/s]Yahoo fundamentals:  61%|██████    | 275/451 [03:38<02:16,  1.29it/s]Yahoo fundamentals:  61%|██████    | 276/451 [03:39<02:23,  1.22it/s]Yahoo fundamentals:  61%|██████▏   | 277/451 [03:40<02:16,  1.27it/s]Yahoo fundamentals:  62%|██████▏   | 278/451 [03:41<02:23,  1.21it/s]Yahoo fundamentals:  62%|██████▏   | 279/451 [03:41<02:23,  1.20it/s]Yahoo fundamentals:  62%|██████▏   | 280/451 [03:42<02:13,  1.28it/s]Yahoo fundamentals:  62%|██████▏   | 281/451 [03:43<02:07,  1.34it/s]Yahoo fundamentals:  63%|██████▎   | 282/451 [03:44<02:07,  1.33it/s]Yahoo fundamentals:  63%|██████▎   | 283/451 [03:44<02:01,  1.38it/s]Yahoo fundamentals:  63%|██████▎   | 284/451 [03:45<02:12,  1.26it/s]Yahoo fundamentals:  63%|██████▎   | 285/451 [03:46<02:06,  1.32it/s]Yahoo fundamentals:  63%|██████▎   | 286/451 [03:47<02:06,  1.31it/s]Yahoo fundamentals:  64%|██████▎   | 287/451 [03:47<02:08,  1.27it/s]Yahoo fundamentals:  64%|██████▍   | 288/451 [03:48<02:17,  1.18it/s]Yahoo fundamentals:  64%|██████▍   | 289/451 [03:49<02:20,  1.15it/s]Yahoo fundamentals:  64%|██████▍   | 290/451 [03:50<02:15,  1.19it/s]Yahoo fundamentals:  65%|██████▍   | 291/451 [03:51<02:17,  1.16it/s]Yahoo fundamentals:  65%|██████▍   | 292/451 [03:52<02:18,  1.15it/s]Yahoo fundamentals:  65%|██████▍   | 293/451 [03:53<02:18,  1.14it/s]Yahoo fundamentals:  65%|██████▌   | 294/451 [03:54<02:11,  1.19it/s]Yahoo fundamentals:  65%|██████▌   | 295/451 [03:54<02:08,  1.22it/s]Yahoo fundamentals:  66%|██████▌   | 296/451 [03:55<02:05,  1.24it/s]Yahoo fundamentals:  66%|██████▌   | 297/451 [03:56<02:04,  1.24it/s]Yahoo fundamentals:  66%|██████▌   | 298/451 [03:57<02:08,  1.19it/s]Yahoo fundamentals:  66%|██████▋   | 299/451 [03:58<02:04,  1.22it/s]Yahoo fundamentals:  67%|██████▋   | 300/451 [03:58<02:00,  1.26it/s]Yahoo fundamentals:  67%|██████▋   | 301/451 [03:59<02:00,  1.25it/s]Yahoo fundamentals:  67%|██████▋   | 302/451 [04:00<02:00,  1.23it/s]Yahoo fundamentals:  67%|██████▋   | 303/451 [04:01<01:54,  1.29it/s]Yahoo fundamentals:  67%|██████▋   | 304/451 [04:02<02:00,  1.22it/s]Yahoo fundamentals:  68%|██████▊   | 305/451 [04:02<01:56,  1.25it/s]Yahoo fundamentals:  68%|██████▊   | 306/451 [04:03<01:58,  1.22it/s]Yahoo fundamentals:  68%|██████▊   | 307/451 [04:04<02:01,  1.18it/s]Yahoo fundamentals:  68%|██████▊   | 308/451 [04:05<01:55,  1.23it/s]Yahoo fundamentals:  69%|██████▊   | 309/451 [04:06<01:54,  1.24it/s]Yahoo fundamentals:  69%|██████▊   | 310/451 [04:06<01:51,  1.26it/s]Yahoo fundamentals:  69%|██████▉   | 311/451 [04:07<01:51,  1.26it/s]Yahoo fundamentals:  69%|██████▉   | 312/451 [04:08<01:47,  1.29it/s]Yahoo fundamentals:  69%|██████▉   | 313/451 [04:09<01:44,  1.33it/s]Yahoo fundamentals:  70%|██████▉   | 314/451 [04:09<01:40,  1.37it/s]Yahoo fundamentals:  70%|██████▉   | 315/451 [04:10<01:41,  1.35it/s]Yahoo fundamentals:  70%|███████   | 316/451 [04:11<01:39,  1.36it/s]Yahoo fundamentals:  70%|███████   | 317/451 [04:12<01:39,  1.34it/s]Yahoo fundamentals:  71%|███████   | 318/451 [04:12<01:42,  1.29it/s]Yahoo fundamentals:  71%|███████   | 319/451 [04:13<01:41,  1.30it/s]Yahoo fundamentals:  71%|███████   | 320/451 [04:14<01:36,  1.36it/s]Yahoo fundamentals:  71%|███████   | 321/451 [04:15<01:44,  1.25it/s]Yahoo fundamentals:  71%|███████▏  | 322/451 [04:16<01:42,  1.25it/s]Yahoo fundamentals:  72%|███████▏  | 323/451 [04:16<01:37,  1.31it/s]Yahoo fundamentals:  72%|███████▏  | 324/451 [04:17<01:36,  1.32it/s]Yahoo fundamentals:  72%|███████▏  | 325/451 [04:18<01:40,  1.25it/s]Yahoo fundamentals:  72%|███████▏  | 326/451 [04:19<01:36,  1.30it/s]Yahoo fundamentals:  73%|███████▎  | 327/451 [04:19<01:40,  1.24it/s]Yahoo fundamentals:  73%|███████▎  | 328/451 [04:20<01:35,  1.29it/s]Yahoo fundamentals:  73%|███████▎  | 329/451 [04:21<01:38,  1.23it/s]Yahoo fundamentals:  73%|███████▎  | 330/451 [04:22<01:34,  1.28it/s]Yahoo fundamentals:  73%|███████▎  | 331/451 [04:23<01:38,  1.21it/s]Yahoo fundamentals:  74%|███████▎  | 332/451 [04:24<01:38,  1.21it/s]Yahoo fundamentals:  74%|███████▍  | 333/451 [04:24<01:32,  1.27it/s]Yahoo fundamentals:  74%|███████▍  | 334/451 [04:25<01:34,  1.23it/s]Yahoo fundamentals:  74%|███████▍  | 335/451 [04:26<01:29,  1.30it/s]Yahoo fundamentals:  75%|███████▍  | 336/451 [04:26<01:24,  1.36it/s]Yahoo fundamentals:  75%|███████▍  | 337/451 [04:27<01:22,  1.39it/s]Yahoo fundamentals:  75%|███████▍  | 338/451 [04:28<01:26,  1.30it/s]Yahoo fundamentals:  75%|███████▌  | 339/451 [04:29<01:27,  1.28it/s]Yahoo fundamentals:  75%|███████▌  | 340/451 [04:30<01:29,  1.23it/s]Yahoo fundamentals:  76%|███████▌  | 341/451 [04:31<01:33,  1.18it/s]Yahoo fundamentals:  76%|███████▌  | 342/451 [04:31<01:26,  1.26it/s]Yahoo fundamentals:  76%|███████▌  | 343/451 [04:32<01:25,  1.26it/s]Yahoo fundamentals:  76%|███████▋  | 344/451 [04:33<01:25,  1.26it/s]Yahoo fundamentals:  76%|███████▋  | 345/451 [04:34<01:29,  1.18it/s]Yahoo fundamentals:  77%|███████▋  | 346/451 [04:35<01:29,  1.17it/s]Yahoo fundamentals:  77%|███████▋  | 347/451 [04:36<01:29,  1.16it/s]Yahoo fundamentals:  77%|███████▋  | 348/451 [04:36<01:25,  1.21it/s]Yahoo fundamentals:  77%|███████▋  | 349/451 [04:37<01:22,  1.24it/s]Yahoo fundamentals:  78%|███████▊  | 350/451 [04:38<01:24,  1.19it/s]Yahoo fundamentals:  78%|███████▊  | 351/451 [04:39<01:25,  1.18it/s]Yahoo fundamentals:  78%|███████▊  | 352/451 [04:40<01:23,  1.18it/s]Yahoo fundamentals:  78%|███████▊  | 353/451 [04:41<01:26,  1.14it/s]Yahoo fundamentals:  78%|███████▊  | 354/451 [04:41<01:20,  1.20it/s]Yahoo fundamentals:  79%|███████▊  | 355/451 [04:42<01:19,  1.21it/s]Yahoo fundamentals:  79%|███████▉  | 356/451 [04:43<01:13,  1.29it/s]Yahoo fundamentals:  79%|███████▉  | 357/451 [04:44<01:11,  1.31it/s]Yahoo fundamentals:  79%|███████▉  | 358/451 [04:44<01:08,  1.36it/s]Yahoo fundamentals:  80%|███████▉  | 359/451 [04:45<01:09,  1.33it/s]Yahoo fundamentals:  80%|███████▉  | 360/451 [04:46<01:07,  1.36it/s]Yahoo fundamentals:  80%|████████  | 361/451 [04:47<01:10,  1.28it/s]Yahoo fundamentals:  80%|████████  | 362/451 [04:48<01:13,  1.22it/s]Yahoo fundamentals:  80%|████████  | 363/451 [04:48<01:11,  1.23it/s]Yahoo fundamentals:  81%|████████  | 364/451 [04:49<01:13,  1.18it/s]Yahoo fundamentals:  81%|████████  | 365/451 [04:50<01:13,  1.16it/s]Yahoo fundamentals:  81%|████████  | 366/451 [04:51<01:15,  1.13it/s]Yahoo fundamentals:  81%|████████▏ | 367/451 [04:52<01:11,  1.17it/s]Yahoo fundamentals:  82%|████████▏ | 368/451 [04:53<01:13,  1.13it/s]Yahoo fundamentals:  82%|████████▏ | 369/451 [04:54<01:08,  1.20it/s]Yahoo fundamentals:  82%|████████▏ | 370/451 [04:55<01:09,  1.17it/s]Yahoo fundamentals:  82%|████████▏ | 371/451 [04:55<01:04,  1.25it/s]Yahoo fundamentals:  82%|████████▏ | 372/451 [04:56<01:03,  1.24it/s]Yahoo fundamentals:  83%|████████▎ | 373/451 [04:57<01:02,  1.24it/s]Yahoo fundamentals:  83%|████████▎ | 374/451 [04:58<01:03,  1.21it/s]Yahoo fundamentals:  83%|████████▎ | 375/451 [04:59<01:06,  1.14it/s]Yahoo fundamentals:  83%|████████▎ | 376/451 [04:59<01:01,  1.22it/s]Yahoo fundamentals:  84%|████████▎ | 377/451 [05:00<01:00,  1.23it/s]Yahoo fundamentals:  84%|████████▍ | 378/451 [05:01<00:58,  1.25it/s]Yahoo fundamentals:  84%|████████▍ | 379/451 [05:02<01:00,  1.18it/s]Yahoo fundamentals:  84%|████████▍ | 380/451 [05:03<00:56,  1.26it/s]Yahoo fundamentals:  84%|████████▍ | 381/451 [05:03<00:54,  1.29it/s]Yahoo fundamentals:  85%|████████▍ | 382/451 [05:04<00:51,  1.33it/s]Yahoo fundamentals:  85%|████████▍ | 383/451 [05:05<00:53,  1.28it/s]Yahoo fundamentals:  85%|████████▌ | 384/451 [05:06<00:54,  1.24it/s]Yahoo fundamentals:  85%|████████▌ | 385/451 [05:07<00:55,  1.20it/s]Yahoo fundamentals:  86%|████████▌ | 386/451 [05:07<00:52,  1.25it/s]Yahoo fundamentals:  86%|████████▌ | 387/451 [05:08<00:48,  1.32it/s]Yahoo fundamentals:  86%|████████▌ | 388/451 [05:09<00:46,  1.36it/s]Yahoo fundamentals:  86%|████████▋ | 389/451 [05:10<00:49,  1.26it/s]Yahoo fundamentals:  86%|████████▋ | 390/451 [05:10<00:47,  1.28it/s]Yahoo fundamentals:  87%|████████▋ | 391/451 [05:11<00:46,  1.28it/s]Yahoo fundamentals:  87%|████████▋ | 392/451 [05:12<00:48,  1.21it/s]Yahoo fundamentals:  87%|████████▋ | 393/451 [05:13<00:45,  1.27it/s]Yahoo fundamentals:  87%|████████▋ | 394/451 [05:14<00:47,  1.19it/s]Yahoo fundamentals:  88%|████████▊ | 395/451 [05:14<00:45,  1.24it/s]Yahoo fundamentals:  88%|████████▊ | 396/451 [05:15<00:43,  1.25it/s]Yahoo fundamentals:  88%|████████▊ | 397/451 [05:16<00:45,  1.19it/s]Yahoo fundamentals:  88%|████████▊ | 398/451 [05:17<00:41,  1.28it/s]Yahoo fundamentals:  88%|████████▊ | 399/451 [05:18<00:40,  1.27it/s]Yahoo fundamentals:  89%|████████▊ | 400/451 [05:18<00:39,  1.28it/s]Yahoo fundamentals:  89%|████████▉ | 401/451 [05:19<00:39,  1.26it/s]Yahoo fundamentals:  89%|████████▉ | 402/451 [05:20<00:38,  1.27it/s]Yahoo fundamentals:  89%|████████▉ | 403/451 [05:21<00:37,  1.27it/s]Yahoo fundamentals:  90%|████████▉ | 404/451 [05:22<00:37,  1.25it/s]Yahoo fundamentals:  90%|████████▉ | 405/451 [05:22<00:36,  1.26it/s]Yahoo fundamentals:  90%|█████████ | 406/451 [05:23<00:37,  1.20it/s]Yahoo fundamentals:  90%|█████████ | 407/451 [05:24<00:34,  1.27it/s]Yahoo fundamentals:  90%|█████████ | 408/451 [05:25<00:32,  1.33it/s]Yahoo fundamentals:  91%|█████████ | 409/451 [05:25<00:31,  1.35it/s]Yahoo fundamentals:  91%|█████████ | 410/451 [05:26<00:30,  1.34it/s]Yahoo fundamentals:  91%|█████████ | 411/451 [05:27<00:30,  1.32it/s]Yahoo fundamentals:  91%|█████████▏| 412/451 [05:28<00:29,  1.31it/s]Yahoo fundamentals:  92%|█████████▏| 413/451 [05:28<00:29,  1.28it/s]Yahoo fundamentals:  92%|█████████▏| 414/451 [05:29<00:27,  1.33it/s]Yahoo fundamentals:  92%|█████████▏| 415/451 [05:30<00:26,  1.37it/s]Yahoo fundamentals:  92%|█████████▏| 416/451 [05:31<00:27,  1.27it/s]Yahoo fundamentals:  92%|█████████▏| 417/451 [05:32<00:26,  1.26it/s]Yahoo fundamentals:  93%|█████████▎| 418/451 [05:32<00:26,  1.23it/s]Yahoo fundamentals:  93%|█████████▎| 419/451 [05:33<00:26,  1.21it/s]Yahoo fundamentals:  93%|█████████▎| 420/451 [05:34<00:24,  1.25it/s]Yahoo fundamentals:  93%|█████████▎| 421/451 [05:35<00:23,  1.30it/s]Yahoo fundamentals:  94%|█████████▎| 422/451 [05:36<00:22,  1.27it/s]Yahoo fundamentals:  94%|█████████▍| 423/451 [05:36<00:22,  1.22it/s]Yahoo fundamentals:  94%|█████████▍| 424/451 [05:37<00:21,  1.28it/s]Yahoo fundamentals:  94%|█████████▍| 425/451 [05:38<00:19,  1.31it/s]Yahoo fundamentals:  94%|█████████▍| 426/451 [05:39<00:20,  1.24it/s]Yahoo fundamentals:  95%|█████████▍| 427/451 [05:40<00:20,  1.18it/s]Yahoo fundamentals:  95%|█████████▍| 428/451 [05:41<00:19,  1.16it/s]Yahoo fundamentals:  95%|█████████▌| 429/451 [05:41<00:18,  1.22it/s]Yahoo fundamentals:  95%|█████████▌| 430/451 [05:42<00:17,  1.21it/s]Yahoo fundamentals:  96%|█████████▌| 431/451 [05:43<00:16,  1.20it/s]Yahoo fundamentals:  96%|█████████▌| 432/451 [05:44<00:14,  1.28it/s]Yahoo fundamentals:  96%|█████████▌| 433/451 [05:44<00:13,  1.33it/s]Yahoo fundamentals:  96%|█████████▌| 434/451 [05:45<00:12,  1.35it/s]Yahoo fundamentals:  96%|█████████▋| 435/451 [05:46<00:12,  1.26it/s]Yahoo fundamentals:  97%|█████████▋| 436/451 [05:47<00:11,  1.26it/s]Yahoo fundamentals:  97%|█████████▋| 437/451 [05:48<00:11,  1.21it/s]Yahoo fundamentals:  97%|█████████▋| 438/451 [05:48<00:10,  1.25it/s]Yahoo fundamentals:  97%|█████████▋| 439/451 [05:49<00:09,  1.30it/s]Yahoo fundamentals:  98%|█████████▊| 440/451 [05:50<00:08,  1.27it/s]Yahoo fundamentals:  98%|█████████▊| 441/451 [05:51<00:08,  1.25it/s]Yahoo fundamentals:  98%|█████████▊| 442/451 [05:52<00:07,  1.23it/s]Yahoo fundamentals:  98%|█████████▊| 443/451 [05:52<00:06,  1.23it/s]Yahoo fundamentals:  98%|█████████▊| 444/451 [05:53<00:05,  1.29it/s]Yahoo fundamentals:  99%|█████████▊| 445/451 [05:54<00:05,  1.20it/s]Yahoo fundamentals:  99%|█████████▉| 446/451 [05:55<00:04,  1.18it/s]Yahoo fundamentals:  99%|█████████▉| 447/451 [05:56<00:03,  1.27it/s]Yahoo fundamentals:  99%|█████████▉| 448/451 [05:56<00:02,  1.33it/s]Yahoo fundamentals: 100%|█████████▉| 449/451 [05:57<00:01,  1.36it/s]Yahoo fundamentals: 100%|█████████▉| 450/451 [05:58<00:00,  1.37it/s]Yahoo fundamentals: 100%|██████████| 451/451 [05:58<00:00,  1.42it/s]Yahoo fundamentals: 100%|██████████| 451/451 [05:58<00:00,  1.26it/s]
-Fundamentals summary: eligible=480, cache_hits=29, yahoo_fetches=451, fetch_successes=451, fetch_failures=0, apply_failures=0.
+3M return gate >= 0.00%: 485 survivors; 344 removed before fundamentals.
+Fundamentals plan: eligible=485, cache_hits=417, live_fetches=68, incomplete_cached_entries=0.
+Fetching Yahoo fundamentals for 68 uncached tickers...
+Yahoo fundamentals:   0%|          | 0/68 [00:00<?, ?it/s]Yahoo fundamentals:   1%|▏         | 1/68 [00:01<01:17,  1.15s/it]Yahoo fundamentals:   3%|▎         | 2/68 [00:01<01:02,  1.05it/s]Yahoo fundamentals:   4%|▍         | 3/68 [00:02<01:00,  1.07it/s]Yahoo fundamentals:   6%|▌         | 4/68 [00:03<00:56,  1.14it/s]Yahoo fundamentals:   7%|▋         | 5/68 [00:04<00:53,  1.17it/s]Yahoo fundamentals:   9%|▉         | 6/68 [00:05<00:53,  1.15it/s]Yahoo fundamentals:  10%|█         | 7/68 [00:06<00:53,  1.13it/s]Yahoo fundamentals:  12%|█▏        | 8/68 [00:07<01:03,  1.06s/it]Yahoo fundamentals:  13%|█▎        | 9/68 [00:08<01:01,  1.04s/it]Yahoo fundamentals:  15%|█▍        | 10/68 [00:09<01:02,  1.07s/it]Yahoo fundamentals:  16%|█▌        | 11/68 [00:10<00:56,  1.01it/s]Yahoo fundamentals:  18%|█▊        | 12/68 [00:11<00:56,  1.02s/it]Yahoo fundamentals:  19%|█▉        | 13/68 [00:12<00:53,  1.03it/s]Yahoo fundamentals:  21%|██        | 14/68 [00:13<00:53,  1.00it/s]Yahoo fundamentals:  22%|██▏       | 15/68 [00:14<00:51,  1.04it/s]Yahoo fundamentals:  24%|██▎       | 16/68 [00:15<00:49,  1.05it/s]Yahoo fundamentals:  25%|██▌       | 17/68 [00:16<00:49,  1.03it/s]Yahoo fundamentals:  26%|██▋       | 18/68 [00:17<00:49,  1.02it/s]Yahoo fundamentals:  28%|██▊       | 19/68 [00:18<00:48,  1.02it/s]Yahoo fundamentals:  29%|██▉       | 20/68 [00:19<00:45,  1.06it/s]Yahoo fundamentals:  31%|███       | 21/68 [00:20<00:44,  1.05it/s]Yahoo fundamentals:  32%|███▏      | 22/68 [00:21<00:42,  1.07it/s]Yahoo fundamentals:  34%|███▍      | 23/68 [00:22<00:40,  1.12it/s]Yahoo fundamentals:  35%|███▌      | 24/68 [00:22<00:39,  1.10it/s]Yahoo fundamentals:  37%|███▋      | 25/68 [00:23<00:39,  1.08it/s]Yahoo fundamentals:  38%|███▊      | 26/68 [00:24<00:38,  1.10it/s]Yahoo fundamentals:  40%|███▉      | 27/68 [00:25<00:37,  1.08it/s]Yahoo fundamentals:  41%|████      | 28/68 [00:26<00:36,  1.10it/s]Yahoo fundamentals:  43%|████▎     | 29/68 [00:27<00:37,  1.05it/s]Yahoo fundamentals:  44%|████▍     | 30/68 [00:28<00:35,  1.06it/s]Yahoo fundamentals:  46%|████▌     | 31/68 [00:29<00:34,  1.08it/s]Yahoo fundamentals:  47%|████▋     | 32/68 [00:30<00:33,  1.08it/s]Yahoo fundamentals:  49%|████▊     | 33/68 [00:31<00:31,  1.10it/s]Yahoo fundamentals:  50%|█████     | 34/68 [00:32<00:31,  1.08it/s]Yahoo fundamentals:  51%|█████▏    | 35/68 [00:33<00:30,  1.07it/s]Yahoo fundamentals:  53%|█████▎    | 36/68 [00:34<00:30,  1.05it/s]Yahoo fundamentals:  54%|█████▍    | 37/68 [00:35<00:28,  1.08it/s]Yahoo fundamentals:  56%|█████▌    | 38/68 [00:36<00:28,  1.07it/s]Yahoo fundamentals:  57%|█████▋    | 39/68 [00:36<00:26,  1.11it/s]Yahoo fundamentals:  59%|█████▉    | 40/68 [00:37<00:24,  1.14it/s]Yahoo fundamentals:  60%|██████    | 41/68 [00:38<00:23,  1.16it/s]Yahoo fundamentals:  62%|██████▏   | 42/68 [00:39<00:23,  1.12it/s]Yahoo fundamentals:  63%|██████▎   | 43/68 [00:40<00:21,  1.16it/s]Yahoo fundamentals:  65%|██████▍   | 44/68 [00:41<00:20,  1.15it/s]Yahoo fundamentals:  66%|██████▌   | 45/68 [00:42<00:21,  1.08it/s]Yahoo fundamentals:  68%|██████▊   | 46/68 [00:43<00:21,  1.04it/s]Yahoo fundamentals:  69%|██████▉   | 47/68 [00:44<00:20,  1.00it/s]Yahoo fundamentals:  71%|███████   | 48/68 [00:45<00:20,  1.00s/it]Yahoo fundamentals:  72%|███████▏  | 49/68 [00:46<00:18,  1.04it/s]Yahoo fundamentals:  74%|███████▎  | 50/68 [00:47<00:16,  1.07it/s]Yahoo fundamentals:  75%|███████▌  | 51/68 [00:48<00:16,  1.03it/s]Yahoo fundamentals:  76%|███████▋  | 52/68 [00:48<00:14,  1.08it/s]Yahoo fundamentals:  78%|███████▊  | 53/68 [00:49<00:14,  1.07it/s]Yahoo fundamentals:  79%|███████▉  | 54/68 [00:50<00:12,  1.10it/s]Yahoo fundamentals:  81%|████████  | 55/68 [00:51<00:12,  1.08it/s]Yahoo fundamentals:  82%|████████▏ | 56/68 [00:52<00:11,  1.06it/s]Yahoo fundamentals:  84%|████████▍ | 57/68 [00:53<00:11,  1.02s/it]Yahoo fundamentals:  85%|████████▌ | 58/68 [00:54<00:09,  1.04it/s]Yahoo fundamentals:  87%|████████▋ | 59/68 [00:55<00:08,  1.08it/s]Yahoo fundamentals:  88%|████████▊ | 60/68 [00:56<00:07,  1.05it/s]Yahoo fundamentals:  90%|████████▉ | 61/68 [00:57<00:06,  1.03it/s]Yahoo fundamentals:  91%|█████████ | 62/68 [00:58<00:05,  1.05it/s]Yahoo fundamentals:  93%|█████████▎| 63/68 [00:59<00:04,  1.06it/s]Yahoo fundamentals:  94%|█████████▍| 64/68 [01:00<00:03,  1.07it/s]Yahoo fundamentals:  96%|█████████▌| 65/68 [01:01<00:02,  1.11it/s]Yahoo fundamentals:  97%|█████████▋| 66/68 [01:02<00:01,  1.09it/s]Yahoo fundamentals:  99%|█████████▊| 67/68 [01:02<00:00,  1.12it/s]Yahoo fundamentals: 100%|██████████| 68/68 [01:03<00:00,  1.11it/s]Yahoo fundamentals: 100%|██████████| 68/68 [01:03<00:00,  1.06it/s]
+Fundamentals summary: eligible=485, cache_hits=417, yahoo_fetches=68, fetch_successes=68, fetch_failures=0, apply_failures=0.
 Done.
 /home/runner/work/clairvoyant/clairvoyant/stock_recommender.py:4960: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
   .infer_objects(copy=False)
@@ -48,260 +44,163 @@ Saved top QVM cache to caches/top_qvm_stocks_cache.pkl.
 
 Top QVM Stocks:
    Symbol   QVMScore  3M Return   1Y Return
-0    INSW  85.423491  48.587642  171.504884
-1     ECO  82.423346  72.350882  212.738432
-2     FRO  79.987112  47.571830  142.333877
-3     LPG  79.518467  59.823288   98.184193
-4     TNK  79.166117  48.020265   91.013698
+0    INSW  85.327973  48.921520  178.921621
+1     ECO  82.386630  75.331695  219.928876
+2     FRO  79.833438  50.507651  146.731858
+3     TNK  79.514905  50.978247   95.922736
+4     DHT  79.104708  44.674323  112.592597
 ..    ...        ...        ...         ...
-70   KEYS  61.578430   2.762300  107.606182
-71   ANET  61.576755  20.626320   42.930882
-72    ERO  61.435400  39.850467   87.331002
-73   IMAX  61.406095  40.817863   73.508512
-74   AUGO  61.337707  24.605365  114.664304
+70   SLDE  61.655498  12.922408   43.004043
+71  SGYEF  61.607408  22.297747   62.045858
+72     PR  61.459913  19.015152   71.384538
+73    AMD  61.268603  12.329907  275.530028
+74  TNEYF  61.252673   6.418422  113.036654
 
 [75 rows x 4 columns]
-MARKET CACHE MISS path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=24.37 reason=expired
+MARKET CACHE MISS path=caches/gemini_shared_market_context_cache.json entries=1 contract=835e51d1d7a2 age_hours=23.71 reason=expired
 
 ...calling Gemini for fresh shared stock/ETF market context...
 
 Gemini 2.5 API budget: 1/8 total; 1/2 market.
 Gemini logical request 1/8: market context (gemini-2.5-flash, attempt 1) (API attempt 1; stock API attempts 0)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Gemini usage [market context]: prompt_tokens=1061, tool_tokens=2284, cached_tokens=None, thinking_tokens=6837, output_tokens=7430, total_tokens=17612
+Gemini usage [market context]: prompt_tokens=1061, tool_tokens=2535, cached_tokens=None, thinking_tokens=7431, output_tokens=9581, total_tokens=20608
 Google searches performed [market context]: 8
-  Search: S&P 500 Nasdaq Russell performance breadth volatility sentiment last 10 days
-  Search: US inflation employment growth official releases last 10 days
-  Search: Federal Reserve policy rate expectations Treasury yields credit liquidity last 10 days
-  Search: US earnings growth guidance margins analyst estimate revisions last 10 days
-  Search: current operating conditions Basic Materials Communication Services Consumer Cyclical Consumer Defensive Energy Financial Services Healthcare Industrials Real Estate Technology Utilities sectors
-  Search: Value growth momentum quality dividends size valuation flows crowding factors last 10 days
-  Search: geopolitics energy commodities freight supply-chain conditions last 10 days
-  Search: material regulation temporary events normalization risk last 10 days
-Grounding citation chunks exposed [market context]: 18
+  Search: S&P 500 Nasdaq Russell performance breadth volatility sentiment last 10 days September 2026
+  Search: US inflation employment growth official releases September 2026
+  Search: Federal Reserve policy rate expectations Treasury yields credit liquidity September 2026
+  Search: US earnings growth guidance margins analyst estimate revisions September 2026
+  Search: Current leadership operating conditions canonical sectors September 2026
+  Search: Value growth momentum quality dividends size valuation flows crowding September 2026
+  Search: Geopolitics energy commodities freight supply-chain conditions September 2026
+  Search: Material regulation temporary events normalization risk September 2026
+Grounding citation chunks exposed [market context]: 24
 MARKET CACHE SAVED contract=835e51d1d7a2 entries=1 exposed_search_queries=8
-Dynamic market risk-event catalog: 1 canonical event(s).
-RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=28 fresh=0 expired=28 contract=db58e7866090
-RESEARCH CACHE MISS symbol=INSW reason=expired
-RESEARCH CACHE MISS symbol=ECO reason=expired
-RESEARCH CACHE MISS symbol=FRO reason=expired
-RESEARCH CACHE MISS symbol=LPG reason=expired
-RESEARCH CACHE MISS symbol=TNK reason=expired
-RESEARCH CACHE MISS symbol=NAT reason=expired
-RESEARCH CACHE MISS symbol=DHT reason=expired
-RESEARCH CACHE MISS symbol=TRMD reason=expired
-RESEARCH CACHE MISS symbol=TEN reason=expired
-RESEARCH CACHE MISS symbol=ARREF reason=expired
-RESEARCH CACHE MISS symbol=PURR reason=expired
-RESEARCH CACHE MISS symbol=TK reason=expired
-RESEARCH CACHE MISS symbol=VCTR reason=expired
-RESEARCH CACHE MISS symbol=DINO reason=expired
-RESEARCH CACHE MISS symbol=AYA reason=expired
-RESEARCH CACHE MISS symbol=FTNT reason=expired
-RESEARCH CACHE MISS symbol=STNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=VLO reason=expired
-RESEARCH CACHE MISS symbol=HAFN reason=expired
-RESEARCH CACHE MISS symbol=CMBT reason=expired
-RESEARCH CACHE MISS symbol=WDOFF reason=expired
-RESEARCH CACHE MISS symbol=DDI reason=expired
-RESEARCH CACHE MISS symbol=NMM reason=expired
-RESEARCH CACHE MISS symbol=SHIP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PTGX reason=expired
-RESEARCH CACHE MISS symbol=HNGE reason=expired
-RESEARCH CACHE MISS symbol=KRT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NVEC reason=expired
-RESEARCH CACHE MISS symbol=SBLK reason=expired
-RESEARCH CACHE MISS symbol=CDNA reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RCRUY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PAYS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MAKO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=DSVSF reason=expired
-RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NUTX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SB reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=BVS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EQNR reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=NTAP reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=EC reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=RDVT reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=HPE reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=PBF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=KEYS reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ANET reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=ERO reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=IMAX reason=symbol_not_cached
-RESEARCH CACHE MISS symbol=AUGO reason=symbol_not_cached
-Deferred excess same-sector research candidates: TRMD, TEN, TK, DINO
-Filled ordinary research batch with future uncached QVM candidates: INSW, ECO, FRO, LPG, TNK, NAT, DHT, ARREF, PURR, VCTR, AYA, FTNT, HAFN, WDOFF, DDI
-
-...calling Gemini for stock batch: INSW, ECO, FRO, LPG, TNK, NAT, DHT, ARREF, PURR, VCTR, AYA, FTNT, HAFN, WDOFF, DDI...
-
-Gemini 2.5 API budget: 2/8 total; 1/6 stock.
-Gemini logical request 2/8: stock batch containing 15 stocks, spanning QVM ranks 1-22 (gemini-2.5-flash, attempt 1) (API attempt 2; stock API attempts 1)
-Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 1-22]: prompt_tokens=25828, tool_tokens=58086, cached_tokens=None, thinking_tokens=9705, output_tokens=22005, total_tokens=115624
-Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 1-22]: 20
-  Search: International Seaways, Inc. INSW investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Okeanis Eco Tankers Corp. ECO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Frontline plc FRO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Dorian LPG Ltd. LPG investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Teekay Tankers Ltd. TNK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Nordic American Tankers Limited NAT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: DHT Holdings, Inc. DHT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Amerigo Resources Ltd. ARREF investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hyperliquid Strategies Inc. PURR investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Aya Gold & Silver Inc. AYA investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Fortinet, Inc. FTNT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hafnia Limited HAFN investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Wesdome Gold Mines Ltd. WDOFF investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: DoubleDown Interactive Co., Ltd. DDI investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Amerigo Resources Ltd. ARREF latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Hyperliquid Strategies Inc. PURR investor relations latest earnings current company spin-off
-  Search: Victory Capital Holdings, Inc. VCTR investor relations latest results guidance
-  Search: Hafnia Limited HAFN investor relations latest results guidance
-  Search: Wesdome Gold Mines Ltd. WDOFF investor relations latest results guidance
-Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 1-22]: 18
-Recovered independently delimited stock results: INSW, ECO, FRO, LPG, TNK, NAT, DHT, ARREF, PURR, VCTR, AYA, FTNT, HAFN, WDOFF, DDI
-Stock response coverage: 15/15 returned; 0 missing; status=NORMAL.
-Research searches requested this call: 15 total; 15 first, 0 repeated.
-Cross-company similarity noted for INSW/FRO but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for INSW/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for INSW/HAFN but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/TNK but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for ECO/NAT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/DHT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for FRO/HAFN but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for TNK/NAT but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
-Cross-company similarity noted for DHT/HAFN but below retry threshold: score=0.5, low_specificity_fields=['material_effect'], shared_specific_financial_figures=none.
+Dynamic market risk-event catalog: 2 canonical event(s).
+RESEARCH CACHE OPEN path=caches/gemini_stock_research_cache_hardened.json exists=True loaded=30 fresh=30 expired=0 contract=db58e7866090
 Validated grounded research [INSW]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=INSW evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [ECO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=ECO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [FRO]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [LPG]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=FRO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TNK]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [NAT]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TNK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [DHT]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [ARREF]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [PURR]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [VCTR]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [AYA]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [FTNT]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [HAFN]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [WDOFF]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [DDI]: 4 distinct source URLs; awaiting judgment.
-Batch research summary:
-  candidates sent: 15
-  company searches exposed: 20
-  results returned: 15
-  results validated: 15
-  incomplete research: 0
-  structural repairs needed: 0
-  genuine repeated searches: 0
-  missing/unsearched attempts refunded: 0
-Deferred excess same-sector research candidates: CMBT, ASC, MPC, PBT
-Filled ordinary research batch with future uncached QVM candidates: TRMD, TEN, TK, DINO, STNG, VLO, NMM, SHIP, PTGX, HNGE, KRT, NVEC, SBLK, CDNA, RCRUY
-
-...calling Gemini for stock batch: TRMD, TEN, TK, DINO, STNG, VLO, NMM, SHIP, PTGX, HNGE, KRT, NVEC, SBLK, CDNA, RCRUY...
-
-Gemini 2.5 API budget: 3/8 total; 2/6 stock.
-Gemini logical request 3/8: stock batch containing 15 stocks, spanning QVM ranks 8-35 (gemini-2.5-flash, attempt 1) (API attempt 3; stock API attempts 2)
-Gemini usage [stock batch containing 15 stocks, spanning QVM ranks 8-35]: prompt_tokens=25851, tool_tokens=64446, cached_tokens=60658, thinking_tokens=12338, output_tokens=22989, total_tokens=125624
-Google searches performed [stock batch containing 15 stocks, spanning QVM ranks 8-35]: 20
-  Search: TORM plc TRMD investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Tsakos Energy Navigation Limited TEN investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Teekay Corporation Ltd. TK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: HF Sinclair Corporation DINO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Scorpio Tankers Inc. STNG investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Valero Energy Corporation VLO investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Navios Maritime Partners L.P. NMM investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Seanergy Maritime Holdings Corp SHIP investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Protagonist Therapeutics, Inc. PTGX investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Hinge Health, Inc. HNGE investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Karat Packaging Inc. KRT investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: NVE Corporation NVEC investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Star Bulk Carriers Corp. SBLK investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: CareDx, Inc. CDNA investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Recruit Holdings Co., Ltd. RCRUY investor relations latest results guidance operating metrics acquisition financing material announcement
-  Search: Tsakos Energy Navigation Limited TEN latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Teekay Corporation Ltd. TK latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Scorpio Tankers Inc. STNG latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Protagonist Therapeutics, Inc. PTGX latest earnings release revenue guidance operating metrics investor relations SEC
-  Search: Recruit Holdings Co., Ltd. RCRUY latest earnings release revenue guidance operating metrics investor relations SEC
-Grounding citation chunks exposed [stock batch containing 15 stocks, spanning QVM ranks 8-35]: 19
-Recovered independently delimited stock results: TRMD, TEN, TK, DINO, STNG, VLO, NMM, SHIP, PTGX, HNGE, KRT, NVEC, SBLK, CDNA, RCRUY
-Stock response coverage: 15/15 returned; 0 missing; status=NORMAL.
-Research searches requested this call: 15 total; 15 first, 0 repeated.
-Cross-company similarity noted for HNGE/CDNA but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for HNGE/RCRUY but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
-Cross-company similarity noted for CDNA/RCRUY but below retry threshold: score=0.5, low_specificity_fields=['reversal_mechanism'], shared_specific_financial_figures=none.
+RESEARCH CACHE HIT symbol=DHT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [LPG]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=LPG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [NAT]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NAT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TRMD]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TRMD evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TEN]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TEN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [ARREF]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=ARREF evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [TK]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=TK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [HAFN]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=HAFN evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [PURR]: 5 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PURR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=MU reason=symbol_not_cached
+Validated grounded research [VCTR]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VCTR evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [STNG]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=STNG evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [AYA]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=AYA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [DINO]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DINO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [VLO]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [NMM]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [SHIP]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=VLO evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [FTNT]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=FTNT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=CMBT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ASC reason=symbol_not_cached
+Validated grounded research [WDOFF]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=WDOFF evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [HNGE]: 5 distinct source URLs; awaiting judgment.
-Validated grounded research [KRT]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=HNGE evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [DDI]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=DDI evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [NMM]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NMM evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [NVEC]: 4 distinct source URLs; awaiting judgment.
-Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=NVEC evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+Validated grounded research [SHIP]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=SHIP evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [CDNA]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=CDNA evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=MPC reason=symbol_not_cached
+Validated grounded research [KRT]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=KRT evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=PAYS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ATEYY reason=symbol_not_cached
+Validated grounded research [SBLK]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=SBLK evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=BWLP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=DSVSF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ETON reason=symbol_not_cached
+Validated grounded research [PTGX]: 4 distinct source URLs; awaiting judgment.
+RESEARCH CACHE HIT symbol=PTGX evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
 Validated grounded research [RCRUY]: 4 distinct source URLs; awaiting judgment.
-Batch research summary:
-  candidates sent: 15
-  company searches exposed: 20
-  results returned: 15
-  results validated: 15
-  incomplete research: 0
-  structural repairs needed: 0
-  genuine repeated searches: 0
-  missing/unsearched attempts refunded: 0
-Prepared compact 3.8 stock judgment payload: stocks=30, prompt_chars=126681, market_events=1, peer_classifications=0.
+RESEARCH CACHE HIT symbol=RCRUY evidence=hit judgment=refresh reason=market_candidate_or_judgment_contract_changed
+RESEARCH CACHE MISS symbol=PARR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MAKO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBR-A reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=RNG reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TSM reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=REPX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ILMN reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CVE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AGEN reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TWLO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SB reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PSX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NTAP reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=WCPRF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=CGAU reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SU reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=BVS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=HPE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=MGYOY reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SCCO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=NUTX reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SSL reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=RDVT reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=ERO reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=KEYS reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=APA reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PBYI reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SLDE reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=SGYEF reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=PR reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=AMD reason=symbol_not_cached
+RESEARCH CACHE MISS symbol=TNEYF reason=symbol_not_cached
+Classifying cached PENDING_JUDGMENT research before new stock research: 30 candidate(s).
+Prepared compact 3.8 stock judgment payload: stocks=30, prompt_chars=127818, market_events=2, peer_classifications=0.
 Gemini 3.8 API budget: 1/8 total; 1/6 classification.
 Gemini classification request 1/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 1/3)
 Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 classification in 60.8s...
+Retrying 3.8 classification in 73.5s...
 Gemini 3.8 API budget: 2/8 total; 2/6 classification.
 Gemini classification request 2/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 2/3)
 Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 classification in 134.3s...
+Retrying 3.8 classification in 142.8s...
 Gemini 3.8 API budget: 3/8 total; 3/6 classification.
 Gemini classification request 3/6: stock judgment for 30 stocks (gemini-3.8-flash, attempt 3/3)
 Warning: stock judgment for 30 stocks (gemini-3.8-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 Warning: Gemini 3.8 judgment is unavailable after this batch's retry allowance; preserving validated research as PENDING_JUDGMENT and opening the classification circuit breaker: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 Judgment unavailable; leaving validated research queued for a later run.
-Classifying pending research before another 2.5 call: 0 selected, 30 pending, optimistic capacity 14/10.
-Stopping retries because no classification model is available.
 Stopping stock research because no classification model is available.
 FINAL VALIDATED CANDIDATE COMPARISON
-Research efficiency: 30 unique stocks, 30 requested searches, 0 repeated searches.
+Research efficiency: 0 unique stocks, 0 requested searches, 0 repeated searches.
 
 CONTEXT REVIEW
 

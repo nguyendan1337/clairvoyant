@@ -1,241 +1,147 @@
-ETF STAGE universe_and_quantitative_data run_id=36976468666-1
+ETF STAGE universe_and_quantitative_data run_id=37029307628-1
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run.log
 Checking top ETF QVM cache: caches/top_qvm_etfs_cache.pkl
-Top ETF QVM cache is stale (23.8h old).
+Top ETF QVM cache is stale (8.7h old).
 Downloading ETF price history for 2 symbols...
-
-1 Failed download:
-['SPMO']: OperationalError('database is locked')
-Downloading missing benchmark history: ['SPMO']
-Downloading ETF price history for 1 symbols...
-Benchmark-relative discovery floors: 1Y 15.00%, 3M 0.00%.
+Benchmark-relative discovery floors: 1Y 15.00%, 3M -2.30%.
 Fetched 250 ETF screener rows at offset 0.
 Fetched 250 ETF screener rows at offset 250.
 Fetched 250 ETF screener rows at offset 500.
 Fetched 250 ETF screener rows at offset 750.
-Fetched 73 ETF screener rows at offset 1000.
+Fetched 59 ETF screener rows at offset 1000.
 
-Raw ETF universe: 1054
-After basic ETF filtering: 459
-Downloading ETF price history for 461 symbols...
+Raw ETF universe: 1045
+After basic ETF filtering: 513
+Downloading ETF price history for 513 symbols...
 Computing ETF momentum metrics...
-Resolving yfinance metadata (cache first) for all 461 filtered momentum candidates...
-ETF metadata (cache + live):   0%|          | 0/461 [00:00<?, ?it/s]ETF metadata (cache + live):   4%|▍         | 20/461 [00:00<00:17, 25.47it/s]ETF metadata (cache + live):  10%|▉         | 45/461 [00:01<00:14, 27.92it/s]ETF metadata (cache + live):  37%|███▋      | 170/461 [00:02<00:03, 88.52it/s]ETF metadata (cache + live):  61%|██████▏   | 283/461 [00:03<00:01, 114.92it/s]ETF metadata (cache + live): 100%|██████████| 461/461 [00:03<00:00, 149.42it/s]
-ETF METADATA CACHE {"status": "completed", "eligible": 461, "hits": 457, "live_requests": 4, "failed_symbols": [], "incomplete_symbols": ["SEURF"], "ttl_hours": 168, "save_succeeded": true}
-Excluded obvious non-U.S.-equity ETF mandates after metadata: BWET, UGA, BNO, USO, DBE, DBO, ARTY, USL, BOAT, GSG, PIT, OILK, THNQ, PDBC, DBC, SEA, USCI, HTEC, COMT, HGER, SDCI, IXC, EPOL, GREK, GSIB, BULD, NBCM, GVAL, JADE, SLVP, USE, EYLD, CMDT, COMB, CPER, LENS, SOYB, EMXF, GGTL, GNR, QQQS, COPY, EWQQF, PWQQF, CMCI, KNO, COM, JPXN, ENOR, CMDY, NRES, GUNR, ASGM, EIRL, BCI, COMD, AVGV, ESGG, IVLU, IOO, HAWX, IQSZ, WEAT, FTGC, RGEF, WRND, AVGE, BINT, AMZA, THD, AQLT, RING, NORW, ZSC, GLOF, GMOM, RLY, DBEF, EFV, PIPE, EFAS, HEFA, IPAC, EDGH, FGSM, TAGS, EWC, RGLO, MXI, FGD, RAAX
-Final benchmark-relative floors: 3M 4.64%, 1Y 31.70%.
-ETF research candidates: 76 (0 strict benchmark-superior, 6 benchmark-competitive backfill, 70 additional top-QVM reserve; top-QVM target: 100).
+Resolving yfinance metadata (cache first) for all 513 filtered momentum candidates...
+ETF metadata (cache + live):   0%|          | 0/513 [00:00<?, ?it/s]ETF metadata (cache + live):   5%|▌         | 27/513 [00:01<00:18, 26.58it/s]ETF metadata (cache + live):  20%|█▉        | 102/513 [00:01<00:05, 68.56it/s]ETF metadata (cache + live):  35%|███▌      | 182/513 [00:02<00:04, 80.88it/s]ETF metadata (cache + live):  37%|███▋      | 191/513 [00:03<00:05, 57.06it/s]ETF metadata (cache + live):  56%|█████▌    | 286/513 [00:04<00:02, 77.08it/s]ETF metadata (cache + live):  57%|█████▋    | 294/513 [00:04<00:04, 52.12it/s]ETF metadata (cache + live):  64%|██████▍   | 328/513 [00:05<00:03, 51.15it/s]ETF metadata (cache + live):  89%|████████▉ | 459/513 [00:06<00:00, 92.14it/s]ETF metadata (cache + live): 100%|██████████| 513/513 [00:06<00:00, 80.79it/s]
+ETF METADATA CACHE {"status": "completed", "eligible": 513, "hits": 505, "live_requests": 8, "failed_symbols": [], "incomplete_symbols": [], "ttl_hours": 168, "save_succeeded": true}
+Excluded obvious non-U.S.-equity ETF mandates after metadata: BWET, UGA, BNO, USO, DBE, DBO, ARTY, USL, BOAT, GSG, PIT, PDBC, THNQ, DBC, SEA, IXN, OILK, SPTE, USCI, COMT, IXC, SDCI, HGER, HTEC, BULD, NBCM, EPOL, PICK, USE, FFEM, VPL, JADE, GVAL, COMB, GSIB, SLVP, LENS, EYLD, GREK, GGTL, CPER, EMXF, SOYB, GNR, DFAE, QQQS, ESGE, PWQQF, KNO, COPY, CMCI, EWQQF, COM, ASGM, ENOR, CMDY, COMD, NRES, BCI, GUNR, AMZA, ESGG, DBB, AVGV, WEAT, JPXN, FTGC, IOO, IQSZ, WRND, HAWX, RGEF, PIPE, IVLU, THD, AVGE, FBOT, GMOM, RLY, GLOF, CGNG, BINT, AQLT, CMDT, EIRL, ZSC, RAAX, NORW, TAGS, EDGH, RING, DBEF, AAVM
+Final benchmark-relative floors: 3M 7.77%, 1Y 32.10%.
+ETF research candidates: 85 (0 strict benchmark-superior, 8 benchmark-competitive backfill, 77 additional top-QVM reserve; top-QVM target: 100).
 Saved top ETF QVM cache to caches/top_qvm_etfs_cache.pkl.
-Fetching structured fund data for 78 ETF research candidates...
-  0%|          | 0/78 [00:00<?, ?it/s] 31%|███       | 24/78 [00:00<00:00, 78.72it/s] 41%|████      | 32/78 [00:00<00:00, 46.28it/s] 53%|█████▎    | 41/78 [00:01<00:01, 34.72it/s] 59%|█████▉    | 46/78 [00:01<00:01, 27.49it/s] 63%|██████▎   | 49/78 [00:01<00:01, 22.30it/s] 67%|██████▋   | 52/78 [00:02<00:02, 12.36it/s] 69%|██████▉   | 54/78 [00:02<00:02, 10.94it/s] 72%|███████▏  | 56/78 [00:02<00:02, 10.25it/s] 74%|███████▍  | 58/78 [00:03<00:02,  7.26it/s] 77%|███████▋  | 60/78 [00:03<00:02,  7.40it/s] 79%|███████▉  | 62/78 [00:04<00:02,  7.28it/s] 81%|████████  | 63/78 [00:04<00:02,  6.08it/s] 82%|████████▏ | 64/78 [00:04<00:02,  4.84it/s] 86%|████████▌ | 67/78 [00:05<00:01,  6.51it/s] 87%|████████▋ | 68/78 [00:05<00:01,  5.38it/s] 90%|████████▉ | 70/78 [00:05<00:01,  5.33it/s] 95%|█████████▍| 74/78 [00:06<00:00,  7.59it/s]100%|██████████| 78/78 [00:06<00:00,  8.38it/s]100%|██████████| 78/78 [00:06<00:00, 12.12it/s]
-ETF FUND CACHE {"status": "completed", "hits": 58, "live_requests": 20, "incomplete_symbols": ["GARP", "BHYP", "FFSM"], "save_succeeded": true}
-Excluded ETFs below 80% equity assets: ETHB, IALT, ZCSH
+Fetching structured fund data for 87 ETF research candidates...
+  0%|          | 0/87 [00:00<?, ?it/s] 28%|██▊       | 24/87 [00:00<00:00, 72.07it/s] 49%|████▉     | 43/87 [00:00<00:00, 69.90it/s] 60%|█████▉    | 52/87 [00:00<00:00, 47.64it/s] 74%|███████▎  | 64/87 [00:01<00:00, 44.51it/s] 79%|███████▉  | 69/87 [00:01<00:00, 32.61it/s]100%|██████████| 87/87 [00:01<00:00, 39.12it/s]100%|██████████| 87/87 [00:01<00:00, 43.82it/s]
+ETF FUND CACHE {"status": "completed", "hits": 81, "live_requests": 6, "incomplete_symbols": ["GARP", "FFSM"], "save_succeeded": true}
+Excluded ETFs below 80% equity assets: ETHB, IALT, ZCSH, BHYP
 
 Top ETF QVM candidates:
      Role Symbol  QVMScore  QualityScore  ValueScore  MomentumScore  BenchmarkRelativeScore  3M Return  6M Return  1Y Return
-BENCHMARK    VGT 76.858499     92.778193   46.493056      72.248775               89.130435   9.270316  42.913612  35.619964
-CANDIDATE   VLUE 76.434912     78.149080   73.732639      75.835401               92.391304   3.770203  39.115819  60.958369
-CANDIDATE    XLE 75.362484     81.984686   88.854167      68.695323               86.141304  18.713895   7.219502  44.364672
-CANDIDATE   VFLO 75.210462     71.713068   61.944444      79.848080               85.597826  11.482962  31.491368  39.746273
-CANDIDATE   CRAK 70.396389     49.400974   49.618056      87.534986               98.369565  31.208748  30.465994  75.435544
-CANDIDATE   DIVB 69.711231     58.898864   86.475694      73.543743               70.380435   3.860266  22.368536  28.200228
-BENCHMARK   SPMO 68.471241     88.306385   51.111111      59.005264               80.706522   0.012538  33.548857  27.772492
-CANDIDATE   FENY 68.209099     65.103734   85.572917      67.028182               84.510870  17.670934   5.938570  43.141469
-CANDIDATE   AVLV 67.572922     76.128084   75.399306      60.705748               54.891304   0.289656  13.282147  27.544889
-CANDIDATE   RSPT 67.562018     67.652760   27.309028      74.822998               92.934783   8.082667  45.473698  50.321281
-CANDIDATE   JQUA 67.406415     65.862933   60.781250      69.593207               59.239130   3.113814  20.917452  19.531427
-CANDIDATE    VDE 66.820104     68.195887   64.143519      66.431258               83.695652  17.646305   5.814826  43.084027
-CANDIDATE   VONV 66.606748     70.305898   72.100694      63.253844               50.815217   0.779868  15.992111  23.748605
-CANDIDATE   DYNF 65.881052     79.779383   51.475694      59.655814               46.195652   2.779316  18.664395  18.404011
-CANDIDATE    IWD 65.276333     70.317100   63.020833      62.478664               49.728261   0.771451  15.967366  23.654741
-CANDIDATE   FNDX 65.100856     74.538366   60.781250      59.880550               37.228261   1.014206  13.649660  21.391355
-CANDIDATE    IWX 64.887231     59.244264   58.611111      69.619322               61.141304   1.918510  18.185075  26.238732
-CANDIDATE   SEIV 64.746976     51.736269   84.288194      69.473568               67.119565   2.924043  18.938771  28.823039
-CANDIDATE   CIBR 64.535161     68.337446   12.673611      71.544899               94.293478  11.702708  61.819977  36.337820
-CANDIDATE   DFLV 63.567349     63.549716   68.385417      62.702558               45.923913   1.614142  13.273506  24.522375
-CANDIDATE    XOP 61.977925     57.125433   76.550926      62.416238               85.054348  20.183722   4.626255  39.825989
-CANDIDATE   SCHD 61.943917     70.234145   78.767361      53.609509               33.152174   2.110776   8.582147  22.795583
-CANDIDATE   JMOM 61.355230     57.772240   56.336806      64.547755               70.108696   0.281414  22.186335  24.859008
-CANDIDATE   GARP 61.288702     46.100000   50.000000      73.006730               82.336957   5.909413  32.689329  30.511831
-CANDIDATE    IYE 61.027742     52.922727   58.958333      66.561735               82.880435  17.105189   6.161770  41.963848
-CANDIDATE   DFUV 60.876968     57.869968   68.940972      61.324330               49.456522   0.551955  14.226695  25.154993
-CANDIDATE   PVAL 59.353066     66.813528   29.236111      60.081310               41.032609   1.457941  13.437346  24.076725
-CANDIDATE    PRF 59.300863     58.971537   56.388889      60.039885               42.391304   0.568640  14.810316  22.106422
-CANDIDATE    IEO 59.293727     35.196861   70.625000      72.567865               90.760870  24.299875  12.493460  48.754350
-CANDIDATE   SPUS 58.794671     57.688745   22.743056      66.053281               64.945652   4.518697  23.139563  20.457354
-CANDIDATE   AVUS 58.502006     64.432413   63.177083      53.878097               38.315217   0.835516  15.486316  19.352662
-CANDIDATE    IBB 57.476485     50.446699   30.711806      66.816291               76.358696   5.458543  21.584165  38.962677
-CANDIDATE   HACK 57.200658     49.642316    8.958333      70.781844               94.565217  10.428947  57.794479  39.923990
-CANDIDATE   ARKG 56.952287     43.613095   20.885417      71.998477               99.456522  22.033506  94.334784  84.298085
-CANDIDATE   COPX 56.949867     71.627814   46.388889      49.529534               63.043478   6.269111   8.877723  41.492794
-CANDIDATE    VTV 56.110862     75.518939   67.233796      41.737915               13.315217  -0.791702  11.059575  18.331127
-CANDIDATE    XBI 55.900845     63.980628   53.385417      51.216516               77.989130  -3.917669  19.929944  53.045997
-CANDIDATE    BUG 55.383097     46.135498   13.854167      68.818647               96.739130  14.285718  81.279254  31.871912
-CANDIDATE   NULV 55.297743     40.437825   52.586806      65.246952               51.358696   3.851443  14.916279  22.422029
-CANDIDATE   SKYY 54.834295     42.379004   15.625000      69.889352               88.586957  21.372499  49.298045  24.143059
-CANDIDATE   SNPE 54.616812     60.668182   62.118056      49.402078               34.782609   2.563533  17.129833  17.596269
-CANDIDATE   FNDB 54.318318     51.517587   61.892361      54.723503               29.076087   0.339160  13.127255  20.802236
-CANDIDATE    DSI 53.861096     49.957738   49.114583      57.208054               48.097826   3.172725  20.441453  16.939283
-CANDIDATE   FTXH 53.574749     36.947511   17.291667      70.752642               76.630435   4.928638  19.680950  38.707684
-CANDIDATE   CGDV 53.283407     81.407197   46.354167      36.646312               15.217391  -0.610499  14.748621  16.651231
-CANDIDATE   THRO 53.029814     55.911932   25.972222      56.115301               48.641304   2.827459  20.502441  16.927872
-CANDIDATE   FTXN 52.069300     35.552543   50.625000      62.842564               81.521739  17.351418   4.545535  39.077643
-CANDIDATE    IGE 51.097664     40.387554   62.291667      55.877916               57.065217  11.015911   0.976143  29.531619
-CANDIDATE    MGV 50.655497     61.317911   71.475694      40.084834               12.500000  -1.753855  11.396728  18.675372
-CANDIDATE    XLV 49.983653     62.607305   51.614583      41.653888               11.956522   3.010655  14.141993  17.778809
-CANDIDATE   COWZ 48.990287     47.877652   54.878472      48.627748               17.119565   6.789836   8.993180  19.442977
-CANDIDATE    RWL 47.650990     52.362338   49.722222      44.276272               13.586957  -0.091254  12.433445  18.158426
-CANDIDATE   RDVY 47.244701     60.952381   52.847222      37.502992               22.282609  -1.437540  15.388020  18.954071
-CANDIDATE   QLTY 47.109684     43.458333   24.687500      53.510031               35.869565   2.926846  17.574403  17.971802
-CANDIDATE    OIH 46.321691     40.739177   58.159722      47.721831               67.663043   5.910793  -4.493170  46.436693
-CANDIDATE    IHE 46.174132     44.511255   35.069444      49.251361               55.163043  -0.975514  14.423749  34.179267
-CANDIDATE   AVUV 45.630761     62.709037   82.447917      28.068738                9.239130  -3.497230   7.636994  20.772376
-CANDIDATE    VHT 45.087079     45.164394   50.381944      44.075176               15.489130   2.245326  14.895941  18.767488
-CANDIDATE   ICOP 44.681574     35.256629   48.958333      49.901673               64.673913   5.113534   8.853806  41.762626
-CANDIDATE   OMFL 44.495409     36.650271   43.767361      49.620142               29.347826   1.239024  15.377429  17.206487
-CANDIDATE   BHYP 44.256640     49.350000   50.000000      46.968261               93.478261  22.357016        NaN        NaN
-CANDIDATE   QQQJ 44.147815     41.288690   61.510417      42.810421               55.434783  -2.786728  19.659151  23.587342
-CANDIDATE   SCHA 44.107386     67.121807   79.739583      22.983264                7.880435  -6.197676  11.663000  18.665189
-CANDIDATE   DFSV 43.990827     57.407197   75.763889      29.676218                9.510870  -1.865472   8.383666  20.055066
-CANDIDATE   FHLC 43.491463     39.042695   52.239583      44.731929               16.032609   2.278291  15.003284  18.925152
-CANDIDATE    IWN 42.403997     53.951190   80.937500      28.049692               10.054348  -4.661976  10.393556  20.514244
-CANDIDATE    PWV 41.159831     40.537662   53.125000      39.380271               10.597826  -0.964624  10.595891  19.773952
-CANDIDATE    SIL 40.597993     66.550108   38.611111      24.444261                0.271739   7.440402  -7.449442  20.560896
-CANDIDATE   AVSC 40.060880     39.627367   76.892361      33.640118               23.913043  -3.945950  11.316495  22.800302
-CANDIDATE    IYH 39.704170     37.536905   28.402778      43.138137               14.673913   2.946253  14.791802  17.804610
-CANDIDATE   JAVA 39.629251     46.129261   44.045139      34.689992                7.608696  -0.771812  11.374393  16.719117
-CANDIDATE    FCG 39.421360     35.989773   58.836806      38.075016               30.978261  11.633227  -5.490761  24.474855
-CANDIDATE   SMMD 36.437662     45.890530   72.621528      23.843315                7.336957  -5.301191  11.487604  17.604611
-CANDIDATE   TMSL 30.925431     42.119318   40.902778      21.987984                6.521739  -5.717561  11.093080  17.662634
-CANDIDATE   FFSM 30.579867     45.450000   50.000000      17.586122                1.630435  -8.129079   5.933673  17.319637
-Benchmark-QVM override floor: 65.47 (weaker benchmark QVM 68.47 minus 3.00 margin).
-ETF STAGE market_context run_id=36976468666-1
-MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 1.3947999355555556, "ttl_hours": 12, "reason": "validated_shared_contract"}
-ETF STAGE research_cache run_id=36976468666-1
-ETF RESEARCH CACHE {"path": "caches/gemini_etf_research_cache.json", "ttl_hours": 30, "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4", "hits": 0, "misses": 73, "save_succeeded": null}
-ETF RESEARCH QUEUE {"planned_capacity": 15, "actual_size": 15, "unused_capacity": 0, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 54, "fresh_added": ["VLUE", "XLE", "VFLO", "CRAK", "DIVB", "FENY", "AVLV", "RSPT", "JQUA", "VDE", "VONV", "DYNF", "IWD", "FNDX", "IWX"], "transport_deferred": [], "first_time_symbols": ["AVLV", "CRAK", "DIVB", "DYNF", "FENY", "FNDX", "IWD", "IWX", "JQUA", "RSPT", "VDE", "VFLO", "VLUE", "VONV", "XLE"], "fresh_retry_symbols": [], "repair_only_symbols": [], "selected_before": 0, "pending_judgment": 0}
-
-...calling Gemini for ETF batch: VLUE, XLE, VFLO, CRAK, DIVB, FENY, AVLV, RSPT, JQUA, VDE, VONV, DYNF, IWD, FNDX, IWX...
-
-ETF STAGE research_batch_1 run_id=36976468666-1
-Gemini 2.5 API budget: 1/8 total; 1/6 research.
-Gemini logical request 1/8: ETF batch ranks 1-15 (gemini-2.5-flash, API attempt 1/3; total API attempts=1)
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Gemini ETF batch ranks 1-15 attempt 1/3 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying transient Gemini failure in 70.6s...
-Gemini 2.5 API budget: 2/8 total; 2/6 research.
-Gemini logical request 1/8: ETF batch ranks 1-15 (gemini-2.5-flash, API attempt 2/3; total API attempts=2)
-Gemini ETF batch ranks 1-15 attempt 2/3 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying transient Gemini failure in 151.9s...
-Gemini 2.5 API budget: 3/8 total; 3/6 research.
-Gemini logical request 1/8: ETF batch ranks 1-15 (gemini-2.5-flash, API attempt 3/3; total API attempts=3)
-Gemini ETF batch ranks 1-15 attempt 3/3 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-ETF batch failed without validated output: Gemini ETF batch ranks 1-15 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Gemini response-level failure did not consume per-ETF research attempts; failed candidates were requeued for a mixed batch.
-ETF STAGE classification_after_research run_id=36976468666-1
-ETF JUDGMENT SCHEDULER {"pending": 0, "force": false, "batch_target": 25, "intermediate_minimum": 15, "remaining_research_calls": 3}
-Portfolio preview after batch: provisional=0/10, authoritative/effective=0/10, newly_judged=0.
-ETF RESEARCH QUEUE {"planned_capacity": 15, "actual_size": 15, "unused_capacity": 0, "exhausted_removed": [], "duplicates_removed": [], "available_fresh_candidates": 39, "fresh_added": ["SEIV", "CIBR", "DFLV", "XOP", "SCHD"], "transport_deferred": ["VONV", "DYNF", "IWD", "FNDX", "IWX"], "first_time_symbols": ["CIBR", "DFLV", "SCHD", "SEIV", "XOP"], "fresh_retry_symbols": ["AVLV", "CRAK", "DIVB", "FENY", "JQUA", "RSPT", "VDE", "VFLO", "VLUE", "XLE"], "repair_only_symbols": [], "selected_before": 0, "pending_judgment": 0}
-
-...calling Gemini for ETF batch: VLUE, XLE, VFLO, CRAK, DIVB, FENY, AVLV, RSPT, JQUA, VDE, SEIV, CIBR, DFLV, XOP, SCHD...
-
-ETF STAGE research_batch_2 run_id=36976468666-1
-Gemini 2.5 API budget: 4/8 total; 4/6 research.
-Gemini logical request 2/8: ETF batch ranks 1-20 (gemini-2.5-flash, API attempt 1/3; total API attempts=4)
-Gemini ETF batch ranks 1-20 attempt 1/3 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying transient Gemini failure in 61.6s...
-Gemini 2.5 API budget: 5/8 total; 5/6 research.
-Gemini logical request 2/8: ETF batch ranks 1-20 (gemini-2.5-flash, API attempt 2/3; total API attempts=5)
-Gemini ETF batch ranks 1-20 attempt 2/3 failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying transient Gemini failure in 133.0s...
-Gemini 2.5 API budget: 6/8 total; 6/6 research.
-Gemini logical request 2/8: ETF batch ranks 1-20 (gemini-2.5-flash, API attempt 3/3; total API attempts=6)
-Gemini usage [ETF batch ranks 1-20]: prompt_tokens=32614, tool_tokens=37435, cached_tokens=0, thinking_tokens=15862, output_tokens=14593, total_tokens=100504
-Google searches performed [ETF batch ranks 1-20]: 15
-  Search: iShares MSCI USA Value Factor ETF VLUE factsheet holdings sector weights performance outlook
-  Search: State Street Energy Select Sector SPDR ETF XLE factsheet holdings sector weights performance outlook
-  Search: Victoryshares Free Cash Flow ETF VFLO factsheet holdings sector weights performance outlook
-  Search: VanEck Oil Refiners ETF CRAK factsheet holdings sector weights performance outlook
-  Search: iShares Core Dividend ETF DIVB factsheet holdings sector weights performance outlook
-  Search: Fidelity MSCI Energy Index ETF FENY factsheet holdings sector weights performance outlook
-  Search: Avantis US Large Cap Value ETF AVLV factsheet holdings sector weights performance outlook
-  Search: Invesco S&P 500 Equal Weight Technology ETF RSPT factsheet holdings sector weights performance outlook
-  Search: JPMorgan U.S. Quality Factor ETF JQUA factsheet holdings sector weights performance outlook
-  Search: Vanguard Energy Index Fund ETF Shares VDE factsheet holdings sector weights performance outlook
-  Search: SEI QiM U.S. Large Cap Value Active ETF SEIV factsheet holdings sector weights performance outlook
-  Search: First Trust NASDAQ Cybersecurity ETF CIBR factsheet holdings sector weights performance outlook
-  Search: Dimensional US Large Cap Value ETF DFLV factsheet holdings sector weights performance outlook
-  Search: State Street SPDR S&P Oil & Gas Exploration & Production ETF XOP factsheet holdings sector weights performance outlook
-  Search: Schwab U.S. Dividend Equity ETF SCHD factsheet holdings sector weights performance outlook
-Gemini response [ETF batch ranks 1-20]: chars=44836, finish=['FinishReason.STOP'], grounding_urls=40
-Invalid sources [VLUE]: type=list, normalized=0, preview=[]
-Invalid sources [VFLO]: type=list, normalized=0, preview=[]
-Invalid sources [DIVB]: type=list, normalized=0, preview=[]
-Invalid sources [VDE]: type=list, normalized=0, preview=[]
-Invalid sources [XOP]: type=list, normalized=0, preview=[]
-ETF response-shape inspection:
-  VLUE: present=True, fields=32, sources=list[0], benchmark=FAIL, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=INDEX_MANDATE, mechanism=HYPOTHETICAL, evidence_scope=MARKET_ONLY, adverse_observed=False, mechanism_chars=186, probability=POSSIBLE, materiality=MODERATE
-  VFLO: present=True, fields=32, sources=list[0], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=OTHER, mechanism=HYPOTHETICAL, evidence_scope=FUND_SPECIFIC, adverse_observed=False, mechanism_chars=165, probability=POSSIBLE, materiality=MODERATE
-  CRAK: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=NOT_US_EQUITY, us_equity_weight=89, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=144, probability=POSSIBLE, materiality=HIGH
-  DIVB: present=True, fields=32, sources=list[0], benchmark=FAIL, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=OTHER, mechanism=HYPOTHETICAL, evidence_scope=MARKET_ONLY, adverse_observed=False, mechanism_chars=167, probability=POSSIBLE, materiality=MODERATE
-  VDE: present=True, fields=32, sources=list[0], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=OTHER, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=193, probability=POSSIBLE, materiality=HIGH
-  CIBR: present=True, fields=32, sources=list[4], benchmark=PASS, mandate=NOT_US_EQUITY, us_equity_weight=89, mandate_basis=HOLDINGS_WEIGHT, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=204, probability=POSSIBLE, materiality=MODERATE
-  XOP: present=True, fields=32, sources=list[0], benchmark=PASS, mandate=US_EQUITY, us_equity_weight=100, mandate_basis=OTHER, mechanism=HYPOTHETICAL, evidence_scope=EXPOSURE_SPECIFIC, adverse_observed=False, mechanism_chars=193, probability=POSSIBLE, materiality=HIGH
-Deferred ETF research [VLUE]: VLUE has 0 valid sources; 2 required.
-Validated ETF research [XLE]: 4 distinct URLs
-Deferred ETF research [VFLO]: VFLO has 0 valid sources; 2 required.
-Deferred ETF research [CRAK]: CRAK NOT_US_EQUITY conflicts with us_equity_weight_estimate of at least 80.
-Deferred ETF research [DIVB]: DIVB has 0 valid sources; 2 required.
-Validated ETF research [FENY]: 4 distinct URLs
-Validated ETF research [AVLV]: 4 distinct URLs
-Validated ETF research [RSPT]: 4 distinct URLs
-Validated ETF research [JQUA]: 4 distinct URLs
-Deferred ETF research [VDE]: VDE has 0 valid sources; 2 required.
-Validated ETF research [SEIV]: 4 distinct URLs
-Deferred ETF research [CIBR]: CIBR NOT_US_EQUITY conflicts with us_equity_weight_estimate of at least 80.
-Validated ETF research [DFLV]: 4 distinct URLs
-Deferred ETF research [XOP]: XOP has 0 valid sources; 2 required.
-Validated ETF research [SCHD]: 4 distinct URLs
-Batch research summary:
-  candidates: 15
-  fresh research requested: 15
-  fresh-search retries: 10
-  repair-only candidates: 0
-  validated: 8
-  deferred: 7
-Validated ETF classification inspection:
-  XLE: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=True, portfolio_group=Energy, canonical_sector=Energy, style=Equity Energy, exposure=US_ENERGY_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-    reversal evidence: De-escalation of Middle East geopolitical tensions or sustained restoration of alternative energy supply routes could weaken the geopolitical premium on Brent crude, causing oil prices to fall.; probability: Market context highlights geopolitical tensions as a major driver and normalization risk for energy prices.; effect: A significant drop in oil prices would negatively impact the profitability of XLE's energy holdings, leading to underperformance.
-  FENY: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=MODERATE, model_eligible=None, python_eligible=True, portfolio_group=Energy, canonical_sector=Energy, style=Equity Energy, exposure=US_ENERGY_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-    reversal evidence: De-escalation of Middle East geopolitical tensions or sustained restoration of alternative energy supply routes could weaken the geopolitical premium on Brent crude, causing oil prices to fall.; probability: Market context highlights geopolitical tensions as a major driver and normalization risk for energy prices.; effect: A significant drop in oil prices would negatively impact the profitability of FENY's energy holdings, leading to underperformance.
-  AVLV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=LARGE_CAP_VALUE_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=TEMPORARY_DRIVER_NORMALIZATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  RSPT: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Technology, canonical_sector=Technology, style=Equal Weight, exposure=EQUAL_WEIGHT_TECHNOLOGY_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  JQUA: admission=BACKFILL, benchmark=FAIL, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=False, portfolio_group=Quality, canonical_sector=N/A, style=Quality, exposure=US_QUALITY_FACTOR_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-  SEIV: admission=BACKFILL, benchmark=PASS, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=True, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=LARGE_CAP_VALUE_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=MODERATE, basis=NORMALIZED_EXPOSURE_DETERIORATION; Python eligibility passed: U.S.-equity mandate, selectable reversal risk and backfill quantitative admission.
-  DFLV: admission=BACKFILL, benchmark=FAIL, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=False, portfolio_group=Large Value, canonical_sector=N/A, style=Large Value, exposure=LARGE_CAP_VALUE_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-  SCHD: admission=BACKFILL, benchmark=FAIL, mandate=US_EQUITY, risk=LOW, model_eligible=None, python_eligible=False, portfolio_group=Dividend, canonical_sector=N/A, style=Dividend, exposure=US_DIVIDEND_EQUITY; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-Queued evidence-only ETF consistency repair: AVLV, SEIV, DFLV
-ETF STAGE classification_after_research run_id=36976468666-1
-ETF JUDGMENT SCHEDULER {"pending": 5, "force": true, "batch_target": 25, "intermediate_minimum": 15, "remaining_research_calls": 0}
-Prepared compact 3.8 ETF judgment payload: kind=initial, etfs=5, prompt_chars=35925, market_events=3, peer_classifications=0.
+BENCHMARK    VGT 77.956232     91.792805   47.589286      74.672402               90.669856  12.843830  43.936649  36.284399
+CANDIDATE    XLK 77.250558     93.692746   46.711310      72.339937               91.866029  11.833676  46.675319  40.604300
+CANDIDATE   VLUE 76.513525     76.678484   74.553571      76.764907               92.344498   4.985021  38.218794  60.889821
+CANDIDATE    XLE 73.103919     80.283220   79.712302      67.333749               83.253589  15.350338   6.370571  45.729105
+CANDIDATE   VFLO 72.766290     68.140379   61.994048      77.668642               82.057416   9.467454  30.226036  38.594058
+CANDIDATE   FTEC 72.748806     76.998930   47.976190      74.548294               90.909091  12.844907  44.053307  36.640359
+CANDIDATE   CRAK 70.537268     47.951809   51.011905      88.459900               97.846890  30.920644  29.460663  76.049872
+BENCHMARK   SPMO 70.399435     87.689145   52.976190      62.564755               79.186603   2.703673  32.873965  27.923735
+CANDIDATE    IYW 69.783259     75.043570   29.181548      73.817918               90.191388  11.000774  44.798773  36.176807
+CANDIDATE   SPYG 69.471372     85.397043   56.378968      61.717291               63.636364   5.867521  25.254828  19.097411
+CANDIDATE   RSPT 68.686355     66.707064   28.973214      77.166474               94.497608  11.750600  46.996437  51.239941
+CANDIDATE   VOOG 68.059402     79.789645   59.285714      62.189917               63.397129   5.901740  25.248196  19.064599
+CANDIDATE   FENY 67.208801     63.999664   85.595238      65.907991               81.339713  14.388799   5.145325  44.693580
+CANDIDATE   IUSG 66.727935     75.160752   71.617063      60.472665               61.244019   5.404770  24.464870  19.088501
+CANDIDATE    IVW 65.744827     77.636681   49.717262      61.091387               62.918660   5.845412  25.182635  18.966141
+CANDIDATE    VDE 65.662849     66.720468   60.615079      65.907596               81.100478  14.430536   5.118426  44.572806
+CANDIDATE   JQUA 65.476002     61.880411   64.122024      68.010283               56.459330   3.976851  20.689295  19.601531
+CANDIDATE   CIBR 64.953420     67.367580   15.029762      72.494164               95.693780  14.253380  64.344810  37.394984
+CANDIDATE   DIVB 64.928516     55.994458   87.038690      66.593795               63.157895   2.101100  21.266587  27.974265
+CANDIDATE   AVLV 64.540211     73.185923   75.982143      56.958042               46.411483   0.785805  12.869187  27.580905
+CANDIDATE   DYNF 63.426821     76.952064   53.913690      56.549508               45.454545   4.152645  18.829603  19.033111
+CANDIDATE   VONV 63.231715     66.218061   75.669643      59.069872               42.344498   0.973136  15.862209  24.168158
+CANDIDATE   JMOM 62.601779     55.581212   60.312500      67.485644               69.377990   2.857141  23.051628  26.083865
+CANDIDATE   GARP 62.506110     47.198276   50.000000      74.521298               81.578947   8.099497  32.872751  30.479165
+CANDIDATE   SEIV 62.293701     49.107065   84.077381      66.724527               62.200957   3.516435  19.211444  29.260278
+CANDIDATE   FNDX 62.010529     71.159657   62.366071      56.123713               31.100478   1.430969  13.477978  21.768379
+CANDIDATE    IWD 61.817643     66.463807   65.431548      58.203920               41.866029   0.940788  15.811433  23.997458
+CANDIDATE    IWX 61.394166     54.924180   60.476190      65.678333               55.023923   1.856891  17.905554  26.599435
+CANDIDATE   ONEQ 60.950638     60.917985   66.388889      59.982644               62.679426   5.281189  23.922931  19.853556
+CANDIDATE    XOP 60.510032     55.845027   69.325397      61.875878               83.971292  17.720956   3.961599  42.766584
+CANDIDATE    IYE 60.452779     52.088029   59.657738      65.920355               80.622010  14.058896   5.554838  43.445962
+CANDIDATE   DFLV 60.305690     60.021085   69.107143      58.886538               38.755981   1.826544  13.085138  24.901331
+CANDIDATE   SPUS 59.380979     55.691086   24.553571      68.061350               65.550239   6.368541  24.019539  21.618771
+CANDIDATE   COPX 59.043555     71.573898   47.544643      53.160412               68.421053  13.674129  10.953185  43.335344
+CANDIDATE   SCHD 58.723884     67.862958   80.907738      48.874682               26.794258   1.355235   8.497599  23.876116
+CANDIDATE   QTEC 58.722618     53.155602   14.657738      70.277062               93.062201   8.314457  52.043796  44.159514
+CANDIDATE   QGRW 58.502883     55.057502   39.434524      64.162373               67.224880   6.393393  28.008828  20.447213
+CANDIDATE   DFUV 58.304794     53.781597   69.583333      59.132549               44.976077   1.429947  14.260584  25.835314
+CANDIDATE   HACK 57.122355     48.291940   11.622024      71.014498               95.933014  12.755190  59.817841  40.768886
+CANDIDATE   AVUS 57.070060     60.398256   66.458333      53.245158               34.928230   1.980824  15.599201  19.835620
+CANDIDATE   SKYY 56.770177     41.467850   18.288690      73.504655               89.473684  21.358178  51.763216  24.226799
+CANDIDATE   TRUT 56.585234     36.915025   43.482143      71.485021               86.842105  13.187421  39.469865  29.281243
+CANDIDATE   PVAL 56.520954     64.651223   34.181548      55.408856               32.057416   1.720279  12.877725  24.390422
+CANDIDATE    PRF 56.409055     54.895849   57.931548      57.095187               36.602871   1.178369  14.721770  22.571591
+CANDIDATE   ARKG 56.230834     41.791561   20.982143      71.828314               99.521531  26.971836  98.422596  81.449182
+CANDIDATE    BUG 55.241643     43.720705   14.791667      69.927691               97.607656  17.046583  82.817343  32.972221
+CANDIDATE   CGDV 54.795037     77.961496   49.553571      41.005738               16.985646   0.482218  14.818417  17.184063
+CANDIDATE    IBB 54.713099     47.927116   35.446429      62.534482               71.531100   3.698256  21.773363  37.657164
+CANDIDATE   FBCG 54.370488     57.328737   31.718750      56.606465               59.330144   4.481521  24.449637  18.471892
+CANDIDATE   SNPE 54.352269     57.892969   65.267857      50.114444               33.971292   3.760613  17.238609  18.076566
+CANDIDATE   DFAC 54.350336     68.038513   62.767857      44.109220               21.052632   1.708253  14.643855  17.099736
+CANDIDATE    DSI 54.029680     45.676065   51.889881      59.734671               50.239234   4.878770  21.097512  17.982031
+CANDIDATE    XBI 53.748704     61.932191   51.160714      49.011574               75.837321  -5.489104  20.362600  51.613129
+CANDIDATE   THRO 53.337640     53.522486   31.413690      57.206182               46.889952   4.147181  20.596337  17.377596
+CANDIDATE    VTV 52.745004     72.716233   62.093254      38.336359                9.330144  -0.671953  10.781507  18.760223
+CANDIDATE   NULV 52.671023     37.297824   54.866071      62.054869               45.933014   3.989824  14.937311  23.079143
+CANDIDATE   FNDB 52.166371     47.957127   63.318452      52.817331               27.272727   0.944764  13.119119  21.365501
+CANDIDATE   SEIM 51.607935     47.923819   53.125000      53.676543               51.913876   1.971729  17.689181  21.777078
+CANDIDATE   FTXN 51.194330     35.272460   52.098214      61.162086               77.511962  13.930386   3.613608  41.747016
+CANDIDATE    IGE 49.245925     38.749036   62.514881      53.513226               48.803828   9.965422   0.790288  30.555413
+CANDIDATE   TSPA 49.203104     55.264063   38.407738      47.308924               30.382775   2.899025  17.450031  16.508345
+CANDIDATE    MGV 48.226812     57.845792   75.133929      37.213440                9.090909  -1.572052  11.000771  19.107185
+CANDIDATE   QLTY 48.114893     44.078407   30.505952      53.885192               35.645933   3.807581  17.922529  18.321391
+CANDIDATE   ICOP 46.366495     35.247409   51.309524      52.543544               68.181818  11.802150  10.398630  43.854107
+CANDIDATE   COWZ 45.900040     45.507881   56.383929      44.243435               10.287081   5.665270   8.707340  19.455472
+CANDIDATE   SCHA 45.580248     64.593441   82.187500      26.825080               11.961722  -3.755543  12.347805  19.280595
+CANDIDATE   AVUV 45.153753     59.046344   80.937500      29.806877               11.004785  -2.169749   7.811157  21.880975
+CANDIDATE    RWL 45.039349     49.317000   51.994048      41.052717                9.808612  -0.116379  12.265226  18.555706
+CANDIDATE    OIH 45.003269     40.510337   59.226190      45.276421               65.071770   5.173359  -3.588678  50.629041
+CANDIDATE   RDVY 44.681044     57.447318   54.642857      34.745813               16.028708  -0.460295  14.430995  18.324772
+CANDIDATE   DFSV 44.303362     54.989240   74.761905      31.965342               12.679426  -0.548592   8.587706  21.176622
+CANDIDATE   QQQJ 43.833987     38.641837   64.077381      43.457465               52.631579  -0.708916  20.580618  23.506615
+CANDIDATE    IWN 42.528330     50.414925   79.642857      30.761493               13.875598  -3.172503  10.925435  21.201461
+CANDIDATE    VHT 41.898510     43.645507   50.922619      39.146038               11.483254   0.823987  15.367880  18.902939
+CANDIDATE    IHE 41.776572     41.821447   39.181548      42.219838               44.019139  -4.204702  15.105282  34.572454
+CANDIDATE    SIL 40.962915     66.714466   40.877976      24.591008                0.717703  11.544491  -7.043578  21.267387
+CANDIDATE   AVSC 40.856967     37.097771   76.175595      36.827614               32.535885  -2.187555  11.777903  24.068838
+CANDIDATE   FHLC 40.803015     38.297756   52.738095      40.227257               13.157895   0.924160  15.448978  19.100400
+CANDIDATE    PWV 38.311190     39.046157   54.657738      34.871384                7.177033  -1.861462  10.177710  20.367462
+CANDIDATE    FCG 37.180511     36.095593   59.122024      33.881548               23.923445   8.438071  -5.904360  27.906476
+CANDIDATE    IYH 36.767492     36.478797   29.657738      38.243889               10.047847   1.538568  15.153498  18.005329
+CANDIDATE   TMSL 32.373533     40.294144   44.657738      25.099652                7.655502  -3.295289  11.327084  18.859658
+CANDIDATE   FFSM 31.916925     46.077586   50.000000      19.617762                2.153110  -6.363038   6.208241  17.924485
+Benchmark-QVM override floor: 67.40 (weaker benchmark QVM 70.40 minus 3.00 margin).
+ETF STAGE market_context run_id=37029307628-1
+MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 10.134089795555555, "ttl_hours": 12, "reason": "validated_shared_contract"}
+ETF STAGE research_cache run_id=37029307628-1
+Using compatible validated ETF research cache for XLE.
+Using compatible validated ETF research cache for RSPT.
+Using compatible validated ETF research cache for FENY.
+Using compatible validated ETF research cache for JQUA.
+Using compatible validated ETF research cache for SCHD.
+ETF RESEARCH CACHE {"path": "caches/gemini_etf_research_cache.json", "ttl_hours": 30, "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4", "hits": 5, "misses": 76, "save_succeeded": null}
+Accumulating ETF judgment candidates: 5/25; no 3.8 call yet.
+Cached evidence preview: provisional=3, authoritative=0; unjudged evidence is not a reopened slot.
+ETF STAGE classification_before_new_research run_id=37029307628-1
+Prepared compact 3.8 ETF judgment payload: kind=initial, etfs=5, prompt_chars=40061, market_events=3, peer_classifications=0.
 Gemini 3.8 API budget: 1/7 total; 1/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 1/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 1/3)
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 ETF classification in 62.6s...
+Retrying 3.8 ETF classification in 88.3s...
 Gemini 3.8 API budget: 2/7 total; 2/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 2/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 2/3)
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 ETF classification in 126.8s...
+Retrying 3.8 ETF classification in 139.6s...
 Gemini 3.8 API budget: 3/7 total; 3/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 3/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 3/3)
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 ETF 3.8 classification circuit OPEN: TRANSIENT_PROVIDER_FAILURE; leaving 5 validated ETF(s) pending judgment without entering invalid-patch recovery.
-Portfolio preview after batch: provisional=3/10, authoritative/effective=0/10, newly_judged=0.
-ETF STAGE classification_final_tail run_id=36976468666-1
-ETF research budget stop: logical=2/6, total_logical=2/8, API_attempts=6/8; research_API_remaining=0.
-ETF PUBLICATION BLOCKED — preserving the previous successful HTML page. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, FENY, RSPT
+ETF STAGE classification_final_tail run_id=37029307628-1
+ETF PUBLICATION BLOCKED — preserving the previous successful HTML page. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, RSPT, FENY
 ETF portfolio shortfall is operational, not a validated final result: 0 of 10 authoritative selections are available, but the final comparison is incomplete.
 ETF cross-candidate consistency warnings:
   - XLE: normalized Equity Energy to Energy.
@@ -246,177 +152,191 @@ ETF cross-candidate consistency warnings:
 ETF portfolio optimization: 0 valid one-for-one swaps; driver repetition penalty -3.00.
 ETF replacement audit: no qualified blocked candidates required a head-to-head test.
 ETF portfolio-rule inspection:
-  rank=1 VLUE: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Large Value; risk=N/A; Research was attempted but did not validate.
-  rank=3 VFLO: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Free Cash Flow; risk=N/A; Research was attempted but did not validate.
-  rank=4 CRAK: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Energy; risk=N/A; Research was attempted but did not validate.
-  rank=5 DIVB: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Dividend; risk=N/A; Research was attempted but did not validate.
-  rank=2 XLE: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
-  rank=8 RSPT: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
-  rank=7 AVLV: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Large Value; risk=N/A; Research was attempted but did not validate.
-  rank=10 VDE: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Energy; risk=N/A; Research was attempted but did not validate.
-  rank=11 VONV: NOT SELECTED — GEMINI API UNAVAILABLE; portfolio_group=Large Value; risk=N/A; Gemini never returned usable ETF-level research for this candidate.
-  rank=9 JQUA: NOT SELECTED — INELIGIBLE; portfolio_group=Quality; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-  rank=12 DYNF: NOT SELECTED — GEMINI API UNAVAILABLE; portfolio_group=Large Blend; risk=N/A; Gemini never returned usable ETF-level research for this candidate.
-  rank=13 IWD: NOT SELECTED — GEMINI API UNAVAILABLE; portfolio_group=Large Value; risk=N/A; Gemini never returned usable ETF-level research for this candidate.
-  rank=14 FNDX: NOT SELECTED — GEMINI API UNAVAILABLE; portfolio_group=Large Value; risk=N/A; Gemini never returned usable ETF-level research for this candidate.
-  rank=15 IWX: NOT SELECTED — GEMINI API UNAVAILABLE; portfolio_group=Large Value; risk=N/A; Gemini never returned usable ETF-level research for this candidate.
-  rank=16 SEIV: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Large Value; risk=N/A; Research was attempted but did not validate.
-  rank=17 CIBR: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Technology; risk=N/A; Research was attempted but did not validate.
-  rank=18 DFLV: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Large Value; risk=N/A; Research was attempted but did not validate.
-  rank=6 FENY: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
-  rank=19 XOP: NOT SELECTED — RESEARCH VALIDATION FAILED; portfolio_group=Energy; risk=N/A; Research was attempted but did not validate.
-  rank=21 JMOM: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Momentum; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=22 GARP: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Quality GARP; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=23 IYE: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=20 SCHD: NOT SELECTED — INELIGIBLE; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
-  rank=24 DFUV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=25 PVAL: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=26 PRF: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=27 IEO: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=28 SPUS: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Technology; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=29 AVUS: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=30 IBB: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=31 HACK: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Technology; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=32 ARKG: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=33 COPX: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Basic Materials; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=34 VTV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=35 XBI: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=36 BUG: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Technology; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=37 NULV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=38 SKYY: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Technology; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=39 SNPE: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=40 FNDB: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=41 DSI: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=42 FTXH: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=43 CGDV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Dividend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=44 THRO: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=45 FTXN: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=46 IGE: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=47 MGV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=48 XLV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=49 COWZ: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Mid-Cap Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=50 RWL: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=51 RDVY: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Dividend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=52 QLTY: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Quality; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=53 OIH: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=54 IHE: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=55 AVUV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=56 VHT: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=57 ICOP: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Basic Materials; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=58 OMFL: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=59 BHYP: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=nan; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=60 QQQJ: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Mid-Cap Growth; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=61 SCHA: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=62 DFSV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=63 FHLC: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=64 IWN: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=65 PWV: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=66 SIL: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Basic Materials; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=67 AVSC: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=68 IYH: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Healthcare; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=69 JAVA: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Large Value; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=70 FCG: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Energy; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=71 SMMD: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Small Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=72 TMSL: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=Mid-Cap Blend; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
-  rank=73 FFSM: NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED; portfolio_group=nan; risk=N/A; The run exhausted its logical Gemini research-call budget before reaching this candidate.
+  rank=1 XLK: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=2 VLUE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=4 VFLO: NOT RESEARCHED — NOT NEEDED; portfolio_group=Free Cash Flow; risk=N/A; The portfolio filled before research was needed.
+  rank=5 FTEC: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=6 CRAK: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=7 IYW: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=9 RSPT: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Technology; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
+  rank=8 SPYG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=10 VOOG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=3 XLE: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
+  rank=12 IUSG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=13 IVW: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=14 VDE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=16 CIBR: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=17 DIVB: NOT RESEARCHED — NOT NEEDED; portfolio_group=Dividend; risk=N/A; The portfolio filled before research was needed.
+  rank=18 AVLV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=15 JQUA: NOT SELECTED — INELIGIBLE; portfolio_group=Quality; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
+  rank=19 DYNF: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=20 VONV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=21 JMOM: NOT RESEARCHED — NOT NEEDED; portfolio_group=Momentum; risk=N/A; The portfolio filled before research was needed.
+  rank=22 GARP: NOT RESEARCHED — NOT NEEDED; portfolio_group=Quality GARP; risk=N/A; The portfolio filled before research was needed.
+  rank=23 SEIV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=24 FNDX: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=25 IWD: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=26 IWX: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=11 FENY: NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED; portfolio_group=Energy; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS; Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended.
+  rank=27 ONEQ: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=28 XOP: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=29 IYE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=30 DFLV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=31 SPUS: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=32 COPX: NOT RESEARCHED — NOT NEEDED; portfolio_group=Basic Materials; risk=N/A; The portfolio filled before research was needed.
+  rank=34 QTEC: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=35 QGRW: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=36 DFUV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=33 SCHD: NOT SELECTED — INELIGIBLE; portfolio_group=Dividend; mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION; Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.
+  rank=37 HACK: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=38 AVUS: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=39 SKYY: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=40 TRUT: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=41 PVAL: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=42 PRF: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=43 ARKG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=44 BUG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=45 CGDV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Dividend; risk=N/A; The portfolio filled before research was needed.
+  rank=46 IBB: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=47 FBCG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Technology; risk=N/A; The portfolio filled before research was needed.
+  rank=48 SNPE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=49 DFAC: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=50 DSI: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=51 XBI: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=52 THRO: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=53 VTV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=54 NULV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=55 FNDB: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=56 SEIM: NOT RESEARCHED — NOT NEEDED; portfolio_group=Momentum; risk=N/A; The portfolio filled before research was needed.
+  rank=57 FTXN: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=58 IGE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=59 TSPA: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=60 MGV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=61 QLTY: NOT RESEARCHED — NOT NEEDED; portfolio_group=Quality; risk=N/A; The portfolio filled before research was needed.
+  rank=62 ICOP: NOT RESEARCHED — NOT NEEDED; portfolio_group=Basic Materials; risk=N/A; The portfolio filled before research was needed.
+  rank=63 COWZ: NOT RESEARCHED — NOT NEEDED; portfolio_group=Mid-Cap Value; risk=N/A; The portfolio filled before research was needed.
+  rank=64 SCHA: NOT RESEARCHED — NOT NEEDED; portfolio_group=Small Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=65 AVUV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Small Value; risk=N/A; The portfolio filled before research was needed.
+  rank=66 RWL: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=67 OIH: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=68 RDVY: NOT RESEARCHED — NOT NEEDED; portfolio_group=Dividend; risk=N/A; The portfolio filled before research was needed.
+  rank=69 DFSV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Small Value; risk=N/A; The portfolio filled before research was needed.
+  rank=70 QQQJ: NOT RESEARCHED — NOT NEEDED; portfolio_group=Mid-Cap Growth; risk=N/A; The portfolio filled before research was needed.
+  rank=71 IWN: NOT RESEARCHED — NOT NEEDED; portfolio_group=Small Value; risk=N/A; The portfolio filled before research was needed.
+  rank=72 VHT: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=73 IHE: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=74 SIL: NOT RESEARCHED — NOT NEEDED; portfolio_group=Basic Materials; risk=N/A; The portfolio filled before research was needed.
+  rank=75 AVSC: NOT RESEARCHED — NOT NEEDED; portfolio_group=Small Value; risk=N/A; The portfolio filled before research was needed.
+  rank=76 FHLC: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=77 PWV: NOT RESEARCHED — NOT NEEDED; portfolio_group=Large Value; risk=N/A; The portfolio filled before research was needed.
+  rank=78 FCG: NOT RESEARCHED — NOT NEEDED; portfolio_group=Energy; risk=N/A; The portfolio filled before research was needed.
+  rank=79 IYH: NOT RESEARCHED — NOT NEEDED; portfolio_group=Healthcare; risk=N/A; The portfolio filled before research was needed.
+  rank=80 TMSL: NOT RESEARCHED — NOT NEEDED; portfolio_group=Mid-Cap Blend; risk=N/A; The portfolio filled before research was needed.
+  rank=81 FFSM: NOT RESEARCHED — NOT NEEDED; portfolio_group=nan; risk=N/A; The portfolio filled before research was needed.
 
 Final ETF selections: 
-Research efficiency: 15 unique ETFs, 30 requested searches, 15 charged search attempts, 0 repeated searches.
+Research efficiency: 0 unique ETFs, 0 requested searches, 0 charged search attempts, 0 repeated searches.
 
 CONTEXT REVIEW
 
-Research summary: 5 ETFs have validated research (5 researched and validated this run, 0 supplied by validated cache); 15 charged ETF search attempts, 0 structural repair attempts, 2 research batches, 0 accepted exclusion-only evidence warnings.
+Research summary: 5 ETFs have validated research (0 researched and validated this run, 5 supplied by validated cache); 0 charged ETF search attempts, 0 structural repair attempts, 0 research batches, 0 accepted exclusion-only evidence warnings.
 Selected ETFs: None
 |   QVM Rank | Symbol   | Sector Group    | Reversal Risk / Status                         |   Sector Selected After |   Total Selected After | Risk Derivation                                                                                                                                                | Explanation                                                                                                                |
 |-----------:|:---------|:----------------|:-----------------------------------------------|------------------------:|-----------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
-|          1 | VLUE     | Large Value     | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|          3 | VFLO     | Free Cash Flow  | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|          4 | CRAK     | Energy          | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|          5 | DIVB     | Dividend        | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|          2 | XLE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
-|          8 | RSPT     | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
-|          7 | AVLV     | Large Value     | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|         10 | VDE      | Energy          | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|         11 | VONV     | Large Value     | NOT SELECTED — GEMINI API UNAVAILABLE          |                       0 |                      0 | nan                                                                                                                                                            | Gemini never returned usable ETF-level research for this candidate.                                                        |
-|          9 | JQUA     | Quality         | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                   | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                        |
-|         12 | DYNF     | Large Blend     | NOT SELECTED — GEMINI API UNAVAILABLE          |                       0 |                      0 | nan                                                                                                                                                            | Gemini never returned usable ETF-level research for this candidate.                                                        |
-|         13 | IWD      | Large Value     | NOT SELECTED — GEMINI API UNAVAILABLE          |                       0 |                      0 | nan                                                                                                                                                            | Gemini never returned usable ETF-level research for this candidate.                                                        |
-|         14 | FNDX     | Large Value     | NOT SELECTED — GEMINI API UNAVAILABLE          |                       0 |                      0 | nan                                                                                                                                                            | Gemini never returned usable ETF-level research for this candidate.                                                        |
-|         15 | IWX      | Large Value     | NOT SELECTED — GEMINI API UNAVAILABLE          |                       0 |                      0 | nan                                                                                                                                                            | Gemini never returned usable ETF-level research for this candidate.                                                        |
-|         16 | SEIV     | Large Value     | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|         17 | CIBR     | Technology      | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|         18 | DFLV     | Large Value     | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|          6 | FENY     | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
-|         19 | XOP      | Energy          | NOT SELECTED — RESEARCH VALIDATION FAILED      |                       0 |                      0 | nan                                                                                                                                                            | Research was attempted but did not validate.                                                                               |
-|         21 | JMOM     | Momentum        | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         22 | GARP     | Quality GARP    | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         23 | IYE      | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         20 | SCHD     | Dividend        | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                      | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                        |
-|         24 | DFUV     | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         25 | PVAL     | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         26 | PRF      | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         27 | IEO      | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         28 | SPUS     | Technology      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         29 | AVUS     | Large Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         30 | IBB      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         31 | HACK     | Technology      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         32 | ARKG     | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         33 | COPX     | Basic Materials | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         34 | VTV      | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         35 | XBI      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         36 | BUG      | Technology      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         37 | NULV     | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         38 | SKYY     | Technology      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         39 | SNPE     | Large Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         40 | FNDB     | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         41 | DSI      | Large Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         42 | FTXH     | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         43 | CGDV     | Dividend        | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         44 | THRO     | Large Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         45 | FTXN     | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         46 | IGE      | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         47 | MGV      | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         48 | XLV      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         49 | COWZ     | Mid-Cap Value   | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         50 | RWL      | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         51 | RDVY     | Dividend        | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         52 | QLTY     | Quality         | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         53 | OIH      | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         54 | IHE      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         55 | AVUV     | Small Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         56 | VHT      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         57 | ICOP     | Basic Materials | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         58 | OMFL     | Large Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         59 | BHYP     | nan             | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         60 | QQQJ     | Mid-Cap Growth  | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         61 | SCHA     | Small Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         62 | DFSV     | Small Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         63 | FHLC     | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         64 | IWN      | Small Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         65 | PWV      | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         66 | SIL      | Basic Materials | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         67 | AVSC     | Small Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         68 | IYH      | Healthcare      | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         69 | JAVA     | Large Value     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         70 | FCG      | Energy          | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         71 | SMMD     | Small Blend     | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         72 | TMSL     | Mid-Cap Blend   | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
-|         73 | FFSM     | nan             | NOT RESEARCHED — RESEARCH BUDGET EXHAUSTED     |                       0 |                      0 | nan                                                                                                                                                            | The run exhausted its logical Gemini research-call budget before reaching this candidate.                                  |
+|          1 | XLK      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          2 | VLUE     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          4 | VFLO     | Free Cash Flow  | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          5 | FTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          6 | CRAK     | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          7 | IYW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          9 | RSPT     | Technology      | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                   | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
+|          8 | SPYG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         10 | VOOG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|          3 | XLE      | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
+|         12 | IUSG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         13 | IVW      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         14 | VDE      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         16 | CIBR     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         17 | DIVB     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         18 | AVLV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         15 | JQUA     | Quality         | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=NORMALIZED_EXPOSURE_DETERIORATION                                   | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                        |
+|         19 | DYNF     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         20 | VONV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         21 | JMOM     | Momentum        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         22 | GARP     | Quality GARP    | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         23 | SEIV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         24 | FNDX     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         25 | IWD      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         26 | IWX      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         11 | FENY     | Energy          | NOT SELECTED — AUTHORITATIVE JUDGMENT REQUIRED |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=HIGH, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION, event=MIDDLE_EAST_GEOPOLITICAL_TENSIONS | Grounded 2.5 research validated, but no authoritative no-Search judgment completed before the classification budget ended. |
+|         27 | ONEQ     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         28 | XOP      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         29 | IYE      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         30 | DFLV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         31 | SPUS     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         32 | COPX     | Basic Materials | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         34 | QTEC     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         35 | QGRW     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         36 | DFUV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         33 | SCHD     | Dividend        | NOT SELECTED — INELIGIBLE                      |                       0 |                      0 | mechanism=HYPOTHETICAL, probability=POSSIBLE, materiality=MODERATE, dependence=HIGH, basis=TEMPORARY_DRIVER_NORMALIZATION                                      | Excluded because this benchmark-competitive backfill lacks a positive forward benchmark assessment.                        |
+|         37 | HACK     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         38 | AVUS     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         39 | SKYY     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         40 | TRUT     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         41 | PVAL     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         42 | PRF      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         43 | ARKG     | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         44 | BUG      | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         45 | CGDV     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         46 | IBB      | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         47 | FBCG     | Technology      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         48 | SNPE     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         49 | DFAC     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         50 | DSI      | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         51 | XBI      | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         52 | THRO     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         53 | VTV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         54 | NULV     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         55 | FNDB     | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         56 | SEIM     | Momentum        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         57 | FTXN     | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         58 | IGE      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         59 | TSPA     | Large Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         60 | MGV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         61 | QLTY     | Quality         | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         62 | ICOP     | Basic Materials | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         63 | COWZ     | Mid-Cap Value   | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         64 | SCHA     | Small Blend     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         65 | AVUV     | Small Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         66 | RWL      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         67 | OIH      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         68 | RDVY     | Dividend        | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         69 | DFSV     | Small Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         70 | QQQJ     | Mid-Cap Growth  | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         71 | IWN      | Small Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         72 | VHT      | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         73 | IHE      | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         74 | SIL      | Basic Materials | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         75 | AVSC     | Small Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         76 | FHLC     | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         77 | PWV      | Large Value     | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         78 | FCG      | Energy          | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         79 | IYH      | Healthcare      | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         80 | TMSL     | Mid-Cap Blend   | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
+|         81 | FFSM     | nan             | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
 
-ETF STAGE summary_skipped_incomplete_judgment run_id=36976468666-1
+ETF STAGE summary_skipped_incomplete_judgment run_id=37029307628-1
 Skipping ETF summary generation because this run is not publishable; preserving Gemini quota for a later retry.
-Generated by model(s): gemini-2.5-flash
-ETF STAGE publish_html_skipped_incomplete_judgment run_id=36976468666-1
+Generated by model(s): validated cache + Python
+ETF STAGE publish_html_skipped_incomplete_judgment run_id=37029307628-1
 ETF HTML publication skipped. etf_index.html is intentionally left unchanged from the previous successful run.
-Classification changes versus prior ETF run:
-  RSPT: evidence_scope, exposure_group, risk_exposure_group
-  XLE: mandate_basis, exposure_group, risk_exposure_group
+Classification consistency: no changes among comparable cached ETFs.
 ETF runtime reconciliation summary: no label repairs were needed.
 ETF benchmark HIGH-negative calibration: raw=0, corroborated=0, downgraded=0.
 ETF selected fund audit (shared labels do not establish index or holdings overlap):
-ETF COVERAGE {"counts": {"REQUESTED_UNVALIDATED": 15, "VALIDATED_UNJUDGED": 5, "NEVER_REQUESTED": 53}, "actionable_never_requested": ["JMOM", "GARP", "IYE", "DFUV", "PVAL", "PRF", "IEO", "SPUS", "AVUS", "IBB", "HACK", "ARKG", "COPX", "VTV", "XBI", "BUG", "NULV", "SKYY", "SNPE", "FNDB", "DSI", "FTXH", "CGDV", "THRO", "FTXN", "IGE", "MGV", "XLV", "COWZ", "RWL", "RDVY", "QLTY", "OIH", "IHE"], "actionable_retryable": ["VLUE", "VFLO", "CRAK", "DIVB", "AVLV", "VDE", "VONV", "DYNF", "IWD", "FNDX", "IWX", "SEIV", "CIBR", "DFLV", "XOP"], "validated_unjudged": ["XLE", "FENY", "RSPT", "JQUA", "SCHD"], "report_saved": true}
+ETF COVERAGE {"counts": {"NEVER_REQUESTED": 76, "VALIDATED_UNJUDGED": 5}, "actionable_never_requested": ["XLK", "VLUE", "VFLO", "FTEC", "CRAK", "IYW", "SPYG", "VOOG", "IUSG", "IVW", "VDE", "CIBR", "DIVB", "AVLV", "DYNF", "VONV", "JMOM", "GARP", "SEIV", "FNDX", "IWD", "IWX", "ONEQ", "XOP", "IYE", "DFLV", "SPUS", "COPX", "QTEC", "QGRW", "DFUV", "HACK", "AVUS", "SKYY", "TRUT", "PVAL", "PRF", "ARKG", "BUG", "CGDV", "IBB", "FBCG", "SNPE", "DFAC", "DSI", "XBI", "THRO", "VTV", "NULV", "FNDB", "SEIM", "FTXN", "IGE", "TSPA", "MGV", "QLTY", "ICOP", "COWZ"], "actionable_retryable": [], "validated_unjudged": ["XLE", "RSPT", "FENY", "JQUA", "SCHD"], "report_saved": true}
 ETF selection-control summary:
-  provisional portfolio peak: 5/10
+  provisional portfolio peak: 3/10
   portfolio challengers queued: 0
   portfolio challengers researched: 0
   portfolio challengers judged: 0
@@ -425,25 +345,25 @@ ETF selection-control summary:
   max factor-family exposure: 3
   slots reopened by authoritative judgment: 0
   authoritative backfill batches: 0
-  remaining unvalidated candidates: 68
-  actionable never-requested candidates: 34
-  actionable retryable candidates: 15
+  remaining unvalidated candidates: 76
+  actionable never-requested candidates: 58
+  actionable retryable candidates: 0
   validation-exhausted candidates: 0
   sector-capacity-blocked unresearched candidates: 0
   factor-family-blocked unresearched candidates: 0
 Gemini request budget:
-  logical calls: 2/8
-  ETF research logical calls: 2/6
+  logical calls: 0/8
+  ETF research logical calls: 0/6
   summary logical calls: 0
   ETF judgment logical calls: 1/6
   ETF judgment API attempts: 3/6
   ETF 3.8 summary API attempts: 0/1
   total Gemini 3.8 API attempts: 3/7
-  actual API attempts: 6/8 (research=6, context=0, summary=0)
-Elapsed time: 884 seconds
+  actual API attempts: 0/8 (research=0, context=0, summary=0)
+Elapsed time: 272 seconds
 
-ETF STAGE failed_incomplete_judgment run_id=36976468666-1
+ETF STAGE failed_incomplete_judgment run_id=37029307628-1
 Traceback (most recent call last):
   File "/home/runner/work/clairvoyant/clairvoyant/etf_recommender.py", line 8237, in <module>
     raise RuntimeError(
-RuntimeError: ETF authoritative judgment incomplete; previous successful HTML page was preserved. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, FENY, RSPT
+RuntimeError: ETF authoritative judgment incomplete; previous successful HTML page was preserved. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, RSPT, FENY

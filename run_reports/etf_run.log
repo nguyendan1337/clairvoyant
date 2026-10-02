@@ -1,30 +1,11 @@
-ETF STAGE universe_and_quantitative_data run_id=37029307628-1
+ETF STAGE universe_and_quantitative_data run_id=37035344877-1
 Run report: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run_report.json
 Run log: /home/runner/work/clairvoyant/clairvoyant/run_reports/etf_run.log
 Checking top ETF QVM cache: caches/top_qvm_etfs_cache.pkl
-Top ETF QVM cache is stale (8.7h old).
-Downloading ETF price history for 2 symbols...
-Benchmark-relative discovery floors: 1Y 15.00%, 3M -2.30%.
-Fetched 250 ETF screener rows at offset 0.
-Fetched 250 ETF screener rows at offset 250.
-Fetched 250 ETF screener rows at offset 500.
-Fetched 250 ETF screener rows at offset 750.
-Fetched 59 ETF screener rows at offset 1000.
-
-Raw ETF universe: 1045
-After basic ETF filtering: 513
-Downloading ETF price history for 513 symbols...
-Computing ETF momentum metrics...
-Resolving yfinance metadata (cache first) for all 513 filtered momentum candidates...
-ETF metadata (cache + live):   0%|          | 0/513 [00:00<?, ?it/s]ETF metadata (cache + live):   5%|▌         | 27/513 [00:01<00:18, 26.58it/s]ETF metadata (cache + live):  20%|█▉        | 102/513 [00:01<00:05, 68.56it/s]ETF metadata (cache + live):  35%|███▌      | 182/513 [00:02<00:04, 80.88it/s]ETF metadata (cache + live):  37%|███▋      | 191/513 [00:03<00:05, 57.06it/s]ETF metadata (cache + live):  56%|█████▌    | 286/513 [00:04<00:02, 77.08it/s]ETF metadata (cache + live):  57%|█████▋    | 294/513 [00:04<00:04, 52.12it/s]ETF metadata (cache + live):  64%|██████▍   | 328/513 [00:05<00:03, 51.15it/s]ETF metadata (cache + live):  89%|████████▉ | 459/513 [00:06<00:00, 92.14it/s]ETF metadata (cache + live): 100%|██████████| 513/513 [00:06<00:00, 80.79it/s]
-ETF METADATA CACHE {"status": "completed", "eligible": 513, "hits": 505, "live_requests": 8, "failed_symbols": [], "incomplete_symbols": [], "ttl_hours": 168, "save_succeeded": true}
-Excluded obvious non-U.S.-equity ETF mandates after metadata: BWET, UGA, BNO, USO, DBE, DBO, ARTY, USL, BOAT, GSG, PIT, PDBC, THNQ, DBC, SEA, IXN, OILK, SPTE, USCI, COMT, IXC, SDCI, HGER, HTEC, BULD, NBCM, EPOL, PICK, USE, FFEM, VPL, JADE, GVAL, COMB, GSIB, SLVP, LENS, EYLD, GREK, GGTL, CPER, EMXF, SOYB, GNR, DFAE, QQQS, ESGE, PWQQF, KNO, COPY, CMCI, EWQQF, COM, ASGM, ENOR, CMDY, COMD, NRES, BCI, GUNR, AMZA, ESGG, DBB, AVGV, WEAT, JPXN, FTGC, IOO, IQSZ, WRND, HAWX, RGEF, PIPE, IVLU, THD, AVGE, FBOT, GMOM, RLY, GLOF, CGNG, BINT, AQLT, CMDT, EIRL, ZSC, RAAX, NORW, TAGS, EDGH, RING, DBEF, AAVM
-Final benchmark-relative floors: 3M 7.77%, 1Y 32.10%.
-ETF research candidates: 85 (0 strict benchmark-superior, 8 benchmark-competitive backfill, 77 additional top-QVM reserve; top-QVM target: 100).
-Saved top ETF QVM cache to caches/top_qvm_etfs_cache.pkl.
+Using cached top 87 ETF QVM candidates (0.9h old).
 Fetching structured fund data for 87 ETF research candidates...
-  0%|          | 0/87 [00:00<?, ?it/s] 28%|██▊       | 24/87 [00:00<00:00, 72.07it/s] 49%|████▉     | 43/87 [00:00<00:00, 69.90it/s] 60%|█████▉    | 52/87 [00:00<00:00, 47.64it/s] 74%|███████▎  | 64/87 [00:01<00:00, 44.51it/s] 79%|███████▉  | 69/87 [00:01<00:00, 32.61it/s]100%|██████████| 87/87 [00:01<00:00, 39.12it/s]100%|██████████| 87/87 [00:01<00:00, 43.82it/s]
-ETF FUND CACHE {"status": "completed", "hits": 81, "live_requests": 6, "incomplete_symbols": ["GARP", "FFSM"], "save_succeeded": true}
+  0%|          | 0/87 [00:00<?, ?it/s] 28%|██▊       | 24/87 [00:00<00:01, 57.81it/s]100%|██████████| 87/87 [00:00<00:00, 139.79it/s]100%|██████████| 87/87 [00:00<00:00, 125.05it/s]
+ETF FUND CACHE {"status": "completed", "hits": 85, "live_requests": 2, "incomplete_symbols": ["GARP", "FFSM"], "save_succeeded": true}
 Excluded ETFs below 80% equity assets: ETHB, IALT, ZCSH, BHYP
 
 Top ETF QVM candidates:
@@ -113,9 +94,9 @@ CANDIDATE    IYH 36.767492     36.478797   29.657738      38.243889             
 CANDIDATE   TMSL 32.373533     40.294144   44.657738      25.099652                7.655502  -3.295289  11.327084  18.859658
 CANDIDATE   FFSM 31.916925     46.077586   50.000000      19.617762                2.153110  -6.363038   6.208241  17.924485
 Benchmark-QVM override floor: 67.40 (weaker benchmark QVM 70.40 minus 3.00 margin).
-ETF STAGE market_context run_id=37029307628-1
-MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 10.134089795555555, "ttl_hours": 12, "reason": "validated_shared_contract"}
-ETF STAGE research_cache run_id=37029307628-1
+ETF STAGE market_context run_id=37035344877-1
+MARKET CACHE HIT {"path": "/home/runner/work/clairvoyant/clairvoyant/caches/gemini_shared_market_context_cache.json", "contract_hash": "835e51d1d7a2b181d3fde7f9d04bd176321fd6273a0a21418c6ad4f9641c8ac5", "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9", "entries": 1, "hit": true, "age_hours": 10.996935387222223, "ttl_hours": 12, "reason": "validated_shared_contract"}
+ETF STAGE research_cache run_id=37035344877-1
 Using compatible validated ETF research cache for XLE.
 Using compatible validated ETF research cache for RSPT.
 Using compatible validated ETF research cache for FENY.
@@ -124,23 +105,23 @@ Using compatible validated ETF research cache for SCHD.
 ETF RESEARCH CACHE {"path": "caches/gemini_etf_research_cache.json", "ttl_hours": 30, "contract_hash": "c39b5875e3308ac0c075f427b426b5853f16bab87e0b348ca72d03c9311a4db4", "hits": 5, "misses": 76, "save_succeeded": null}
 Accumulating ETF judgment candidates: 5/25; no 3.8 call yet.
 Cached evidence preview: provisional=3, authoritative=0; unjudged evidence is not a reopened slot.
-ETF STAGE classification_before_new_research run_id=37029307628-1
+ETF STAGE classification_before_new_research run_id=37035344877-1
 Prepared compact 3.8 ETF judgment payload: kind=initial, etfs=5, prompt_chars=40061, market_events=3, peer_classifications=0.
 Gemini 3.8 API budget: 1/7 total; 1/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 1/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 1/3)
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 1/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 ETF classification in 88.3s...
+Retrying 3.8 ETF classification in 68.2s...
 Gemini 3.8 API budget: 2/7 total; 2/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 2/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 2/3)
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 2/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-Retrying 3.8 ETF classification in 139.6s...
+Retrying 3.8 ETF classification in 134.5s...
 Gemini 3.8 API budget: 3/7 total; 3/6 classification.
 Gemini ETF classification logical call 1/6; API attempt 3/6: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 3/3)
 Warning: ETF judgment initial 1-5 (gemini-3.8-flash, attempt 3/3) failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 Warning: ETF judgment unavailable for batch; grounded 2.5 research is preserved, but these ETFs remain ineligible for final selection until judged: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
 ETF 3.8 classification circuit OPEN: TRANSIENT_PROVIDER_FAILURE; leaving 5 validated ETF(s) pending judgment without entering invalid-patch recovery.
-ETF STAGE classification_final_tail run_id=37029307628-1
+ETF STAGE classification_final_tail run_id=37035344877-1
 ETF PUBLICATION BLOCKED — preserving the previous successful HTML page. Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, RSPT, FENY
 ETF portfolio shortfall is operational, not a validated final result: 0 of 10 authoritative selections are available, but the final comparison is incomplete.
 ETF cross-candidate consistency warnings:
@@ -325,10 +306,10 @@ Selected ETFs: None
 |         80 | TMSL     | Mid-Cap Blend   | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
 |         81 | FFSM     | nan             | NOT RESEARCHED — NOT NEEDED                    |                       0 |                      0 | nan                                                                                                                                                            | The portfolio filled before research was needed.                                                                           |
 
-ETF STAGE summary_skipped_incomplete_judgment run_id=37029307628-1
+ETF STAGE summary_skipped_incomplete_judgment run_id=37035344877-1
 Skipping ETF summary generation because this run is not publishable; preserving Gemini quota for a later retry.
 Generated by model(s): validated cache + Python
-ETF STAGE publish_html_skipped_incomplete_judgment run_id=37029307628-1
+ETF STAGE publish_html_skipped_incomplete_judgment run_id=37035344877-1
 ETF HTML publication skipped. etf_index.html is intentionally left unchanged from the previous successful run.
 Classification consistency: no changes among comparable cached ETFs.
 ETF runtime reconciliation summary: no label repairs were needed.
@@ -360,9 +341,9 @@ Gemini request budget:
   ETF 3.8 summary API attempts: 0/1
   total Gemini 3.8 API attempts: 3/7
   actual API attempts: 0/8 (research=0, context=0, summary=0)
-Elapsed time: 272 seconds
+Elapsed time: 234 seconds
 
-ETF STAGE failed_incomplete_judgment run_id=37029307628-1
+ETF STAGE failed_incomplete_judgment run_id=37035344877-1
 Traceback (most recent call last):
   File "/home/runner/work/clairvoyant/clairvoyant/etf_recommender.py", line 8237, in <module>
     raise RuntimeError(

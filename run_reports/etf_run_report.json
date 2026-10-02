@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "run_id": "37029307628-1",
+  "run_id": "37035344877-1",
   "classification_contract_hash": "ddb64b4c758b82e8058d404428ef1e35efc89a7ba8b8040304cf1b62a0902b93",
   "classification_prior_compatible": true,
   "benchmark_high_negative": {
@@ -9,27 +9,20 @@
     "downgraded": 0
   },
   "provenance": {
-    "run_id": "37029307628-1",
-    "github_sha": "681f4b58b984260c857e860e78ffed822b4f9583",
+    "run_id": "37035344877-1",
+    "github_sha": "04bff12037fd35054ac77342c626ccbf1050fcf8",
     "github_run_attempt": "1",
     "source_sha256": "6eb36efcd9bb8afce7f4ad400980e7ce5018d5f08c69b2fc0b7dc962f8deab52",
     "config_sha256": "7e4e4efd844ba44752e4dc5f564e57e1e17f46c8d8530871614b60b7ea46a036"
   },
   "cache": {
     "yfinance_metadata": {
-      "status": "completed",
-      "eligible": 513,
-      "hits": 505,
-      "live_requests": 8,
-      "failed_symbols": [],
-      "incomplete_symbols": [],
-      "ttl_hours": 168,
-      "save_succeeded": true
+      "status": "not_run"
     },
     "fund_data": {
       "status": "completed",
-      "hits": 81,
-      "live_requests": 6,
+      "hits": 85,
+      "live_requests": 2,
       "incomplete_symbols": [
         "GARP",
         "FFSM"
@@ -37,7 +30,7 @@
       "save_succeeded": true
     },
     "top_qvm": {
-      "hit": false,
+      "hit": true,
       "path": "caches/top_qvm_etfs_cache.pkl",
       "ttl_hours": 6
     },
@@ -47,7 +40,7 @@
       "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9",
       "entries": 1,
       "hit": true,
-      "age_hours": 10.134089795555555,
+      "age_hours": 10.996935387222223,
       "ttl_hours": 12,
       "reason": "validated_shared_contract"
     },
@@ -71,7 +64,7 @@
         "XLE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 8.565142633055556,
+          "age_hours": 9.427988578333334,
           "market_context_changed": false,
           "evidence_timestamp": "2026-10-02T07:13:40.389098+00:00"
         },
@@ -103,7 +96,7 @@
         "RSPT": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 8.5651432925,
+          "age_hours": 9.427989260833332,
           "market_context_changed": false,
           "evidence_timestamp": "2026-10-02T07:13:40.390231+00:00"
         },
@@ -115,7 +108,7 @@
         "FENY": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 8.5651437,
+          "age_hours": 9.427989672222223,
           "market_context_changed": false,
           "evidence_timestamp": "2026-10-02T07:13:40.389825+00:00"
         },
@@ -137,7 +130,7 @@
         "JQUA": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 8.56514405138889,
+          "age_hours": 9.427990021388888,
           "market_context_changed": false,
           "evidence_timestamp": "2026-10-02T07:13:40.390455+00:00"
         },
@@ -229,7 +222,7 @@
         "SCHD": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 8.565145828611112,
+          "age_hours": 9.427991768055554,
           "market_context_changed": false,
           "evidence_timestamp": "2026-10-02T07:13:40.391840+00:00"
         },
@@ -484,27 +477,27 @@
     },
     {
       "stage": "universe_and_quantitative_data",
-      "elapsed_seconds": 32.954
+      "elapsed_seconds": 0.925
     },
     {
       "stage": "market_context",
-      "elapsed_seconds": 0.001
+      "elapsed_seconds": 0.002
     },
     {
       "stage": "research_cache",
-      "elapsed_seconds": 0.063
+      "elapsed_seconds": 0.064
     },
     {
       "stage": "classification_before_new_research",
-      "elapsed_seconds": 239.36
+      "elapsed_seconds": 232.861
     },
     {
       "stage": "classification_final_tail",
-      "elapsed_seconds": 0.01
+      "elapsed_seconds": 0.014
     },
     {
       "stage": "summary_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.009
+      "elapsed_seconds": 0.013
     }
   ],
   "api_attempts": [],
@@ -1318,7 +1311,7 @@
       "SCHD"
     ]
   },
-  "generated_at": "2026-10-02T15:51:34.316930+00:00",
+  "generated_at": "2026-10-02T16:43:14.071292+00:00",
   "status": "FAILED_INCOMPLETE_JUDGMENT",
   "failure_reason": "Authoritative ETF judgment is incomplete; validated candidates that could change the final portfolio remain unjudged: XLE, RSPT, FENY",
   "selection_target": 10,
@@ -3079,7 +3072,7 @@
       "fallback": false,
       "requested_count": 5,
       "prompt_chars": 40061,
-      "elapsed_seconds": 0.797,
+      "elapsed_seconds": 16.862,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
@@ -3101,7 +3094,7 @@
       "fallback": false,
       "requested_count": 5,
       "prompt_chars": 40061,
-      "elapsed_seconds": 0.325,
+      "elapsed_seconds": 11.132,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
@@ -3123,7 +3116,7 @@
       "fallback": false,
       "requested_count": 5,
       "prompt_chars": 40061,
-      "elapsed_seconds": 10.346,
+      "elapsed_seconds": 2.116,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     }

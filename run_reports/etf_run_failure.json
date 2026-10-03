@@ -1,14 +1,14 @@
 {
   "schema_version": 2,
-  "run_id": "37035344877-1",
-  "updated_at": "2026-10-02T16:43:14.082880+00:00",
+  "run_id": "37103559268-1",
+  "updated_at": "2026-10-03T06:39:47.777420+00:00",
   "status": "FAILED",
   "active_stage": "failed_incomplete_judgment",
-  "elapsed_seconds": 233.922,
-  "active_stage_seconds": 0.002,
+  "elapsed_seconds": 241.51,
+  "active_stage_seconds": 0.003,
   "provenance": {
-    "run_id": "37035344877-1",
-    "github_sha": "04bff12037fd35054ac77342c626ccbf1050fcf8",
+    "run_id": "37103559268-1",
+    "github_sha": "df8514d41af9a8c1d88bac338f0fb33d1157ee50",
     "github_run_attempt": "1",
     "source_sha256": "6eb36efcd9bb8afce7f4ad400980e7ce5018d5f08c69b2fc0b7dc962f8deab52",
     "config_sha256": "7e4e4efd844ba44752e4dc5f564e57e1e17f46c8d8530871614b60b7ea46a036"
@@ -20,36 +20,45 @@
     },
     {
       "stage": "universe_and_quantitative_data",
-      "elapsed_seconds": 0.925
+      "elapsed_seconds": 26.7
     },
     {
       "stage": "market_context",
-      "elapsed_seconds": 0.002
+      "elapsed_seconds": 0.001
     },
     {
       "stage": "research_cache",
-      "elapsed_seconds": 0.064
+      "elapsed_seconds": 2.136
     },
     {
       "stage": "classification_before_new_research",
-      "elapsed_seconds": 232.861
+      "elapsed_seconds": 212.61
     },
     {
       "stage": "classification_final_tail",
-      "elapsed_seconds": 0.014
+      "elapsed_seconds": 0.01
     },
     {
       "stage": "summary_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.013
+      "elapsed_seconds": 0.009
     },
     {
       "stage": "publish_html_skipped_incomplete_judgment",
-      "elapsed_seconds": 0.011
+      "elapsed_seconds": 0.009
     }
   ],
   "cache": {
     "yfinance_metadata": {
-      "status": "not_run"
+      "status": "completed",
+      "eligible": 503,
+      "hits": 502,
+      "live_requests": 1,
+      "failed_symbols": [],
+      "incomplete_symbols": [
+        "SEURF"
+      ],
+      "ttl_hours": 168,
+      "save_succeeded": true
     },
     "fund_data": {
       "status": "completed",
@@ -62,7 +71,7 @@
       "save_succeeded": true
     },
     "top_qvm": {
-      "hit": true,
+      "hit": false,
       "path": "caches/top_qvm_etfs_cache.pkl",
       "ttl_hours": 6
     },
@@ -72,7 +81,7 @@
       "schema_hash": "c1717df12214dc79e982bf5b849bf8d51068f1fc916c7fdea06be49d4a94a1b9",
       "entries": 1,
       "hit": true,
-      "age_hours": 10.996935387222223,
+      "age_hours": 1.1561002483333334,
       "ttl_hours": 12,
       "reason": "validated_shared_contract"
     },
@@ -96,8 +105,8 @@
         "XLE": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.427988578333334,
-          "market_context_changed": false,
+          "age_hours": 23.375732884166666,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-10-02T07:13:40.389098+00:00"
         },
         "VFLO": {
@@ -115,12 +124,17 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
+        "SPYG": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
         "IYW": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "SPYG": {
+        "VOOG": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -128,20 +142,15 @@
         "RSPT": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.427989260833332,
-          "market_context_changed": false,
+          "age_hours": 23.376282819444445,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-10-02T07:13:40.390231+00:00"
-        },
-        "VOOG": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
         },
         "FENY": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.427989672222223,
-          "market_context_changed": false,
+          "age_hours": 23.37628318861111,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-10-02T07:13:40.389825+00:00"
         },
         "IUSG": {
@@ -162,16 +171,11 @@
         "JQUA": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.427990021388888,
-          "market_context_changed": false,
+          "age_hours": 23.376305958333333,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-10-02T07:13:40.390455+00:00"
         },
         "CIBR": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "DIVB": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -181,7 +185,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "DYNF": {
+        "DIVB": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -191,7 +195,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "JMOM": {
+        "DYNF": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -201,7 +205,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "SEIV": {
+        "JMOM": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -212,6 +216,11 @@
           "age_hours": null
         },
         "IWD": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "SEIV": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -241,12 +250,12 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "SPUS": {
+        "COPX": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "COPX": {
+        "SPUS": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -254,16 +263,16 @@
         "SCHD": {
           "hit": true,
           "reason": "compatible",
-          "age_hours": 9.427991768055554,
-          "market_context_changed": false,
+          "age_hours": 23.376309025,
+          "market_context_changed": true,
           "evidence_timestamp": "2026-10-02T07:13:40.391840+00:00"
         },
-        "QTEC": {
+        "QGRW": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "QGRW": {
+        "QTEC": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -273,7 +282,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "HACK": {
+        "PVAL": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -288,12 +297,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "TRUT": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "PVAL": {
+        "HACK": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -308,17 +312,17 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
+        "TRUT": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
         "BUG": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
         "CGDV": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "IBB": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -333,7 +337,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "DFAC": {
+        "IBB": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -383,37 +387,7 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "TSPA": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
         "MGV": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "QLTY": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "ICOP": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "COWZ": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "SCHA": {
-          "hit": false,
-          "reason": "missing_or_incompatible",
-          "age_hours": null
-        },
-        "AVUV": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -423,12 +397,42 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "OIH": {
+        "ICOP": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "QLTY": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "XLV": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "COWZ": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "AVUV": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "SCHA": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
         "RDVY": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "OIH": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -463,12 +467,17 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "AVSC": {
+        "RPV": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
         "FHLC": {
+          "hit": false,
+          "reason": "missing_or_incompatible",
+          "age_hours": null
+        },
+        "AVSC": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -488,12 +497,12 @@
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "TMSL": {
+        "FFSM": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
         },
-        "FFSM": {
+        "TMSL": {
           "hit": false,
           "reason": "missing_or_incompatible",
           "age_hours": null
@@ -562,8 +571,8 @@
       "success": false,
       "fallback": false,
       "requested_count": 5,
-      "prompt_chars": 40061,
-      "elapsed_seconds": 16.862,
+      "prompt_chars": 40366,
+      "elapsed_seconds": 1.912,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
@@ -584,8 +593,8 @@
       "success": false,
       "fallback": false,
       "requested_count": 5,
-      "prompt_chars": 40061,
-      "elapsed_seconds": 11.132,
+      "prompt_chars": 40366,
+      "elapsed_seconds": 3.889,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     },
@@ -606,8 +615,8 @@
       "success": false,
       "fallback": false,
       "requested_count": 5,
-      "prompt_chars": 40061,
-      "elapsed_seconds": 2.116,
+      "prompt_chars": 40366,
+      "elapsed_seconds": 9.509,
       "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
       "status": "TRANSIENT_PROVIDER_FAILURE"
     }
